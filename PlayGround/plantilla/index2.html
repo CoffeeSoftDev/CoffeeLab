@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CH - Rotación del Personal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+
+<body class="bg-[#F9FAFB]">
+    <div class="p-4 bg-gray-100 min-h-screen">
+        <div class="rounded shadow overflow-auto bg-white">
+            <div class="border-b px-4 py-3 bg-[#0C5286] text-white font-semibold text-lg">
+                CH - Rotación del Personal
+            </div>
+
+            <!-- Filtros -->
+            <div class="p-4 flex flex-wrap gap-4 items-end">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Periodo</label>
+                    <select class="form-select border rounded px-3 py-2 text-sm w-48" id="periodo">
+                        <option>Enero 2025</option>
+                        <option>Febrero 2025</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">UDN</label>
+                    <select class="form-select border rounded px-3 py-2 text-sm w-48" id="udn">
+                        <option>BS</option>
+                        <option>QT</option>
+                    </select>
+                </div>
+                <button id="btnNuevoPeriodo"
+                    class="bg-[#0C5286] text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">
+                    + Nuevo Periodo
+                </button>
+            </div>
+
+            <div class="p-4 space-y-6 text-sm text-gray-700">
+
+                <!-- Tabla 1: % de Rotación -->
+                <div>
+                    <h2 class="text-base font-semibold mb-2 text-[#0C5286]">Tabla 1: % de Rotación</h2>
+                    <table class="w-full border text-sm">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="border px-2 py-1">UDN</th>
+                                <th class="border px-2 py-1">ENE</th>
+                                <th class="border px-2 py-1">FEB</th>
+                                <th class="border px-2 py-1">MAR</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="hover:bg-gray-50">
+                                <td class="border px-2 py-1">BS</td>
+                                <td class="border px-2 py-1">4.12%</td>
+                                <td class="border px-2 py-1">1.82%</td>
+                                <td class="border px-2 py-1">2.04%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Tabla 2: Rotación Modelo -->
+                <div>
+                    <h2 class="text-base font-semibold mb-2 text-[#0C5286]">Tabla 2: Rotación Modelo</h2>
+                    <table class="w-full border text-sm">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="border px-2 py-1">UDN</th>
+                                <th class="border px-2 py-1">Plantilla Inicial</th>
+                                <th class="border px-2 py-1">Plantilla Final</th>
+                                <th class="border px-2 py-1">EPM</th>
+                                <th class="border px-2 py-1">Bajas</th>
+                                <th class="border px-2 py-1">Rotación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="hover:bg-gray-50">
+                                <td class="border px-2 py-1">BS</td>
+                                <td class="border px-2 py-1">200</td>
+                                <td class="border px-2 py-1">195</td>
+                                <td class="border px-2 py-1">198</td>
+                                <td class="border px-2 py-1">4</td>
+                                <td class="border px-2 py-1">2.02%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Tabla 3: Plantilla Rotación -->
+                <div>
+                    <h2 class="text-base font-semibold mb-2 text-[#0C5286]">Tabla 3: Plantilla Rotación</h2>
+                    <table class="w-full border text-sm">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="border px-2 py-1">UDN</th>
+                                <th class="border px-2 py-1">Plantilla Adj.</th>
+                                <th class="border px-2 py-1">Real</th>
+                                <th class="border px-2 py-1">% Plantilla</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="hover:bg-gray-50">
+                                <td class="border px-2 py-1">BS</td>
+                                <td class="border px-2 py-1">195</td>
+                                <td class="border px-2 py-1">192</td>
+                                <td class="border px-2 py-1">98.46%</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
