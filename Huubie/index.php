@@ -8,6 +8,8 @@ if (isset($_SESSION['USR'])) {
     exit();
 }
 ?>
+
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
