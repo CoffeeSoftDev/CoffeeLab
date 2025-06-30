@@ -2,7 +2,7 @@
 // init vars.
 let app, sub;
 
-let api = "https://huubie.com.mx/alpha/eventos/ctrl/ctrl-sub-eventos.php";
+let api = "https://huubie.com.mx/alpha/eventos/ctrl/ctrl-payment.php";
 
 
 
@@ -12,7 +12,7 @@ $(async () => {
     app.init();
 });
 
-class App extends UI {
+class App extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "";
@@ -23,22 +23,21 @@ class App extends UI {
     }
 
     render(options) {
-      this.layout();
-      this.filterBar();
-      this.ls()
+        this.layout();
+        this.filterBar();
+        this.onShowDocument(8);
     }
 
-    layout(){
+    layout() {
         this.primaryLayout({
             parent: "root",
             id: this.PROJECT_NAME,
             card: {
                 filterBar: {
-                    class: "lg:h-[12%] line",
+                    class: "lg:h-[20%] line",
                     id: "filterBar" + this.PROJECT_NAME,
                 },
                 container: {
-                    class: "lg:h-[88%] line",
                     id: "container" + this.PROJECT_NAME,
                 },
             },
@@ -52,19 +51,19 @@ class App extends UI {
             data: [
                 {
                     opc: "input-calendar",
-                    class: "col-sm-3",
+                    class: "col-sm-4",
                     id: "calendar" + this.PROJECT_NAME,
                     lbl: "Rango de fechas",
                 },
                 {
                     opc: "button",
-                    class: "col-sm-2",
-                    className:'w-100',
+                    class: "col-sm-4",
+                    className: 'w-100',
                     color_btn: "primary",
                     id: "btnNuevoDestajo",
                     text: "Consultar",
                     onClick: () => {
-                        this.ls();
+                        this.onShowDocument(8);
                     },
                 },
             ],
@@ -96,205 +95,413 @@ class App extends UI {
         this.createTable({
             parent: "container" + this.PROJECT_NAME,
             idFilterBar: "filterBar" + this.PROJECT_NAME,
-            coffeesoft:true,
+            coffeesoft: true,
             data: {
                 opc: "list",
                 fi: range.fi,
                 ff: range.ff,
                 udn: 0,
-                status:0
+                status: 0
             },
             conf: { datatable: false, pag: 10 },
             attr: {
                 id: "tb" + this.PROJECT_NAME,
                 extends: true,
-                title:'Reporte de pagos por destajo',
+                title: 'Reporte de pagos por destajo',
                 subtitle: `Correspondiente del ${this.formatDateText(range.fi)} a ${this.formatDateText(range.ff)}`,
-                theme:'corporativo',
-                right: [3,4,5,6,7,8,9],
-                center: [2,10],
+                theme: 'corporativo',
+                right: [3, 4, 5, 6, 7, 8, 9],
+                center: [2, 10],
                 f_size: 12,
-                striped:false
+                striped: false
             },
         });
     }
 
-<<<<<<< HEAD
-=======
-    formatDateText(fechaStr) {
-        const [dia, mes, año] = fechaStr.split('-');
-        const meses = [
-            "enero", "febrero", "marzo", "abril", "mayo", "junio",
-            "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
-        ];
-        const nombreMes = meses[parseInt(mes, 10) - 1];
-        return `${año}/${nombreMes}/${dia}`;
+    async onShowDocument(id) {
+
+        // let modal = bootbox.dialog({
+
+        //     title: "Imprimir nota de evento",
+        //     closeButton: true,
+        //     size: "xl",
+        //     message:
+        //         '<div class="flex justify-content-end  mt-3" id="containerButtons"></div><div class="flex justify-content-center  mt-3" id="containerPDF"></div> ',
+        //     id: "modalDocument",
+        // }); // Crear componente modal.
+
+
+        let data = await useFetch({
+            url: this._link,
+            data: { opc: 'getFormatedEvent', idEvent: id, }
+        });
+
+        console.log('', data)
+
+
+        this.createPDFComponent({
+            parent: "container",
+            dataEvent: data.Event,
+            dataSubEvent: data.SubEvent,
+            dataPayment: data.Payment,
+            dataMenu: data.menu,
+            dataExtra: data.extras,
+            logo: data.company.logo,
+            location: data.company.location,
+            type: data.type
+
+
+        });
+
+        // // Función para imprimir y cerrar el modal correctamente
+        let printDiv = () => {
+
+            let divToPrint = document.getElementById("docEvent");
+            let popupWin = window.open("", "_blank");
+
+            popupWin.document.open();
+            popupWin.document.write(`
+                <html>
+                <head>
+                    <link href="https://15-92.com/ERP3/src/plugin/bootstrap-5/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+                    <script src="https://cdn.tailwindcss.com"></script>
+                    <style type="text/css" media="print">
+                        @page { margin: 5px; }
+                        body { margin: 5px; padding: 10px; }
+                    </style>
+                </head>
+                <body>
+                    ${divToPrint.innerHTML}
+                    <script>
+                        window.onload = function() {
+                            setTimeout(() => {
+                                window.print();
+                                window.close();
+                            }, 500);
+                        };
+                    <\/script>
+                </body>
+                </html>`);
+
+            popupWin.document.close();
+
+            // Cierra el modal inmediatamente después de lanzar la impresión
+            modal.modal('hide');
+
+        };
+
+        $('#containerButtons').append(
+            $('<button>', {
+                class: 'btn btn-primary text-white',
+
+                html: '<i class="icon-print"></i> Imprimir ',
+                click: function () {
+                    printDiv();
+                }
+            }),
+
+        );
+
+
     }
 
 
+    createPDFComponent(options) {
 
->>>>>>> d728fa824ca0f7e6742bde990e82fedd9f225e3e
-    async showSubEvent() {
+        const defaults = {
+            parent: 'containerprimaryLayout',
+            dataPackage: [],
+            dataMenu: [],
+            dataExtra: [],
+            dataPayment: [],
+            dataSubEvent: [],
+            logo: "",
+            location: 'Tapachula,Chis ',
+            link: 'https://huubie.com.mx/alpha',
+            type: 'Event',
+            dataEvent: {
+                name: "[name]",
+                email: "[email]",
+                phone: "[phone]",
+                contact: "[contact]",
+                idEvent: "[idEvent]",
+                location: "[location]",
+                date_creation: "[date_creation]",
+                date_start: "[date_start]",
+                date_start_hr: "[date_start_hr]",
+                date_end: "[date_end]",
+                date_end_hr: "[date_end_hr]",
+                day: "[day]",
+                quantity_people: "[quantity_people]",
+                advance_pay: "[advance_pay]",
+                total_pay: "[total_pay]",
+                notes: "[notes]",
+                type_event: "[type_event]",
+                status: "[status]"
+            },
+            clauses: ["", "", "", ""]
+        };
 
-        let subEvents = await useFetch({
-            url: this._link,
-            data: {
-                opc: "listSubEvents",
-                id: idEvent
+        const opts = Object.assign({}, defaults, options);
+
+        const header = `
+            <div class="flex justify-between items-start mb-4">
+                ${opts.logo ? `<img src="${opts.link + opts.logo}" alt="Logo" class="w-20 h-20 rounded-full object-cover">` : ""}
+                <p id="location-label">${opts.location ? opts.location : '<span class="text-gray-400">Ubicación no disponible </span>'}, a ${opts.dataEvent.date_creation}</p>
+            </div>
+
+            <div class="event-header text-sm text-gray-800 mb-4">
+                <p class="font-bold uppercase">${opts.dataEvent.name}</p>
+                ${opts.dataEvent.status === 'Cotización' ? `<p class="font-bold uppercase text-red-500">${opts.dataEvent.status}</p>` : ''}
+                <p>${opts.dataEvent.date_start} ${opts.dataEvent.date_start_hr}</p>
+                <p id="location-event">${opts.dataEvent.location ? opts.dataEvent.location : '<span class="text-gray-400">Obteniendo ubicación...</span>'}</p>
+            </div>
+
+            <div class="mb-3 text-justify">
+                <p>Agradecemos su preferencia por celebrar su evento con nosotros el día
+                <strong>${opts.dataEvent.day}</strong>,
+                <strong>${opts.dataEvent.date_start} ${opts.dataEvent.date_start_hr}</strong>
+                a <strong>${opts.dataEvent.date_end} ${opts.dataEvent.date_end_hr}</strong>, en el salón
+                <strong id="location-detail">${opts.dataEvent.location ? opts.dataEvent.location : '...'}</strong>.</p>
+                <p>Estamos encantados de recibir a <strong>${opts.dataEvent.quantity_people}</strong> invitados y nos aseguraremos de que cada detalle esté a la altura de sus expectativas.</p>
+                <br>
+                ${opts.dataEvent.notes ? `<p><strong>NOTAS:</strong> ${opts.dataEvent.notes}</p>` : ""}
+            </div>
+        `;
+
+
+
+        let subEvents = "";
+
+
+        opts.dataMenu.forEach(menu => {
+
+            subEvents += `
+                <div class="mb-3 text-sm leading-5 ">
+                <p><strong>${menu.name || ""}  (${menu.quantity || 0})</strong>
+                ${Array.isArray(menu.dishes) && menu.dishes.length > 0 ? `
+                        <ul class=" text-[12px]  mt-1 pl-6">
+                            ${menu.dishes.map(d => `<li>- ${d.name} (${d.quantity})</li>`).join("")}
+                        </ul>
+                    ` : ""}
+                 <p class="mt-2"><strong>Costo:</strong>$ ${menu.price}</p>
+                </div>
+                `;
+        });
+
+        // ------ EXTRAS ------
+
+        // Calcula el costo total de los extras (cantidad * precio, suma todo)
+        const totalExtras = Array.isArray(opts.dataExtra)
+            ? opts.dataExtra.reduce((acc, extra) => {
+                const quantity = Number(extra.quantity) || 0;
+                const price = Number(extra.price) || 0;
+                return acc + (quantity * price);
+            }, 0)
+            : 0;
+
+        // Render extras con lista y total elegante
+        const extraItems =
+            Array.isArray(opts.dataExtra) && opts.dataExtra.length > 0
+                ? `
+            <div class="mt-2 text-sm">
+                <p class="font-semibold">Extras</p>
+                <ul class="list-disc list-inside pl-6">
+                ${opts.dataExtra
+                            .map(
+                                (extra) => `
+                        <li class="text-gray-700 text-[13px]">
+                        ${extra.name || ""}
+                        <span class="text-gray-400">
+                            ${extra.quantity ? `x${extra.quantity}` : ""}
+                        </span>
+
+                        </li>`
+                            )
+                            .join("")}
+                </ul>
+                <div class="mt-2 flex ">
+                <p class="mt-2"><strong>Costo:</strong>$ ${totalExtras.toLocaleString('es-MX') }</p>
+
+                </div>
+            </div>`
+                : "";
+
+        // Ejemplo de uso:
+        subEvents += `
+        <div class="mb-3 text-sm leading-6">
+            ${extraItems}
+        </div>
+        `;
+
+        // if (Array.isArray(opts.dataSubEvent) && opts.dataSubEvent.length > 0) {
+        //     opts.dataSubEvent.forEach(sub => {
+
+        //         if (!sub) return;
+
+        //         // ------ PAQUETES ------
+        //         let menuPackages = "";
+        //         if (
+        //             sub.menu &&
+        //             typeof sub.menu === 'object' &&
+        //             Object.keys(sub.menu).some(key => !isNaN(key))
+        //         ) {
+        //             menuPackages = Object.entries(sub.menu)
+        //                 .filter(([key]) => !isNaN(key)) // solo claves numéricas
+        //                 .map(([key, pkg]) => {
+        //                     const pkgDishes = (sub.menu.dishes || [])
+        //                         .filter(dish => dish.package_id === pkg.package_id)
+        //                         .map(dish =>
+        //                             `<li class="mb-0.5 text-[14px] text-gray-800">${dish.name}${dish.quantity ? ` <span class="text-gray-400">(${dish.quantity})</span>` : ""}</li>`
+        //                         ).join("");
+        //                     return `
+        //         <div class="">
+        //             <div class=" text-[12px] text-black mb-1">${pkg.name || "Paquete"}</div>
+        //             <ul class="list-disc pl-5">
+        //                 ${pkgDishes}
+        //             </ul>
+        //         </div>`;
+        //                 }).join("");
+        //         }
+
+        //         // ------ EXTRAS ------
+        //         const extraItems = Array.isArray(sub.extras) && sub.extras.length > 0
+        //             ? `
+        //             <div class="mt-3 text-sm">
+        //                 <p class="font-semibold">Extras</p>
+        //                 <ul class="list-disc list-inside pl-6">
+        //                     ${sub.extras.map(extra => `
+        //                         <li class="text-gray-700 text-[12px]">
+        //                             ${extra.name || ""} (${extra.quantity || 0})
+        //                         </li>`).join("")}
+        //                 </ul>
+        //             </div>`
+        //             : "";
+
+        //         // ------ Costo seguro ------
+        //         let costo = sub.total_pay !== null && sub.total_pay !== undefined && !isNaN(sub.total_pay)
+        //             ? `$${parseFloat(sub.total_pay).toLocaleString('es-MX')}`
+        //             : "-";
+
+        //         // ------ Render Subevento ------
+        //         subEvents += `
+        //             <div class="mb-6 text-sm leading-6">
+        //                 <p><strong>${sub.name_subevent || ""} para ${sub.quantity_people || 0} personas</strong>
+        //                 (${sub.time_start || "-"} a ${sub.time_end || "-"} horas)</p>
+        //                 <p class="text-capitalize font-semibold">${sub.location || ""}</p>
+        //                 ${menuPackages}
+        //                 ${extraItems}
+        //                 <p class="mt-2"><strong>Costo:</strong> ${costo}</p>
+        //             </div>
+        //         `;
+        //     });
+        // }
+
+
+
+
+        const total = parseFloat(opts.dataEvent.total_pay) || 0;
+        const advance = parseFloat(opts.dataEvent.advance_pay) || 0;
+        const discount = parseFloat(opts.dataEvent.discount || 0);     // nuevo campo opcional
+
+        let totalPagos = 0;
+        let templatePayment = '';
+
+        opts.dataPayment.forEach((item) => {
+            const monto = parseFloat(item.valor) || 0;
+            totalPagos += monto;
+            templatePayment += `
+            <div class="flex justify-between text-sm">
+                <p class="font-semibold">${item.method_pay}</p>
+                <p>${monto.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
+            </div>`;
+        });
+
+
+
+
+        templatePayment += `
+
+            <div class="flex justify-between text-sm border-t pt-2 mt-2">
+                <p class="font-bold">Total Pagado</p>
+                <p class="">${totalPagos.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
+            </div>
+
+            <div class="flex justify-between text-sm mt-3 border-t">
+                <p class="font-bold"> Restante</p>
+                <p class="">${(total - advance - discount - totalPagos).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
+            </div>`;
+
+        const blockTotals = `
+            <div class="mt-6 mb-2 text-sm  flex justify-end">
+                <div class="w-1/3">
+                    <div class="flex justify-between pt-2">
+                        <p class="font-bold"> Total </p>
+                        <p>${total.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
+                    </div>
+                    <div class="flex justify-between">
+                        <p class="font-bold"> Anticipo </p>
+                        <p>${advance.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
+                    </div>
+                    <div class="flex justify-between">
+                        <p class="font-bold"> Descuento </p>
+                        <p>${discount.toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
+                    </div>
+                    <div class="flex justify-between">
+                        <p class="font-bold"> Saldo </p>
+                        <p>${(total - advance - discount).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' })}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex text-sm justify-end mt-2">
+                <div class="w-1/3">
+                    <p class="font-bold border-t my-1">Forma de pago</p>
+                    ${templatePayment}
+                </div>
+            </div>`;
+
+
+        let templateClauses = `
+            <div class="mb-4 mt-3 text-xs">
+                <p class="font-bold">Cláusulas</p>
+                <ul class="list-decimal pl-5">`;
+
+        opts.clauses.forEach((clause, index) => {
+
+            templateClauses += `<li>${clause}</li>`;
+            if ((index + 1) % 5 === 0 && index + 1 < opts.clauses.length) {
+                templateClauses += `</ul><div style="page-break-after: always;"></div><ul class='list-decimal pl-5'>`;
             }
         });
 
-<<<<<<< HEAD
-=======
+        templateClauses += `</ul></div>`;
 
-        if (subEvents.status == 200) {
-            this.accordingMenu({
-                parent: "container-companies",
-                title: "Evento  : " + subEvents.event.name_event,
-                subtitle: subEvents.event.status,
-                data: subEvents.data,
->>>>>>> d728fa824ca0f7e6742bde990e82fedd9f225e3e
+        const docs = `
+        <div id="docEvent"
+            class="flex flex-col justify-between px-12 py-10 bg-white text-gray-800 shadow-lg rounded-lg"
+            style="
+                width: 816px;
+                min-height: 1056px;
+                background-image: url('https://huubie.com.mx/alpha/eventos/src/img/background.png');
+                background-repeat: no-repeat;
+                background-size: 90% 100%;
+                background-position: left top;
+            ">
 
-        this.accordingMenu({
-            parent: 'container'
-        })
+            <div class="w-full pl-[120px] grow">
+                ${header}
+                ${subEvents}
+            </div>
 
+            <div class="w-full pl-[120px] mt-10">
+                ${blockTotals}
+                ${templateClauses}
+            </div>
+        </div>`;
+
+        $('#' + opts.parent).append(docs);
     }
-
-    accordingMenu(options) {
-        const defaults = {
-            parent: "tab-sub-event",
-            id: "accordionTable",
-            title: 'Titulo',
-            subtitle: 'Subtitulo',
-            color_primary: 'bg-[#1F2A37]',
-            data: [],
-            center: [1, 2, 5],
-            right: [3, 4],
-            onShow: () => { },
-            onDetail: () => { }, // ✅ Nuevo hook
-        };
-
-        const opts = Object.assign(defaults, options);
-        const container = $('<div>', {
-            id: opts.id,
-            class: `${opts.color_primary} rounded-lg my-5 border border-gray-700 overflow-hidden`
-        });
-
-        const titleRow = $(`
-        <div class="flex justify-between items-center px-4 py-4 border-b border-gray-800">
-            <div>
-                <h2 class="text-lg font-semibold text-white">${opts.title}</h2>
-                ${opts.subtitle ? `<span class="inline-block mt-1 text-xs font-medium text-gray-300 bg-gray-700 px-2 py-1 rounded-full">${opts.subtitle}</span>` : ''}
-            </div>
-            <div class="flex items-center gap-2">
-                <button id="btn-new-sub-event" class="bg-gray-600 hover:bg-gray-700 text-white text-sm px-4 py-2 rounded w-40 flex items-center justify-center gap-2">
-                    <span class="text-lg">＋</span> Nuevo
-                </button>
-                <button id="btn-print-sub-event" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded w-40 flex items-center justify-center gap-2">
-                    <span class="text-lg">🖨️</span> Imprimir
-                </button>
-            </div>
-        </div>
-    `);
-
-        titleRow.find("#btn-new-sub-event").on("click", () => opts.onAdd?.());
-        titleRow.find("#btn-print-sub-event").on("click", () => opts.onPrint?.());
-        container.append(titleRow);
-
-        const firstItem = opts.data[0] || {};
-        const keys = Object.keys(firstItem).filter(k => k !== 'body' && k !== 'id');
-
-        const headerRow = $('<div>', {
-            class: "flex justify-between items-center px-4 py-2 font-medium text-gray-400 border-b border-gray-700 text-sm"
-        });
-
-        keys.forEach(key => {
-            headerRow.append(`<div class="flex-1 text-center truncate">${key.charAt(0).toUpperCase() + key.slice(1)}</div>`);
-        });
-
-        headerRow.append(`<div class="flex-none text-right">Acciones</div>`);
-        container.append(headerRow);
-
-        let currentActive = null;
-
-        opts.data.forEach((opt, index) => {
-            const row = $('<div>', { class: "border-gray-700" });
-            const header = $(`<div class="flex justify-between items-center px-3 py-2 border-y border-gray-700 hover:bg-[#18212F] bg-[#313D4F] cursor-pointer"></div>`);
-
-            keys.forEach((key, i) => {
-                let align = "text-left";
-                if (opts.center.includes(i)) align = "text-center";
-                if (opts.right.includes(i)) align = "text-end";
-                header.append(`<div class="flex-1 px-3 text-gray-300 truncate ${align}">${opt[key]}</div>`);
-            });
-
-            const actions = $(`
-            <div class="flex-none flex gap-2 mx-2">
-                <button class="btn-detail bg-yellow-600 text-white text-sm px-2 py-1 rounded" title="Ver detalles">👁️</button>
-                <button class="btn-edit bg-gray-700 text-white text-sm px-2 py-1 rounded" title="Editar">✏️</button>
-                <button class="btn-delete bg-gray-700 text-red-500 text-sm px-2 py-1 rounded" title="Eliminar">🗑️</button>
-            </div>`);
-
-            header.append(actions);
-
-            const bodyWrapper = $('<div>', {
-                class: "bg-[#1F2A37] hidden px-4 py-4 text-sm text-gray-300 accordion-body",
-                id: 'containerInfo' + opt.id,
-                html: ``
-            });
-
-            header.on("click", function (e) {
-                const target = $(e.target);
-                if (target.closest(".btn-edit, .btn-delete, .btn-detail").length) return;
-                $(".accordion-body").slideUp();
-                const isVisible = bodyWrapper.is(":visible");
-                if (!isVisible) {
-                    bodyWrapper.slideDown(200);
-                    opts.onShow?.(opt.id);
-                }
-            });
-
-            header.find(".btn-edit").on("click", e => {
-                e.stopPropagation();
-                opts.onEdit?.(opt, index);
-            });
-
-            header.find(".btn-delete").on("click", e => {
-                e.stopPropagation();
-                opts.onDelete?.(opt, index);
-            });
-
-            header.find(".btn-detail").on("click", e => {
-                e.stopPropagation();
-                $(".active-sub-event").removeClass("border border-green-400 active-sub-event");
-                row.addClass("border border-green-400 active-sub-event");
-                opts.onDetail?.(opt, index);
-            });
-
-            row.append(header, bodyWrapper);
-            container.append(row);
-        });
-
-        let totalGral = opts.data.reduce((sum, el) => {
-            let clean = (el.Total || '0').toString().replace(/[^0-9.-]+/g, '');
-            return sum + (parseFloat(clean) || 0);
-        }, 0);
-
-        container.append(`
-        <div class="flex justify-between items-center px-4 py-4 mt-3 border-t border-gray-800 text-white text-sm">
-            <div class="font-semibold text-green-400 text-lg">
-                TOTAL GRAL: <span>$${totalGral.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
-            </div>
-            <button type="button" class="flex bg-[#374151] hover:bg-[#4b5563] text-white items-center justify-center px-4 py-2 mt-3 text-sm w-40 rounded" onclick="eventos.closeEvent()">Cerrar</button>
-        </div>
-    `);
-
-        $(`#${opts.parent}`).html(container);
-    }
-
-
-    
 
 
 }
