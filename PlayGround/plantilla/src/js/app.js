@@ -25,7 +25,7 @@ class App extends Templates {
     render(options) {
         this.layout();
         this.filterBar();
-        this.onShowDocument(8);
+        this.onShowDocument(10);
     }
 
     layout() {
@@ -136,7 +136,6 @@ class App extends Templates {
             data: { opc: 'getFormatedEvent', idEvent: id, }
         });
 
-        console.log('', data)
 
 
         this.createPDFComponent({
@@ -244,6 +243,7 @@ class App extends Templates {
 
         const opts = Object.assign({}, defaults, options);
 
+
         const header = `
             <div class="flex justify-between items-start mb-4">
                 ${opts.logo ? `<img src="${opts.link + opts.logo}" alt="Logo" class="w-20 h-20 rounded-full object-cover">` : ""}
@@ -272,130 +272,151 @@ class App extends Templates {
 
 
         let subEvents = "";
+        console.log(opts.type)
+        if (opts.type == 'Event') {
 
 
-        opts.dataMenu.forEach(menu => {
+            opts.dataMenu.forEach(menu => {
 
+                subEvents += `
+                    <div class="mb-3 text-sm leading-5 ">
+                    <p><strong>${menu.name || ""}  (${
+                  menu.quantity || 0
+                })</strong>
+                    ${
+                      Array.isArray(menu.dishes) && menu.dishes.length > 0
+                        ? `
+                            <ul class=" text-[12px]  mt-1 pl-6">
+                                ${menu.dishes
+                                  .map(
+                                    (d) =>
+                                      `<li>- ${d.name}  <span class="text-gray-400">(${d.quantity})</span></li>`
+                                  )
+                                  .join("")}
+                            </ul>
+                        `
+                        : ""
+                    }
+                    <p class="mt-2"><strong>Costo:</strong>$ ${menu.price}</p>
+                    </div>
+                    `;
+            });
+
+            // ------ EXTRAS ------
+
+            // Calcula el costo total de los extras (cantidad * precio, suma todo)
+            const totalExtras = Array.isArray(opts.dataExtra)
+                ? opts.dataExtra.reduce((acc, extra) => {
+                    const quantity = Number(extra.quantity) || 0;
+                    const price = Number(extra.price) || 0;
+                    return acc + (quantity * price);
+                }, 0)
+                : 0;
+
+            // Render extras con lista y total elegante
+            const extraItems =
+                Array.isArray(opts.dataExtra) && opts.dataExtra.length > 0
+                    ? `
+                <div class="mt-2 text-sm">
+                    <p class="font-semibold">Extras</p>
+                    <ul class="list-disc list-inside pl-6">
+                    ${opts.dataExtra
+                                .map(
+                                    (extra) => `
+                            <li class="text-gray-700 text-[13px]">
+                            ${extra.name || ""}
+                            <span class="text-gray-400">
+                                ${extra.quantity ? `(${extra.quantity})` : ""}
+                            </span>
+
+                            </li>`
+                                )
+                                .join("")}
+                    </ul>
+                    <div class="mt-2 flex ">
+                    <p class="mt-2"><strong>Costo:</strong>$ ${totalExtras.toLocaleString('es-MX') }</p>
+
+                    </div>
+                </div>`
+                    : "";
+
+            // Ejemplo de uso:
             subEvents += `
-                <div class="mb-3 text-sm leading-5 ">
-                <p><strong>${menu.name || ""}  (${menu.quantity || 0})</strong>
-                ${Array.isArray(menu.dishes) && menu.dishes.length > 0 ? `
-                        <ul class=" text-[12px]  mt-1 pl-6">
-                            ${menu.dishes.map(d => `<li>- ${d.name} (${d.quantity})</li>`).join("")}
+            <div class="mb-3 text-sm leading-6">
+                ${extraItems}
+            </div>
+            `;
+
+        }else{
+
+            if (Array.isArray(opts.dataSubEvent) && opts.dataSubEvent.length > 0) {
+                opts.dataSubEvent.forEach(sub => {
+
+                    if (!sub) return;
+
+                    // ------ PAQUETES ------
+                    let menuPackages = "";
+                    if (
+                        sub.menu &&
+                        typeof sub.menu === 'object' &&
+                        Object.keys(sub.menu).some(key => !isNaN(key))
+                    ) {
+                        menuPackages = Object.entries(sub.menu)
+                            .filter(([key]) => !isNaN(key)) // solo claves numéricas
+                            .map(([key, pkg]) => {
+                                const pkgDishes = (sub.menu.dishes || [])
+                                    .filter(dish => dish.package_id === pkg.package_id)
+                                    .map(dish =>
+                                        `<li class="mb-0.5 text-[12px] text-gray-600">${dish.name}${dish.quantity ? ` <span class="text-gray-400">(${dish.quantity})</span>` : ""}</li>`
+                                    ).join("");
+                                return `
+                    <div class="">
+                        <div class=" text-[14px] text-black mb-1">${pkg.name || "Paquete"}</div>
+                        <ul class=" pl-5">
+                            ${pkgDishes}
                         </ul>
-                    ` : ""}
-                 <p class="mt-2"><strong>Costo:</strong>$ ${menu.price}</p>
-                </div>
-                `;
-        });
+                    </div>`;
+                            }).join("");
+                    }
 
-        // ------ EXTRAS ------
+                    // ------ EXTRAS ------
+                    const extraItems = Array.isArray(sub.extras) && sub.extras.length > 0
+                        ? `
+                        <div class="mt-2 text-sm">
+                            <p class="font-semibold">Extras</p>
+                            <ul class="list-disc list-inside pl-6">
+                                ${sub.extras.map(extra => `
+                                    <li class="text-gray-700 text-[12px]">
+                                        ${extra.name || ""} (${extra.quantity || 0})
+                                    </li>`).join("")}
+                            </ul>
+                        </div>`
+                        : "";
 
-        // Calcula el costo total de los extras (cantidad * precio, suma todo)
-        const totalExtras = Array.isArray(opts.dataExtra)
-            ? opts.dataExtra.reduce((acc, extra) => {
-                const quantity = Number(extra.quantity) || 0;
-                const price = Number(extra.price) || 0;
-                return acc + (quantity * price);
-            }, 0)
-            : 0;
+                    // ------ Costo seguro ------
+                    let costo = sub.total_pay !== null && sub.total_pay !== undefined && !isNaN(sub.total_pay)
+                        ? `$${parseFloat(sub.total_pay).toLocaleString('es-MX')}`
+                        : "-";
 
-        // Render extras con lista y total elegante
-        const extraItems =
-            Array.isArray(opts.dataExtra) && opts.dataExtra.length > 0
-                ? `
-            <div class="mt-2 text-sm">
-                <p class="font-semibold">Extras</p>
-                <ul class="list-disc list-inside pl-6">
-                ${opts.dataExtra
-                            .map(
-                                (extra) => `
-                        <li class="text-gray-700 text-[13px]">
-                        ${extra.name || ""}
-                        <span class="text-gray-400">
-                            ${extra.quantity ? `x${extra.quantity}` : ""}
-                        </span>
+                    // ------ Render Subevento ------
+                    subEvents += `
+                        <div class="mb-3 text-sm leading-5">
+                            <p><strong>${sub.name_subevent || ""} para ${sub.quantity_people || 0} personas</strong>
+                            (${sub.time_start || "-"} a ${sub.time_end || "-"} horas)</p>
+                            <p class="text-capitalize font-semibold">${sub.location || ""}</p>
+                            ${menuPackages}
+                            ${extraItems}
+                            <p class="mt-2"><strong>Costo:</strong> ${costo}</p>
+                        </div>
+                    `;
+                });
+            }
 
-                        </li>`
-                            )
-                            .join("")}
-                </ul>
-                <div class="mt-2 flex ">
-                <p class="mt-2"><strong>Costo:</strong>$ ${totalExtras.toLocaleString('es-MX') }</p>
 
-                </div>
-            </div>`
-                : "";
+        }
 
-        // Ejemplo de uso:
-        subEvents += `
-        <div class="mb-3 text-sm leading-6">
-            ${extraItems}
-        </div>
-        `;
 
-        // if (Array.isArray(opts.dataSubEvent) && opts.dataSubEvent.length > 0) {
-        //     opts.dataSubEvent.forEach(sub => {
 
-        //         if (!sub) return;
-
-        //         // ------ PAQUETES ------
-        //         let menuPackages = "";
-        //         if (
-        //             sub.menu &&
-        //             typeof sub.menu === 'object' &&
-        //             Object.keys(sub.menu).some(key => !isNaN(key))
-        //         ) {
-        //             menuPackages = Object.entries(sub.menu)
-        //                 .filter(([key]) => !isNaN(key)) // solo claves numéricas
-        //                 .map(([key, pkg]) => {
-        //                     const pkgDishes = (sub.menu.dishes || [])
-        //                         .filter(dish => dish.package_id === pkg.package_id)
-        //                         .map(dish =>
-        //                             `<li class="mb-0.5 text-[14px] text-gray-800">${dish.name}${dish.quantity ? ` <span class="text-gray-400">(${dish.quantity})</span>` : ""}</li>`
-        //                         ).join("");
-        //                     return `
-        //         <div class="">
-        //             <div class=" text-[12px] text-black mb-1">${pkg.name || "Paquete"}</div>
-        //             <ul class="list-disc pl-5">
-        //                 ${pkgDishes}
-        //             </ul>
-        //         </div>`;
-        //                 }).join("");
-        //         }
-
-        //         // ------ EXTRAS ------
-        //         const extraItems = Array.isArray(sub.extras) && sub.extras.length > 0
-        //             ? `
-        //             <div class="mt-3 text-sm">
-        //                 <p class="font-semibold">Extras</p>
-        //                 <ul class="list-disc list-inside pl-6">
-        //                     ${sub.extras.map(extra => `
-        //                         <li class="text-gray-700 text-[12px]">
-        //                             ${extra.name || ""} (${extra.quantity || 0})
-        //                         </li>`).join("")}
-        //                 </ul>
-        //             </div>`
-        //             : "";
-
-        //         // ------ Costo seguro ------
-        //         let costo = sub.total_pay !== null && sub.total_pay !== undefined && !isNaN(sub.total_pay)
-        //             ? `$${parseFloat(sub.total_pay).toLocaleString('es-MX')}`
-        //             : "-";
-
-        //         // ------ Render Subevento ------
-        //         subEvents += `
-        //             <div class="mb-6 text-sm leading-6">
-        //                 <p><strong>${sub.name_subevent || ""} para ${sub.quantity_people || 0} personas</strong>
-        //                 (${sub.time_start || "-"} a ${sub.time_end || "-"} horas)</p>
-        //                 <p class="text-capitalize font-semibold">${sub.location || ""}</p>
-        //                 ${menuPackages}
-        //                 ${extraItems}
-        //                 <p class="mt-2"><strong>Costo:</strong> ${costo}</p>
-        //             </div>
-        //         `;
-        //     });
-        // }
 
 
 
