@@ -137,7 +137,7 @@ class App extends Templates {
         });
 
 
-
+        console.log('data: ', data.SubEvent);
         this.createPDFComponent({
             parent: "container",
             dataEvent: data.Event,
