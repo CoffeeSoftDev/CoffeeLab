@@ -1,5 +1,6 @@
 $(function () {
     const app = new App();
+    sub = new Sub(api,'');
     app.init();
 });
 
