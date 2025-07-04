@@ -1,33 +1,43 @@
 
-let api = '';
+let api = 'https://huubie.com.mx/alpha/eventos/ctrl/ctrl-sub-eventos.php';
 
-let sub;
+let sub, idEvent, id_subevent;
 
-class Sub extends Template {
+class Sub extends Templates {
 
-  
-    
+
+
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "SubEvent";
 
 
- 
+
     }
+
+    init(){
+        this.showSubEvent();
+        idEvent = 10;
+    }
+
+
+
     async showSubEvent() {
 
         let subEvents = await useFetch({
             url: this._link,
             data: {
                 opc: "listSubEvents",
-                id: idEvent
+                id: 10
             }
         });
+
+        console.log(subEvents);
 
 
         if (subEvents.status == 200) {
             this.accordingMenu({
-                parent: 'tab-new-subevent',
+                parent: 'containerprojectName',
                 title: 'Evento  : ' + subEvents.event.name_event,
                 subtitle: subEvents.event.status,
                 data: subEvents.data,
@@ -165,7 +175,7 @@ class Sub extends Template {
                         <input type="number" min="1" value="1" class="cantidadPersonas w-full rounded-md bg-gray-800 text-white border border-gray-600 p-2" />
                     </div>
 
-                 
+
 
                     <div class="flex items-end">
                         <button type="button" class="btnAgregarMenu w-full flex items-center justify-center gap-2 bg-[#1A56DB] hover:bg-[#274DCD] text-white font-medium py-2 px-4 rounded-md">

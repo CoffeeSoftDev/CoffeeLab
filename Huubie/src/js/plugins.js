@@ -1348,9 +1348,9 @@ $.fn.rpt_json_table2 = function (options) {
 
                                     let onChangeipt = z.fn ? z.fn : '';
 
-                                    tdText = `<input 
+                                    tdText = `<input
                                   type   ="${ipt_type}"
-                                  value  = "${z.value}"  
+                                  value  = "${z.value}"
                                   id     = "${z.id}"
                                   name   = "${z.name}"
                                   onkeyUp = "${onChangeipt}"
@@ -1411,13 +1411,13 @@ $.fn.rpt_json_table2 = function (options) {
 
 
                         //   td.append(`<td id="${indices[col]}_${x.id}"
-                        //   style="" 
-                        //   class=""> 
+                        //   style=""
+                        //   class="">
                         //   ${tdText}  </td>`);
                     }
 
 
-                }//end agrupar 
+                }//end agrupar
                 else {
 
                     td.append($('<td>', {
@@ -1866,9 +1866,9 @@ $.fn.rpt_json_table3 = function (options) {
 
                                     let onChangeipt = z.fn ? z.fn : '';
 
-                                    tdText = `<input 
+                                    tdText = `<input
                                     type   ="${ipt_type}"
-                                    value  = "${z.value}"  
+                                    value  = "${z.value}"
                                     id     = "${z.id}"
                                     name   = "${z.name}"
                                     onkeyUp = "${onChangeipt}"
@@ -1928,13 +1928,13 @@ $.fn.rpt_json_table3 = function (options) {
 
 
                         //   td.append(`<td id="${indices[col]}_${x.id}"
-                        //   style="" 
-                        //   class=""> 
+                        //   style=""
+                        //   class="">
                         //   ${tdText}  </td>`);
                     }
 
 
-                }//end agrupar 
+                }//end agrupar
                 else {
 
                     td.append($('<td>', {
@@ -1973,7 +1973,7 @@ $.fn.rpt_json_table3 = function (options) {
                 td.append(td_btn);
             }
 
-            //crear boton personalizado 
+            //crear boton personalizado
 
             if (x.dropdown != null) {
 
@@ -2122,7 +2122,7 @@ $.fn.Loading = function (options) {
             load = `<div class="d-flex align-items-center justify-content-center" style="min-height:300px;">
                     <h3 class="text-success">
                         <i class="icon-spin5 animate-spin"></i>
-                      
+
                        CARGANDO...
                     </h3>
                 </div>`;
@@ -2332,4 +2332,15 @@ function fn_ajax(datos, url, div = "") {
             },
         });
     });
+}
+
+function formatPrice(amount, locale = 'es-MX', currency = 'MXN') {
+    // Verificar si el monto es null, undefined o 0
+    if (!amount) {
+        return '-';
+    }
+    return new Intl.NumberFormat(locale, {
+        style: 'currency',
+        currency: currency
+    }).format(amount);
 }

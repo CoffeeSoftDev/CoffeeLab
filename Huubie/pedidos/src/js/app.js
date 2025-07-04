@@ -1,7 +1,8 @@
 $(function () {
-    const app = new App();
+    const app = new App(api,'root');
     sub = new Sub(api,'');
     app.init();
+    sub.init();
 });
 
 class App extends Templates {
@@ -24,6 +25,7 @@ class App extends Templates {
         this.primaryLayout({
             parent: `root`,
             class: 'flex mx-2 my-2 h-100 mt-5 p-2',
+
 
             id: this.PROJECT_NAME,
         });
