@@ -20,8 +20,6 @@ class Sub extends Templates {
         idEvent = 10;
     }
 
-
-
     async showSubEvent() {
 
         let subEvents = await useFetch({
@@ -32,7 +30,7 @@ class Sub extends Templates {
             }
         });
 
-        console.log(subEvents);
+   
 
 
         if (subEvents.status == 200) {
@@ -107,7 +105,7 @@ class Sub extends Templates {
             id: id,
             menus: initMenu.packages,
             extras: initMenu.products,
-
+            clasification: initMenu.classifications,
             sub: {
                 menusSeleccionados: response.menus,
                 extrasSeleccionados: response.extras
@@ -116,6 +114,7 @@ class Sub extends Templates {
             // eventos:
             onAddPackage: () => { this.addPackage(id) },
             onAddExtra: () => { this.addExtra(id) },
+            onAddExtraCustom: () => { this.addExtraCustom(id) },
 
         });
 
@@ -133,10 +132,12 @@ class Sub extends Templates {
             resumen: {},
             onAddPackage: () => { },
             onAddExtra: () => { },
-            onSubmit: () => { }
+            onSubmit: () => { },
+            onAddExtraCustom:()=>{}
         };
 
         const opts = Object.assign({}, defaults, options);
+        console.log(opts.clasification)
 
         $(`#${opts.parent}`).empty();
         // <div>
@@ -147,7 +148,7 @@ class Sub extends Templates {
 
         // Interfaz.
         const paquetes = `
-            <div class="md:col-span-2">
+            <div class="md:col-span-2 ">
             <div class="bg-[#1F2A37] rounded-lg border border-gray-700 shadow-md p-6 text-white">
                 <div class="mb-4">
                 <h3 class="text-xl font-bold">${opts.title}</h3>
@@ -205,43 +206,99 @@ class Sub extends Templates {
             </div>
             </div>`;
 
-        const extras = `
-            <div class="col-span-3 mt-4">
+        //   extras personalizado 
+
+        const extrasPredefinidos =  `
+            <div class="mb-6">
+            <h4 class="font-semibold mb-2">Extras predefinidos</h4>
+            <form id="formExtra${opts.id}" class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
+                <select class="selectExtra col-span-1 rounded-md bg-gray-800 text-white border border-gray-600 p-2 text-sm">
+                <option value="">Seleccione un extra</option>
+                ${opts.extras.map(e => `<option value="${e.id}">${e.nombre}</option>`).join("")}
+                </select>
+                <input type="number" min="1" value="1" class="extraCantidad col-span-1 rounded-md bg-gray-800 text-white border border-gray-600 p-2 text-sm" placeholder="Cantidad">
+                <button type="button" class="btnAgregarExtra col-span-1 px-3 py-2 text-sm text-white rounded bg-[#1A56DB] hover:bg-[#274DCD]">
+                <i class="icon-plus-circle"></i> Agregar
+                </button>
+            </form>
+            </div>
+        `;
+
+        const extrasPersonalizados =  `
+            <div class="mb-6">
+            <h4 class="font-semibold mb-2">Extra personalizado</h4>
+            <form  id="customForm${opts.id}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                <label class="block text-sm text-gray-300 mb-1">Nombre del platillo</label>
+                <input id="extraNombre" type="text" class="w-full rounded-md bg-gray-800 text-white border border-gray-600 p-2" placeholder="Ej. Postre especial">
+                </div>
+
+                <div>
+                <label class="block text-sm text-gray-300 mb-1">Clasificación</label>
+                <select id="selectClass" class="w-full rounded-md bg-gray-800 text-white border border-gray-600 p-2">
+                    <option value="">Seleccione una clasificación</option>
+                    ${opts.clasification.map(e => `<option value="${e.id}">${e.nombre}</option>`).join("")}
+    
+                </select>
+                </div>
+                
+                <div>
+                <label class="block text-sm text-gray-300 mb-1">Precio (MXN)</label>
+                <input id="extraPrecio" type="number" min="0" class="w-full rounded-md bg-gray-800 text-white border border-gray-600 p-2" placeholder="Ej. 250">
+                </div>
+                
+                <div>
+                <label class="block text-sm text-gray-300 mb-1">Cantidad</label>
+                <input id="extraCantidadCustom" type="number" min="1" value="1" class="w-full rounded-md bg-gray-800 text-white border border-gray-600 p-2" placeholder="Cantidad">
+                </div>
+
+                <div class="col-span-2">
+                <button type="button" id="" class="btnAgregarExtraPersonalizado w-full flex items-center justify-center gap-2 px-4 py-2 bg-[#1A56DB] text-white rounded hover:bg-[#274DCD]">
+                    <i class="icon-plus-circle"></i> Agregar extra personalizado
+                </button>
+                </div>
+            </form>
+            </div>
+        `;
+
+        const extrasAgregados = `
+            <div>
+                <h4 class="font-semibold mb-2">Extras agregados</h4>
+
+                <div class="contentExtras bg-gray-900 text-gray-400 p-4 rounded-md min-h-[300px] overflow-auto text-sm">
+                    No hay extras agregados
+                </div>
+            </div>
+        `;
+
+        const template = `
+            <div class="col-span-3">
             <div class="bg-[#1F2A37] rounded-lg border border-gray-700 shadow-md p-6 text-white">
                 <div class="mb-4">
                 <h3 class="text-xl font-bold">Agregar Extras</h3>
                 <p class="text-sm text-gray-400">Personalice su menú con opciones adicionales</p>
                 </div>
-                <form id="formExtra${opts.id}" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h4 class="font-semibold mb-2">Extras predefinidos</h4>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 items-end">
-                        <select class="selectExtra col-span-1 rounded-md bg-gray-800 text-white border border-gray-600 p-2 text-sm">
-                            <option value="">Seleccione un extra</option>
-                            ${opts.extras.map(e => `<option value="${e.id}">${e.nombre}</option>`).join('')}
-                        </select>
-                        <input type="number" min="1" value="1" class="extraCantidad col-span-1 rounded-md bg-gray-800 text-white border border-gray-600 p-2 text-sm" placeholder="Cantidad">
-                        <button type="button" class="btnAgregarExtra col-span-1 px-3 py-2 text-sm text-white rounded bg-[#1A56DB] hover:bg-[#274DCD]">
-                            <i class="icon-plus-circle"></i> Agregar
-                        </button>
-                        </div>
-                    </div>
-                    <div>
-                        <h4 class="font-semibold mb-2">Extras agregados</h4>
-                        <div class="contentExtras bg-gray-900 text-gray-400 p-4 rounded-md min-h-[300px] overflow-auto text-center text-sm">
-                        No hay extras agregados
-                        </div>
-                    </div>
-
-                </form>
-
-
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div>
+                    ${extrasPredefinidos}
+                    ${extrasPersonalizados}
+                </div>
+                ${extrasAgregados}
+                </div>
             </div>
-            </div>`;
+            </div>
+        `;
+
 
         const layout = `
         <div id="${opts.id}"
-        class="grid grid-cols-1 md:grid-cols-3 gap-6 ${opts.class}">${paquetes}${resumen}${extras}</div>`;
+        class="grid grid-cols-1 md:grid-cols-3 gap-6 ${opts.class}">
+
+            ${paquetes}
+            ${resumen}
+            ${template}
+
+        </div>`;
 
         $(`#${opts.parent}`).append(layout);
 
@@ -257,6 +314,7 @@ class Sub extends Templates {
         // Eventos
         $(`#${opts.id} .btnAgregarMenu`).on("click", () => opts.onAddPackage());
         $(`#${opts.id} .btnAgregarExtra`).on("click", () => opts.onAddExtra());
+        $(`#${opts.id} .btnAgregarExtraPersonalizado`).on("click", () => opts.onAddExtraCustom());
         $(`#${opts.id} .saveMenuEvent`).on("click", () => opts.onSubmit());
     }
 
@@ -508,5 +566,95 @@ class Sub extends Templates {
     `;
 
         contenedor.html(detallesMenuHTML);
+    }
+
+    // add Extra custom
+
+    async addExtra(id) {
+
+        const form     = $(`#formExtra${id}`);
+        const idExtra  = form.find(".selectExtra").val();
+        const cantidad = parseInt(form.find(".extraCantidad").val());
+
+        if (!idExtra || cantidad <= 0) {
+            alert({ icon: "warning", text: "Debe seleccionar un extra y una cantidad válida." });
+            return;
+        }
+
+        console.log(form)
+
+        // const response = await useFetch({
+        //     url: this._link,
+        //     data: {
+        //         opc: "addExtra",
+        //         product_id: idExtra,
+        //         quantity: cantidad,
+        //         subevent_id: id
+        //     },
+        // });
+
+        // if (response.status === 200) {
+        //     console.log('add extra ', response)
+        //     this.renderExtras(id, response.sub);
+        //     this.renderResumen(id, response.sub);
+        // } else {
+        //     alert(response.message);
+        // }
+    }
+
+    async addExtraCustom(id) {
+        const nombre = $("#extraNombre").val().trim();
+        const clasificacion = $("#selectClass").val();
+        const precio = parseFloat($("#extraPrecio").val());
+        const cantidad = parseInt($("#extraCantidadCustom").val());
+
+        // Validaciones básicas
+        if (!nombre || !clasificacion || isNaN(precio) || isNaN(cantidad) || cantidad <= 0 || precio < 0) {
+            alert({ icon: "warning", text: "Completa todos los campos correctamente para agregar el extra personalizado.", timer:2000 });
+            return;
+        }
+
+        // Construcción y envío
+        const response = await useFetch({
+            url: this._link,
+            data: {
+                opc: "addProduct",
+            
+                
+                // id_classification,
+                // clasificacion,
+                // precio,
+                // cantidad,
+                // subevent_id: id
+            },
+        });
+
+        if (response.status === 200) {
+            this.renderExtras(id, response.sub);
+            this.renderResumen(id, response.sub);
+            alert({ icon: "success", text: "Extra agregado correctamente" });
+        } else {
+            alert({ icon: "error", text: response.message });
+        }
+    }
+
+    // delete Extra
+    async deleteExtra(targetId, menuId) {
+
+        const response = await useFetch({
+            url: this._link,
+            data: {
+                opc: "deleteExtra",
+                subevent_id: targetId,
+                id: menuId,
+            },
+        });
+
+        if (response.status === 200) {
+            this.renderResumen(targetId, response.sub);
+            this.renderExtras(targetId, response.sub);
+        } else {
+            alert(response.message);
+        }
     }
 }
