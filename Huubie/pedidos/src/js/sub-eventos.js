@@ -137,8 +137,7 @@ class Sub extends Templates {
         };
 
         const opts = Object.assign({}, defaults, options);
-        console.log(opts.clasification)
-
+       
         $(`#${opts.parent}`).empty();
         // <div>
         //     <label class="block text-sm font-medium text-gray-300 mb-1">Tiempos</label>
@@ -408,7 +407,6 @@ class Sub extends Templates {
         const menu = sub.menusSeleccionados;
         const extras = sub.extrasSeleccionados;
 
-        console.log('resumen', menu, extras);
 
         contenedorResumen.empty();
 
@@ -541,29 +539,29 @@ class Sub extends Templates {
         if (!menu) return contenedor.empty();
 
         const detallesMenuHTML = `
-        <div class="bg-[#1F2A37] rounded-lg border border-gray-700 shadow-md p-6 text-white">
-            <div class="mb-4">
-                <h3 class="text-xl font-bold">Detalles del Menú: ${menu.nombre} ${formatPrice(menu.precioPorPersona)} /persona</h3>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-300">
-                <div>
-                    <h4 class="font-semibold mb-2">Platillos incluidos:</h4>
-                    <ul class="list-disc pl-5 space-y-1">
-                        ${menu.platillos.map(p => `<li>${p.nombre}</li>`).join("")}
-                    </ul>
+            <div class="bg-[#1F2A37] rounded-lg border border-gray-700 shadow-md p-6 text-white">
+                <div class="mb-4">
+                    <h3 class="text-xl font-bold">Detalles del Menú: ${menu.nombre} ${formatPrice(menu.precioPorPersona)} /persona</h3>
                 </div>
-                <div>
-                    <h4 class="font-semibold mb-2">Bebidas incluidas:</h4>
-                    <ul class="list-disc pl-5 space-y-1">
-                        ${menu.bebidas.map(b => `<li>${b.nombre}</li>`).join("")}
-                    </ul>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-300">
+                    <div>
+                        <h4 class="font-semibold mb-2">Platillos incluidos:</h4>
+                        <ul class="list-disc pl-5 space-y-1">
+                            ${menu.platillos.map(p => `<li>${p.nombre}</li>`).join("")}
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold mb-2">Bebidas incluidas:</h4>
+                        <ul class="list-disc pl-5 space-y-1">
+                            ${menu.bebidas.map(b => `<li>${b.nombre}</li>`).join("")}
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-6 text-right">
+                    <button onclick="sub.cerrarDetallesMenu('#detalleMenuSeleccionado-${id_subevent}')" class="text-blue-400 hover:underline">Cerrar detalles</button>
                 </div>
             </div>
-            <div class="mt-6 text-right">
-                <button onclick="sub.cerrarDetallesMenu('#detalleMenuSeleccionado-${id_subevent}')" class="text-blue-400 hover:underline">Cerrar detalles</button>
-            </div>
-        </div>
-    `;
+        `;
 
         contenedor.html(detallesMenuHTML);
     }
@@ -581,25 +579,23 @@ class Sub extends Templates {
             return;
         }
 
-        console.log(form)
+        const response = await useFetch({
+            url: this._link,
+            data: {
+                opc: "addExtra",
+                product_id: idExtra,
+                quantity: cantidad,
+                subevent_id: id
+            },
+        });
 
-        // const response = await useFetch({
-        //     url: this._link,
-        //     data: {
-        //         opc: "addExtra",
-        //         product_id: idExtra,
-        //         quantity: cantidad,
-        //         subevent_id: id
-        //     },
-        // });
+        if (response.status === 200) {
+            this.renderExtras(id, response.sub);
+            this.renderResumen(id, response.sub);
 
-        // if (response.status === 200) {
-        //     console.log('add extra ', response)
-        //     this.renderExtras(id, response.sub);
-        //     this.renderResumen(id, response.sub);
-        // } else {
-        //     alert(response.message);
-        // }
+        } else {
+            alert(response.message);
+        }
     }
 
     async addExtraCustom(id) {
@@ -611,8 +607,7 @@ class Sub extends Templates {
         const clasificacion = form.find(".selectClass").val()
         const precio        = parseFloat(form.find(".extraPrecio").val());
         const cantidad      = parseInt(form.find(".extraCantidadCustom").val());
-        console.log(nombre, clasificacion, precio, cantidad);
-
+     
         // Validaciones básicas
         if (!nombre || !clasificacion || isNaN(precio) || isNaN(cantidad) || cantidad <= 0 || precio < 0) {
             alert({ icon: "warning", text: "Completa todos los campos correctamente para agregar el extra personalizado.", timer:2000 });
@@ -633,6 +628,7 @@ class Sub extends Templates {
          });
 
         if (response.status === 200) {
+           
             this.renderExtras(id, response.sub);
             this.renderResumen(id, response.sub);
             alert({ icon: "success", text: "Extra agregado correctamente" });
