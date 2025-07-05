@@ -30,7 +30,7 @@ class Sub extends Templates {
             }
         });
 
-   
+
 
 
         if (subEvents.status == 200) {
@@ -206,7 +206,7 @@ class Sub extends Templates {
             </div>
             </div>`;
 
-        //   extras personalizado 
+        //   extras personalizado
 
         const extrasPredefinidos =  `
             <div class="mb-6">
@@ -235,21 +235,21 @@ class Sub extends Templates {
 
                 <div>
                 <label class="block text-sm text-gray-300 mb-1">Clasificación</label>
-                <select id="selectClass" class="w-full rounded-md bg-gray-800 text-white border border-gray-600 p-2">
+                <select id="" class="selectClass w-full rounded-md bg-gray-800 text-white border border-gray-600 p-2">
                     <option value="">Seleccione una clasificación</option>
                     ${opts.clasification.map(e => `<option value="${e.id}">${e.nombre}</option>`).join("")}
-    
+
                 </select>
                 </div>
-                
+
                 <div>
                 <label class="block text-sm text-gray-300 mb-1">Precio (MXN)</label>
-                <input id="extraPrecio" type="number" min="0" class="w-full rounded-md bg-gray-800 text-white border border-gray-600 p-2" placeholder="Ej. 250">
+                <input id="" type="number" min="0" class="extraPrecio w-full rounded-md bg-gray-800 text-white border border-gray-600 p-2" placeholder="Ej. 250">
                 </div>
-                
+
                 <div>
                 <label class="block text-sm text-gray-300 mb-1">Cantidad</label>
-                <input id="extraCantidadCustom" type="number" min="1" value="1" class="w-full rounded-md bg-gray-800 text-white border border-gray-600 p-2" placeholder="Cantidad">
+                <input id="" type="number" min="1" value="1" class="extraCantidadCustom w-full rounded-md bg-gray-800 text-white border border-gray-600 p-2" placeholder="Cantidad">
                 </div>
 
                 <div class="col-span-2">
@@ -603,10 +603,15 @@ class Sub extends Templates {
     }
 
     async addExtraCustom(id) {
-        const nombre = $("#extraNombre").val().trim();
-        const clasificacion = $("#selectClass").val();
-        const precio = parseFloat($("#extraPrecio").val());
-        const cantidad = parseInt($("#extraCantidadCustom").val());
+
+        const form = $(`#customForm${id}`);
+
+
+        const nombre        = form.find("#extraNombre").val();
+        const clasificacion = form.find(".selectClass").val()
+        const precio        = parseFloat(form.find(".extraPrecio").val());
+        const cantidad      = parseInt(form.find(".extraCantidadCustom").val());
+        console.log(nombre, clasificacion, precio, cantidad);
 
         // Validaciones básicas
         if (!nombre || !clasificacion || isNaN(precio) || isNaN(cantidad) || cantidad <= 0 || precio < 0) {
@@ -618,16 +623,14 @@ class Sub extends Templates {
         const response = await useFetch({
             url: this._link,
             data: {
-                opc: "addProduct",
-            
-                
-                // id_classification,
-                // clasificacion,
-                // precio,
-                // cantidad,
-                // subevent_id: id
+                opc              : "addProduct",
+                name             : nombre,
+                price            : precio,
+                quantity         : cantidad,
+                id_classification: clasificacion,
+                subevent_id      : id
             },
-        });
+         });
 
         if (response.status === 200) {
             this.renderExtras(id, response.sub);
