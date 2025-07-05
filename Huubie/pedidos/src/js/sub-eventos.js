@@ -5,8 +5,6 @@ let sub, idEvent, id_subevent;
 
 class Sub extends Templates {
 
-
-
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "SubEvent";
@@ -91,6 +89,7 @@ class Sub extends Templates {
     }
 
     // Menu package,extra.
+
     async addMenu(id) {
 
         let response = await useFetch({
@@ -566,7 +565,7 @@ class Sub extends Templates {
         contenedor.html(detallesMenuHTML);
     }
 
-    // add Extra custom
+    // add Extra custom.
 
     async addExtra(id) {
 
