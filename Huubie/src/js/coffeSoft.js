@@ -1890,7 +1890,7 @@ class Components extends Complements {
             data: [],
             center: [1, 2, 5],
             right: [3, 4],
-            onShow: () => { },          // ✅ por si no lo pasan
+            onShow: () => { },
         };
 
         const opts = Object.assign(defaults, options);
@@ -1902,101 +1902,119 @@ class Components extends Complements {
         const titleRow = $(`
         <div class="flex justify-between items-center px-4 py-4 border-b border-gray-800">
             <div>
-            <h2 class="text-lg font-semibold text-white">${opts.title}</h2>
-            ${opts.subtitle ? `<span class="inline-block mt-1 text-xs font-medium text-gray-300 bg-gray-700 px-2 py-1 rounded-full">${opts.subtitle}</span>` : ''}
+                <h2 class="text-lg font-semibold text-white">${opts.title}</h2>
+                ${opts.subtitle
+                ? `<span class="inline-block mt-1 text-xs font-medium text-gray-300 bg-gray-700 px-2 py-1 rounded-full">${opts.subtitle}</span>`
+                : ""
+            }
             </div>
-
             <div class="flex items-center gap-2">
-            <button id="btn-new-sub-event" class="bg-gray-600 hover:bg-gray-700 text-white text-sm px-4 py-2 rounded w-40 flex items-center justify-center gap-2">
-                <span class="text-lg">＋</span> Nuevo
-            </button>
-            <button id="btn-print-sub-event" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded w-40 flex items-center justify-center gap-2">
-                <span class="text-lg">🖨️</span> Imprimir
-            </button>
+                <button id="btn-new-sub-event" class="bg-gray-600 hover:bg-gray-700 text-white text-sm px-4 py-2 rounded w-40 flex items-center justify-center gap-2">
+                    <span class="text-lg">＋</span> Nuevo
+                </button>
+                <button id="btn-print-sub-event" class="bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 rounded w-40 flex items-center justify-center gap-2">
+                    <span class="text-lg">🖨️</span> Imprimir
+                </button>
+                <button id="btn-action3" class="bg-purple-600 hover:bg-purple-700 text-white text-sm px-4 py-2 rounded w-40 flex items-center justify-center gap-2">
+                    <span class="text-lg">⭐</span> Configuración
+                </button>
             </div>
         </div>
-        `);
+    `);
 
         titleRow.find("#btn-new-sub-event").on("click", () => {
             if (typeof opts.onAdd === "function") opts.onAdd();
         });
-
         titleRow.find("#btn-print-sub-event").on("click", () => {
-            if (typeof opts.onAdd === "function") opts.onPrint();
+            if (typeof opts.onPrint === "function") opts.onPrint();
         });
-
+        titleRow.find("#btn-action3").on("click", () => {
+            if (typeof opts.configuration === "function") opts.onAction3();
+        });
 
         container.append(titleRow);
 
-        // 📜 Mostrar nota del evento si existe (gris claro)
+        // Nota del evento si existe
         if (opts.data.length > 0 && opts.data[0].note) {
             const noteRow = $(`<div class="px-4 text-sm text-gray-400 mb-2">${opts.data[0].note}</div>`);
             container.append(noteRow);
         }
 
+        // ----- Agrupador padre para thead y rows -----
+        const divRowsContainer = $('<div>', { id: "rows-container" });
+
+        // Header
         const firstItem = opts.data[0] || {};
         const keys = Object.keys(firstItem).filter(k => k !== 'body' && k !== 'id');
 
         const headerRow = $('<div>', {
             class: "flex justify-between items-center px-4 py-2 font-medium text-gray-400 border-b border-gray-700 text-sm"
         });
-
+        headerRow.append(`<div class="w-6"></div>`);
         keys.forEach(key => {
             headerRow.append(`<div class="flex-1 text-center truncate">${key.charAt(0).toUpperCase() + key.slice(1)}</div>`);
         });
-
         headerRow.append(`<div class="flex-none text-right">Acciones</div>`);
-        container.append(headerRow);
-
+        divRowsContainer.append(headerRow);
 
         // 🔁 Render de cada fila
         opts.data.forEach((opt, index) => {
+            const rowId = `row-${opt.id}`;
+            const row = $('<div>', { class: "border-gray-700", id: rowId });
 
-            const row = $('<div>', { class: " border-gray-700" });
+            const collapseIcon = $('<span>', {
+                class: "mr-2 cursor-pointer select-none transition-transform duration-200",
+                html: '<i class="icon-right-dir"></i>',
+            });
 
             const header = $(`<div class="flex justify-between items-center px-3 py-2 border-y border-gray-700 hover:bg-[#18212F] bg-[#313D4F] cursor-pointer"></div>`);
+            header.append($('<div class="w-6 flex items-center justify-center">').append(collapseIcon));
 
             keys.forEach((key, i) => {
-
                 let align = "text-left";
                 if (opts.center.includes(i)) align = "text-center";
                 if (opts.right.includes(i)) align = "text-end";
-
-
-                header.append(`<div class="flex-1 px-3  text-gray-300 truncate ${align}">${opt[key]}</div>`);
+                header.append(`<div class="flex-1 px-3 text-gray-300 truncate ${align}">${opt[key]}</div>`);
             });
 
             const actions = $(`
-                <div class="flex-none flex gap-2 mx-2">
-                    <button class="btn-edit bg-gray-700 text-white text-sm px-2 py-1 rounded" title="Editar">✏️</button>
-                    <button class="btn-delete bg-gray-700 text-red-500 text-sm px-2 py-1 rounded" title="Eliminar">🗑️</button>
-                </div>`);
-
+            <div class="flex-none flex gap-2 mx-2">
+                <button class="btn-edit bg-gray-700 text-white text-sm px-2 py-1 rounded" title="Editar">✏️</button>
+                <button class="btn-delete bg-gray-700 text-red-500 text-sm px-2 py-1 rounded" title="Eliminar">🗑️</button>
+            </div>`);
             header.append(actions);
 
             // Container collapsed
             let bodyWrapper = $('<div>', {
                 class: "bg-[#1F2A37] hidden px-4 py-4 text-sm text-gray-300 accordion-body",
                 id: 'containerInfo' + opt.id,
-
-                html: `
-
-                `
+                html: ``
             });
 
+            function toggleCollapseIcon(expanded) {
+                collapseIcon.html(
+                    expanded ? '<i class="icon-down-dir"></i>' : '<i class="icon-right-dir"></i>'
+                );
+            }
 
-            // Logic Components.
-
-            // ✅ Evita colapsar si haces clic en botón
             header.on("click", function (e) {
                 let target = $(e.target);
                 if (target.closest(".btn-edit").length || target.closest(".btn-delete").length) return;
 
-                $(".accordion-body").slideUp(); // Oculta los demás
+                divRowsContainer.find(".active-row").removeClass("active-row").css("background", "");
+                $(".accordion-body").slideUp();
+                $(".mr-2").html('<i class="icon-right-dir"></i>');
+
                 let isVisible = bodyWrapper.is(":visible");
                 if (!isVisible) {
+                    header.addClass("active-row").css("background", "#111827");
                     bodyWrapper.slideDown(200);
+                    toggleCollapseIcon(true);
                     if (typeof opts.onShow === 'function') opts.onShow(opt.id);
+                } else {
+                    header.removeClass("active-row").css("background", "");
+                    bodyWrapper.slideUp(200);
+                    toggleCollapseIcon(false);
                 }
             });
 
@@ -2004,46 +2022,63 @@ class Components extends Complements {
                 e.stopPropagation();
                 if (typeof opts.onEdit === "function") opts.onEdit(opt, index);
             });
-
             header.find(".btn-delete").on("click", e => {
                 e.stopPropagation();
                 if (typeof opts.onDelete === "function") opts.onDelete(opt, index);
             });
 
-
-
-
-            // add interfaces.
             row.append(header, bodyWrapper);
-            container.append(row);
-
+            divRowsContainer.append(row);
         });
 
+        // Inserta el padre de filas y encabezado al container principal
+        container.append(divRowsContainer);
 
         // 📌 Calcular total general
         let totalGral = opts.data.reduce((sum, el) => {
-            let clean = (el.Total || '0')
-                .toString()
-                .replace(/[^0-9.-]+/g, ''); // Elimina $ , y cualquier otro símbolo
-
+            let clean = (el.Total || '0').toString().replace(/[^0-9.-]+/g, '');
             return sum + (parseFloat(clean) || 0);
         }, 0);
 
-
-        container.append(`
-            <div class="flex justify-between items-center  px-4 py-4 space-y-2 mt-3 border-t border-gray-800 text-white text-sm">
-                <div class="font-semibold text-green-400 text-lg">
-                    TOTAL GRAL: <span>$${totalGral.toLocaleString(undefined, {
-            minimumFractionDigits: 2,
-        })}</span>
-                </div>
-                <button type="button" class="flex  bg-[#374151] hover:bg-[#4b5563] text-white items-center justify-center px-4 py-2 mt-3 text-sm w-40 rounded" onclick="eventos.closeEvent()">Cerrar</button>
+        // Se guarda el elemento totalGral para futuras modificaciones
+        const totalGeneralDiv = $(`
+        <div class="flex justify-between items-center  px-4 py-4 space-y-2 mt-3 border-t border-gray-800 text-white text-sm">
+            <div class="font-semibold text-green-400 text-lg">
+                TOTAL GRAL: <span id="spanTotalGeneral">$${totalGral.toLocaleString(undefined, { minimumFractionDigits: 2, })}</span>
             </div>
-        `);
+            <button type="button" class="flex  bg-[#374151] hover:bg-[#4b5563] text-white items-center justify-center px-4 py-2 mt-3 text-sm w-40 rounded" onclick="eventos.closeEvent()">Cerrar</button>
+        </div>
+    `);
 
+        container.append(totalGeneralDiv);
+
+        // ---- Función extender: sumar y actualizar total general ----
+        container[0].totalGral = function (options) {
+            let defaults = {
+                id: '#accordionTable',
+                position: 5
+
+            };
+
+            let opts = $.extend({}, defaults, options);
+
+            let total   = 0;
+
+            $('#accordionTable #rows-container > div[id^="row-"]').each(function () {
+                // Busca el div de total (por posición o por clase, si es siempre el mismo)
+                let $totalDiv = $(this).find('div.flex-1').eq(opts.position);
+                let val = $totalDiv.text().replace(/[^0-9.-]+/g, ''); // quita $ y comas
+                total += parseFloat(val) || 0;
+            });
+
+            $('#spanTotalGeneral').html(formatPrice(total));
+        };
+
+        // Renderiza todo
         $(`#${opts.parent}`).html(container);
-    }
 
+
+    }
 
 }
 

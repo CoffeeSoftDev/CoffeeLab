@@ -25,7 +25,11 @@ class App extends Templates {
         this.primaryLayout({
             parent: `root`,
             class: 'flex mx-2 my-2 h-100 mt-5 p-2',
-
+            card:{
+                container:{
+                    class:'bg-[#1F2A37] p-3 rounded-3 '
+                },
+            },
 
             id: this.PROJECT_NAME,
         });
