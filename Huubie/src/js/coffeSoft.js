@@ -1788,7 +1788,7 @@ class Components extends Complements {
             theme: "light", // 'dark' | 'light'
             class: "",
             tab: {
-                size: 'px-3 py-1',
+                size: 'px-3 py-2 m-1',
             },
             content: { class:'',id:''},
             renderContainer: true,
@@ -1832,7 +1832,7 @@ class Components extends Complements {
             const tabButton = $("<button>", {
                 id: `tab-${tab.id}`,
                 html: tab.icon ? `<i class='${tab.icon} mr-2 h-4 w-4'></i>${tab.tab}` : tab.tab,
-                class: `${opts.type === "short" ? "" : "flex-1"} flex items-center justify-center gap-2 ${opts.tab.size} rounded-lg text-sm font-medium transition
+                class: `${opts.type === "short" ? "w-[10%]" : "flex-1"} flex items-center justify-center gap-2 ${opts.tab.size} rounded-lg text-sm font-medium transition
                  data-[state=active]:${themes[opts.theme].active} ${themes[opts.theme].inactive}`,
                 "data-state": isActive ? "active" : "inactive",
                 click: () => {
