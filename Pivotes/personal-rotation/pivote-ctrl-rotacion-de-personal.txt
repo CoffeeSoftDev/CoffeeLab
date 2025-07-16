@@ -1,0 +1,427 @@
+<?php
+session_start();
+if (empty($_POST['opc'])) exit(0);
+
+session_start();
+setlocale(LC_TIME, 'es_ES.UTF-8');
+date_default_timezone_set('America/Mexico_City');
+
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
+
+require_once '../mdl/mdl-rotacion-de-personal.php';
+require_once('../../conf/coffeSoft.php');
+
+class ctrl extends mdl {
+
+    function init() {
+        $udn[] = ["id" => "0", "valor" => "TODAS LAS UDN"];
+        $udn   = array_merge($udn, $this->lsUDN());
+
+        return [
+            'udn'     => $udn,
+            'periodo' => $this->lsPeriods()
+        ];
+    }
+
+    // Rotacion > Crear nueva rotación mensual:
+
+    function addNewRotacion() {
+        $status  = 500;
+        $message = "No se pudo generar la rotación mensual.";
+
+        // 1. Crear periodo
+        $mes        = date('m');
+        $anio       = date('Y');
+        $nombre_mes = $this->getMesNombre($mes);
+        $name       = strtoupper($nombre_mes)." ".$anio;
+
+        // Checar si ya existe el periodo (único por mes/año)
+        $periodo = $this->getPeriodoPorMesAnio([$mes, $anio]);
+
+        
+        if (!$periodo) {
+            $_values         = $this->util->sql([
+                'date_creation' => date('Y-m-d H:i:s'),
+                'date_month'    => $mes,
+                'date_year'     => $anio,
+                'name'          => $name,
+                'status'        => 1
+            ]);
+
+            $periodo_id = $this->createPeriodo( $_values);
+
+        } else {
+            $periodo_id = $periodo['id'];
+        }
+
+        // 2. Crear registros vacíos para cada UDN en las dos tablas
+        $udns = $this->lsUDN();
+
+
+       
+
+        // if (!$periodo) {
+        //     foreach ($udns as $udn) {
+
+
+                $initial_template     = $this-> getCountEmployed([$udn]);
+                $end_template         = $this-> getCountEmployed([$udn]);
+                $epm                  = $initial_template['total'] + ($end_template['total'] / 2);
+
+                $monthly_terminations = $this->getMonthlyTerminations([$udn,$mes,$anio]);
+                $rotation             = ($monthly_terminations['total'] * 100) / $epm;
+
+                $values = [
+
+                    'period_id'            => $periodo_id,
+                    'udn_id'               => $udn['id'],
+                    'initial_template'     => $initial_template['total'],
+                    'end_template'         => $end_template['total'],
+                    'epm'                  => $epm,
+                    'monthly_terminations' => $monthly_terminations['total'],
+                    'rotation'             => $rotation,
+                    'date_creation'        => date('Y-m-d H:i:s') 
+                ];
+
+
+        //           // Rotation Percentage
+        //         $_values_rotation         = $this->util->sql([
+        //             'period_id'            => $periodo_id,
+        //             'udn_id'               => $udn['id'],
+        //             'initial_template'     => $initial_template,
+        //             'end_template'         => $end_template,
+        //             'epm'                  => $epm,
+        //             'monthly_terminations' => $monthly_terminations,
+        //             'rotation'             => $rotation,
+        //             'date_creation'        => date('Y-m-d H:i:s')
+        //         ]);
+
+        //         $rp = $this->createRotationPercentage($_values_rotation);
+
+
+        //         // Rotation Template
+        //         $_values_rotation         = $this->util->sql([
+        //             'period_id'           => $periodo_id,
+        //             'udn_id'              => $udn['id'],
+        //             'authorized_template' => null,
+        //             'real_template'       => null,
+        //             'percentage_template' => null,
+        //             'date_creation'       => date('Y-m-d H:i:s')
+        //         ]);
+
+        //         $rt = $this->createRotationTemplate($_values_rotation);
+
+        //     }
+        // }
+
+        $status  = 200;
+        $message = "Rotación mensual generada exitosamente.";
+
+
+        return [
+            'status'  => $status,
+            'message' => $message,
+          
+            'values'=>$values,
+            'data'    => [
+                'editRotation' => $this->listEditRotation($periodo_id),
+                'editTemplate' => $this->listEditTemplate($periodo_id),
+            ]
+        ];
+    }
+
+    function listEditTemplate($id){
+
+        $__row = [];
+
+        $ls = $this->getRotationTemplateByPeriod([$id]);
+
+        foreach ($ls as $template) { 
+            $id = $template['id'];
+
+        $__row[] = [
+            'id'                    => $template['id'],
+            'UDN'                   => [
+                    'html'  => $template['udn'],
+                    'class' => 'p-2 w-[25%]',
+            ],
+            '✏️ PLANTILLA AUTORIZADA' => [
+                    'html'  => $this->inputEditable('autorizada', $id, $template['authorized_template'] ?? ''),
+                    'class' => 'p-2 w-25',
+                ],
+            
+            '✏️ PLANTILLA REAL' => [
+                'html'  => $this->inputEditable('real', $id, $template['real_template'] ?? ''),
+                'class' => 'w-25',
+            ],
+        
+            'ROTACION' => '',
+            'opc'      => 0,    // Indica que es una fila editable
+        ];
+
+        }
+
+        return [ "row" => $__row, "ls" => $ls ];
+
+    }
+
+    function listEditRotation($id) {
+        $__row = [];
+        $ls = $this->getRotationPorcentByPeriod([$id]);
+
+        foreach ($ls as $rotation) { 
+            $__row[] = [
+                'id'  => $rotation['id'],
+                'UDN' => $rotation['udn'],
+
+                '✏️ PLANTILLA INICIAL ' => [
+                    'html'  => $this->inputEditable('initial_template',$rotation['id'], $rotation['initial_template']),
+                    'class' => 'p-2 w-25',
+                ],
+
+                '✏️ PLANTILLA FINAL '   => [
+                    'html'  => $this->inputEditable('end_template',$rotation['id'], $rotation['end_template']),
+                    'class' => ' p-0 w-25',
+                ],
+
+                'EPM'      =>  $rotation['epm'],
+                'BAJAS'    =>  $rotation['monthly_terminations'],
+                'ROTACION' =>  $rotation['id'],
+                'opc'      => 0,
+            ];
+        }
+
+        return [ "row" => $__row, "ls" =>$id ];
+    }
+
+    function editRotationField() {
+
+        $status  = 500;
+        $message = 'No se pudo actualizar el campo';
+
+        // Limpieza 
+        $data = $this->util->sql($_POST, 1);
+
+        $update = $this->updateRotation($data);
+
+        if ($update) {
+            $status  = 200;
+            $message = 'Campo actualizado correctamente';
+        }
+
+        return [
+            'status'  => $status,
+            'message' => $message,
+            $data
+        ];
+
+    }
+
+    // Rotacion > Consultar rotación mensual por periodo:
+
+     function list() {
+      
+        $data = ($_POST['concentrado'] == "General")
+            ?  $this->listRotationPorcentGeneral()
+            :  $this->listRotationPorcentDetail();
+    
+        return [ "row" => $data, "ls" => "0" ];
+    }
+
+    function listRotationGeneral(){
+        $rows = [];
+        $ls = $this->getRotationTemplateByPeriod([$_POST['id']]);
+
+        foreach ($ls as $template) {
+            $rows[] = [
+                'id'                     => $template['id'],
+                'UDN'                    => $template['udn'],
+                'PLANTILLA AUTORIZADA'   => $template['authorized_template'] ?? '',
+                'PLANTILLA REAL'         => $template['real_template'] ?? '',
+                'ROTACION'               => '', // O puedes calcular el valor si aplica
+                'opc'                    => 0,  // Si no usas este campo, puedes omitirlo
+            ];
+        }
+
+        return $rows;
+
+    }
+
+    function listRotationPorcentGeneral() {
+        $rows = [];
+        $ls = $this->getRotationPorcentByPeriod([$_POST['id']]);
+
+         // Inicializa sumas
+        $total_inicial = 0;
+        $total_final   = 0;
+        $total_epm     = 0;
+        $total_bajas   = 0;
+
+        foreach ($ls as $rotation) {
+            
+            // Suma solo si son numéricos
+            $total_inicial += is_numeric($rotation['initial_template']) ? $rotation['initial_template'] : 0;
+            $total_final   += is_numeric($rotation['end_template']) ? $rotation['end_template'] : 0;
+            $total_epm     += is_numeric($rotation['epm']) ? $rotation['epm'] : 0;
+            $total_bajas   += is_numeric($rotation['monthly_terminations']) ? $rotation['monthly_terminations'] : 0;
+
+
+
+            $rows[] = [
+                'id'                => $rotation['id'],
+                'UDN'               => $rotation['udn'],
+                'PLANTILLA INICIAL' => $rotation['initial_template'],
+                'PLANTILLA FINAL'   => $rotation['end_template'],
+                'EPM'               => $rotation['epm'],
+                'BAJAS'             => $rotation['monthly_terminations'],
+                'ROTACION'          => $rotation['rotation'], // O calcula el valor aquí si aplica
+                'opc'               => 0,  // Opcional, para compatibilidad front
+            ];
+        }
+
+        // Fila de totales
+        
+        $rows[] = [
+            'id'                => 'total',
+            'UDN'               => 'Total Varoch',
+            'PLANTILLA INICIAL' => $total_inicial,
+            'PLANTILLA FINAL'   => $total_final,
+            'EPM'               => $total_epm,
+            'BAJAS'             => $total_bajas,
+            'ROTACION'          => '', // Puedes poner un promedio aquí si lo requieres
+            'opc'               => 2,
+        ];
+
+        return $rows;
+    }
+
+    function listRotationPorcentDetail() {
+        $rows = [];
+        $listUDN = $this->lsUDN();
+
+        $fechas     = [];
+        $fechasName = [];
+
+        $mes  =  date('m');
+        $year = date('Y');
+
+        // 📜 Generar los últimos 6 meses
+        for ($i = 0; $i < 6; $i++) {
+            $time         = strtotime("-$i months", strtotime("$year-$mes-01"));
+            $monthName    = date('M', $time);
+            $yearName     = date('Y', $time);
+            $fechasName[] = "$monthName/$yearName";
+            $monthNumber  = date('m', $time);
+            $yearNumber   = date('Y', $time);
+            $fechas[]     = "$monthNumber/$yearNumber";
+        }
+
+        // Inicializar arreglo para sumar totales por columna
+        $totalPorMes = array_fill_keys($fechasName, 0);
+        $totalUDN = []; // Opcional: totales por UDN si requieres (por fila)
+
+        foreach ($listUDN as $udn) {
+            // 📜 Fila de encabezado
+            $campos = [
+                'id'  => $udn['id'],
+                'udn' => $udn['valor'],
+            ];
+
+            $dates = [];
+            $sumaUDN = 0;
+
+            foreach ($fechas as $index => $fecha) {
+                list($m, $y) = explode("/", $fecha);
+                $RotationPorcent = $this->getRotationPorcentByDate([$m, $y, $udn['id']]);
+                $valor = floatval($RotationPorcent['rotation']);
+
+                // Sumar a los totales generales por mes
+                $totalPorMes[$fechasName[$index]] += $valor;
+                $sumaUDN += $valor;
+
+                $dates[$fechasName[$index]] = [
+                    'html'  => evaluar($valor,''),
+                    'class' => 'text-end px-3'
+                ];
+            }
+
+            // Puedes guardar el total UDN (por fila) si necesitas mostrarlo
+            $totalUDN[$udn['id']] = $sumaUDN;
+
+            $rows[] = array_merge($campos, $dates, [
+                'total_udn' => [
+                    'html'  => evaluar($sumaUDN,''),
+                    'class' => 'font-bold bg-gray-100 text-end px-3'
+                ],
+                'opc' => 1
+            ]);
+        }
+
+        // 📊 Agregar fila de totales generales por mes
+        $totalRow = [
+            'id'  => 'total_general',
+            'udn' => '<strong>TOTAL</strong>',
+        ];
+        $sumaTotalGeneral = 0;
+
+        foreach ($fechasName as $col) {
+            $totalRow[$col] = [
+             'html'=> evaluar($totalPorMes[$col],'') ,
+             'class'=>'text-end px-3 font-bold bg-gray-100' ];
+            $sumaTotalGeneral += $totalPorMes[$col];
+        }
+
+        // Total general de todos los meses
+        $totalRow['total_udn'] = [
+            'html'=> evaluar($sumaTotalGeneral,''),
+            'class'=>'text-end px-3 font-bold bg-gray-100' 
+
+        ];
+        $totalRow['opc'] = 2;
+
+        // Agregar la fila de totales al final del arreglo de filas
+        $rows[] = $totalRow;
+
+        return $rows;
+    }
+
+    // Aux. functions:
+
+    function inputEditable($name, $id, $value = '') {
+        return '<input 
+            type="text" 
+            class="border font-semibold text-right py-1 px-2 rounded-lg  focus:outline-none w-100"
+            name="'.$name.'"
+            id="'.$name.'_'.$id.'"
+            value="'.htmlspecialchars($value).'"
+            data-id="'.$id.'"
+            data-field="'.$name.'"
+            onkeyup="app.onEditRotation(this)"
+            autocomplete="off" />';
+    }
+
+   
+    function getMesNombre($mes) {
+        $meses = [
+            "01"=>"Enero", "02"=>"Febrero", "03"=>"Marzo", "04"=>"Abril",
+            "05"=>"Mayo", "06"=>"Junio", "07"=>"Julio", "08"=>"Agosto",
+            "09"=>"Septiembre", "10"=>"Octubre", "11"=>"Noviembre", "12"=>"Diciembre"
+        ];
+        return $meses[$mes] ?? $mes;
+    }
+
+
+   
+
+
+  
+}
+
+echo json_encode(
+    (new ctrl)->{$_POST['opc']}()
+);
+
+
+?>

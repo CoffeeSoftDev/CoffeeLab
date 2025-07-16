@@ -63,6 +63,8 @@ class Sub extends Templates {
                 }
             });
 
+
+
         } else {
             const emptySubEvent = $(`
                     <div class="flex flex-col items-center justify-content-start py-12 text-center h-full  bg-[#1F2A37] rounded-lg">
@@ -136,7 +138,7 @@ class Sub extends Templates {
         };
 
         const opts = Object.assign({}, defaults, options);
-       
+
         $(`#${opts.parent}`).empty();
         // <div>
         //     <label class="block text-sm font-medium text-gray-300 mb-1">Tiempos</label>
@@ -153,7 +155,7 @@ class Sub extends Templates {
                 <p class="text-sm text-gray-400">Elija uno o más menús/paquetes y la cantidad de personas</p>
                 </div>
                 <form id="formMenu${opts.id
-            }" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+            }" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-1">Paquete Precargado</label>
                         <select class="selectMenu w-full rounded-md bg-gray-800 text-white border border-gray-600 p-2">
@@ -331,7 +333,7 @@ class Sub extends Templates {
 
             const card = $(`
             <div id="${cardId}" class="border border-gray-700 p-3 rounded-lg bg-gray-800 mb-3">
-                <div class="grid grid-cols-12 items-center gap-4">
+                <div class="grid grid-cols-12 items-center gap-3">
                     <div class="col-span-6 flex flex-col justify-start text-left">
                         <div class="flex items-center gap-2">
                             <h4 class="font-semibold text-white truncate">${item.menu.nombre}</h4>
@@ -402,58 +404,83 @@ class Sub extends Templates {
     }
 
     renderResumen(id, sub) {
+        // Selección de contenedores y datos
         const contenedorResumen = $(`#${id} .contentResumen`);
         const menu = sub.menusSeleccionados;
         const extras = sub.extrasSeleccionados;
 
+        // Encontrar la row y el div de total (columna 6, index 5)
+        let headerDiv = $('#row-' + id);
+        let totalDiv = headerDiv.find('div.flex-1').eq(5);
 
+        // Limpia el resumen antes de renderizar
         contenedorResumen.empty();
 
+        // Si no hay menús ni extras seleccionados
         if (menu.length === 0 && extras.length === 0) {
-            contenedorResumen.html(`<p class="text-sm text-gray-400">Seleccione al menos un menú o un extra para ver el resumen</p>`);
+            contenedorResumen.html(`
+            <div class="w-full  flex items-center justify-center">
+                <p class="text-sm text-gray-400">Seleccione al menos un menú o un extra para ver el resumen</p>
+            </div>
+        `);
+            // Limpia el total visual
+            totalDiv.text(formatPrice(0));
             return;
         }
 
+        // Monto total acumulado
         let montoTotal = 0;
 
+        // Render de Menús seleccionados
         const containerMenu = menu.length > 0
             ? `<h4 class="text-sm font-semibold text-white mb-2">Menús:</h4>` +
-            menu.map((item) => {
+            menu.map(item => {
                 let subtotal = item.menu.precioPorPersona * item.cantidadPersonas;
                 montoTotal += subtotal;
-                return `<div class="flex justify-between text-xs text-white mb-1">
-                          <span class="w-1/2 truncate">(${item.cantidadPersonas}) ${item.menu.nombre}</span>
-                          <span class="w-1/4 text-right">${formatPrice(item.menu.precioPorPersona)}</span>
-                          <span class="w-1/4 text-right">${formatPrice(subtotal)}</span>
-                      </div>`;
+                return `
+                    <div class="flex justify-between text-xs text-white mb-1">
+                        <span class="w-1/2 truncate">(${item.cantidadPersonas}) ${item.menu.nombre}</span>
+                        <span class="w-1/4 text-right">${formatPrice(item.menu.precioPorPersona)}</span>
+                        <span class="w-1/4 text-right">${formatPrice(subtotal)}</span>
+                    </div>
+                `;
             }).join("")
             : "";
 
+        // Render de Extras seleccionados
         const containerExtra = extras.length > 0
             ? `<h4 class="text-sm font-semibold text-white mt-4 mb-2">Extras:</h4>` +
-            extras.map((extra) => {
+            extras.map(extra => {
                 let subtotal = extra.precio * extra.cantidad;
                 montoTotal += subtotal;
-                return `<div class="flex justify-between text-xs text-white mb-1">
-                          <span class="w-1/2 truncate">(${extra.cantidad}) ${extra.nombre}</span>
-                          <span class="w-1/4 text-right">${formatPrice(extra.precio)}</span>
-                          <span class="w-1/4 text-right">${formatPrice(subtotal)}</span>
-                      </div>`;
+                return `
+                    <div class="flex justify-between text-xs text-white mb-1">
+                        <span class="w-1/2 truncate">(${extra.cantidad}) ${extra.nombre}</span>
+                        <span class="w-1/4 text-right">${formatPrice(extra.precio)}</span>
+                        <span class="w-1/4 text-right">${formatPrice(subtotal)}</span>
+                    </div>
+                `;
             }).join("")
             : "";
 
+        // Render del resumen total (abarca todo el div)
         contenedorResumen.html(`
-                <div class="text-left">
+        <div class="w-full p-2">
+            <div class="text-left">
                 ${containerMenu}
                 ${containerExtra}
-
             </div>
             <hr class="border-gray-600 my-3" />
             <div class="flex justify-between font-bold text-white text-lg">
                 <span>Total:</span>
                 <span id="pagoTotal">${formatPrice(montoTotal)}</span>
             </div>
+        </div>
         `);
+
+        // Actualiza la columna total en la row
+        totalDiv.text(formatPrice(montoTotal));
+        $('#accordionTable')[0].totalGral();
     }
 
     renderExtras(id, sub) {
@@ -565,94 +592,73 @@ class Sub extends Templates {
         contenedor.html(detallesMenuHTML);
     }
 
-    // add Extra custom.
+    // Package:
 
-    async addExtra(id) {
+    async addPackage(id) {
+        const form = $(`#formMenu${id}`);
+        const idMenu = form.find(".selectMenu").val();
+        const cantidad = parseInt(form.find(".cantidadPersonas").val());
 
-        const form     = $(`#formExtra${id}`);
-        const idExtra  = form.find(".selectExtra").val();
-        const cantidad = parseInt(form.find(".extraCantidad").val());
-
-        if (!idExtra || cantidad <= 0) {
-            alert({ icon: "warning", text: "Debe seleccionar un extra y una cantidad válida." });
+        if (!idMenu || cantidad <= 0) {
+            alert({ icon: "warning", text: "Debe seleccionar un paquete y una cantidad válida." });
             return;
         }
 
         const response = await useFetch({
             url: this._link,
             data: {
-                opc: "addExtra",
-                product_id: idExtra,
+                opc: "addPackage",
+                package_id: idMenu,
                 quantity: cantidad,
                 subevent_id: id
             },
         });
 
         if (response.status === 200) {
-            this.renderExtras(id, response.sub);
+            this.renderPackages(id, response.sub);
             this.renderResumen(id, response.sub);
+        } else {
+            alert(response.message);
+        }
+
+    }
+
+    async deletePackage(targetId, menuId) {
+
+        const response = await useFetch({
+            url: this._link,
+            data: { opc: "deletePackage", subevent_id: targetId, id: menuId },
+        });
+
+        if (response.status === 200) {
+
+            this.renderResumen(targetId, response.sub);
+            this.renderPackages(targetId, response.sub);
 
         } else {
             alert(response.message);
         }
+
     }
 
-    async addExtraCustom(id) {
-
-        const form = $(`#customForm${id}`);
-
-
-        const nombre        = form.find("#extraNombre").val();
-        const clasificacion = form.find(".selectClass").val()
-        const precio        = parseFloat(form.find(".extraPrecio").val());
-        const cantidad      = parseInt(form.find(".extraCantidadCustom").val());
-     
-        // Validaciones básicas
-        if (!nombre || !clasificacion || isNaN(precio) || isNaN(cantidad) || cantidad <= 0 || precio < 0) {
-            alert({ icon: "warning", text: "Completa todos los campos correctamente para agregar el extra personalizado.", timer:2000 });
-            return;
-        }
-
-        // Construcción y envío
+    async updatePackageQuantity(targetId, menuId, newQuantity) {
         const response = await useFetch({
             url: this._link,
             data: {
-                opc              : "addProduct",
-                name             : nombre,
-                price            : precio,
-                quantity         : cantidad,
-                id_classification: clasificacion,
-                subevent_id      : id
-            },
-         });
-
-        if (response.status === 200) {
-           
-            this.renderExtras(id, response.sub);
-            this.renderResumen(id, response.sub);
-            alert({ icon: "success", text: "Extra agregado correctamente" });
-        } else {
-            alert({ icon: "error", text: response.message });
-        }
-    }
-
-    // delete Extra
-    async deleteExtra(targetId, menuId) {
-
-        const response = await useFetch({
-            url: this._link,
-            data: {
-                opc: "deleteExtra",
+                opc: "updatePackageQuantity",
                 subevent_id: targetId,
                 id: menuId,
+                quantity: newQuantity
             },
         });
 
         if (response.status === 200) {
             this.renderResumen(targetId, response.sub);
-            this.renderExtras(targetId, response.sub);
         } else {
             alert(response.message);
         }
     }
+
+    // add Extra custom.
+
 }
