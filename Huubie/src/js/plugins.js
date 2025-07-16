@@ -2216,13 +2216,7 @@ function dataPicker(options) {
         );
     }
 
-    // if (settings.type == 'all') {
-    //     $("#" + settings.parent).daterangepicker(settings.rangepicker);
-
-    // } else if (settings.type == 'simple') {
-
-    //     $("#" + settings.parent).daterangepicker(settings.rangeDefault);
-    // }
+  
 }
 
 function getDataRangePicker(idInput) {

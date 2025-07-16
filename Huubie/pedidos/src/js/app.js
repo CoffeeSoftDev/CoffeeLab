@@ -105,6 +105,7 @@ class App extends Templates {
                     id: "calendar",
                     lbl: "Consultar fecha: ",
                 },
+                
                 {
                     opc: "btn",
                     class: "col-sm-2",
