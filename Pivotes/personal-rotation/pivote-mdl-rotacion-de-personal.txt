@@ -1,0 +1,171 @@
+<?php
+require_once '../../conf/_CRUD.php';
+require_once '../../conf/_Utileria.php';
+
+class mdl extends CRUD {
+
+    public $util;
+    public $bd;
+
+    public function __construct() {
+        $this->util = new Utileria;
+        $this->bd   = '';
+    }
+
+    // Units:
+    public function lsUDN() {
+        return $this->_Select([
+            'table'  => "{$this->bd}udn",
+            'values' => 'idUDN AS id, UPPER(UDN) AS valor, Abreviatura AS alias',
+            'where'  => 'Stado = 1',
+            'order'  => ['ASC' => 'Antiguedad'],
+        ]);
+    }
+
+    // Periods:
+    public function getPeriodList() {
+        return $this->_Select([
+            'table' => "{$this->bd}rotation_period",
+            'values' => "id AS id, name AS valor",
+            'order' => ['DESC' => 'id'],
+            'limit' => 6,
+        ]);
+    }
+
+    public function getPeriodByMonthYear($array) {
+        $query = "
+            SELECT *
+            FROM {$this->bd}rotation_period
+            WHERE date_month = ?
+            AND date_year = ?
+            LIMIT 1
+        ";
+        $result = $this->_Read($query, $array);
+        return !empty($result) ? $result[0] : null;
+    }
+
+    public function createPeriod($array) {
+        return $this->_Insert([
+            'table'  => "{$this->bd}rotation_period",
+            'values' => $array['values'],
+            'data'   => $array['data']
+        ]);
+    }
+
+    // Rotation Percentage:
+    public function createRotationPercentage($array) {
+        return $this->_Insert([
+            'table'  => "{$this->bd}rotation_percentage",
+            'values' => $array['values'],
+            'data'   => $array['data']
+        ]);
+    }
+
+    public function updateRotationPercentage($array) {
+        return $this->_Update([
+            'table'  => "{$this->bd}rotation_percentage",
+            'values' => $array['values'],
+            'where'  => $array['where'],
+            'data'   => $array['data']
+        ]);
+    }
+
+    public function getRotationPercentageByPeriod($array) {
+        $query = "
+            SELECT
+                rotation_percentage.id AS id,
+                udn.UDN AS udn,
+                rotation_percentage.initial_template,
+                rotation_percentage.end_template,
+                rotation_percentage.epm,
+                rotation_percentage.monthly_terminations,
+                rotation_percentage.date_creation,
+                rotation_percentage.rotation,
+                rotation_percentage.period_id
+            FROM
+                {$this->bd}rotation_percentage
+            INNER JOIN {$this->bd}udn ON rotation_percentage.udn_id = udn.idUDN
+            WHERE rotation_percentage.period_id = ?
+        ";
+        return $this->_Read($query, $array);
+    }
+
+    public function getRotationPercentageByDate($array) {
+        $query = "
+            SELECT
+                rotation_percentage.rotation,
+                rotation_percentage.period_id,
+                rotation_period.date_month,
+                rotation_period.date_year
+            FROM
+                {$this->bd}rotation_percentage
+            INNER JOIN {$this->bd}rotation_period ON rotation_percentage.period_id = rotation_period.id
+            WHERE date_month = ?
+              AND date_year = ?
+              AND udn_id = ?
+        ";
+        $result = $this->_Read($query, $array);
+        return !empty($result) ? $result[0] : null;
+    }
+
+    // Rotation Template:
+    public function createRotationTemplate($array) {
+        return $this->_Insert([
+            'table'  => "{$this->bd}rotation_template",
+            'values' => $array['values'],
+            'data'   => $array['data']
+        ]);
+    }
+
+    public function getRotationTemplateByPeriod($array) {
+        $query = "
+            SELECT
+                rotation_template.id AS id,
+                udn.UDN AS udn,
+                udn.Abreviatura,
+                rotation_template.rotation_template,
+                rotation_template.authorized_template,
+                rotation_template.real_template,
+                rotation_template.percentage_template,
+                rotation_template.date_creation,
+                rotation_template.period_id 
+            FROM
+                {$this->bd}rotation_template
+            INNER JOIN {$this->bd}udn ON rotation_template.udn_id = udn.idUDN
+            WHERE period_id = ?
+        ";
+        return $this->_Read($query, $array);
+    }
+
+    // HR General:
+    public function getEmployeeCount($array) {
+        $query = "
+            SELECT
+                empleados.idEmpleado,
+                empleados.Nombres,
+                empleados.UDN_Empleado,
+                empleados.Estado,
+                COUNT(*) AS total
+            FROM
+                {$this->bd}empleados
+            WHERE
+                empleados.UDN_Empleado = 1 AND empleados.Estado = 1
+        ";
+        $result = $this->_Read($query, $array);
+        return !empty($result) ? $result[0] : null;
+    }
+
+    public function getMonthlyTerminations($array) {
+        $query = "
+            SELECT COUNT(*) AS total
+            FROM {$this->bd}bitacora_ab
+            WHERE UDN_AB = ?
+              AND MONTH(Fecha_ab) = ?
+              AND YEAR(Fecha_ab) = ?
+              AND Estado_ab = 0
+        ";
+        $result = $this->_Read($query, $array);
+        return !empty($result) ? $result[0] : null;
+    }
+}
+?>
