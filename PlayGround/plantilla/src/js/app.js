@@ -2,7 +2,7 @@
 // init vars.
 let app, sub;
 
-let api = "https://huubie.com.mx/alpha/eventos/ctrl/ctrl-payment.php";
+let api = "https://erp-varoch.com/ERP24/gestor-de-actividades/ctrl/ctrl-gestordeactividades.php";
 
 
 
@@ -25,7 +25,7 @@ class App extends Templates {
     render(options) {
         this.layout();
         this.filterBar();
-        this.onShowDocument(10);
+        this.ls()
     }
 
     layout() {
@@ -34,86 +34,121 @@ class App extends Templates {
             id: this.PROJECT_NAME,
             card: {
                 filterBar: {
-                    class: "lg:h-[20%] line",
+                    class: "line",
                     id: "filterBar" + this.PROJECT_NAME,
                 },
                 container: {
                     id: "container" + this.PROJECT_NAME,
+                    class:''
                 },
             },
         });
     }
 
     filterBar() {
+        const admin =
+
+            [
+                {
+                    opc: "btn",
+                    class: "col-sm-6 col-md-6 col-lg-3",
+                    color_btn: "primary",
+                    id: "btnNuevaActividad",
+                    text: "Nueva actividad",
+                    fn: "gestor.addTaskModal()",
+                },
+
+                {
+                    opc: "btn",
+                    class: "col-sm-6 col-md-6 col-lg-3",
+                    color_btn: "success",
+                    icon: "icon-whatsapp",
+                    id: "btnSendRecorders",
+                    text: "Enviar Recordatorios",
+                    fn: "gestor.reminderModal()",
+                },
+            ]
         this.createfilterBar({
             parent: "filterBar" + this.PROJECT_NAME,
-            type: 'simple',
             data: [
                 {
-                    opc: "input-calendar",
-                    class: "col-sm-4",
-                    id: "calendar" + this.PROJECT_NAME,
-                    lbl: "Rango de fechas",
+                    opc: "select",
+                    class: "col-sm-6 col-md-4 col-lg-2",
+                    id: "udn",
+                    lbl: "Seleccionar udn: ",
+                    data: [
+                        {id:0, valor:'Corporativo'}
+                    ],
+                    onchange: "app.ls()",
                 },
                 {
-                    opc: "button",
-                    class: "col-sm-4",
-                    className: 'w-100',
-                    color_btn: "primary",
-                    id: "btnNuevoDestajo",
-                    text: "Consultar",
-                    onClick: () => {
-                        this.onShowDocument(8);
-                    },
+                    opc: "input-calendar",
+                    class: "col-sm-6 col-md-4 col-lg-2",
+                    id: "calendar",
+                    lbl: "Consultar fecha: ",
                 },
+                {
+                    opc: "select",
+                    class: "col-sm-6 col-md-4 col-lg-2",
+                    id: "estado",
+                    lbl: "Seleccionar estados: ",
+                    data: [
+                        {id:0, valor:'Pendiente'},
+                        {id:2, valor:'En curso'},
+                        {id:3, valor:'Terminado'}
+                    ],
+                    onchange: "app.ls()",
+                },
+                ...admin,
             ],
         });
-
-        // Init del rango de fechas
+        // initialized.
         dataPicker({
-            parent: "calendar" + this.PROJECT_NAME,
+            parent: "calendar",
             rangepicker: {
-                startDate: moment().subtract(2, "month").startOf("month"),
-                endDate: moment().endOf("month"),
+                startDate: moment().startOf("year"),
+                endDate: moment().endOf("year"),
                 showDropdowns: true,
+
                 ranges: {
                     "Mes actual": [moment().startOf("month"), moment().endOf("month")],
-                    "Mes anterior": [moment().subtract(1, "month").startOf("month"), moment().subtract(1, "month").endOf("month")],
-                    "Primeros 6 meses": [moment().startOf("year"), moment().month(5).endOf("month")],
-                    "Últimos 6 meses": [moment().month(6).startOf("month"), moment().endOf("year")]
-                }
+                    "Semana actual": [moment().startOf("week"), moment().endOf("week")],
+                    "Proxima semana": [moment().add(1, "week").startOf("week"), moment().add(1, "week").endOf("week")],
+                    "Proximo mes": [moment().add(1, "month").startOf("month"), moment().add(1, "month").endOf("month")],
+                    "Mes anterior": [moment().subtract(1, "month").startOf("month"), moment().subtract(1, "month").endOf("month")]
+                },
             },
             onSelect: (start, end) => {
                 this.ls();
             },
         });
+
+        // $("#estado").val(1); // cambiar a en proceso
     }
 
     ls() {
-        let range = getDataRangePicker("calendar" + this.PROJECT_NAME);
+
+
+
+        let rangePicker = getDataRangePicker("calendar");
+        const fi = rangePicker.fi;
+        const ff = rangePicker.ff;
 
         this.createTable({
             parent: "container" + this.PROJECT_NAME,
             idFilterBar: "filterBar" + this.PROJECT_NAME,
+            data: { opc: "lsTasks", fi: rangePicker.fi, ff: rangePicker.ff },
+            conf: { datatable: true, pag: 10 },
             coffeesoft: true,
-            data: {
-                opc: "list",
-                fi: range.fi,
-                ff: range.ff,
-                udn: 0,
-                status: 0
-            },
-            conf: { datatable: false, pag: 10 },
             attr: {
-                id: "tb" + this.PROJECT_NAME,
-                extends: true,
-                title: 'Reporte de pagos por destajo',
-                subtitle: `Correspondiente del ${this.formatDateText(range.fi)} a ${this.formatDateText(range.ff)}`,
-                theme: 'corporativo',
-                right: [3, 4, 5, 6, 7, 8, 9],
-                center: [2, 10],
+                theme:'corporativo',
+                title: " Lista de Actividades Creadas ",
+                subtitle: `Periodo del ${fi} al ${ff}`,
+                id: "tbGestorActivityMac",
+                center: [1, 2, 4, 5, 6, 7, 8],
+                right: [4],
                 f_size: 12,
-                striped: false
+                extends: true,
             },
         });
     }

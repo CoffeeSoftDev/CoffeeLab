@@ -1,6 +1,8 @@
+let url = 'https://huubie.com.mx/dev/pedidos/ctrl/ctrl-admin.php';
+
 $(function () {
-    const app = new App(api,'root');
-    sub = new Sub(api,'');
+    const app = new App(url,'root');
+    sub = new Sub(url,'');
     app.init();
     // sub.init();
 });
@@ -45,7 +47,7 @@ class App extends Templates {
                     id: "company",
                     tab: "Empresa",
                     active: true,
-                    onClick: () => { },
+                    onClick: () => { this.ls() },
                 },
 
                 {
@@ -79,21 +81,10 @@ class App extends Templates {
         // sucursales.render();
         // company.render();
         // clausules.render();
+        this.filterBarProductos()
     }
 
-    // layout() {
-    //     this.primaryLayout({
-    //         parent: `root`,
-    //         class: 'flex mx-2 my-2 h-100 mt-5 p-2',
-    //         card:{
-    //             container:{
-    //                 class:'bg-[#1F2A37] p-3 rounded-3 '
-    //             },
-    //         },
-
-    //         id: this.PROJECT_NAME,
-    //     });
-    // }
+ 
 
     createFilterBar() {
         this.createfilterBar({
@@ -123,22 +114,51 @@ class App extends Templates {
         });
     }
 
+    filterBarProductos() {
+        const container = $("#container-company");
+        container.html('<div id="filterbar-company" class="mb-2"></div><div id="table-company"></div>');
+
+        this.createfilterBar({
+            parent: "filterbar-company",
+            data: [
+                {
+                    opc: "select",
+                    id: "estado-productos",
+                    class: "col-12 col-md-3",
+                    data: [
+                        { id: "1", valor: "Disponibles" },
+                        { id: "0", valor: "No disponibles" }
+                    ],
+                    // onchange: () => this.lsProductos()
+                },
+                {
+                    opc: "button",
+                    class: "col-12 col-md-3",
+                    id: "btnNuevoProducto",
+                    text: "Nuevo Producto",
+                    onClick: () => this.addProducto(),
+                },
+            ],
+        });
+
+
+        // setTimeout(() => this.lsProductos(), 50);
+    }
+
     ls() {
         let rangePicker = getDataRangePicker("calendar");
 
         this.createTable({
-            parent: `container${this.PROJECT_NAME}`,
-            idFilterBar: `filterBar${this.PROJECT_NAME}`,
-            data: { opc: "lsMenu", fi: rangePicker.fi, ff: rangePicker.ff },
-            conf: { datatable: false, pag: 3 },
+            parent: `table-company`,
+            idFilterBar: `filterbar-company`,
+            data: { opc: "listProductos" },
+            coffeesoft: true,
+            conf: { datatable: true, pag: 10 },
             attr: {
-                color_th: "bg-primary",
-                id: `tb${this.PROJECT_NAME}`,
-                class: "table table-bordered table-sm uppercase",
-                f_size: 12,
-                center: [2],
-                right: [2, 3, 4, 5],
-                extends: true,
+                id: "tbProductos",
+                theme: 'dark',
+                right: [2],
+                center: [3, 6]
             },
         });
     }

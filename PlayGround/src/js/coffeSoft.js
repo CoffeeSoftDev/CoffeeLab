@@ -194,7 +194,7 @@ class Components extends Complements {
     }
 
 
-    //    
+    //
 
     swalQuestion(options = {}) {
 
@@ -331,7 +331,7 @@ class Components extends Complements {
 
                     extendsAjax.then((data) => {
 
-                     
+
                             let attr_table_filter = {
                                 data: data,
                                 f_size: '14',
@@ -362,9 +362,9 @@ class Components extends Complements {
                             }
 
 
-                     
 
-                     
+
+
 
                     });
 
@@ -701,7 +701,7 @@ class Components extends Complements {
         $("#" + opts.parent).append(div);
     }
 
-    //      
+    //
 
     ModalForm(options) {
 
@@ -1044,7 +1044,7 @@ class Components extends Complements {
 
         };
 
-        //  Combinar objetos 
+        //  Combinar objetos
         let opts = Object.assign(defaults, options);
         $(`#${opts.parent}`).content_json_form({ data: opts.data, type: '', id: opts.id });
 
@@ -1090,11 +1090,11 @@ class Components extends Complements {
                 class: "nav-item",
             });
 
-            // if(x.fn) 
+            // if(x.fn)
 
 
 
-            // li.html(`<a class="nav-link ${active}" 
+            // li.html(`<a class="nav-link ${active}"
             //     id="${x.id}-tab"  data-bs-toggle="tab" href="#${x.id}"  onclick="${x.fn}"> ${x.tab}</a>  `);
             li.append(
                 $('<a>', {
@@ -1389,7 +1389,7 @@ class Components extends Complements {
         <div class="row p-2">
 
             <div class="col-12 col-md-4  m-0">
-                
+
             <div class="${opts.classForm}" id="${opts.form.id}" novalidate>
                 <div class="col-12 mb-2 d-flex justify-content-between">
                         <span class="fw-bold fs-5">${opts.title}</span>
@@ -1399,7 +1399,7 @@ class Components extends Complements {
                 </div>
 
             </div>
-            
+
             <div class="col-12 col-md-8" id="layoutTable">
             <div class="">
                 <button type="button" class="btn btn-primary btn-sm d-none" id="addRecetasSub">
@@ -1517,18 +1517,18 @@ class Components extends Complements {
         <div class="row p-2">
 
             <div class="col-12 col-md-4  m-0">
-                
+
             <div class="${opts.classForm}" id="${opts.id}"  novalidate>
                 <div class="col-12 mb-2 d-flex justify-content-between">
                         <span class="fw-bold fs-5">${opts.title}</span>
                         <button type="button" class="btn-close" aria-label="Close" id="btnClose" ></button>
-                       
+
                 </div>
                         <form class="mt-3 " id="${opts.form.parent}" ></form>
             </div>
 
             </div>
-            
+
             <div class="col-12 col-md-8" id="layoutTable">
             <div class="">
                 <button type="button" class="btn btn-primary btn-sm d-none" id="addRecetasSub">
@@ -1536,7 +1536,7 @@ class Components extends Complements {
             </div>
 
             <div class="m-0 p-0" id="${opts.table.parent}">
-               
+
             </div>
             </div>
         </div>`;
@@ -1597,7 +1597,7 @@ class Components extends Complements {
             defaults.color_th = "bg-[#003360] text-white";
             defaults.color_row = "bg-white ";
             defaults.color_group = "bg-[#D0E3FF] ";
-            defaults.class = "w-full table-auto text-sm ";
+            defaults.class = "w-full table-fixed text-sm ";
             defaults.border_table = "border border-gray-300";
             defaults.border_row = "border-t border-gray-300";
             defaults.color_row_alt = "bg-gray-200";
@@ -1617,12 +1617,27 @@ class Components extends Complements {
         });
 
         if (opts.title) {
-            const titleRow = $(`
-            <div class="flex flex-col px-4 py-3  border-b ${opts.dark ? 'border-gray-700 bg-gray-800' : 'border-gray-300 bg-white'}">
-                <h2 class="text-base font-semibold ${opts.dark ? 'text-gray-100' : 'text-gray-800'}">${opts.title}</h2>
-                ${opts.subtitle ? `<p class="text-sm ${opts.dark ? 'text-gray-400' : 'text-gray-600'} mt-1">${opts.subtitle}</p>` : ''}
-            </div>`);
-            container.append(titleRow);
+            const titleContainer = $("<div>", {
+                class: `flex flex-col gap-1 px-4 mt-3 mb-1 rounded-t-md ${opts.dark ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-800'
+                    }`
+            });
+
+            const title = $("<h2>", {
+                class: "text-lg font-semibold leading-tight",
+                text: opts.title,
+            });
+
+            titleContainer.append(title);
+
+            if (opts.subtitle) {
+                const subtitle = $("<p>", {
+                    class: `text-sm mt-1 ${opts.dark ? 'text-gray-400' : 'text-gray-600'}`,
+                    text: opts.subtitle,
+                });
+                titleContainer.append(subtitle);
+            }
+
+            container.append(titleContainer);
         }
 
         const table = $("<table>", { id: opts.id, class: `border-separate border-spacing-0  ${opts.border_table} ${opts.class}` });
@@ -1703,7 +1718,7 @@ class Components extends Complements {
                 let cellAttributes = {
                     id: `${key}_${data.id}`,
                     style: `font-size:${opts.f_size}px;`,
-                    class: `${align} ${opts.border_row} px-3 py-2 truncate ${colorBg}`,
+                    class: `${align} ${opts.border_row} px-3 py-2  ${colorBg}`,
                     html: tdText
                 };
 
