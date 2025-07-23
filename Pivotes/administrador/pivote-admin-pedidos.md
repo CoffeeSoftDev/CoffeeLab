@@ -96,7 +96,7 @@ class App extends Templates {
                         { id: "1", valor: "Disponibles" },
                         { id: "0", valor: "No disponibles" }
                     ],
-                    // onchange: () => this.lsProductos()
+                    onchange: () => this.lsProductos()
                 },
                 {
                     opc: "button",
@@ -109,7 +109,7 @@ class App extends Templates {
         });
 
 
-        // setTimeout(() => this.lsProductos(), 50);
+       
     }
 
     filterBarCategoria() {
