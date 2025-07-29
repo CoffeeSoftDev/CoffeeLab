@@ -1572,11 +1572,11 @@ class Components extends Complements {
             color_th: "bg-[#003360] text-gray-100",
             color_row: "bg-white hover:bg-gray-50",
             color_group: "bg-gray-200",
-            class: "w-full table-auto text-sm text-gray-800",
+            class: "w-full table-fixed text-sm text-gray-800",
             onEdit: () => { },
             onDelete: () => { },
             extends: true,
-            f_size: 14,
+            f_size: 12,
             includeColumnForA: false,
             border_table: "border border-gray-300",
             border_row: "border-t border-gray-200",
@@ -1586,29 +1586,29 @@ class Components extends Complements {
 
         if (options.theme === 'dark') {
             defaults.dark = true;
-            defaults.color_th = "bg-[#374151] text-gray-300";
-            defaults.color_row = "bg-[#283341] text-gray-300 ";
+            defaults.color_th = "bg-[#0F172A] text-white";
+            defaults.color_row = "bg-[#1E293B] text-white";
             defaults.color_group = "bg-[#334155] text-white";
-            defaults.class = "w-full table-auto text-sm ";
+            defaults.class = "w-full table-fixed text-sm text-white";
             defaults.border_table = "";
             defaults.border_row = "border-t border-gray-700";
             defaults.color_row_alt = "bg-[#111827]";
         } else if (options.theme === 'corporativo') {
             defaults.color_th = "bg-[#003360] text-white";
             defaults.color_row = "bg-white ";
-            defaults.color_group = "bg-[#D0E3FF] ";
-            defaults.class = "w-full table-fixed text-sm ";
-            defaults.border_table = "border border-gray-300";
+            defaults.color_group = "bg-gray-100 ";
+            defaults.class = "w-full table-auto text-sm ";
+            defaults.border_table = "border rounded-lg  border-gray-300";
             defaults.border_row = "border-t border-gray-300";
-            defaults.color_row_alt = "bg-gray-200";
+            defaults.color_row_alt = "bg-gray-100";
         } else {
-            defaults.color_th = "bg-gray-100 text-gray-600";
+            defaults.color_th = "bg-[#F2F5F9] text-[#003360]";
             defaults.color_row = "bg-white hover:bg-gray-600";
             defaults.color_group = "bg-gray-200";
-            defaults.class = "w-full table-auto text-sm text-gray-800";
-            defaults.border_table = "border border-gray-300";
+            defaults.class = "w-full table-fixed text-sm text-gray-800";
+            defaults.border_table = "border rounded-lg  border-gray-300";
             defaults.border_row = "border-t border-gray-200";
-            defaults.color_row_alt = "bg-gray-100";
+            defaults.color_row_alt = "bg-gray-50";
         }
 
         const opts = Object.assign({}, defaults, options);
@@ -1618,17 +1618,14 @@ class Components extends Complements {
 
         if (opts.title) {
             const titleContainer = $("<div>", {
-                class: `flex flex-col gap-1 px-4 mt-3 mb-1 rounded-t-md ${opts.dark ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-800'
+                class: `flex flex-col gap-1 px-4 py-3 rounded-t-md ${opts.dark ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-800'
                     }`
             });
-
             const title = $("<h2>", {
                 class: "text-lg font-semibold leading-tight",
                 text: opts.title,
             });
-
             titleContainer.append(title);
-
             if (opts.subtitle) {
                 const subtitle = $("<p>", {
                     class: `text-sm mt-1 ${opts.dark ? 'text-gray-400' : 'text-gray-600'}`,
@@ -1636,11 +1633,9 @@ class Components extends Complements {
                 });
                 titleContainer.append(subtitle);
             }
-
             container.append(titleContainer);
         }
-
-        const table = $("<table>", { id: opts.id, class: `border-separate border-spacing-0  ${opts.border_table} ${opts.class}` });
+        const table = $("<table>", { id: opts.id, class: ` border-separate border-spacing-0 ${opts.border_table} ${opts.class}` });
         const thead = $("<thead>");
 
         if (opts.data.thead) {
@@ -1663,6 +1658,7 @@ class Components extends Complements {
                         }
                     });
                     thead.append(headerRow);
+
                 } else {
                     columnHeaders.forEach(columnGroup => {
                         const headerGroup = $("<tr>");
@@ -1688,7 +1684,7 @@ class Components extends Complements {
                 if (clave != "opc" && clave != "id") {
                     clave = (clave == 'btn' || clave == 'btn_personalizado' || clave == 'a' || clave == 'dropdown') ? '<i class="icon-gear"> </i>' : clave;
                     autoHeaderRow.append($("<th>", {
-                        class: `px-2 py-2 ${opts.color_th} capitalize text-center font-semibold`,
+                        class: `px-3 py-2 ${opts.color_th} capitalize text-center font-semibold`,
                         style: `font-size:${opts.f_size}px;`
                     }).html(clave));
                 }
@@ -1697,15 +1693,31 @@ class Components extends Complements {
         }
 
         table.append(thead);
-        const tbody = $("<tbody>", { class: '' });
+        const tbody = $("<tbody>");
 
         opts.data.row.forEach((data, i) => {
-            const colorBg = opts.striped && i % 2 === 0 ? opts.color_row_alt : opts.color_row;
+            let bg_grupo = "";
+
+            if (data.opc) {
+                if (data.opc == 1) {
+                    bg_grupo = opts.color_group + " font-bold";
+                } else if (data.opc == 2) {
+                    bg_grupo = opts.color_group + " text-primary fw-bold ";
+                }
+            }
+
+
+
+            const colorBg = bg_grupo || (opts.striped && i % 2 === 0 ? opts.color_row_alt : opts.color_row);
+
+
             delete data.opc;
 
             const tr = $("<tr>", {
-                class: ``,
+                class: ` `,
             });
+
+
 
             Object.keys(data).forEach((key, colIndex) => {
                 if (["btn", "a", "dropdown", "id"].includes(key)) return;
@@ -1741,42 +1753,44 @@ class Components extends Complements {
 
                     const button_a = $("<a>", atributos);
                     actions.append(button_a);
+
                 });
                 tr.append(actions);
             }
 
             if (data.dropdown) {
-                actions = $("<td>", { class: `px-2 py-2  relative justify-center items-center ${colorBg} ${opts.border_row}` });
+                actions = $("<td>", { class: `px-2 py-2 flex justify-center items-center ${colorBg} ${opts.border_row}` });
 
-                const wrapper = $("<div>", {
-                    class: "relative"
-                });
+                const wrapper = $("<div>", { class: "relative" });
 
                 const btn = $("<button>", {
-                    class: "icon-dot-3 text-gray-200 hover:text-gray-600",
+                    class: "icon-dot-3 text-gray-500 hover:text-gray-800",
                     click: function (e) {
                         e.stopPropagation();
+                        // Cierra todos los menús antes de mostrar el actual
+                        $("ul.dropdown-menu-custom").hide();
                         $(this).next("ul").toggle();
                     }
                 });
 
                 const menu = $("<ul>", {
-                    class: "absolute top-full right-0 mt-2 w-44 z-10 bg-[#1F2A37] border rounded-md shadow-md hidden",
+                    class: "absolute right-0 mt-2 w-44 z-10 bg-white border rounded-md shadow-md hidden dropdown-menu-custom",
                 });
 
                 data.dropdown.forEach((item) =>
                     menu.append(`
-                    <li><a onclick="${item.onclick}"text-left class="block px-4 py-2 text-sm hover:bg-[#283341] text-gray-200">
-                    <i class="${item.icon} "></i> ${item.text}</a></li>`)
+                    <li>
+                        <a onclick="${item.onclick}" text-left class="block px-4 py-2 text-sm hover:bg-gray-100 text-gray-800">
+                        <i class="${item.icon} text-blue-600"></i> ${item.text}
+                        </a>
+                    </li>`)
                 );
-
-
-
-
 
                 wrapper.append(btn, menu);
                 actions.append(wrapper);
-                $(document).on("click", () => menu.hide());
+
+                // Oculta todos los menús al hacer click fuera
+                $(document).on("click", () => $("ul.dropdown-menu-custom").hide());
             }
 
             tr.append(actions);
@@ -1794,6 +1808,7 @@ class Components extends Complements {
         #${opts.id} tr:last-child td:last-child { border-bottom-right-radius: 0.5rem; }
         `).appendTo("head");
     }
+
 
     tabLayout(options) {
         const defaults = {

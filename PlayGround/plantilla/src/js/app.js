@@ -2,13 +2,14 @@
 // init vars.
 let app, sub;
 
-let api = "https://erp-varoch.com/ERP24/gestor-de-actividades/ctrl/ctrl-gestordeactividades.php";
+let api = "https://www.huubie.com.mx/dev/pedidos/ctrl/ctrl-admin.php";
+let link = "https://erp-varoch.com/DEV/gestor-de-actividades/ctrl/ctrl-gestordeactividades.php";
 
 
 
 $(async () => {
     // instancias.
-    app = new App(api, 'root');
+    app = new App(link, 'root');
     app.init();
 });
 
@@ -23,10 +24,15 @@ class App extends Templates {
     }
 
     render(options) {
+
         this.layout();
         this.filterBar();
         this.ls()
+       
     }
+
+    // Gestor activity
+
 
     layout() {
         this.primaryLayout({
@@ -43,7 +49,218 @@ class App extends Templates {
                 },
             },
         });
+
+        // this.addModifier()
     }
+
+    async addModifier() {
+        // Estado temporal para productos
+        this.tempProductList = [];
+
+        // 1. Renderiza el modal con ambos formularios separados, pero solo el primero activo al inicio
+        bootbox.dialog({
+            title: `
+            <h2 class="text-lg font-semibold leading-none tracking-tight text-gray-500">Crear Nuevo Modificador</h2>
+            <p class="text-sm text-muted-foreground">Completa la información del modificador.</p>
+        `,
+            message: `
+            <form id="formModifierContainer" novalidate></form>
+            <form id="formProductsContainer" novalidate class="mt-4 d-none"></form>
+            <div id="product-list" class="overflow-y-auto max-h-52 mt-2"></div>
+        `,
+            size: '',
+            buttons: {
+                cancel: {
+                    label: 'Cancelar',
+                    className: 'btn-secondary'
+                },
+                confirm: {
+                    label: 'Guardar',
+                    className: 'btn-primary',
+                    callback: () => {
+                        // // Al guardar, validar que haya productos
+                        // if (this.tempProductList.length === 0) {
+                        //     alert({ icon: "error", title: "Productos requeridos", text: "Debes agregar al menos un producto." });
+                        //     return false;
+                        // }
+                        // // Enviar a backend todo el modificador
+                        // const name = $('#name').val();
+                        // const description = $('#description').val();
+                        // useFetch({
+                        //     url: this._link,
+                        //     data: {
+                        //         opc: 'addModifier',
+                        //         name,
+                        //         description,
+                        //         products: JSON.stringify(this.tempProductList),
+                        //     },
+                        //     success: (response) => {
+                        //         if (response.status == 200) {
+                        //             alert({ icon: "success", text: response.message });
+                        //             if (typeof this.lsModifiers === 'function') this.lsModifiers();
+                        //         } else {
+                        //             alert({ icon: "error", title: "Oops!...", text: response.message });
+                        //         }
+                        //     }
+                        // });
+                        // return true;
+                    }
+                }
+            }
+        });
+
+        // 2. Renderiza el primer formulario con createForm (nombre + descripción)
+        this.createForm({
+            parent: "formModifierContainer",
+            id: "formModifier",
+            data: { opc: 'addModifier' },
+            json: [
+                {
+                    opc: "input",
+                    id: "name",
+                    lbl: "Nombre del Modificador",
+                    required: true,
+                    class: "col-12 mb-3",
+                },
+                {
+                    opc: "textarea",
+                    id: "description",
+                    lbl: "Descripción",
+                    class: "col-12",
+                },
+                {
+                    opc: "btn-submit",
+                    text: "Crear Modificador",
+                    class: "col-12",
+                }
+            ],
+            success: (response) => {
+                if (response.status == 200) {
+                    // Desactiva form y habilita el de productos
+                    $('#formModifier :input').prop('disabled', true);
+                    $('#formProductsContainer').removeClass('d-none');
+                    // this.modifierId = response.modifierId; // Guarda el id si tu backend lo da
+                    this.renderProductForm(); // Activa el siguiente paso
+                }
+            }
+        });
+
+
+    }
+
+    renderProductForm() {
+        this.createForm({
+            parent: "formProductsContainer",
+            id: "formProduct",
+            data: { opc: 'tempProduct' },
+            json: [
+                {
+                    opc: "input",
+                    id: "productName",
+                    lbl: "Nombre",
+                    required: true,
+                    class: "col-4",
+                },
+                {
+                    opc: "input",
+                    id: "cant",
+                    lbl: "Cantidad",
+                    tipo: "numero",
+                    value: 1,
+                    required: true,
+                    class: "col-4",
+                },
+                {
+                    opc: "input",
+                    id: "price",
+                    lbl: "Precio",
+                    tipo: "numero",
+                    value: 1,
+                    required: true,
+                    class: "col-4",
+                },
+                {
+                    opc: "button",
+                    text: "Añadir",
+                    class: "col-4",
+                    onClick: () => this.addProductToList()
+                }
+            ],
+        });
+
+        $("#formProduct").on('reset', () => {
+            $("#productName").val('');
+            $("#cant").val(1);
+            $("#price").val(1);
+        });
+    }
+
+    addProductToList() {
+        const name = $("#productName").val().trim();
+        const qty = parseInt($("#cant").val());
+        const price = parseFloat($("#price").val());
+
+        if (!name || qty < 1 || price < 0) {
+            alert({ icon: "info", text: "Nombre, cantidad y precio son requeridos y válidos." });
+            return;
+        }
+        this.tempProductList.push({
+            id: name, // Aquí puedes poner el id real si usas catálogo
+            text: name,
+            qty,
+            price
+        });
+        this.renderProductList();
+        $("#formProduct")[0].reset();
+    }
+
+    renderProductList() {
+        let html = "";
+        this.tempProductList.forEach((prod, idx) => {
+            const prodId = prod.id || idx + 1;
+            
+            html += `
+            <div class="product-item" data-id="${prodId}">
+                <div class="border border-gray-200 bg-gray-500 rounded-lg p-3 shadow-sm flex items-center justify-between gap-4 mb-2">
+                    <div class="text-sm font-semibold text-white flex-1 truncate">${prod.text}</div>
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm text-gray-800 font-medium">Cantidad:</label>
+                        <input 
+                            type="number"
+                            min="1"
+                            class="form-control bg-[#1F2A37] w-20 text-sm"
+                            id="quantity-${prodId}"
+                            value="${prod.qty}"
+                            onkeyup="validationInputForNumber('#quantity-${prodId}')"
+                        >
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label class="text-sm text-gray-800 font-medium">Precio:</label>
+                        <input 
+                            type="number"
+                            min="0"
+                            step="0.01"
+                            class="form-control bg-[#1F2A37] w-24 text-sm"
+                            id="price-${prodId}"
+                            value="${prod.price}"
+                        >
+                    </div>
+                    <button 
+                        type="button"
+                        class="btn btn-outline-danger btn-sm"
+                        id="remove-product-${prodId}"
+                        onclick="app.deleteProductToList('#remove-product-${prodId}')">
+                        <i class="icon-trash"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        });
+        $("#product-list").html(html);
+    }
+
+
+
 
     filterBar() {
         const admin =
