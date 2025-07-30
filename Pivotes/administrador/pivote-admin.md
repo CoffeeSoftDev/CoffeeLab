@@ -1,17 +1,32 @@
 # PIVOTE ADMIN PEDIDOS
 
 ## DESCRIPCION
+Este módulo forma parte del sistema Administrador y está diseñado para permitir al usuario gestionar eficientemente los productos disponibles en una tienda o catálogo digital.
 
+Este módulo está optimizado con TailwindCSS y usa componentes de CoffeeSoft para asegurar una experiencia fluida, adaptable y profesional.
+
+Esta separado en tres pestañas:
+ - Productos
+ - Categorias
+ - Clientes
 
 ### ADMIN.JS [ FRONT-JS]
 ```javascript
+let app,category,client;
 
-let app;
+let cat;
 const api = "../pedidos/ctrl/ctrl-admin.php";
 
-$(() => {
-    app = new App(api, "root");
+$(async () => {
+
+    const data = await useFetch({ url: api, data: { opc: "init" } });
+    cat  = data.category;
+
+    app      = new App(api, "root");
+    category = new Category(api, "root");
+    client  = new Client(api, "root");
     app.render();
+
 });
 
 
@@ -28,11 +43,13 @@ class App extends Templates {
 
         this.filterBarProductos();
         this.lsProductos();
-        // this.lsCategoria();
-        // this.lsClientes();
+        category.lsCategory();
+        client.lsClientes();
+
     }
 
     layout() {
+
         this.primaryLayout({
             parent: `root`,
             id: this.PROJECT_NAME,
@@ -43,7 +60,10 @@ class App extends Templates {
             }
         });
 
+        // layout
         this.layoutTabs();
+        category.filterBarCategory();
+        client.filterBarClient();
     }
 
     layoutTabs() {
@@ -64,12 +84,12 @@ class App extends Templates {
                 {
                     id: "categoria",
                     tab: "Categoría",
-                    // onClick: () => this.filterBarCategoria()
+                    onClick: () => category.lsCategory()
                 },
                 {
-                    id: "clientes",
+                    id: "cliente",
                     tab: "Clientes",
-                    // onClick: () => this.filterBarClientes()
+                    onClick: () => client.lsClient()
                 }
             ]
         });
@@ -96,7 +116,7 @@ class App extends Templates {
                         { id: "1", valor: "Disponibles" },
                         { id: "0", valor: "No disponibles" }
                     ],
-                    onchange: () => this.lsProductos()
+                    onchange: ' app.lsProductos()'
                 },
                 {
                     opc: "button",
@@ -109,47 +129,6 @@ class App extends Templates {
         });
 
 
-       
-    }
-
-    filterBarCategoria() {
-        const container = $("#container-categoria");
-        container.html('<div id="filterbar-categoria" class="mb-2"></div><div id="tabla-categoria"></div>');
-
-        this.createfilterBar({
-            parent: "filterbar-categoria",
-            data: [
-                {
-                    opc: "button",
-                    class: "col-12 col-md-2",
-                    id: "btnNuevaCategoria",
-                    text: "Nueva Categoría",
-                    onClick: () => this.addCategoria(),
-                },
-            ],
-        });
-
-        setTimeout(() => this.lsCategoria(), 50);
-    }
-
-    filterBarClientes() {
-        const container = $("#container-clientes");
-        container.html('<div id="filterbar-clientes" class="mb-2"></div><div id="tabla-clientes"></div>');
-
-        this.createfilterBar({
-            parent: "filterbar-clientes",
-            data: [
-                {
-                    opc: "button",
-                    class: "col-12 col-md-2",
-                    id: "btnNuevoCliente",
-                    text: "Nuevo Cliente",
-                    onClick: () => this.addCliente(),
-                },
-            ],
-        });
-
-        setTimeout(() => this.lsClientes(), 50);
     }
 
     // Productos
@@ -164,8 +143,8 @@ class App extends Templates {
             attr: {
                 id: "tbProductos",
                 theme: 'dark',
-                right:[2],
-                center:[3,6]
+                right:[3],
+                center:[1,6]
             },
         });
     }
@@ -199,15 +178,15 @@ class App extends Templates {
                     lbl: "Descripción",
                     class: "col-12 mb-3"
                 },
-                // {
-                //     opc: "select",
-                //     id: "category_id",
-                //     lbl: "Clasificación",
-                //     class: "col-12",
-                //     data: await this.getClasificaciones(),
-                //     text: "classification",
-                //     value: "id"
-                // },
+                {
+                    opc: "select",
+                    id: "category_id",
+                    lbl: "Clasificación",
+                    class: "col-12",
+                    data: cat,
+                    text: "classification",
+                    value: "id"
+                },
                 {
                     opc: "div",
                     id: "image",
@@ -227,14 +206,21 @@ class App extends Templates {
                         </div>
                         `
                 },
-              
+
             ],
-            success: () => this.lsProductos()
+            success: (response) => {
+                console.log(response);
+                if (response.status === 200) {
+                    alert({ icon: "success", text: response.message });
+                    this.lsProductos();
+                } else {
+                    alert({ icon: "info", title: "Oops!...", text: response.message, btn1: true, btn1Text: "Ok" });
+                }
+            }
         });
 
     }
 
-    // EDITAR PRODUCTO
     async editProducto(id) {
 
         const request = await useFetch({
@@ -275,15 +261,15 @@ class App extends Templates {
                     lbl: "Descripción",
                     class: "col-12 mb-3"
                 },
-                // {
-                //     opc: "select",
-                //     id: "category_id",
-                //     lbl: "Clasificación",
-                //     class: "col-12",
-                //     data: await this.getClasificaciones(),
-                //     text: "classification",
-                //     value: "id"
-                // },
+                {
+                    opc  : "select",
+                    id   : "category_id",
+                    lbl  : "Clasificación",
+                    class: "col-12",
+                    data : cat,
+                    text : "classification",
+                    value: "id"
+                },
                 {
                     opc: "div",
                     id: "image",
@@ -306,7 +292,7 @@ class App extends Templates {
 
 
             ],
-            success: (request) => {
+            success: (response) => {
                 this.lsProductos();
             },
         });
@@ -319,11 +305,13 @@ class App extends Templates {
                 text: "Esta acción ocultará o reactivará el producto.",
                 icon: "warning",
             },
+
             data: {
                 opc: "statusProducto",
-                id: id,
                 active: active === 1 ? 0 : 1,
+                id: id,
             },
+
             methods: {
                 send: () => this.lsProductos(),
             },
@@ -331,35 +319,329 @@ class App extends Templates {
     }
 
 
+   
 
-    // Category
+}
+
+class Category extends Templates {
+
+    constructor(link, div_modulo) {
+        super(link, div_modulo);
+        this.PROJECT_NAME = "Categorias";
+    }
 
 
+    filterBarCategory() {
+        const container = $("#container-categoria");
+        container.html('<div id="filterbar-category" class="mb-2"></div><div id="table-category"></div>');
 
-    lsCategoria() {
+        this.createfilterBar({
+            parent: "filterbar-category",
+            data: [
+                {
+                    opc: "select",
+                    id: "active",
+                    class: "col-12 col-md-3",
+                    data: [
+                        { id: "1", valor: "Disponibles" },
+                        { id: "0", valor: "No disponibles" }
+                    ],
+                    onchange: ' category.lsCategory()'
+                },
+                {
+                    opc: "button",
+                    class: "col-12 col-md-3",
+                    id: "btnNewCategory",
+                    text: "Nueva categoria ",
+                    onClick: () => this.addCategory(),
+                },
+            ],
+        });
+    }
+
+    lsCategory() {
         this.createTable({
-            parent: "tabla-categoria",
-            idFilterBar: "filterbar-categoria",
-            data: { opc: "listCategoria" },
+            parent: "table-category",
+            idFilterBar: "filterbar-category",
+            data: { opc: "listCategory" },
             coffeesoft: true,
             conf: { datatable: true, pag: 10 },
             attr: {
-                id: "tbCategoria",
+                id: "tbCategory",
                 theme: 'dark'
             },
         });
     }
 
-    lsClientes() {
+    addCategory() {
+        this.createModalForm({
+            id: 'formCategoryAdd',
+            data: { opc: 'addCategory' },
+            bootbox: {
+                title: 'Agregar categoria',
+            },
+            json: [
+                {
+                    opc: "input",
+                    id: "classification",
+                    lbl: "Category Name",
+                    class: "col-12 mb-3"
+                },
+                {
+                    opc: "textarea",
+                    id: "description",
+                    lbl: "Description",
+                    class: "col-12 mb-3"
+                }
+            ],
+            success: (response) => {
+                if (response.status === 200) {
+                    alert({ icon: "success", text: response.message });
+                    this.loadCategory();
+                } else {
+                    alert({ icon: "info", title: "Oops!...", text: response.message, btn1: true, btn1Text: "Ok" });
+                }
+            }
+        });
+    }
+
+    async editCategory(id) {
+        const request = await useFetch({
+            url: this._link,
+            data: {
+                opc: "getCategories",
+                id: id,
+            },
+        });
+
+
+        const data = request.data;
+
+        this.createModalForm({
+            id: 'formCategoriaEdit',
+            data: { opc: 'editCategory', id: id },
+            bootbox: {
+                title: 'Editar Categoría',
+            },
+            autofill: data,
+            json: [
+                {
+                    opc: "input",
+                    id: "classification",
+                    lbl: "Nombre de la categoría",
+                    class: "col-12 mb-3"
+                },
+                {
+                    opc: "textarea",
+                    id: "description",
+                    lbl: "Descripción",
+                    class: "col-12 mb-3"
+                }
+            ],
+            success: (response) => {
+                if (response.status === 200) {
+                    alert({ icon: "success", text: response.message });
+                    this.lsCategory();
+                } else {
+                    alert({ icon: "info", title: "Oops!...", text: response.message });
+                }
+            }
+        });
+    }
+
+    statusCategory(id, estado) {
+
+        this.swalQuestion({
+
+            opts: {
+                title: "¿Desea cambiar el estado de la categoría?",
+                text: "Esta acción activará o desactivará la categoría.",
+                icon: "warning",
+            },
+
+            data: {
+
+                opc   : "statusCategory",
+                active: estado === 1 ? 0: 1,
+                id    : id,
+
+            },
+
+            methods: {
+                send: (response) => {
+                    if (response.status === 200) {
+                        alert({ icon: "success", text: response.message });
+                        this.lsCategory();
+                    } else {
+                        alert({ icon: "info", title: "Oops!...", text: response.message });
+                    }
+                }
+            },
+        });
+
+    }
+
+
+
+
+}
+
+class Client extends Templates {
+
+    constructor(link, div_modulo) {
+        super(link, div_modulo);
+        this.PROJECT_NAME = "Client";
+    }
+
+    filterBarClient() {
+        const container = $("#container-cliente");
+        container.html('<div id="filterbar-client" class="mb-2"></div><div id="table-client"></div>');
+
+        this.createfilterBar({
+            parent: "filterbar-client",
+            data: [
+                {
+                    opc: "select",
+                    id: "active",
+                    class: "col-12 col-md-3",
+                    data: [
+                        { id: "1", valor: "Disponibles" },
+                        { id: "0", valor: "No disponibles" }
+                    ],
+                    onchange: ' client.lsClient()'
+                },
+                {
+                    opc: "button",
+                    class: "col-12 col-md-3",
+                    id: "btnNewClient",
+                    text: "Nuevo Cliente",
+                    onClick: () => this.addClient(),
+                },
+            ],
+        });
+    }
+
+    lsClient() {
         this.createTable({
-            parent: "tabla-clientes",
-            idFilterBar: "filterbar-clientes",
-            data: { opc: "listClientes" },
+            parent: "table-client",
+            idFilterBar: "filterbar-client",
+            data: { opc: "listClient" },
             coffeesoft: true,
             conf: { datatable: true, pag: 10 },
             attr: {
-                id: "tbClientes",
+                id: "tbClient",
                 theme: 'dark'
+            },
+        });
+    }
+
+    addClient() {
+        this.createModalForm({
+            id: 'formClientAdd',
+            data: { opc: 'addClient' },
+            bootbox: {
+                title: 'Agregar Cliente',
+            },
+            json: [
+                {
+                    opc: "input",
+                    id: "name",
+                    lbl: "Nombre del Cliente",
+                    class: "col-12 mb-3"
+                },
+                {
+                    opc: "input",
+                    id: "email",
+                    lbl: "Correo Electrónico",
+                    class: "col-12 mb-3"
+                },
+                {
+                    opc: "input",
+                    id: "phone",
+                    lbl: "Teléfono",
+                    class: "col-12 mb-3"
+                }
+            ],
+            success: (response) => {
+                if (response.status === 200) {
+                    alert({ icon: "success", text: response.message });
+                    this.lsClient();
+                } else {
+                    alert({ icon: "info", title: "Oops!...", text: response.message, btn1: true, btn1Text: "Ok" });
+                }
+            }
+        });
+    }
+
+    async editClient(id) {
+        const request = await useFetch({
+            url: this._link,
+            data: {
+                opc: "getClient",
+                id: id,
+            },
+        });
+
+        const data = request.data;
+
+        this.createModalForm({
+            id: 'formClientEdit',
+            data: { opc: 'editClient', id: id },
+            bootbox: {
+                title: 'Editar Cliente',
+            },
+            autofill: data,
+            json: [
+                {
+                    opc: "input",
+                    id: "name",
+                    lbl: "Nombre del Cliente",
+                    class: "col-12 mb-3"
+                },
+                {
+                    opc: "input",
+                    id: "email",
+                    lbl: "Correo Electrónico",
+                    class: "col-12 mb-3"
+                },
+                {
+                    opc: "input",
+                    id: "phone",
+                    lbl: "Teléfono",
+                    class: "col-12 mb-3"
+                }
+            ],
+            success: (response) => {
+                if (response.status === 200) {
+                    alert({ icon: "success", text: response.message });
+                    this.lsClient();
+                } else {
+                    alert({ icon: "info", title: "Oops!...", text: response.message });
+                }
+            }
+        });
+    }
+
+    deleteClient(id) {
+        this.swalQuestion({
+            opts: {
+                title: "¿Desea eliminar este cliente?",
+                text: "Esta acción no se puede deshacer.",
+                icon: "warning",
+            },
+            data: {
+                opc: "deleteClient",
+                id: id,
+            },
+            methods: {
+                send: (response) => {
+                    if (response.status === 200) {
+                        alert({ icon: "success", text: response.message });
+                        this.lsClient();
+                    } else {
+                        alert({ icon: "info", title: "Oops!...", text: response.message });
+                    }
+                }
             },
         });
     }
@@ -369,7 +651,7 @@ class App extends Templates {
 
 ### ctrl-admin.php [ CTRL]
  ```php
-    <?php
+ <?php
     session_start();
     if (empty($_POST['opc'])) exit(0);
 
@@ -381,9 +663,18 @@ class App extends Templates {
 
     class ctrl extends mdl {
 
+
+        function init() {
+            return [
+                'category' => $this->lsCategory([])
+            ];
+        }
+
+        // Products.
+
         function listProductos() {
             $active = $_POST['estado-productos'];
-            $data   = $this->getProductos([$active,$_SESSION['SUB']]);
+            $data   = $this->lsProductos([$active,$_SESSION['SUB']]);
             $rows   = [];
 
             foreach ($data as $item) {
@@ -410,15 +701,15 @@ class App extends Templates {
                 }
 
                 $rows[] = [
-                    'id'              => $item['id'],
-                    'Producto'  => [
+                    'id'       => $item['id'],
+                    'Producto' => [
                             'class' => ' justify-start  px-2 py-2 ',
                             'html'  => renderProductImage($costsys,$item['valor'])
                     ],
                     'Precio'          => evaluar($item['price']),
                     'Estado'          => renderStatus($item['active']),
 
-                    'Inventario'  => '',
+                    'Inventario'  => $item['active'],
                     'Categoria'   => $item['classification'],
                     'Descripción' => $item['description'],
 
@@ -460,7 +751,9 @@ class App extends Templates {
             $_POST['date_creation'] = date('Y-m-d H:i:s');
             $_POST['subsidiaries_id'] = $_SESSION['SUB'];
 
-            if (!$this->existsProductoByName([$_POST['name'], $_SESSION['SUB']])) {
+            $exists = $this->existsProductoByName([$_POST['name'], $_SESSION['SUB']]);
+
+            if ($exists === 0) {
                 $create = $this->createProducto($this->util->sql($_POST));
                 if ($create) {
                     $status = 200;
@@ -473,7 +766,8 @@ class App extends Templates {
 
             return [
                 'status' => $status,
-                'message' => $message
+                'message' => $message,
+                'data' => $exists
             ];
         }
 
@@ -512,7 +806,190 @@ class App extends Templates {
 
             return [
                 'status' => $status,
-                'message' => $message
+                'message' => $message,
+                'update' => $update
+
+            ];
+        }
+
+        // Category.
+
+        function listCategory() {
+            $__row = [];
+
+            $ls    = $this->lsCategory([$_POST['active']]);
+
+            foreach ($ls as $key) {
+
+                $a = [];
+
+                if ($key['active'] == 1) {
+                    $a[] = [
+                        'class'   => 'btn btn-sm btn-primary me-1',
+                        'html'    => '<i class="icon-pencil"></i>',
+                        'onclick' => 'category.editCategory(' . $key['id'] . ')'
+                    ];
+
+                    $a[] = [
+                        'class'   => 'btn btn-sm btn-danger',
+                        'html'    => '<i class="icon-toggle-on"></i>',
+                        'onclick' => 'category.statusCategory(' . $key['id'] . ', ' . $key['active'] . ')'
+                    ];
+                } else {
+
+                    $a[] = [
+                        'class'   => 'btn btn-sm btn-outline-danger',
+                        'html'    => '<i class="icon-toggle-off"></i>',
+                        'onclick' => 'category.statusCategory(' . $key['id'] . ', ' . $key['active'] . ')'
+                    ];
+                }
+
+
+                $__row[] = [
+                    'id'          => $key['id'],
+                    'Nombre'      => $key['valor'],
+                    'Descripción' => $key['description'],
+                    'Estado'      => renderStatus($key['active']),
+                    'a'           => $a
+                ];
+            }
+
+            return [
+                'row' => $__row,
+                'ls'  => $ls
+            ];
+        }
+
+        function addCategory() {
+
+            $_POST['date_creation']   = date('Y-m-d H:i:s');
+            $_POST['active']          = 1;
+            $_POST['subsidiaries_id'] = $_SESSION['SUB'];
+
+            $data   = $this->util->sql($_POST);
+            $create = $this->createCategory($data);
+
+            return [
+                'status'  => $create ? 200 : 500,
+                'message' => $create ? 'Categoría agregada correctamente.' : 'No se pudo agregar.',
+                $create,
+                $data
+            ];
+        }
+
+        function getCategories() {
+            
+            $get = $this->getCategoryById([$_POST['id']]);
+
+            return [
+                'status'  => $get ? 200 : 500,
+                'message' => $get ? 'Datos obtenidos.' : 'Error al obtener.',
+                'data'    => $get,
+                'data'    => $get,
+            ];
+        }
+
+        function editCategory() {
+
+            $edit = $this->updateCategory($this->util->sql($_POST, 1));
+
+            return [
+                'status' => $edit ? 200 : 500,
+                'message' => $edit ? 'Categoría actualizada.' : 'No se pudo actualizar.'
+            ];
+        }
+
+        function statusCategory() {
+
+            $update = $this->updateCategory($this->util->sql($_POST, 1));
+            
+            return [
+                'status' => $update ? 200 : 500,
+                'message' => $update ? 'Estado actualizado' : 'Error al cambiar estado'
+            ];
+        }   
+
+        // Client.
+
+        function listClient() {
+            $__row = [];
+
+            $ls = $this->lsClient([1, $_SESSION['SUB']]);
+
+            foreach ($ls as $key) {
+
+                $a = [];
+
+                $a[] = [
+                    'class'   => 'btn btn-sm btn-primary me-1',
+                    'html'    => '<i class="icon-pencil"></i>',
+                    'onclick' => 'client.editClient(' . $key['id'] . ')'
+                ];
+
+                $a[] = [
+                    'class'   => 'btn btn-sm btn-danger',
+                    'html'    => '<i class="icon-trash"></i>',
+                    'onclick' => 'client.deleteClient(' . $key['id'] . ')'
+                ];
+
+                $__row[] = [
+                    'id'         => $key['id'],
+                    'Nombre'     => $key['name'],
+                    'Correo'     => $key['email'],
+                    'Teléfono'   => $key['phone'],
+                    'Registrado' => formatSpanishDate($key['date_create']),
+                    'a'          => $a
+                ];
+            }
+
+            return [
+                'row' => $__row,
+                'ls'  => $ls
+            ];
+        }
+
+        function addClient() {
+            $_POST['date_create']    = date('Y-m-d H:i:s');
+            $_POST['active']         = 1;
+            $_POST['subsidiaries_id'] = $_SESSION['SUB'];
+
+            $data   = $this->util->sql($_POST);
+            $create = $this->createClient($data);
+
+            return [
+                'status'  => $create ? 200 : 500,
+                'message' => $create ? 'Cliente registrado correctamente.' : 'Error al registrar.',
+                $create,
+                $data
+            ];
+        }
+
+        function getClient() {
+            $get = $this->getClientById([$_POST['id']]);
+
+            return [
+                'status'  => $get ? 200 : 500,
+                'message' => $get ? 'Datos obtenidos.' : 'Error al obtener.',
+                'data'    => $get
+            ];
+        }
+
+        function editClient() {
+            $edit = $this->updateClient($this->util->sql($_POST, 1));
+
+            return [
+                'status' => $edit ? 200 : 500,
+                'message' => $edit ? 'Cliente actualizado.' : 'No se pudo actualizar.',
+                'post'=>$this->util->sql($_POST, 1)
+            ];
+        }
+
+        function deleteClient() {
+            $del = $this->deleteClientById([$_POST['id']]);
+
+            return [
+                'status' => $del ? 200 : 500,
+                'message' => $del ? 'Cliente eliminado correctamente.' : 'Error al eliminar.'
             ];
         }
 
@@ -526,7 +1003,7 @@ class App extends Templates {
 
     $img = !empty($src)
         ? '<img src="' . $src . '" alt="Imagen Producto" class="w-10 h-10 bg-gray-500 rounded-md object-cover" />'
-        : '<div class="w-10 h-10 bg-[#1F2A37] rounded-md flex items-center justify-center">
+        : '<div class="w-12 h-12 bg-[#1F2A37] rounded-md flex items-center justify-center">
                 <i class=" icon-birthday text-gray-500"></i>
         </div>';
 
@@ -555,11 +1032,14 @@ class App extends Templates {
 
 $obj = new ctrl();
 echo json_encode($obj->{$_POST['opc']}());
+
+ 
 ```
 
 ### mdl-admin.PHP [ mdl ]
 ```php
-    <?php
+
+<?php
 require_once '../../conf/_CRUD.php';
 require_once '../../conf/_Utileria.php';
 session_start();
@@ -573,10 +1053,9 @@ class mdl extends CRUD {
         $this->bd = "{$_SESSION['DB']}.";
     }
 
-    // 🛍️ PRODUCTOS ---------------------
+    // 🛍️ Product.
 
-    function getProductos($array)
-    {
+    function lsProductos($array){
         $leftjoin = [
             $this->bd . 'pedidos_category' => 'pedidos_products.category_id = pedidos_category.id'
         ];
@@ -584,7 +1063,7 @@ class mdl extends CRUD {
         return $this->_Select([
             'table'    => $this->bd . 'pedidos_products',
             'values'   =>
-                "pedidos_products.id,
+                "pedidos_products.id as id,
                 pedidos_products.name AS valor,
                 pedidos_products.price,
                 pedidos_products.description,
@@ -600,7 +1079,6 @@ class mdl extends CRUD {
         ]);
     }
 
-
     function getProductoById($id){
         return $this->_Select([
             'table'  => $this->bd . 'pedidos_products',
@@ -610,14 +1088,16 @@ class mdl extends CRUD {
         ])[0];
     }
 
-    function existsProductoByName($array)
-    {
-        $exists = $this->_Select([
-            'table'  => $this->bd . 'pedidos_products',
-            'values' => 'id',
-            'where'  => 'LOWER(name) = LOWER(?) AND active = 1 AND subsidiaries_id = ?',
-            'data'   => $array
-        ]);
+    function existsProductoByName($array) {
+        $query = "
+            SELECT id
+            FROM {$this->bd}pedidos_products
+            WHERE LOWER(name) = LOWER(?)
+            AND active = 1
+            AND subsidiaries_id = ?
+        ";
+
+        $exists = $this->_Read($query, $array);
         return count($exists) > 0;
     }
 
@@ -647,6 +1127,114 @@ class mdl extends CRUD {
             'data'   => $array['data']
         ]);
     }
+
+    // Category.
+
+    function lsCategory($array) {
+
+        return $this->_Select([
+            'table' => "{$this->bd}pedidos_category",
+
+            'values' => "
+                id,
+                classification AS valor,
+                description,
+                DATE_FORMAT(date_creation, '%d %M %Y') AS date_creation,
+                active
+            ",
+            'where' => "active = ? ",
+            'order' => ['DESC' => 'id'],
+            'data'  => $array
+        ]);
+    }
+
+    function getCategory($array = []) {
+        return $this->_Select([
+
+            'table'  => "{$this->bd}pedidos_category",
+            'values' => ['id', 'active','classification', 'description', "DATE_FORMAT(date_creation, '%Y-%m-%d') AS date_creation"],
+            'order'  => ['DESC' => 'date_creation']
+        ]);
+    }
+
+    function getCategoryById($array) {
+        return $this->_Select([
+
+            'table'  => "{$this->bd}pedidos_category",
+            'values' => '*',
+            'where'  => 'id = ?',
+            'data'   => $array
+        ])[0];
+    }
+
+    function createCategory($array) {
+
+        return $this->_Insert([
+
+            'table'  => "{$this->bd}pedidos_category",
+            'values' => $array['values'],
+            'data'   => $array['data']
+        ]);
+
+    }
+
+    function updateCategory($array) {
+        return $this->_Update([
+
+            'table'  => "{$this->bd}pedidos_category",
+            'values' => $array['values'],
+            'where'  => 'id = ?',
+            'data'   => $array['data']
+        ]);
+    }
+
+   // Clients.
+
+    function lsClient($array) {
+        return $this->_Select([
+            'table'  => "{$this->bd}pedidos_clients",
+            'values' =>
+                "id,
+                name,
+                phone,
+                email,
+                DATE_FORMAT(date_create, '%Y-%m-%d') as date_create",
+            'where'  => 'active = ? AND subsidiaries_id = ?',
+            'order'  => ['DESC' => 'id'],
+            'data'   => $array
+        ]);
+    }
+
+    function getClientById($array) {
+        return $this->_Select([
+            'table'  => "{$this->bd}pedidos_clients",
+            'values' => '*',
+            'where'  => 'id = ?',
+            'data'   => $array
+        ])[0];
+    }
+
+    function createClient($array) {
+        return $this->_Insert([
+            'table'  => "{$this->bd}pedidos_clients",
+            'values' => $array['values'],
+            'data'   => $array['data']
+        ]);
+    }
+
+    function updateClient($array) {
+        return $this->_Update([
+            'table'  => "{$this->bd}pedidos_clients",
+            'values' => $array['values'],
+            'where'  => 'id = ?',
+            'data'   => $array['data']
+        ]);
+    }
+
+   
+
 }
+
+   
 
 ```
