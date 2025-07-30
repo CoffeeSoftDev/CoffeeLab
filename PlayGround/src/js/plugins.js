@@ -1136,7 +1136,6 @@ $.fn.option_select = function (options) {
     }
 };
 
-
 $.fn.rpt_json_table2 = function (options) {
     return new Promise((resolve, reject) => {
         var defaults = {
