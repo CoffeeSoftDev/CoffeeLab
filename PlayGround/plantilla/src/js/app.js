@@ -9,7 +9,7 @@ let link = "https://erp-varoch.com/DEV/gestor-de-actividades/ctrl/ctrl-gestordea
 
 $(async () => {
     // instancias.
-    app = new App(link, 'root');
+    app = new App(api, 'root');
     app.init();
 });
 
@@ -25,10 +25,10 @@ class App extends Templates {
 
     render(options) {
 
-        this.layout();
-        this.filterBar();
-        this.ls()
-       
+        // this.layout();
+        // this.filterBar();
+        // this.ls()
+        this.addModifier()
     }
 
     // Gestor activity
@@ -59,54 +59,20 @@ class App extends Templates {
 
         // 1. Renderiza el modal con ambos formularios separados, pero solo el primero activo al inicio
         bootbox.dialog({
+            // size:'lg',
+            closeButton:true,
             title: `
-            <h2 class="text-lg font-semibold leading-none tracking-tight text-gray-500">Crear Nuevo Modificador</h2>
+            <h2 class="text-lg font-semibold leading-none tracking-tight text-white">Crear Nuevo Modificador</h2>
             <p class="text-sm text-muted-foreground">Completa la información del modificador.</p>
         `,
             message: `
             <form id="formModifierContainer" novalidate></form>
+                <label class="text-lg font-medium text-gray-600 mt-3">Productos Incluidos</label>
+                <p class="text-sm text-muted-foreground">Añade los productos que incluye este modificador</p>
             <form id="formProductsContainer" novalidate class="mt-4 d-none"></form>
             <div id="product-list" class="overflow-y-auto max-h-52 mt-2"></div>
         `,
-            size: '',
-            buttons: {
-                cancel: {
-                    label: 'Cancelar',
-                    className: 'btn-secondary'
-                },
-                confirm: {
-                    label: 'Guardar',
-                    className: 'btn-primary',
-                    callback: () => {
-                        // // Al guardar, validar que haya productos
-                        // if (this.tempProductList.length === 0) {
-                        //     alert({ icon: "error", title: "Productos requeridos", text: "Debes agregar al menos un producto." });
-                        //     return false;
-                        // }
-                        // // Enviar a backend todo el modificador
-                        // const name = $('#name').val();
-                        // const description = $('#description').val();
-                        // useFetch({
-                        //     url: this._link,
-                        //     data: {
-                        //         opc: 'addModifier',
-                        //         name,
-                        //         description,
-                        //         products: JSON.stringify(this.tempProductList),
-                        //     },
-                        //     success: (response) => {
-                        //         if (response.status == 200) {
-                        //             alert({ icon: "success", text: response.message });
-                        //             if (typeof this.lsModifiers === 'function') this.lsModifiers();
-                        //         } else {
-                        //             alert({ icon: "error", title: "Oops!...", text: response.message });
-                        //         }
-                        //     }
-                        // });
-                        // return true;
-                    }
-                }
-            }
+
         });
 
         // 2. Renderiza el primer formulario con createForm (nombre + descripción)
@@ -150,42 +116,45 @@ class App extends Templates {
 
     renderProductForm() {
         this.createForm({
-            parent: "formProductsContainer",
-            id: "formProduct",
-            data: { opc: 'tempProduct' },
-            json: [
-                {
-                    opc: "input",
-                    id: "productName",
-                    lbl: "Nombre",
-                    required: true,
-                    class: "col-4",
-                },
-                {
-                    opc: "input",
-                    id: "cant",
-                    lbl: "Cantidad",
-                    tipo: "numero",
-                    value: 1,
-                    required: true,
-                    class: "col-4",
-                },
-                {
-                    opc: "input",
-                    id: "price",
-                    lbl: "Precio",
-                    tipo: "numero",
-                    value: 1,
-                    required: true,
-                    class: "col-4",
-                },
-                {
-                    opc: "button",
-                    text: "Añadir",
-                    class: "col-4",
-                    onClick: () => this.addProductToList()
-                }
-            ],
+          parent: "formProductsContainer",
+          id: "formProduct",
+
+          data: { opc: "tempProduct" },
+          json: [
+            {
+              opc: "input",
+              id: "productName",
+              lbl: "Nombre ",
+              placeholder: "Ingrese nombre del producto",
+              required: true,
+                  class: "col-12 mb-3",
+            },
+            {
+              opc: "input",
+              id: "cant",
+              lbl: "Cantidad",
+              tipo: "numero",
+              value: 1,
+              required: true,
+              class: "col-4",
+            },
+            {
+              opc: "input",
+              id: "price",
+              lbl: "Precio",
+              tipo: "numero",
+              value: 1,
+              required: true,
+              class: "col-4",
+            },
+            {
+              opc: "button",
+              text: "Añadir",
+              className: "w-full",
+              class: "col-4",
+              onClick: () => this.addProductToList(),
+            },
+          ],
         });
 
         $("#formProduct").on('reset', () => {
@@ -218,14 +187,14 @@ class App extends Templates {
         let html = "";
         this.tempProductList.forEach((prod, idx) => {
             const prodId = prod.id || idx + 1;
-            
+
             html += `
             <div class="product-item" data-id="${prodId}">
                 <div class="border border-gray-200 bg-gray-500 rounded-lg p-3 shadow-sm flex items-center justify-between gap-4 mb-2">
                     <div class="text-sm font-semibold text-white flex-1 truncate">${prod.text}</div>
                     <div class="flex items-center gap-2">
                         <label class="text-sm text-gray-800 font-medium">Cantidad:</label>
-                        <input 
+                        <input
                             type="number"
                             min="1"
                             class="form-control bg-[#1F2A37] w-20 text-sm"
@@ -236,7 +205,7 @@ class App extends Templates {
                     </div>
                     <div class="flex items-center gap-2">
                         <label class="text-sm text-gray-800 font-medium">Precio:</label>
-                        <input 
+                        <input
                             type="number"
                             min="0"
                             step="0.01"
@@ -245,7 +214,7 @@ class App extends Templates {
                             value="${prod.price}"
                         >
                     </div>
-                    <button 
+                    <button
                         type="button"
                         class="btn btn-outline-danger btn-sm"
                         id="remove-product-${prodId}"

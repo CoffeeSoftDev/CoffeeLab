@@ -1759,7 +1759,7 @@ class Components extends Complements {
             }
 
             if (data.dropdown) {
-                actions = $("<td>", { class: `px-2 py-2 flex justify-center items-center ${colorBg} ${opts.border_row}` });
+                actions = $("<td>", { class: `px-2 py-2 relative justify-center items-center ${colorBg} ${opts.border_row}` });
 
                 const wrapper = $("<div>", { class: "relative" });
 
@@ -1774,13 +1774,13 @@ class Components extends Complements {
                 });
 
                 const menu = $("<ul>", {
-                    class: "absolute right-0 mt-2 w-44 z-10 bg-white border rounded-md shadow-md hidden dropdown-menu-custom",
+                    class: "absolute right-0 mt-2 w-44 z-10 pointer bg-white border rounded-md shadow-md hidden dropdown-menu-custom",
                 });
 
                 data.dropdown.forEach((item) =>
                     menu.append(`
                     <li>
-                        <a onclick="${item.onclick}" text-left class="block px-4 py-2 text-sm hover:bg-gray-100 text-gray-800">
+                        <a onclick="${item.onclick}" text-left class="block px-3 py-2 text-sm hover:bg-gray-200 text-gray-800">
                         <i class="${item.icon} text-blue-600"></i> ${item.text}
                         </a>
                     </li>`)
