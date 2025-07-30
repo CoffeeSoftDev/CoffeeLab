@@ -111,7 +111,6 @@ class App extends Templates {
         });
     }
 
-
     renderProductForm(idModifier) {
         this.createForm({
           parent: "formProductsContainer",
@@ -157,7 +156,6 @@ class App extends Templates {
 
         });
     }
-
 
     addProductToList() {
         const name = $("#productName").val().trim();
