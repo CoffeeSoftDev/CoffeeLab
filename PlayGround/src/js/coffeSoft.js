@@ -209,13 +209,12 @@ class Components extends Complements {
             cancelButtonText: "Cancelar",
             ...options.opts,
             customClass: {
-                popup: "bg-[#1F2A37] text-white rounded-lg shadow-lg",
                 title: "text-2xl font-semibold",
                 content: "text-gray-300",
                 confirmButton:
                     "bg-[#1C64F2] hover:bg-[#0E9E6E] text-white py-2 px-4 rounded",
                 cancelButton:
-                    "bg-transparent text-white border border-gray-500 py-2 px-4 rounded hover:bg-[#111928]",
+                    "bg-[#111928] text-white border border-gray-500 py-2 px-4 rounded hover:bg-[#111928]",
             },
         };
 

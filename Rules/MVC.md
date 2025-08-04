@@ -13,15 +13,18 @@ Debe respetarse el formato de CoffeeSoft
  ```JS
     let api = '';
     let app;
-    $(function () {
+    $( async () => {
         const app = new App(api,'root');
         app.init();
-    }
+    });
     class App extends Template{}
   ```
-- El constructor debe recibir dos parámetros: el enlace del controlador (`link`) y el identificador de contenedor principal (`div_modulo`).
-- El constructor debe de tener la variable PROJECT_NAME
-``` this.PROJECT_NAME = "projectName";``
+- El constructor debe recibir dos parámetros: el enlace del controlador (`api`) y el identificador de contenedor principal (`root`).
+- El constructor debe de tener la variable PROJECT_NAME 
+
+```
+ this.PROJECT_NAME = "projectName";
+ ```
 
 - Si dos modulos , el segundo debe heredar la clase App
 - Solo genera un submodulo si se necesita
@@ -29,11 +32,6 @@ Debe respetarse el formato de CoffeeSoft
     class SubModulo extends App{}
 ```
 
-- Todos los componentes de coffeeSoft incluyen el parametro parent
-debe llevar la siguiente nomenclatura
-```JS   
-    parent: `[nombreComponente]${this.PROJECT_NAME}`, 
-```
 
 
 ## Rules
@@ -95,6 +93,8 @@ debe llevar la siguiente nomenclatura
 
 - ls()
   - Carga datos de la tabla utilizando createTable(), incluyendo paginación y configuración responsiva.
+
+  
 - add()
   - Despliega un formulario modal mediante createModalForm() para agregar nuevos registros
 - edit(id)
