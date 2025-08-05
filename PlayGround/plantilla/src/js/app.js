@@ -1,11 +1,7 @@
 
 // init vars.
 let app, sub;
-
 let api = "https://erp-varoch.com/DEV/capital-humano/ctrl/ctrl-rotacion-de-personal.php";
-
-
-
 
 $(async () => {
     // instancias.
@@ -23,7 +19,9 @@ class App extends Templates {
         this.render();
     }
 
+    
     render(options) {
+
 
         this.viewLayout();
         // this.filterBar();
@@ -55,7 +53,7 @@ class App extends Templates {
         const data = request.data;
 
         $("#root").html(`
-            <div class="flex flex-col shadow-sm bg-gray-50 rounded-t-lg">
+            <div class="flex flex-col ">
                 <div class="grid grid-cols-3 items-center gap-4 px-4 pb-4 pt-6">
                     <!-- Columna 1: Botones -->
                     <div class="flex gap-2">
@@ -100,45 +98,7 @@ class App extends Templates {
         this.newRotation(data);
     }
 
-    async saveRotationTemplate(id) {
-       
-        this.swalQuestion({
-            opts: {
-                title: "¿Deseas guardar la plantilla de rotación?",
-                text: "Esta acción almacenará la plantilla actual para futuras rotaciones.",
-                icon: "question",
-            },
-            data: {
-                opc: 'saveRotationTemplate',
-                period_id: id
-            },
-            methods: {
-                send: async () => {
-               
-                    if (response.status === 200) {
-                        alert({
-                            icon: "success",
-                            title: "Guardado exitoso",
-                            text: response.message || "La plantilla se guardó correctamente.",
-                            btn1: true,
-                            btn1Text: "Aceptar"
-                        });
-                    } else {
-                        alert({
-                            icon: "error",
-                            title: "Ocurrió un error",
-                            text: response.message || "No fue posible guardar la plantilla.",
-                            btn1: true,
-                            btn1Text: "Aceptar"
-                        });
-                    }
-
-                }
-            }
-        });
-    }
-
-
+  
 
     async viewLayout() {
         const mes = moment().format('MMMM').toUpperCase();
@@ -156,8 +116,8 @@ class App extends Templates {
         this.layoutNewRotation(request)
 
     }
-    async newRotation(data) {
-        // Crea la tabla de rotación
+    
+    newRotation(data) {
         this.createCoffeTable({
             parent: "rotacionModulo",
             title: "Rotación Mensual",
@@ -210,6 +170,88 @@ class App extends Templates {
             }
         })
     }
+
+    async saveRotationTemplate(id) {
+
+        this.swalQuestion({
+            opts: {
+                title: "¿Deseas guardar la plantilla de rotación?",
+                text: "Esta acción almacenará la plantilla actual para futuras rotaciones.",
+                icon: "question",
+            },
+            data: {
+                opc: 'updateRotation',
+                status: 2,
+                id: id
+            },
+            methods: {
+                send: async () => {
+
+                    if (response.status === 200) {
+                        alert({
+                            icon: "success",
+                            title: "Guardado exitoso",
+                            text: response.message || "La plantilla se guardó correctamente.",
+                            btn1: true,
+                            btn1Text: "Aceptar"
+                        });
+
+                        app.render();
+
+                    } else {
+                        alert({
+                            icon: "error",
+                            title: "Ocurrió un error",
+                            text: response.message || "No fue posible guardar la plantilla.",
+                            btn1: true,
+                            btn1Text: "Aceptar"
+                        });
+                    }
+
+                }
+            }
+        });
+    }
+
+    async onEditRotation(input) {
+        const id    = input.dataset.id;
+        const field = input.dataset.field;
+        const value = parseFloat(input.value);
+
+        if (!id || !field || isNaN(value)) {
+            alert({ icon: "error", text: "Identificador o campo inválido." });
+            return;
+        }
+
+        const row = input.closest('tr');
+
+        // Obtener los valores actuales de la fila
+        const initialInput = row.querySelector('input[name="initial_template"]');
+        const endInput     = row.querySelector('input[name="end_template"]');
+
+        const initialValue = parseFloat(initialInput?.value || 0);
+        const endValue     = parseFloat(endInput?.value || 0);
+
+        const epm  = initialValue + (endValue / 2);
+        const bajas = parseFloat(row.cells[4]?.innerText || 0); // Asumiendo columna 4 = BAJAS
+        const rotacion = epm > 0 ? ((bajas * 100) / epm).toFixed(2) : 0;
+
+        // Actualizar la fila visualmente
+        row.cells[3].innerText = epm.toFixed(2);     // EPM
+        row.cells[5].innerText = rotacion;           // ROTACION
+
+        // Llamar backend
+        await useFetch({
+            url: api,
+            data: {
+                opc: "editRotationField",
+                [field]: value,
+                id: id,
+            },
+        });
+
+    }
+
    
 
 }
