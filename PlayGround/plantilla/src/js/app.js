@@ -21,12 +21,9 @@ class App extends Templates {
 
     
     render(options) {
-
-
         this.viewLayout();
         // this.filterBar();
         // this.ls()
-       
     }
 
     layout() {
@@ -58,7 +55,7 @@ class App extends Templates {
                     <!-- Columna 1: Botones -->
                     <div class="flex gap-2">
                         <button id="btnRegresar"
-                            class="inline-flex items-center gap-2 px-5 py-2 border border-blue-400 bg-white text-blue-600 font-semibold rounded-lg transition hover:bg-blue-50 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-200">
+                            class="inline-flex items-center gap-2 px-5 py-2 border border-blue-600 bg-white text-blue-600 font-semibold rounded-lg transition hover:bg-blue-50 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-200">
                             <i class="icon-left text-lg"></i>
                             <span>Regresar</span>
                         </button>
@@ -73,6 +70,7 @@ class App extends Templates {
                         <h2 class="text-2xl md:text-3xl font-bold text-gray-700 tracking-wide text-center">
                             Rotación de Personal
                         </h2>
+                        <p>Gestión y análisis de rotación mensual</p>
                     </div>
                     <!-- Columna 3: Info derecha -->
                     <div class="flex flex-col items-end">
@@ -99,7 +97,6 @@ class App extends Templates {
     }
 
   
-
     async viewLayout() {
         const mes = moment().format('MMMM').toUpperCase();
         const anio = moment().format('YYYY');
@@ -121,6 +118,8 @@ class App extends Templates {
         this.createCoffeTable({
             parent: "rotacionModulo",
             title: "Rotación Mensual",
+            subtitle:'EPM (Empleados Por Mes): Promedio de empleados por mes.',
+
             data: data.editRotation,
             conf: {
                 datatable: false,
@@ -171,7 +170,7 @@ class App extends Templates {
         })
     }
 
-    async saveRotationTemplate(id) {
+    saveRotationTemplate(id) {
 
         this.swalQuestion({
             opts: {
@@ -185,7 +184,7 @@ class App extends Templates {
                 id: id
             },
             methods: {
-                send: async () => {
+                send:  () => {
 
                     if (response.status === 200) {
                         alert({
@@ -244,15 +243,56 @@ class App extends Templates {
         await useFetch({
             url: api,
             data: {
-                opc: "editRotationField",
-                [field]: value,
-                id: id,
+                opc     : "editRotationField",
+                [field] : value,
+                epm     : epm.toFixed(2),
+                rotation: rotacion,
+                id      : id,
             },
         });
 
     }
 
-   
+    // Template Rotation.
+
+    async onEditTemplate(input) {
+        const id = input.dataset.id;
+        const field = input.dataset.field;
+        const value = parseFloat(input.value);
+
+        if (!id || !field || isNaN(value)) {
+            alert({ icon: "error", text: "Identificador o campo inválido." });
+            return;
+        }
+
+        const row = input.closest('tr');
+
+        // Obtener inputs de la fila
+        const realInput = row.querySelector('input[name="real_template"]');
+        const authorizedInput = row.querySelector('input[name="authorized_template"]');
+
+        const realValue = parseFloat(realInput?.value || 0);
+        const authorizedValue = parseFloat(authorizedInput?.value || 0);
+
+        // Calcular ROTACIÓN
+        const rotacion = authorizedValue > 0 ? ((realValue * 100) / authorizedValue).toFixed(2) : "0.00";
+
+        // Actualizar celda visualmente
+        row.cells[3].innerText = rotacion;         
+
+        // Enviar datos al backend
+        await useFetch({
+            url: api,
+            data: {
+                opc: "editTemplateField",
+                [field]: value,
+                percentage_template: rotacion,
+                id: id,
+            },
+        });
+    }
+
+
 
 }
 
