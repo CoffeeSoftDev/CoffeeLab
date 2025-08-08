@@ -1,8 +1,8 @@
 let url = 'https://huubie.com.mx/dev/pedidos/ctrl/ctrl-admin.php';
-let api = "https://www.huubie.com.mx/dev/pedidos/ctrl/ctrl-admin.php";
-let sub,app;
+let api = "https://huubie.com.mx/dev/reservaciones/ctrl/ctrl-reservaciones.php";
+let sub, app;
 $(function () {
-    const app = new App(api,'root');
+    const app = new App(api, 'root');
     app.init();
     // sub.init();
 });
@@ -15,140 +15,235 @@ class App extends Templates {
 
     init() {
         this.render();
+        this.viewReservation(12);
     }
 
     render() {
         this.layout();
         // this.createFilterBar();
-
-        this.addModifier()
-
     }
 
-    async addModifier() {
-        this.tempProductList = [];
-        this.idModifier = 0;
+    async viewReservation(id) {
+        const res = await useFetch({ url: this._link, data: { opc: "getReservation", id: id } });
+        const data = res.data;
 
         bootbox.dialog({
+            title: "📅 Reservación ",
             closeButton: true,
-            title: `
-            <h2 class="text-lg font-semibold leading-none tracking-tight text-gray-100">Crear Nuevo Modificador</h2>
-            <p class="text-sm text-muted-foreground">Completa la información del modificador.</p>
-        `,
-            message: `
-            <form id="formModifierContainer" novalidate></form>
-            <form id="formProductsContainer" novalidate class="d-none"></form>
-            <div id="product-list" class="overflow-y-auto max-h-52 mt-2"></div>
-        `,
-            buttons: {
+            message: '<div id="containerReservation"></div>',
+           
+        });
 
-                cerrar: {
-                    label: 'Cancelar',
-                    className: 'btn btn-secondary',
 
-                    callback: () => { }
-                },
-                actualizar: {
-                    label: 'Guardar',
-                    className: 'btn btn-primary',
-                    callback: () => {
+        this.detailCard({
+          parent: "containerReservation",
+        //   class:'cols-2',
+          data: [
+              {
+                  text: "Estado",
+                  value: data.status_process_id,
+                  type: "status",
+                  icon: "icon-spinner",
+              },
+            { text: "Evento", value: data.name_event, icon: "icon-calendar" },
+            { text: "Nombre", value: data.name_client, icon: "icon-user-1" },
+            { text: "Telefono", value: data.phone, icon: "icon-phone-1" },
+            {
+              text: "Creado el",
+              value: data.date_creation,
+              icon: "icon-calendar-1",
+            },
+            { text: "Correo", value: data.email, icon: "icon-mail-1" },
 
-                        useFetch({
-                            url: this._link,
-                            data: {
-                                opc: 'updateModifier',
-                                name: $('#name').val(),
-                                productos: JSON.stringify(this.tempProductList)
-                        },
-                            success: (res) => {
-                                if (res.status == 200) {
-                                    Swal.fire("✔", "Modificador actualizado correctamente", "success");
-                                } else {
-                                    Swal.fire("Error", res.message || "No se pudo actualizar", "error");
-                                }
-                            }
-                        });
+            { text: "Total", value: data.total_pay, icon: "icon-dollar" },
+          ],
+          id: id,
 
-                        return false;
-                    }
-                },
+          subtitle: `Lugar: ${data.location}`,
+        });
+
+
+
+        // const status = statusMap[data.status_reservation_id] || { txt: "Desconocido", color: "bg-gray-400" };
+
+        // const html = `
+        //     <div class="text-white p-4 min-w-[350px]">
+        //         <div class="flex items-center justify-between mb-2">
+        //             <div class="flex items-center gap-2">
+        //                 <span class="text-2xl"></span>
+        //                 <h5 class="text-xl font-bold ml-2">📅 ${data.name_event || '-'}</h5>
+        //             </div>
+        //             <div class="flex gap-2">
+        //                 <button class="btn btn-success rounded-lg px-4 py-1" id="btnShowRes"><i class="icon-check"></i> Show</button>
+        //                 <button class="btn btn-danger rounded-lg px-4 py-1" id="btnNoShowRes"><i class="icon-block"></i> No Show</button>
+        //             </div>
+        //         </div>
+        //         <!-- Info -->
+        //         <div class="grid grid-cols-1  gap-x-6 gap-y-1 mt-2 mb-2">
+        //             <div><span class="text-gray-400"><i class="icon-"></i> Estado:</span>   <span class="px-3 py-1 rounded-full text-xs font-bold ${status.color}">${status.txt}</span></div>
+        //             <div><span class="text-gray-400"><i class="icon-user"></i> Cliente:</span> <b>${data.name_client || '-'}</b></div>
+        //             <div><span class="text-gray-400"><i class="icon-phone"></i> Tel:</span> <b>${data.phone || '-'}</b></div>
+        //             <div><span class="text-gray-400"><i class="icon-location"></i> Locación:</span> <b>${data.location || '-'}</b></div>
+        //             <div><span class="text-gray-400"><i class="icon-calendar-2"></i> Fecha:</span> <b>${data.date_start || '-'} ${data.time_start || ''}</b></div>
+        //             <div><span class="text-gray-400"><i class="icon-mail"></i> Correo:</span> <b>${data.email || '-'}</b></div>
+        //             <div><span class="text-gray-400"><i class="icon-money"></i> Total:</span> <b>$${data.total_pay || '-'}</b></div>
+        //         </div>
+        //         <!-- Notas -->
+        //         <div class="mb-2">
+        //             <span class="text-gray-400"><i class="icon-clipboard"></i> Notas:</span>
+        //             <div class="bg-[#28324c] rounded p-2 text-gray-300 mt-1">${data.notes || '-'}</div>
+        //         </div>
+        //         <!-- STATUS abajo -->
+        //         <div class="flex items-center gap-2 mt-3"></div>
+        //     </div>`;
+
+        // bootbox.dialog({
+        //     closeButton: true,
+        //     title: "Detalle de Reservación",
+        //     message: html,
+        //     size: "large",
+        //     onShown: function () {
+        //         $("#btnShowRes").off().on("click", async () => {
+        //             await useFetch({ url: this._link, data: { opc: "setShow", id: id, status_reservation_id: 2 } });
+        //             alert({ icon: "success", text: "¡La reservación fue marcada como Show!" });
+        //             $('.bootbox-close-button').trigger('click');
+        //             app.ls();
+        //         });
+        //         $("#btnNoShowRes").off().on("click", async () => {
+        //             await useFetch({ url: this._link, data: { opc: "setShow", id: id, status_reservation_id: 3 } });
+        //             alert({ icon: "info", text: "La reservación fue marcada como No Show." });
+        //             $('.bootbox-close-button').trigger('click');
+        //             app.ls();
+        //         });
+        //     }.bind(this)
+        // });
+    }
+
+
+    detailCard(options = {}) {
+        const defaults = {
+            parent: "body",
+            title: "",
+            subtitle: "",
+            class: "space-y-2", // Por defecto una columna
+            data: [],
+            notes: "",
+            onShow: () => { },
+            onNoShow: () => { }
+        };
+        const opts = Object.assign({}, defaults, options);
+
+        // Detecta si hay cols-2 en la clase
+        const isCols2 = opts.class.includes("cols-2");
+        let contentClass = isCols2
+            ? `grid grid-cols-2 ${opts.class.replace("cols-2", "")}`
+            : `flex flex-col ${opts.class}`;
+
+        // Construcción del detalle
+        let infoHtml = `<div class="${contentClass}">`;
+
+        opts.data.forEach(item => {
+            if (item.type === "status") {
+                infoHtml += `
+                <div class="flex items-center mb-1">
+                    <span class="text-gray-400 font-medium flex items-center text-base">
+                        ${item.icon ? `<i class="${item.icon} mr-2"></i>` : ""}
+                        ${item.text}:
+                    </span>
+                    <span class="ml-2 px-3 py-1 rounded-full text-xs font-bold ${item.color || "bg-gray-500"}">${item.value}</span>
+                </div>
+            `;
+            } else {
+                infoHtml += `
+                <div class="flex items-center mb-1">
+                    <span class="text-gray-400 font-medium flex items-center text-base">
+                        ${item.icon ? `<i class="${item.icon} mr-2"></i>` : ""}
+                        ${item.text}:
+                    </span>
+                    <span class="ml-2 font-semibold text-white text-base">${item.value}</span>
+                </div>
+            `;
             }
         });
 
-        this.createForm({
-            parent: "formModifierContainer",
-            id: "formModifier",
-            data: { opc: 'addModifier' },
-            json: [
-                {
-                    opc: "input",
-                    id: "name",
-                    lbl: "Nombre del Modificador",
-                    required: true,
-                    class: "col-12 ",
-                },
-                // {
-                //     opc: "textarea",
-                //     id: "description",
-                //     lbl: "Descripción",
-                //     class: "col-12",
-                // },
-                {
-                    opc: "btn-submit",
-                    text: "Crear Modificador",
-                    class: "col-12",
-                    id: "btnCrearModificador"
-                }
-            ],
-            success: (response) => {
-                if (response.status == 200) {
-                    this.idModifier = response.id;
-                    $('#btnCrearModificador').closest('.col-12').remove(); // Elimina el botón
-                    $('#formProductsContainer').removeClass('d-none');
-                    this.renderProductForm(response.id);
-                }
-            }
+        infoHtml += `</div>`;
+
+        // Bloque de notas
+        let notesHtml = `
+        <div class="mt-3">
+            <label class="text-gray-400 font-medium text-base mb-1 block">Notas:</label>
+            <div class="bg-[#28324c] rounded p-2 text-gray-300">${opts.notes || ""}</div>
+        </div>
+    `;
+
+        // Layout final (card)
+        const html = `
+        <div class="text-white rounded-xl p-3 min-w-[320px]">
+            ${infoHtml}
+            ${notesHtml}
+            <div class="flex gap-2 mt-4">
+                <button class="btn btn-success rounded-lg px-4 py-1" id="btnShowRes">
+                    <i class="icon-check"></i> Show
+                </button>
+                <button class="btn btn-danger rounded-lg px-4 py-1" id="btnNoShowRes">
+                    <i class="icon-block"></i> No Show
+                </button>
+            </div>
+        </div>
+    `;
+
+        // Renderiza en el parent
+        $(`#${opts.parent}`).html(html);
+
+        // Eventos (desacoplados)
+        $(`#${opts.parent} #btnShowRes`).off().on("click", async () => {
+            await opts.onShow();
+        });
+        $(`#${opts.parent} #btnNoShowRes`).off().on("click", async () => {
+            await opts.onNoShow();
         });
     }
+
+
 
     renderProductForm(idModifier) {
         this.createForm({
-          parent: "formProductsContainer",
-          id: "formProduct",
-          data: { opc: "addProductModifier", id: idModifier },
-          json: [
-            {
-              opc: "div",
-              html: ` <label class="text-lg font-medium text-gray-100">Productos Incluidos</label>
+            parent: "formProductsContainer",
+            id: "formProduct",
+            data: { opc: "addProductModifier", id: idModifier },
+            json: [
+                {
+                    opc: "div",
+                    html: ` <label class="text-lg font-medium text-gray-100">Productos Incluidos</label>
                     <p class="text-sm text-muted-foreground mb-1">Añade los productos que incluye este modificador</p> `,
-              class: "col-12",
-            },
-            {
-              opc: "input",
-              id: "productName",
-              lbl: "Nombre ",
-              placeholder: "Ingrese nombre del producto",
-              required: true,
-              class: "col-5 mb-3",
-            },
+                    class: "col-12",
+                },
+                {
+                    opc: "input",
+                    id: "productName",
+                    lbl: "Nombre ",
+                    placeholder: "Ingrese nombre del producto",
+                    required: true,
+                    class: "col-5 mb-3",
+                },
 
-            {
-              opc: "input",
-              id: "price",
-              lbl: "Precio",
-              tipo: "numero",
-              placeholder: "0.00",
-              required: true,
-              class: "col-3",
-            },
-            {
-              opc: "button",
-              text: "Añadir",
-              className: "w-full",
-              class: "col-4",
-              onClick: () => this.addProductToList(),
-            },
-          ],
+                {
+                    opc: "input",
+                    id: "price",
+                    lbl: "Precio",
+                    tipo: "numero",
+                    placeholder: "0.00",
+                    required: true,
+                    class: "col-3",
+                },
+                {
+                    opc: "button",
+                    text: "Añadir",
+                    className: "w-full",
+                    class: "col-4",
+                    onClick: () => this.addProductToList(),
+                },
+            ],
         });
 
         $("#formProduct").on('reset', () => {
@@ -244,7 +339,7 @@ class App extends Templates {
             id: "tabComponent",
             content: { class: "" },
             theme: "dark",
-            type:'short',
+            type: 'short',
             json: [
                 {
                     id: "company",
