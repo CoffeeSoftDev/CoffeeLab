@@ -24,126 +24,154 @@ class App extends Templates {
     }
 
     async viewReservation(id) {
-        const res = await useFetch({ url: this._link, data: { opc: "getReservation", id: id } });
+        const res = await useFetch({
+            url: this._link,
+            data: { opc: "getReservation", id }
+        });
+
         const data = res.data;
 
         bootbox.dialog({
-            title: "📅 Reservación ",
+            title: "📅 Reservación",
             closeButton: true,
-            message: '<div id="containerReservation"></div>',
-           
+            message: '<div id="containerReservation"></div>'
         });
-
+       
+        const estado = this.getStatusReservation(data.status_process_id);
 
         this.detailCard({
-          parent: "containerReservation",
-        //   class:'cols-2',
-          data: [
-              {
-                  text: "Estado",
-                  value: data.status_process_id,
-                  type: "status",
-                  icon: "icon-spinner",
-              },
-            { text: "Evento", value: data.name_event, icon: "icon-calendar" },
-            { text: "Nombre", value: data.name_client, icon: "icon-user-1" },
-            { text: "Telefono", value: data.phone, icon: "icon-phone-1" },
-            {
-              text: "Creado el",
-              value: data.date_creation,
-              icon: "icon-calendar-1",
-            },
-            { text: "Correo", value: data.email, icon: "icon-mail-1" },
+            parent: "containerReservation",
+            data: [
+                { text: "Locación", value: data.location, icon: "icon-location" },
+                { text: "Estado", value: estado.label , type: "status", icon: "icon-spinner", color: estado.color },
+                { text: "Evento", value: data.name_event, icon: "icon-calendar" },
+                { text: "Nombre", value: data.name_client, icon: "icon-user-1" },
+                { text: "Teléfono", value: data.phone, icon: "icon-phone-1" },
+                { text: "Creado el", value: data.date_creation, icon: "icon-calendar-1" },
+                { text: "Correo", value: data.email, icon: "icon-mail-1" },
+                { text: "Total", value: formatPrice(data.total_pay), icon: "icon-money" },
+                { type: "observacion", value: data.notes },
+                { type:'div',
+                  html:`
+                    <div class="flex gap-2 mt-4 justify-end">
+                    <button class="bg-green-600 hover:bg-green-700 text-white font-semibold text-sm px-4 py-2 rounded flex items-center gap-2"
+                    id="btnShowReservation" data-id="123">
+                        <i class="icon-ok"></i> Show
+                    </button>
 
-            { text: "Total", value: data.total_pay, icon: "icon-dollar" },
-          ],
-          id: id,
-
-          subtitle: `Lugar: ${data.location}`,
+                    <button class="bg-red-600 hover:bg-red-700 text-white font-semibold text-sm px-4 py-2 rounded flex items-center gap-2"
+                    id="btnNoShowReservation" data-id="123">
+                    <i class="icon-block-1"></i> No Show
+                    </button>
+                    </div>`
+                }
+            ],
         });
 
-
-
-        // const status = statusMap[data.status_reservation_id] || { txt: "Desconocido", color: "bg-gray-400" };
-
-        // const html = `
-        //     <div class="text-white p-4 min-w-[350px]">
-        //         <div class="flex items-center justify-between mb-2">
-        //             <div class="flex items-center gap-2">
-        //                 <span class="text-2xl"></span>
-        //                 <h5 class="text-xl font-bold ml-2">📅 ${data.name_event || '-'}</h5>
-        //             </div>
-        //             <div class="flex gap-2">
-        //                 <button class="btn btn-success rounded-lg px-4 py-1" id="btnShowRes"><i class="icon-check"></i> Show</button>
-        //                 <button class="btn btn-danger rounded-lg px-4 py-1" id="btnNoShowRes"><i class="icon-block"></i> No Show</button>
-        //             </div>
-        //         </div>
-        //         <!-- Info -->
-        //         <div class="grid grid-cols-1  gap-x-6 gap-y-1 mt-2 mb-2">
-        //             <div><span class="text-gray-400"><i class="icon-"></i> Estado:</span>   <span class="px-3 py-1 rounded-full text-xs font-bold ${status.color}">${status.txt}</span></div>
-        //             <div><span class="text-gray-400"><i class="icon-user"></i> Cliente:</span> <b>${data.name_client || '-'}</b></div>
-        //             <div><span class="text-gray-400"><i class="icon-phone"></i> Tel:</span> <b>${data.phone || '-'}</b></div>
-        //             <div><span class="text-gray-400"><i class="icon-location"></i> Locación:</span> <b>${data.location || '-'}</b></div>
-        //             <div><span class="text-gray-400"><i class="icon-calendar-2"></i> Fecha:</span> <b>${data.date_start || '-'} ${data.time_start || ''}</b></div>
-        //             <div><span class="text-gray-400"><i class="icon-mail"></i> Correo:</span> <b>${data.email || '-'}</b></div>
-        //             <div><span class="text-gray-400"><i class="icon-money"></i> Total:</span> <b>$${data.total_pay || '-'}</b></div>
-        //         </div>
-        //         <!-- Notas -->
-        //         <div class="mb-2">
-        //             <span class="text-gray-400"><i class="icon-clipboard"></i> Notas:</span>
-        //             <div class="bg-[#28324c] rounded p-2 text-gray-300 mt-1">${data.notes || '-'}</div>
-        //         </div>
-        //         <!-- STATUS abajo -->
-        //         <div class="flex items-center gap-2 mt-3"></div>
-        //     </div>`;
-
-        // bootbox.dialog({
-        //     closeButton: true,
-        //     title: "Detalle de Reservación",
-        //     message: html,
-        //     size: "large",
-        //     onShown: function () {
-        //         $("#btnShowRes").off().on("click", async () => {
-        //             await useFetch({ url: this._link, data: { opc: "setShow", id: id, status_reservation_id: 2 } });
-        //             alert({ icon: "success", text: "¡La reservación fue marcada como Show!" });
-        //             $('.bootbox-close-button').trigger('click');
-        //             app.ls();
-        //         });
-        //         $("#btnNoShowRes").off().on("click", async () => {
-        //             await useFetch({ url: this._link, data: { opc: "setShow", id: id, status_reservation_id: 3 } });
-        //             alert({ icon: "info", text: "La reservación fue marcada como No Show." });
-        //             $('.bootbox-close-button').trigger('click');
-        //             app.ls();
-        //         });
-        //     }.bind(this)
-        // });
+        $(`#btnShowReservation`).on("click", () => this.showReservation());
+        $(`#btnNoShowReservation`).on("click", () => this.noShowReservation());
     }
 
+
+
+
+    getStatusReservation(id) {
+        const map = {
+            1: { label: "Reservación", color: "bg-[#EBD9FF] text-[#6B3FA0]" },
+            2: { label: "Show", color: "bg-[#B9FCD3] text-[#032B1A]" },
+            3: { label: "No Show", color: "bg-[#E5E7EB] text-[#374151]" }
+        };
+        return map[id] || { label: "-", color: "bg-gray-500 text-white" };
+    }
+
+    showReservation(id) {
+        this.swalQuestion({
+            opts: {
+                title: "¿Confirmar asistencia del cliente?",
+                text: "Esta acción marcará esta reservación como 'Show'.",
+                icon: "question"
+            },
+            data: {
+                opc: "StatusReservation",
+                id: id,
+                status_process_id: 2
+            },
+            methods: {
+                send: (res) => {
+                    if (res.status === 200) {
+                        alert({
+                            icon: "success",
+                            text: "La reservación fue marcada como Show",
+                            btn1: true
+                        });
+                        this.ls();
+                    } else {
+                        alert({
+                            icon: "error",
+                            text: res.message,
+                            btn1: true
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+    noShowReservation(id) {
+        this.swalQuestion({
+            opts: {
+                title: "¿Marcar como No Show?",
+                text: "Esta acción marcará la reservación como No Show. ¿Deseas continuar?",
+                icon: "warning"
+            },
+            data: {
+                opc: "StatusReservation",
+                id: id,
+                status_process_id: 3
+            },
+            methods: {
+                send: (res) => {
+                    if (res.status === 200) {
+                        alert({
+                            icon: "success",
+                            text: "La reservación fue marcada como No Show",
+                            btn1: true
+                        });
+                        this.ls();
+                    } else {
+                        alert({
+                            icon: "error",
+                            text: res.message,
+                            btn1: true
+                        });
+                    }
+                }
+            }
+        });
+    }
 
     detailCard(options = {}) {
         const defaults = {
             parent: "body",
             title: "",
             subtitle: "",
-            class: "space-y-2", // Por defecto una columna
+            class: "space-y-2",
             data: [],
-            notes: "",
-            onShow: () => { },
-            onNoShow: () => { }
         };
+
         const opts = Object.assign({}, defaults, options);
 
-        // Detecta si hay cols-2 en la clase
         const isCols2 = opts.class.includes("cols-2");
         let contentClass = isCols2
             ? `grid grid-cols-2 ${opts.class.replace("cols-2", "")}`
             : `flex flex-col ${opts.class}`;
 
-        // Construcción del detalle
         let infoHtml = `<div class="${contentClass}">`;
 
         opts.data.forEach(item => {
-            if (item.type === "status") {
+            if (item.type === "div") {
+                infoHtml += `<div class="${item.class || ''}">${item.html || ''}</div>`;
+            } else if (item.type === "status") {
                 infoHtml += `
                 <div class="flex items-center mb-1">
                     <span class="text-gray-400 font-medium flex items-center text-base">
@@ -151,6 +179,13 @@ class App extends Templates {
                         ${item.text}:
                     </span>
                     <span class="ml-2 px-3 py-1 rounded-full text-xs font-bold ${item.color || "bg-gray-500"}">${item.value}</span>
+                </div>
+            `;
+            } else if (item.type === "observacion") {
+                infoHtml += `
+                <div class="col-span-2 mt-2">
+                    <label class="text-gray-400 font-medium text-base mb-1 block">${item.text || "Observación"}:</label>
+                    <div class="bg-[#28324c] rounded p-3 text-gray-300 min-h-[80px]">${item.value || ""}</div>
                 </div>
             `;
             } else {
@@ -168,42 +203,14 @@ class App extends Templates {
 
         infoHtml += `</div>`;
 
-        // Bloque de notas
-        let notesHtml = `
-        <div class="mt-3">
-            <label class="text-gray-400 font-medium text-base mb-1 block">Notas:</label>
-            <div class="bg-[#28324c] rounded p-2 text-gray-300">${opts.notes || ""}</div>
-        </div>
-    `;
-
-        // Layout final (card)
         const html = `
         <div class="text-white rounded-xl p-3 min-w-[320px]">
             ${infoHtml}
-            ${notesHtml}
-            <div class="flex gap-2 mt-4">
-                <button class="btn btn-success rounded-lg px-4 py-1" id="btnShowRes">
-                    <i class="icon-check"></i> Show
-                </button>
-                <button class="btn btn-danger rounded-lg px-4 py-1" id="btnNoShowRes">
-                    <i class="icon-block"></i> No Show
-                </button>
-            </div>
         </div>
     `;
 
-        // Renderiza en el parent
         $(`#${opts.parent}`).html(html);
-
-        // Eventos (desacoplados)
-        $(`#${opts.parent} #btnShowRes`).off().on("click", async () => {
-            await opts.onShow();
-        });
-        $(`#${opts.parent} #btnNoShowRes`).off().on("click", async () => {
-            await opts.onNoShow();
-        });
     }
-
 
 
     renderProductForm(idModifier) {
