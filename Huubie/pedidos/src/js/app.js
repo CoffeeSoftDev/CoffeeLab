@@ -15,7 +15,7 @@ class App extends Templates {
 
     init() {
         this.render();
-        this.viewReservation(12);
+        this.showReservationModal(12);
     }
 
     render() {
@@ -23,7 +23,7 @@ class App extends Templates {
         // this.createFilterBar();
     }
 
-    async viewReservation(id) {
+    async showReservationModal(id) {
         const res = await useFetch({
             url: this._link,
             data: { opc: "getReservation", id }
@@ -31,46 +31,62 @@ class App extends Templates {
 
         const data = res.data;
 
+        const estado = this.getStatusReservation(data.status_reservation_id);
+
+        const datos = [
+            { text: "Locación", value: data.location, icon: "icon-location" },
+            { text: "Estado", value: estado.label, type: "status", icon: "icon-spinner", color: estado.color },
+            { text: "Evento", value: data.name_event, icon: "icon-calendar" },
+            { text: "Nombre", value: data.name_client, icon: "icon-user-1" },
+            { text: "Teléfono", value: data.phone, icon: "icon-phone-1" },
+            { text: "Creado el", value: data.date_creation, icon: "icon-calendar-1" },
+            { text: "Correo", value: data.email, icon: "icon-mail-1" },
+            { text: "Total", value: formatPrice(data.total_pay), icon: "icon-money" },
+            { type: "observacion", value: data.notes }
+        ];
+
+        // Solo si está en estado activo (1), agrega los botones
+        if (data.status_reservation_id === 1) {
+            datos.push({
+                type: "div",
+                html: `
+                <div class="flex gap-2 mt-4 justify-end">
+                    <button class="bg-green-600 hover:bg-green-700 text-white font-semibold text-sm px-4 py-2 rounded flex items-center gap-2"
+                        id="btnShowReservation" data-id="${data.id}">
+                        <i class="icon-ok"></i> Show
+                    </button>
+                    <button class="bg-red-600 hover:bg-red-700 text-white font-semibold text-sm px-4 py-2 rounded flex items-center gap-2"
+                        id="btnNoShowReservation" data-id="${data.id}">
+                        <i class="icon-block-1"></i> No Show
+                    </button>
+                </div>
+            `
+            });
+        }
+
+        // Render
         bootbox.dialog({
             title: "📅 Reservación",
             closeButton: true,
-            message: '<div id="containerReservation"></div>'
+            message: '<div id="containerReservation"></div>',
+
         });
-       
-        const estado = this.getStatusReservation(data.status_process_id);
+
 
         this.detailCard({
             parent: "containerReservation",
-            data: [
-                { text: "Locación", value: data.location, icon: "icon-location" },
-                { text: "Estado", value: estado.label , type: "status", icon: "icon-spinner", color: estado.color },
-                { text: "Evento", value: data.name_event, icon: "icon-calendar" },
-                { text: "Nombre", value: data.name_client, icon: "icon-user-1" },
-                { text: "Teléfono", value: data.phone, icon: "icon-phone-1" },
-                { text: "Creado el", value: data.date_creation, icon: "icon-calendar-1" },
-                { text: "Correo", value: data.email, icon: "icon-mail-1" },
-                { text: "Total", value: formatPrice(data.total_pay), icon: "icon-money" },
-                { type: "observacion", value: data.notes },
-                { type:'div',
-                  html:`
-                    <div class="flex gap-2 mt-4 justify-end">
-                    <button class="bg-green-600 hover:bg-green-700 text-white font-semibold text-sm px-4 py-2 rounded flex items-center gap-2"
-                    id="btnShowReservation" data-id="123">
-                        <i class="icon-ok"></i> Show
-                    </button>
-
-                    <button class="bg-red-600 hover:bg-red-700 text-white font-semibold text-sm px-4 py-2 rounded flex items-center gap-2"
-                    id="btnNoShowReservation" data-id="123">
-                    <i class="icon-block-1"></i> No Show
-                    </button>
-                    </div>`
-                }
-            ],
+            data: datos,
         });
 
-        $(`#btnShowReservation`).on("click", () => this.showReservation());
-        $(`#btnNoShowReservation`).on("click", () => this.noShowReservation());
+        // Event.
+        if (data.status_reservation_id === 1) {
+            $("#btnShowReservation").on("click", () => this.showReservation(data.id));
+            $("#btnNoShowReservation").on("click", () => this.noShowReservation(data.id));
+        }
     }
+
+
+
 
 
 
@@ -78,8 +94,8 @@ class App extends Templates {
     getStatusReservation(id) {
         const map = {
             1: { label: "Reservación", color: "bg-[#EBD9FF] text-[#6B3FA0]" },
-            2: { label: "Show", color: "bg-[#B9FCD3] text-[#032B1A]" },
-            3: { label: "No Show", color: "bg-[#E5E7EB] text-[#374151]" }
+            2: { label: "Si llego", color: "bg-[#B9FCD3] text-[#032B1A]" },
+            3: { label: "No llego", color: "bg-[#E5E7EB] text-[#374151]" }
         };
         return map[id] || { label: "-", color: "bg-gray-500 text-white" };
     }
@@ -92,9 +108,9 @@ class App extends Templates {
                 icon: "question"
             },
             data: {
-                opc: "StatusReservation",
+                opc: "editReservation",
+                status_reservation_id: 2,
                 id: id,
-                status_process_id: 2
             },
             methods: {
                 send: (res) => {
@@ -105,6 +121,8 @@ class App extends Templates {
                             btn1: true
                         });
                         this.ls();
+                        bootbox.hideAll();
+
                     } else {
                         alert({
                             icon: "error",
@@ -125,9 +143,9 @@ class App extends Templates {
                 icon: "warning"
             },
             data: {
-                opc: "StatusReservation",
+                opc: "editReservation",
+                status_reservation_id: 3,
                 id: id,
-                status_process_id: 3
             },
             methods: {
                 send: (res) => {
@@ -138,6 +156,7 @@ class App extends Templates {
                             btn1: true
                         });
                         this.ls();
+                         bootbox.hideAll();
                     } else {
                         alert({
                             icon: "error",
