@@ -29,8 +29,6 @@ class Sub extends Templates {
         });
 
 
-
-
         if (subEvents.status == 200) {
             this.accordingMenu({
                 parent: 'containerprojectName',
