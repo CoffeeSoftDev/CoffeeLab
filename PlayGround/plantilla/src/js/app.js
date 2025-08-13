@@ -19,12 +19,148 @@ class App extends Templates {
         this.render();
     }
 
-    
+
     render(options) {
-        this.viewLayout();
+        // this.layout();
         // this.filterBar();
-        // this.ls()
+        this.dashboard();
     }
+
+    dashboard() {
+        this.infoCard({
+            parent: "root",
+            id:'dashboardIngresos',
+            class:'',
+            theme:'dark',
+            json: [
+                {
+                    title: "Venta del día",
+                    emoji: '✅',
+                    data: {
+                        value: "245,000",
+                        description: "+12% respecto al periodo anterior",
+                        color: "text-green-600"
+                    }
+                },
+                {
+                    title: "Confirmados",
+                    icon: "icon-dollar",
+                    data: {
+                        value: "183",
+                        description: "+10% confirmados",
+                        color: "text-green-400"
+                    }
+                },
+
+
+
+                {
+                    title: "Pendientes",
+                    icon: "🕓",
+                    data: {
+                        value: "42",
+                        description: "Pendientes por agendar",
+                        color: "text-yellow-400"
+                    }
+                },
+                {
+                    title: "Cancelados",
+                    emoji: "❌",
+                    data: {
+                        value: "20",
+                        description: "Cancelaciones recientes",
+                        color: "text-red-400"
+                    }
+                }
+            ]
+        });
+
+    }
+
+
+   infoCard(options) {
+    const defaults = {
+        parent: "root",
+        id: "infoCard",
+        class: "",
+        type: "kpi",
+        title: "",
+        theme: "dark", // nuevo: light o dark
+        json: [],
+        data: {
+            value: "0",
+            description: "",
+            color: "text-white"
+        },
+        onClick: () => { }
+    };
+
+    const opts = Object.assign({}, defaults, options);
+
+    const isDark = opts.theme === "dark";
+
+    const cardBase = isDark
+        ? "bg-[#1f2937] text-white border border-[#374151]"
+        : "bg-white text-gray-800 border border-gray-200";
+
+    const titleColor = isDark ? "text-gray-300" : "text-gray-500";
+    const descColor = isDark ? "text-gray-400" : "text-gray-500";
+
+    const renderCard = (card, i = "") => {
+        const box = $("<div>", {
+            id: `${opts.id}_${i}`,
+            class: `rounded-xl ${cardBase} p-4 flex flex-col justify-between relative`
+        });
+
+        // Icono o emoji
+        if (card.emoji || card.icon) {
+            const iconElement = $("<div>", {
+                class: `absolute top-3 right-3 text-xl opacity-70`,
+                html: card.emoji || `<i class="${card.icon}"></i>`
+            });
+            box.append(iconElement);
+        }
+
+        const title = $("<p>", {
+            class: `text-sm font-medium ${titleColor}`,
+            text: card.title
+        });
+
+        const value = $("<p>", {
+            class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
+            text: card.data?.value
+        });
+
+        const description = $("<p>", {
+            class: `text-xs mt-1 ${descColor}`,
+            text: card.data?.description
+        });
+
+        box.append(title, value, description);
+        return box;
+    };
+
+    // Grid para múltiples
+    if (opts.json.length > 0) {
+        const container = $("<div>", {
+            id: opts.id,
+            class: `grid grid-cols-1 py-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${opts.class}`
+        });
+
+        opts.json.forEach((item, i) => {
+            container.append(renderCard(item, i));
+        });
+
+        $(`#${opts.parent}`).html(container);
+    } else {
+        const container = renderCard(opts);
+        container.attr("id", opts.id);
+        $(`#${opts.parent}`).html(container);
+    }
+}
+
+
+
 
     layout() {
         this.primaryLayout({
@@ -37,7 +173,7 @@ class App extends Templates {
                 },
                 container: {
                     id: "container" + this.PROJECT_NAME,
-                    class:''
+                    class: ''
                 },
             },
         });
@@ -96,7 +232,7 @@ class App extends Templates {
         this.newRotation(data);
     }
 
-  
+
     async viewLayout() {
         const mes = moment().format('MMMM').toUpperCase();
         const anio = moment().format('YYYY');
@@ -113,12 +249,12 @@ class App extends Templates {
         this.layoutNewRotation(request)
 
     }
-    
+
     newRotation(data) {
         this.createCoffeTable({
             parent: "rotacionModulo",
             title: "Rotación Mensual",
-            subtitle:'EPM (Empleados Por Mes): Promedio de empleados por mes.',
+            subtitle: 'EPM (Empleados Por Mes): Promedio de empleados por mes.',
 
             data: data.editRotation,
             conf: {
@@ -184,7 +320,7 @@ class App extends Templates {
                 id: id
             },
             methods: {
-                send:  () => {
+                send: () => {
 
                     if (response.status === 200) {
                         alert({
@@ -213,7 +349,7 @@ class App extends Templates {
     }
 
     async onEditRotation(input) {
-        const id    = input.dataset.id;
+        const id = input.dataset.id;
         const field = input.dataset.field;
         const value = parseFloat(input.value);
 
@@ -226,12 +362,12 @@ class App extends Templates {
 
         // Obtener los valores actuales de la fila
         const initialInput = row.querySelector('input[name="initial_template"]');
-        const endInput     = row.querySelector('input[name="end_template"]');
+        const endInput = row.querySelector('input[name="end_template"]');
 
         const initialValue = parseFloat(initialInput?.value || 0);
-        const endValue     = parseFloat(endInput?.value || 0);
+        const endValue = parseFloat(endInput?.value || 0);
 
-        const epm  = initialValue + (endValue / 2);
+        const epm = initialValue + (endValue / 2);
         const bajas = parseFloat(row.cells[4]?.innerText || 0); // Asumiendo columna 4 = BAJAS
         const rotacion = epm > 0 ? ((bajas * 100) / epm).toFixed(2) : 0;
 
@@ -243,11 +379,11 @@ class App extends Templates {
         await useFetch({
             url: api,
             data: {
-                opc     : "editRotationField",
-                [field] : value,
-                epm     : epm.toFixed(2),
+                opc: "editRotationField",
+                [field]: value,
+                epm: epm.toFixed(2),
                 rotation: rotacion,
-                id      : id,
+                id: id,
             },
         });
 
@@ -278,7 +414,7 @@ class App extends Templates {
         const rotacion = authorizedValue > 0 ? ((realValue * 100) / authorizedValue).toFixed(2) : "0.00";
 
         // Actualizar celda visualmente
-        row.cells[3].innerText = rotacion;         
+        row.cells[3].innerText = rotacion;
 
         // Enviar datos al backend
         await useFetch({
