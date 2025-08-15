@@ -20,7 +20,6 @@ class App extends Templates {
         this.render();
     }
 
-
     render(options) {
         // this.layout();
         // this.filterBar();
@@ -28,49 +27,47 @@ class App extends Templates {
     }
 
     dashboard() {
+
+        $('#root').append(`<div id="dashboard" class="p-6  font-sans space-y-3 max-w-[1400px] mx-auto"></div>`);
         this.infoCard({
-            parent: "root",
-            id:'dashboardIngresos',
-            class:'',
-            theme:'dark',
+            parent: "dashboard",
+            id: 'dashboardIngresos',
+            class: '',
+            theme: 'light',
             json: [
                 {
-                    title: "Venta del día",
-                    emoji: '✅',
+                    id: "kpiDia",
+                    title: "Venta del Día ",
                     data: {
-                        value: "245,000",
-                        description: "+12% respecto al periodo anterior",
-                        color: "text-green-600"
+                        value: "$12,500",
+                        description: "+12% vs ayer",
+                        color: "text-[#8CC63F]"
                     }
                 },
                 {
-                    title: "Confirmados",
-                    icon: "icon-dollar",
+                    id: "kpiMes",
+                    title: "Venta del Mes",
                     data: {
-                        value: "183",
-                        description: "+10% confirmados",
-                        color: "text-green-400"
-                    }
-                },
-
-
-
-                {
-                    title: "Pendientes",
-                    icon: "🕓",
-                    data: {
-                        value: "42",
-                        description: "Pendientes por agendar",
-                        color: "text-yellow-400"
+                        value: "$125,000",
+                        description: "+8% vs mes anterior",
+                        color: "text-[#8CC63F]"
                     }
                 },
                 {
-                    title: "Cancelados",
-                    emoji: "❌",
+                    title: "Clientes",
                     data: {
-                        value: "20",
-                        description: "Cancelaciones recientes",
-                        color: "text-red-400"
+                        value: "1248",
+                        description: "+5% vs período anterior",
+                        color: "text-[#103B60]"
+                    }
+                },
+                {
+                    id: "kpiCheque",
+                    title: "Cheque Promedio",
+                    data: {
+                        value: "$1,156",
+                        description: "-2% vs período anterior",
+                        color: "text-red-600"
                     }
                 }
             ]
@@ -79,86 +76,74 @@ class App extends Templates {
     }
 
 
-   infoCard(options) {
-    const defaults = {
-        parent: "root",
-        id: "infoCard",
-        class: "",
-        type: "kpi",
-        title: "",
-        theme: "dark", // nuevo: light o dark
-        json: [],
-        data: {
-            value: "0",
-            description: "",
-            color: "text-white"
-        },
-        onClick: () => { }
-    };
+    infoCard(options) {
+        const defaults = {
+            parent: "root",
+            id: "infoCardKPI",
+            class: "",
+            theme: "light", // light | dark
+            json: [],
+            data: {
+                value: "0",
+                description: "",
+                color: "text-gray-800"
+            },
+            onClick: () => { }
+        };
 
-    const opts = Object.assign({}, defaults, options);
+        const opts = Object.assign({}, defaults, options);
 
-    const isDark = opts.theme === "dark";
+        const isDark = opts.theme === "dark";
 
-    const cardBase = isDark
-        ? "bg-[#1f2937] text-white border border-[#374151]"
-        : "bg-white text-gray-800 border border-gray-200";
+        const cardBase = isDark
+            ? "bg-[#1F2A37] text-white rounded-xl shadow"
+            : "bg-white text-gray-800 rounded-xl shadow";
 
-    const titleColor = isDark ? "text-gray-300" : "text-gray-500";
-    const descColor = isDark ? "text-gray-400" : "text-gray-500";
+        const titleColor = isDark ? "text-gray-300" : "text-gray-600";
+        const descColor = isDark ? "text-gray-400" : "text-gray-500";
 
-    const renderCard = (card, i = "") => {
-        const box = $("<div>", {
-            id: `${opts.id}_${i}`,
-            class: `rounded-xl ${cardBase} p-4 flex flex-col justify-between relative`
-        });
-
-        // Icono o emoji
-        if (card.emoji || card.icon) {
-            const iconElement = $("<div>", {
-                class: `absolute top-3 right-3 text-xl opacity-70`,
-                html: card.emoji || `<i class="${card.icon}"></i>`
+        const renderCard = (card, i = "") => {
+            const box = $("<div>", {
+                id: `${opts.id}_${i}`,
+                class: `${cardBase} p-4`
             });
-            box.append(iconElement);
-        }
 
-        const title = $("<p>", {
-            class: `text-sm font-medium ${titleColor}`,
-            text: card.title
-        });
+            const title = $("<p>", {
+                class: `text-sm ${titleColor}`,
+                text: card.title
+            });
 
-        const value = $("<p>", {
-            class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
-            text: card.data?.value
-        });
+            const value = $("<p>", {
+                id: card.id || "",
+                class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
+                text: card.data?.value
+            });
 
-        const description = $("<p>", {
-            class: `text-xs mt-1 ${descColor}`,
-            text: card.data?.description
-        });
+            const description = $("<p>", {
+                class: `text-xs mt-1 ${card.data?.color || descColor}`,
+                text: card.data?.description
+            });
 
-        box.append(title, value, description);
-        return box;
-    };
+            box.append(title, value, description);
+            return box;
+        };
 
-    // Grid para múltiples
-    if (opts.json.length > 0) {
         const container = $("<div>", {
             id: opts.id,
-            class: `grid grid-cols-1 py-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${opts.class}`
+            class: `grid grid-cols-2 md:grid-cols-4 gap-4 ${opts.class}`
         });
 
-        opts.json.forEach((item, i) => {
-            container.append(renderCard(item, i));
-        });
+        if (opts.json.length > 0) {
+            opts.json.forEach((item, i) => {
+                container.append(renderCard(item, i));
+            });
+        } else {
+            container.append(renderCard(opts));
+        }
 
-        $(`#${opts.parent}`).html(container);
-    } else {
-        const container = renderCard(opts);
-        container.attr("id", opts.id);
         $(`#${opts.parent}`).html(container);
     }
-}
+
 
 
 

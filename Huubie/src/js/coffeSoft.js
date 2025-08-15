@@ -1721,7 +1721,7 @@ class Components extends Complements {
             let actions = '';
 
             if (data.a?.length) {
-                actions = $("<td>", { class: `px-2 py-2 relative justify-center items-center ${colorBg} ${opts.border_row}` });
+                actions = $("<td>", { class: `px-2 py-2 flex justify-center items-center ${colorBg} ${opts.border_row}` });
                 data.a.forEach(atributos => {
 
                     const button_a = $("<a>", atributos);
@@ -1731,7 +1731,9 @@ class Components extends Complements {
             }
 
             if (data.dropdown) {
-                actions = $("<td>", { class: `px-2 py-2  relative justify-center items-center ${colorBg} ${opts.border_row}` });
+                actions = $("<td>", {
+                    class: `px-2 py-2 w-10 relative justify-center items-center ${colorBg} ${opts.border_row}`
+                });
 
                 const wrapper = $("<div>", {
                     class: "relative"
@@ -1741,29 +1743,34 @@ class Components extends Complements {
                     class: "icon-dot-3 text-gray-200 hover:text-gray-600",
                     click: function (e) {
                         e.stopPropagation();
-                        $(this).next("ul").toggle();
+                        $("ul.dropdown-menu").hide(); // cerrar todos los menús antes
+                        $(this).next("ul").toggle();  // abrir solo el actual
                     }
                 });
 
                 const menu = $("<ul>", {
-                    class: "absolute top-full right-0 mt-2 w-44 z-10 bg-[#1F2A37] border rounded-md shadow-md hidden",
+                    class: "dropdown-menu absolute top-full right-0 mt-2 w-44 z-10 bg-[#1F2A37] border rounded-md shadow-md hidden"
                 });
 
                 data.dropdown.forEach((item) =>
                     menu.append(`
-                    <li><a onclick="${item.onclick}"text-left class="block px-4 py-2 text-sm hover:bg-[#283341] text-gray-200">
-                    <i class="${item.icon} "></i> ${item.text}</a></li>`)
+                        <li>
+                            <a onclick="${item.onclick}" class="block px-4 py-2 text-sm hover:bg-[#283341] text-gray-200 text-left">
+                                <i class="${item.icon}"></i> ${item.text}
+                            </a>
+                        </li>
+                    `)
                 );
-
-
-
-
 
                 wrapper.append(btn, menu);
                 actions.append(wrapper);
-                $(document).on("click", () => menu.hide());
-            }
 
+                // Cerrar todos los dropdowns al hacer clic fuera
+                $(document).on("click", () => {
+                    $("ul.dropdown-menu").hide();
+                });
+            }
+            
             tr.append(actions);
             tbody.append(tr);
         });
@@ -1779,7 +1786,6 @@ class Components extends Complements {
         #${opts.id} tr:last-child td:last-child { border-bottom-right-radius: 0.5rem; }
         `).appendTo("head");
     }
-
     tabLayout(options) {
         const defaults = {
             parent: "root",

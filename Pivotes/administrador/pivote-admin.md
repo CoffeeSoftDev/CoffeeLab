@@ -53,10 +53,10 @@ class App extends Templates {
         this.primaryLayout({
             parent: `root`,
             id: this.PROJECT_NAME,
-            class: 'flex mx-2 my-2 h-100 mt-5 p-2',
+            class: 'flex mx-2 my-2 h-100 mt-5 p-2 ',
             card: {
                 filterBar: { class: 'w-full my-3', id: 'filterBar' + this.PROJECT_NAME },
-                container: { class: 'w-full my-3 h-full bg-[#1F2A37] rounded-lg p-3', id: 'container' + this.PROJECT_NAME }
+                container: { class: 'w-full my-3 h-full  rounded-lg p-3', id: 'container' + this.PROJECT_NAME }
             }
         });
 
@@ -319,7 +319,7 @@ class App extends Templates {
     }
 
 
-   
+
 
 }
 
@@ -878,7 +878,7 @@ class Client extends Templates {
         }
 
         function getCategories() {
-            
+
             $get = $this->getCategoryById([$_POST['id']]);
 
             return [
@@ -902,12 +902,12 @@ class Client extends Templates {
         function statusCategory() {
 
             $update = $this->updateCategory($this->util->sql($_POST, 1));
-            
+
             return [
                 'status' => $update ? 200 : 500,
                 'message' => $update ? 'Estado actualizado' : 'Error al cambiar estado'
             ];
-        }   
+        }
 
         // Client.
 
@@ -1033,7 +1033,7 @@ class Client extends Templates {
 $obj = new ctrl();
 echo json_encode($obj->{$_POST['opc']}());
 
- 
+
 ```
 
 ### mdl-admin.PHP [ mdl ]
@@ -1231,10 +1231,10 @@ class mdl extends CRUD {
         ]);
     }
 
-   
+
 
 }
 
-   
+
 
 ```

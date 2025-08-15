@@ -119,6 +119,70 @@ class Components extends Complements {
         super(link, div_modulo);
     }
 
+
+
+    detailCard(options = {}) {
+        const defaults = {
+            parent: "body",
+            title: "",
+            subtitle: "",
+            class: "space-y-2",
+            data: [],
+        };
+
+        const opts = Object.assign({}, defaults, options);
+
+        const isCols2 = opts.class.includes("cols-2");
+        let contentClass = isCols2
+            ? `grid grid-cols-2 ${opts.class.replace("cols-2", "")}`
+            : `flex flex-col ${opts.class}`;
+
+        let infoHtml = `<div class="${contentClass}">`;
+
+        opts.data.forEach(item => {
+            if (item.type === "div") {
+                infoHtml += `<div class="${item.class || ''}">${item.html || ''}</div>`;
+            } else if (item.type === "status") {
+                infoHtml += `
+                <div class="flex items-center mb-1">
+                    <span class="text-gray-400 font-medium flex items-center text-base">
+                        ${item.icon ? `<i class="${item.icon} mr-2"></i>` : ""}
+                        ${item.text}:
+                    </span>
+                    <span class="ml-2 px-3 py-1 rounded-full text-xs font-bold ${item.color || "bg-gray-500"}">${item.value}</span>
+                </div>
+            `;
+            } else if (item.type === "observacion") {
+                infoHtml += `
+                <div class="col-span-2 mt-2">
+                    <label class="text-gray-400 font-medium text-base mb-1 block">${item.text || "Observación"}:</label>
+                    <div class="bg-[#28324c] rounded p-3 text-gray-300 min-h-[80px]">${item.value || ""}</div>
+                </div>
+            `;
+            } else {
+                infoHtml += `
+                <div class="flex items-center mb-1">
+                    <span class="text-gray-400 font-medium flex items-center text-base">
+                        ${item.icon ? `<i class="${item.icon} mr-2"></i>` : ""}
+                        ${item.text}:
+                    </span>
+                    <span class="ml-2 font-semibold text-white text-base">${item.value}</span>
+                </div>
+            `;
+            }
+        });
+
+        infoHtml += `</div>`;
+
+        const html = `
+        <div class="text-white rounded-xl p-3 min-w-[320px]">
+            ${infoHtml}
+        </div>
+    `;
+
+        $(`#${opts.parent}`).html(html);
+    }
+
     createItemCard(options) {
         let defaults = {
             parent: 'cardGridContainer',
