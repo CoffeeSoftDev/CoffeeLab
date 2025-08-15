@@ -1,5 +1,5 @@
 let url = 'https://huubie.com.mx/dev/pedidos/ctrl/ctrl-admin.php';
-let api = "https://huubie.com.mx/dev/reservaciones/ctrl/ctrl-reservaciones.php";
+let api = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-pedidos.php";
 let sub, app;
 $(function () {
     const app = new App(api, 'root');
@@ -10,16 +10,20 @@ $(function () {
 class App extends Templates {
     constructor(link, divModule) {
         super(link, divModule);
-        this.PROJECT_NAME = "Admin";
+        this.PROJECT_NAME = "Order";
     }
 
     init() {
+
         this.render();
-        this.showReservationModal(12);
+
     }
 
+
     render() {
-        this.layout();
+        this.layoutS();
+        this.createFilterBar()
+        this.ls();
         // this.createFilterBar();
     }
 
@@ -83,6 +87,120 @@ class App extends Templates {
             $("#btnShowReservation").on("click", () => this.showReservation(data.id));
             $("#btnNoShowReservation").on("click", () => this.noShowReservation(data.id));
         }
+    }
+
+      layoutS() {
+
+        this.primaryLayout({
+            parent: "root",
+            id: this.PROJECT_NAME,
+            class: 'flex mx-2 my-2 h-100 mt-5 p-2',
+            card: {
+                filterBar: { class: 'w-full my-3 ', id: 'filterBar' },
+                container: { class: 'w-full my-3 bg-[#1F2A37] h-[calc(100vh)] rounded p-3', id: 'container' + this.PROJECT_NAME }
+            }
+        });
+
+        // Filter bar.
+
+        $('#filterBar').html(`
+            <div id="containerHours"></div>
+            <div id="filterBar${this.PROJECT_NAME}" class="w-full my-3 " ></div>
+        `);
+
+    }
+
+     // Orders.
+    createFilterBar() {
+        this.createfilterBar({
+            parent: `filterBar${this.PROJECT_NAME}`,
+            data: [
+                {
+                    opc: "input-calendar",
+                    class: "col-sm-3",
+                    id: "calendar",
+                    lbl: "Consultar fecha: ",
+                },
+
+
+                {
+                    opc: 'select',
+                    id: 'selectStatusPedido',
+                    class: 'col-sm-3',
+                    onchange:'order.ls()',
+                    data: [
+                        { id: '', valor: 'Todos los estados' },
+                        { id: '1', valor: 'Pendiente' },
+                        { id: '2', valor: 'Pagado' },
+                        { id: '3', valor: 'Cancelado' }
+                    ]
+                },
+
+                {
+                    opc      : 'button',
+                    id       : 'btnNuevoPedido',
+                    class    : 'col-sm-2',
+                    text     : 'Nuevo Pedido',
+                    className: 'btn-primary w-100',
+                    onClick  : () => this.showTypePedido()
+                },
+
+                {
+                    opc: "button",
+                    className: "w-100",
+                    class: "col-sm-2",
+                    color_btn: "secondary",
+                    id: "btnCalendario",
+                    text: "Calendario",
+                    onClick: () => {
+                        this.ls()
+                        // window.location.href = '/dev/calendario/'
+                    }
+                },
+
+            ]
+        });
+
+        dataPicker({
+            parent: "calendar",
+            rangepicker: {
+                startDate: moment().startOf("month"), // Inicia con el primer dÃ­a del mes actual
+                endDate: moment().endOf("month"), // Finaliza con el Ãºltimo dÃ­a del mes actual
+                showDropdowns: true,
+                ranges: {
+                    "Mes actual"    : [moment().startOf("month"), moment().endOf("month")],
+                    "Semana actual" : [moment().startOf("week"), moment().endOf("week")],
+                    "PrÃ³xima semana": [moment().add(1, "week").startOf("week"), moment().add(1, "week").endOf("week")],
+                    "PrÃ³ximo mes"   : [moment().add(1, "month").startOf("month"), moment().add(1, "month").endOf("month")],
+                    "Mes anterior"  : [moment().subtract(1, "month").startOf("month"), moment().subtract(1, "month").endOf("month")]
+                },
+            },
+            onSelect: (start, end) => {
+                this.ls();
+            },
+        });
+    }
+
+    ls() {
+
+        let rangePicker = getDataRangePicker("calendar");
+
+        this.createTable({
+
+            parent     : `container${this.PROJECT_NAME}`,
+            idFilterBar: `filterBar${this.PROJECT_NAME}`,
+            data: { opc: "listOrders", fi: rangePicker.fi, ff: rangePicker.ff },
+            conf       : { datatable: false, pag: 10 },
+            coffeesoft : true,
+
+            attr: {
+                id     : `tb${this.PROJECT_NAME}`,
+                theme  : 'dark',
+                center : [1, 2,  7, 8,9,10,11],
+                right  : [4,5,6],
+                extends: true,
+            },
+        });
     }
 
 
@@ -410,80 +528,5 @@ class App extends Templates {
 
 
 
-    createFilterBar() {
-        this.createfilterBar({
-            parent: `filterBar${this.PROJECT_NAME}`,
-            data: [
-                {
-                    opc: "input-calendar",
-                    class: "col-sm-4",
-                    id: "calendar",
-                    lbl: "Consultar fecha: ",
-                },
-
-                {
-                    opc: "btn",
-                    class: "col-sm-2",
-                    color_btn: "primary",
-                    id: "btn",
-                    text: "Buscar",
-                    fn: `${this.PROJECT_NAME.toLowerCase()}.ls()`,
-                },
-            ],
-        });
-
-        dataPicker({
-            parent: "calendar",
-            onSelect: () => this.ls(),
-        });
-    }
-
-    filterBarProductos() {
-        const container = $("#container-company");
-        container.html('<div id="filterbar-company" class="mb-2"></div><div id="table-company"></div>');
-
-        this.createfilterBar({
-            parent: "filterbar-company",
-            data: [
-                {
-                    opc: "select",
-                    id: "estado-productos",
-                    class: "col-12 col-md-3",
-                    data: [
-                        { id: "1", valor: "Disponibles" },
-                        { id: "0", valor: "No disponibles" }
-                    ],
-                    // onchange: () => this.lsProductos()
-                },
-                {
-                    opc: "button",
-                    class: "col-12 col-md-3",
-                    id: "btnNuevoProducto",
-                    text: "Nuevo Producto",
-                    onClick: () => this.addProducto(),
-                },
-            ],
-        });
-
-
-        // setTimeout(() => this.lsProductos(), 50);
-    }
-
-    ls() {
-        let rangePicker = getDataRangePicker("calendar");
-
-        this.createTable({
-            parent: `table-company`,
-            idFilterBar: `filterbar-company`,
-            data: { opc: "listProductos" },
-            coffeesoft: true,
-            conf: { datatable: true, pag: 10 },
-            attr: {
-                id: "tbProductos",
-                theme: 'dark',
-                right: [2],
-                center: [3, 6]
-            },
-        });
-    }
+   
 }
