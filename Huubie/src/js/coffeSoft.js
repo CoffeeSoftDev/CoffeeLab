@@ -1712,7 +1712,7 @@ class Components extends Complements {
                 // Si opts.extends está activo y data[key] es objeto, sobrescribe atributos
                 if (opts.extends && typeof data[key] === 'object' && data[key] !== null) {
                     cellAttributes = Object.assign(cellAttributes, data[key]);
-                    cellAttributes.class += ` ${opts.border_row} `;
+                    cellAttributes.class += ` ${opts.border_row} ${colorBg}`;
                 }
 
                 tr.append($("<td>", cellAttributes));
@@ -1721,7 +1721,7 @@ class Components extends Complements {
             let actions = '';
 
             if (data.a?.length) {
-                actions = $("<td>", { class: `px-2 py-2 flex justify-center items-center ${colorBg} ${opts.border_row}` });
+                actions = $("<td>", { class: `px-2 py-2 relative w-15 justify-center items-center text-center ${colorBg} ${opts.border_row}` });
                 data.a.forEach(atributos => {
 
                     const button_a = $("<a>", atributos);

@@ -1,8 +1,8 @@
 let url = 'https://huubie.com.mx/dev/pedidos/ctrl/ctrl-admin.php';
-let api = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-pedidos.php";
-let sub, app;
+let api = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-admin.php";
+let app;
 $(function () {
-    const app = new App(api, 'root');
+    app = new App(api, 'root');
     app.init();
     // sub.init();
 });
@@ -24,6 +24,7 @@ class App extends Templates {
         this.layoutS();
         this.createFilterBar()
         this.ls();
+        this.addProducto()
         // this.createFilterBar();
     }
 
@@ -189,7 +190,7 @@ class App extends Templates {
 
             parent     : `container${this.PROJECT_NAME}`,
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
-            data: { opc: "listOrders", fi: rangePicker.fi, ff: rangePicker.ff },
+            data: { opc: "listProductos", estado:1 },
             conf       : { datatable: false, pag: 10 },
             coffeesoft : true,
 
@@ -205,7 +206,131 @@ class App extends Templates {
 
 
 
+    addProducto() {
+        const modal = bootbox.dialog({
+            closeButton: true,
+            title: 'Agregar Producto',
+            message: `<div><form id="formAddProducto" novalidate></form></div>`
+        });
 
+        this.createForm({
+            id: 'formAddProductoInternal',
+            parent: 'formAddProducto',
+            autovalidation: false,
+            data: [],
+            json: [
+                {
+                    opc: "input",
+                    id: "name",
+                    lbl: "Nombre del Producto",
+                    class: "col-12 mb-3"
+                },
+                {
+                    opc: "input-group",
+                    id: "price",
+                    lbl: "Precio",
+                    tipo: "cifra",
+                    class: "col-12 mb-3",
+                    icon: "icon-dollar",
+                    onkeyup: "validationInputForNumber('#price')"
+                },
+                {
+                    opc: "textarea",
+                    id: "description",
+                    lbl: "Descripción",
+                    class: "col-12 mb-3"
+                },
+                {
+                    opc: "select",
+                    id: "category_id",
+                    lbl: "Clasificación",
+                    class: "col-12",
+                    text: "classification",
+                    value: "id"
+                },
+                {
+                    opc: "div",
+                    id: "image",
+                    lbl: "Foto del producto",
+                    class: "col-12 mt-2",
+                    html: `
+                    <div class="col-12 mb-2">
+                        <div class="w-full p-2 border-2 border-dashed border-gray-500 rounded-xl text-center">
+                            <input
+                                type="file"
+                                id="archivos"
+                                name="archivos"
+                                class="hidden"
+                                multiple
+                                accept="image/*"
+                                onchange="app.previewImages(this, 'previewImagenes')"
+                            >
+                            <div class="flex flex-col items-center justify-center py-2 cursor-pointer" onclick="document.getElementById('archivos').click()">
+                                <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center mb-2">
+                                    <i class="icon-upload text-white"></i>
+                                </div>
+                                <p class="text-xs">Drag & Drop or <span class="text-purple-400 underline">choose file</span></p>
+                                <p class="text-[10px] text-gray-400 mt-1">JPEG, PNG</p>
+                            </div>
+                            <div id="previewImagenes" class="flex gap-2 flex-wrap mt-1"></div>
+                        </div>
+                    </div>
+                `
+                },
+                {
+                    opc: "button",
+                    id: "btnAddProducto",
+                    class: "col-12 mt-2",
+                    className: "w-full p-2",
+                    text: "Guardar Producto",
+                    onClick: () => {
+                        const form = document.getElementById('formAddProducto');
+                        const formData = new FormData(form);
+
+                        formData.append('opc', 'add');
+
+                        const files = document.getElementById('archivos').files;
+                        for (let i = 0; i < files.length; i++) {
+                            formData.append('archivos[]', files[i]);
+                        }
+
+                        fetch(this._link, {
+                            method: 'POST',
+                            body: formData
+                        })
+                            .then(response => response.json())
+                            .then(response => {
+                                if (response.status === 200) {
+                                    alert({ icon: "success", text: response.message });
+                                    this.lsProductos();
+                                    modal.modal('hide');
+                                } else {
+                                    alert({ icon: "info", title: "Oops!...", text: response.message, btn1: true, btn1Text: "Ok" });
+                                }
+                            });
+                    }
+                }
+            ]
+        });
+    }
+
+
+    previewImages(input, previewId) {
+        const previewContainer = document.getElementById(previewId);
+        previewContainer.innerHTML = "";
+        Array.from(input.files).forEach(file => {
+            if (file.type.startsWith("image/")) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.classList.add("w-20", "h-20", "object-cover", "rounded");
+                    previewContainer.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
 
 
 
