@@ -1,7 +1,12 @@
 let url = 'https://huubie.com.mx/dev/pedidos/ctrl/ctrl-admin.php';
-let api = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-admin.php";
+let api = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-pedidos-catalogo.php";
 let app;
-$(function () {
+let modifier,products;
+$(async () => {
+
+    const data = await useFetch({ url: api, data: { opc: "init" } });
+    modifier = data.modifier;
+    products = data.products;
     app = new App(api, 'root');
     app.init();
     // sub.init();
@@ -21,637 +26,616 @@ class App extends Templates {
 
 
     render() {
-        this.layoutS();
-        this.createFilterBar()
-        this.ls();
-        this.addProducto()
+        this.layout();
+       
+       
         // this.createFilterBar();
     }
 
-    async showReservationModal(id) {
-        const res = await useFetch({
-            url: this._link,
-            data: { opc: "getReservation", id }
-        });
-
-        const data = res.data;
-
-        const estado = this.getStatusReservation(data.status_reservation_id);
-
-        const datos = [
-            { text: "Locación", value: data.location, icon: "icon-location" },
-            { text: "Estado", value: estado.label, type: "status", icon: "icon-spinner", color: estado.color },
-            { text: "Evento", value: data.name_event, icon: "icon-calendar" },
-            { text: "Nombre", value: data.name_client, icon: "icon-user-1" },
-            { text: "Teléfono", value: data.phone, icon: "icon-phone-1" },
-            { text: "Creado el", value: data.date_creation, icon: "icon-calendar-1" },
-            { text: "Correo", value: data.email, icon: "icon-mail-1" },
-            { text: "Total", value: formatPrice(data.total_pay), icon: "icon-money" },
-            { type: "observacion", value: data.notes }
-        ];
-
-        // Solo si está en estado activo (1), agrega los botones
-        if (data.status_reservation_id === 1) {
-            datos.push({
-                type: "div",
-                html: `
-                <div class="flex gap-2 mt-4 justify-end">
-                    <button class="bg-green-600 hover:bg-green-700 text-white font-semibold text-sm px-4 py-2 rounded flex items-center gap-2"
-                        id="btnShowReservation" data-id="${data.id}">
-                        <i class="icon-ok"></i> Show
-                    </button>
-                    <button class="bg-red-600 hover:bg-red-700 text-white font-semibold text-sm px-4 py-2 rounded flex items-center gap-2"
-                        id="btnNoShowReservation" data-id="${data.id}">
-                        <i class="icon-block-1"></i> No Show
-                    </button>
-                </div>
-            `
-            });
-        }
-
-        // Render
-        bootbox.dialog({
-            title: "📅 Reservación",
-            closeButton: true,
-            message: '<div id="containerReservation"></div>',
-
-        });
-
-
-        this.detailCard({
-            parent: "containerReservation",
-            data: datos,
-        });
-
-        // Event.
-        if (data.status_reservation_id === 1) {
-            $("#btnShowReservation").on("click", () => this.showReservation(data.id));
-            $("#btnNoShowReservation").on("click", () => this.noShowReservation(data.id));
-        }
-    }
-
-      layoutS() {
-
+  
+    layout() {
         this.primaryLayout({
             parent: "root",
             id: this.PROJECT_NAME,
-            class: 'flex mx-2 my-2 h-100 mt-5 p-2',
+            class: "flex mx-2 my-2 mt-5 p-2",
             card: {
-                filterBar: { class: 'w-full my-3 ', id: 'filterBar' },
-                container: { class: 'w-full my-3 bg-[#1F2A37] h-[calc(100vh)] rounded p-3', id: 'container' + this.PROJECT_NAME }
-            }
-        });
-
-        // Filter bar.
-
-        $('#filterBar').html(`
-            <div id="containerHours"></div>
-            <div id="filterBar${this.PROJECT_NAME}" class="w-full my-3 " ></div>
-        `);
-
-    }
-
-     // Orders.
-    createFilterBar() {
-        this.createfilterBar({
-            parent: `filterBar${this.PROJECT_NAME}`,
-            data: [
-                {
-                    opc: "input-calendar",
-                    class: "col-sm-3",
-                    id: "calendar",
-                    lbl: "Consultar fecha: ",
+                filterBar: {
+                    id: "filterBar" + this.PROJECT_NAME,
+                    class: "w-full my-3"
                 },
-
-
-                {
-                    opc: 'select',
-                    id: 'selectStatusPedido',
-                    class: 'col-sm-3',
-                    onchange:'order.ls()',
-                    data: [
-                        { id: '', valor: 'Todos los estados' },
-                        { id: '1', valor: 'Pendiente' },
-                        { id: '2', valor: 'Pagado' },
-                        { id: '3', valor: 'Cancelado' }
-                    ]
+                container: {
+                    class: "w-full my-3 bg-[#1F2A37] rounded-lg p-4",
                 },
-
-                {
-                    opc      : 'button',
-                    id       : 'btnNuevoPedido',
-                    class    : 'col-sm-2',
-                    text     : 'Nuevo Pedido',
-                    className: 'btn-primary w-100',
-                    onClick  : () => this.showTypePedido()
-                },
-
-                {
-                    opc: "button",
-                    className: "w-100",
-                    class: "col-sm-2",
-                    color_btn: "secondary",
-                    id: "btnCalendario",
-                    text: "Calendario",
-                    onClick: () => {
-                        this.ls()
-                        // window.location.href = '/dev/calendario/'
-                    }
-                },
-
-            ]
-        });
-
-        dataPicker({
-            parent: "calendar",
-            rangepicker: {
-                startDate: moment().startOf("month"), // Inicia con el primer dÃ­a del mes actual
-                endDate: moment().endOf("month"), // Finaliza con el Ãºltimo dÃ­a del mes actual
-                showDropdowns: true,
-                ranges: {
-                    "Mes actual"    : [moment().startOf("month"), moment().endOf("month")],
-                    "Semana actual" : [moment().startOf("week"), moment().endOf("week")],
-                    "PrÃ³xima semana": [moment().add(1, "week").startOf("week"), moment().add(1, "week").endOf("week")],
-                    "PrÃ³ximo mes"   : [moment().add(1, "month").startOf("month"), moment().add(1, "month").endOf("month")],
-                    "Mes anterior"  : [moment().subtract(1, "month").startOf("month"), moment().subtract(1, "month").endOf("month")]
-                },
-            },
-            onSelect: (start, end) => {
-                this.ls();
-            },
-        });
-    }
-
-    ls() {
-
-        let rangePicker = getDataRangePicker("calendar");
-
-        this.createTable({
-
-            parent     : `container${this.PROJECT_NAME}`,
-            idFilterBar: `filterBar${this.PROJECT_NAME}`,
-            data: { opc: "listProductos", estado:1 },
-            conf       : { datatable: false, pag: 10 },
-            coffeesoft : true,
-
-            attr: {
-                id     : `tb${this.PROJECT_NAME}`,
-                theme  : 'dark',
-                center : [1, 2,  7, 8,9,10,11],
-                right  : [4,5,6],
-                extends: true,
-            },
-        });
-    }
-
-
-
-    addProducto() {
-        const modal = bootbox.dialog({
-            closeButton: true,
-            title: 'Agregar Producto',
-            message: `<div><form id="formAddProducto" novalidate></form></div>`
-        });
-
-        this.createForm({
-            id: 'formAddProductoInternal',
-            parent: 'formAddProducto',
-            autovalidation: false,
-            data: [],
-            json: [
-                {
-                    opc: "input",
-                    id: "name",
-                    lbl: "Nombre del Producto",
-                    class: "col-12 mb-3"
-                },
-                {
-                    opc: "input-group",
-                    id: "price",
-                    lbl: "Precio",
-                    tipo: "cifra",
-                    class: "col-12 mb-3",
-                    icon: "icon-dollar",
-                    onkeyup: "validationInputForNumber('#price')"
-                },
-                {
-                    opc: "textarea",
-                    id: "description",
-                    lbl: "Descripción",
-                    class: "col-12 mb-3"
-                },
-                {
-                    opc: "select",
-                    id: "category_id",
-                    lbl: "Clasificación",
-                    class: "col-12",
-                    text: "classification",
-                    value: "id"
-                },
-                {
-                    opc: "div",
-                    id: "image",
-                    lbl: "Foto del producto",
-                    class: "col-12 mt-2",
-                    html: `
-                    <div class="col-12 mb-2">
-                        <div class="w-full p-2 border-2 border-dashed border-gray-500 rounded-xl text-center">
-                            <input
-                                type="file"
-                                id="archivos"
-                                name="archivos"
-                                class="hidden"
-                                multiple
-                                accept="image/*"
-                                onchange="app.previewImages(this, 'previewImagenes')"
-                            >
-                            <div class="flex flex-col items-center justify-center py-2 cursor-pointer" onclick="document.getElementById('archivos').click()">
-                                <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center mb-2">
-                                    <i class="icon-upload text-white"></i>
-                                </div>
-                                <p class="text-xs">Drag & Drop or <span class="text-purple-400 underline">choose file</span></p>
-                                <p class="text-[10px] text-gray-400 mt-1">JPEG, PNG</p>
-                            </div>
-                            <div id="previewImagenes" class="flex gap-2 flex-wrap mt-1"></div>
-                        </div>
-                    </div>
-                `
-                },
-                {
-                    opc: "button",
-                    id: "btnAddProducto",
-                    class: "col-12 mt-2",
-                    className: "w-full p-2",
-                    text: "Guardar Producto",
-                    onClick: () => {
-                        const form = document.getElementById('formAddProducto');
-                        const formData = new FormData(form);
-
-                        formData.append('opc', 'add');
-
-                        const files = document.getElementById('archivos').files;
-                        for (let i = 0; i < files.length; i++) {
-                            formData.append('archivos[]', files[i]);
-                        }
-
-                        fetch(this._link, {
-                            method: 'POST',
-                            body: formData
-                        })
-                            .then(response => response.json())
-                            .then(response => {
-                                if (response.status === 200) {
-                                    alert({ icon: "success", text: response.message });
-                                    this.lsProductos();
-                                    modal.modal('hide');
-                                } else {
-                                    alert({ icon: "info", title: "Oops!...", text: response.message, btn1: true, btn1Text: "Ok" });
-                                }
-                            });
-                    }
-                }
-            ]
-        });
-    }
-
-
-    previewImages(input, previewId) {
-        const previewContainer = document.getElementById(previewId);
-        previewContainer.innerHTML = "";
-        Array.from(input.files).forEach(file => {
-            if (file.type.startsWith("image/")) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = document.createElement("img");
-                    img.src = e.target.result;
-                    img.classList.add("w-20", "h-20", "object-cover", "rounded");
-                    previewContainer.appendChild(img);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-    }
-
-
-
-    getStatusReservation(id) {
-        const map = {
-            1: { label: "Reservación", color: "bg-[#EBD9FF] text-[#6B3FA0]" },
-            2: { label: "Si llego", color: "bg-[#B9FCD3] text-[#032B1A]" },
-            3: { label: "No llego", color: "bg-[#E5E7EB] text-[#374151]" }
-        };
-        return map[id] || { label: "-", color: "bg-gray-500 text-white" };
-    }
-
-    showReservation(id) {
-        this.swalQuestion({
-            opts: {
-                title: "¿Confirmar asistencia del cliente?",
-                text: "Esta acción marcará esta reservación como 'Show'.",
-                icon: "question"
-            },
-            data: {
-                opc: "editReservation",
-                status_reservation_id: 2,
-                id: id,
-            },
-            methods: {
-                send: (res) => {
-                    if (res.status === 200) {
-                        alert({
-                            icon: "success",
-                            text: "La reservación fue marcada como Show",
-                            btn1: true
-                        });
-                        this.ls();
-                        bootbox.hideAll();
-
-                    } else {
-                        alert({
-                            icon: "error",
-                            text: res.message,
-                            btn1: true
-                        });
-                    }
-                }
-            }
-        });
-    }
-
-    noShowReservation(id) {
-        this.swalQuestion({
-            opts: {
-                title: "¿Marcar como No Show?",
-                text: "Esta acción marcará la reservación como No Show. ¿Deseas continuar?",
-                icon: "warning"
-            },
-            data: {
-                opc: "editReservation",
-                status_reservation_id: 3,
-                id: id,
-            },
-            methods: {
-                send: (res) => {
-                    if (res.status === 200) {
-                        alert({
-                            icon: "success",
-                            text: "La reservación fue marcada como No Show",
-                            btn1: true
-                        });
-                        this.ls();
-                         bootbox.hideAll();
-                    } else {
-                        alert({
-                            icon: "error",
-                            text: res.message,
-                            btn1: true
-                        });
-                    }
-                }
-            }
-        });
-    }
-
-    detailCard(options = {}) {
-        const defaults = {
-            parent: "body",
-            title: "",
-            subtitle: "",
-            class: "space-y-2",
-            data: [],
-        };
-
-        const opts = Object.assign({}, defaults, options);
-
-        const isCols2 = opts.class.includes("cols-2");
-        let contentClass = isCols2
-            ? `grid grid-cols-2 ${opts.class.replace("cols-2", "")}`
-            : `flex flex-col ${opts.class}`;
-
-        let infoHtml = `<div class="${contentClass}">`;
-
-        opts.data.forEach(item => {
-            if (item.type === "div") {
-                infoHtml += `<div class="${item.class || ''}">${item.html || ''}</div>`;
-            } else if (item.type === "status") {
-                infoHtml += `
-                <div class="flex items-center mb-1">
-                    <span class="text-gray-400 font-medium flex items-center text-base">
-                        ${item.icon ? `<i class="${item.icon} mr-2"></i>` : ""}
-                        ${item.text}:
-                    </span>
-                    <span class="ml-2 px-3 py-1 rounded-full text-xs font-bold ${item.color || "bg-gray-500"}">${item.value}</span>
-                </div>
-            `;
-            } else if (item.type === "observacion") {
-                infoHtml += `
-                <div class="col-span-2 mt-2">
-                    <label class="text-gray-400 font-medium text-base mb-1 block">${item.text || "Observación"}:</label>
-                    <div class="bg-[#28324c] rounded p-3 text-gray-300 min-h-[80px]">${item.value || ""}</div>
-                </div>
-            `;
-            } else {
-                infoHtml += `
-                <div class="flex items-center mb-1">
-                    <span class="text-gray-400 font-medium flex items-center text-base">
-                        ${item.icon ? `<i class="${item.icon} mr-2"></i>` : ""}
-                        ${item.text}:
-                    </span>
-                    <span class="ml-2 font-semibold text-white text-base">${item.value}</span>
-                </div>
-            `;
-            }
-        });
-
-        infoHtml += `</div>`;
-
-        const html = `
-        <div class="text-white rounded-xl p-3 min-w-[320px]">
-            ${infoHtml}
-        </div>
-    `;
-
-        $(`#${opts.parent}`).html(html);
-    }
-
-
-    renderProductForm(idModifier) {
-        this.createForm({
-            parent: "formProductsContainer",
-            id: "formProduct",
-            data: { opc: "addProductModifier", id: idModifier },
-            json: [
-                {
-                    opc: "div",
-                    html: ` <label class="text-lg font-medium text-gray-100">Productos Incluidos</label>
-                    <p class="text-sm text-muted-foreground mb-1">Añade los productos que incluye este modificador</p> `,
-                    class: "col-12",
-                },
-                {
-                    opc: "input",
-                    id: "productName",
-                    lbl: "Nombre ",
-                    placeholder: "Ingrese nombre del producto",
-                    required: true,
-                    class: "col-5 mb-3",
-                },
-
-                {
-                    opc: "input",
-                    id: "price",
-                    lbl: "Precio",
-                    tipo: "numero",
-                    placeholder: "0.00",
-                    required: true,
-                    class: "col-3",
-                },
-                {
-                    opc: "button",
-                    text: "Añadir",
-                    className: "w-full",
-                    class: "col-4",
-                    onClick: () => this.addProductToList(),
-                },
-            ],
-        });
-
-        $("#formProduct").on('reset', () => {
-            $("#productName").val('');
-
-        });
-    }
-
-    addProductToList() {
-        const name = $("#productName").val().trim();
-        const qty = parseInt($("#cant").val());
-        const price = $("#price").val();
-
-        if (!name || qty < 1 || price < 0) {
-            alert({ icon: "info", text: "Nombre, cantidad y precio son requeridos y válidos." });
-            return;
-        }
-
-        this.tempProductList.push({
-            id: name, // Aquí puedes poner el id real si usas catálogo
-            text: name,
-            qty,
-            price
-        });
-        this.renderProductList();
-        $("#formProductsContainer")[0].reset();
-    }
-
-    renderProductList() {
-        let html = `<div id="product-list" class="overflow-y-auto max-h-52">`;
-
-        this.tempProductList.forEach((prod, idx) => {
-            html += `
-            <div class="product-item" data-index="${idx}">
-                <div class="border border-gray-200 rounded-lg p-2 shadow-sm flex items-center justify-between gap-4 mb-2">
-                    <div class="text-sm font-semibold text-gray-900 flex-1 truncate text-white">${prod.text}</div>
-                    <div class="flex items-center gap-2">
-                        <label class="text-sm text-gray-800 font-medium">Precio:</label>
-                        <input
-                            type="text"
-                            placeholder="0.00"
-                            class="form-control bg-[#1F2A37] w-20 text-sm text-end input-qty"
-                            data-index="${idx}"
-                            value="${prod.price}"
-                        >
-                    </div>
-                    <button
-                        type="button"
-                        class="btn btn-outline-danger btn-sm btn-remove-product"
-                        data-index="${idx}">
-                        <i class="icon-trash"></i>
-                    </button>
-                </div>
-            </div>
-        `;
-        });
-
-        html += `</div>`;
-        $("#product-list").html(html);
-
-        // Eliminar producto por índice exacto
-        $('#product-list').off('click', '.btn-remove-product').on('click', '.btn-remove-product', (e) => {
-            const index = $(e.currentTarget).data('index');
-            this.tempProductList.splice(index, 1);
-            this.renderProductList();
-        });
-
-        // Actualizar cantidad por índice
-        $('#product-list').off('keyup', '.input-qty').on('keyup', '.input-qty', (e) => {
-            const input = $(e.currentTarget);
-            const index = parseInt(input.data('index'));
-            const value = parseFloat(input.val()) || 1;
-            this.tempProductList[index].price = value;
-        });
-    }
-
-
-    layout() {
-        let nameCompany = '';
-
-        this.primaryLayout({
-            parent: `root`,
-            id: this.PROJECT_NAME,
-            class: "flex mx-2 my-2 h-full mt-5 p-2",
-            card: {
-                filterBar: { class: "w-full my-3 ", id: "filterBar" + this.PROJECT_NAME },
-                container: { class: "w-full my-3 h-full bg-[#1F2A37] rounded-lg p-3", id: "container" + this.PROJECT_NAME },
             },
         });
 
         this.tabLayout({
-            parent: "container" + this.PROJECT_NAME,
-            id: "tabComponent",
-            content: { class: "" },
-            theme: "dark",
-            type: 'short',
-            json: [
-                {
-                    id: "company",
-                    tab: "Empresa",
-                    active: true,
-                    onClick: () => { this.ls() },
-                },
+          parent: "container" + this.PROJECT_NAME,
+          id: "tabsPedido",
+          theme: "dark",
+          type: "short",
+          content: { class: "" },
+          json: [
+            {
+              id: "datos",
 
-                {
-                    id: "usuarios",
-                    tab: "usuarios",
-                    icon: "",
-                    onClick: () => { },
-                },
+              tab: "Datos del pedido",
+            },
+            {
+              id: "package",
+              active: true,
 
-                {
-                    id: "sucursal",
-                    tab: "Sucursal",
-                    icon: "",
-                    onClick: () => { },
-                },
-            ],
+              tab: "Paquetes",
+            },
+          ],
         });
 
+        this.createPOSContainers({ 
+            parent: "container-package", 
+            id: "pedido",
+            onChange:(item)=>{
+                this.searchFilter({ parent:'searchProduct'})
+            }
+        });
+        
+        this.createProductTabs({ data:modifier });
+        this.createProductGrid({ data: products });
+        this.createOrderPanel();
 
 
-        // Titulo del modulo.
+    }
 
-        $("#containerAdmin").prepend(`
-            <div class="px-4 pt-3 pb-3">
-                <h2 class="text-2xl font-semibold text-white">⚙️ Configuración de ${nameCompany}</h2>
-                <p class="text-gray-400">Administra los datos de la empresa, los usuarios y sucursales de la aplicación.</p>
-            </div>
-        `);
+   
+    createPOSContainers(options) {
+        const opts = Object.assign({
+            parent: "container-package",
+            id: "posLayout",
+            theme: "dark", // 'light' | 'dark'
+            class: "flex text-sm h-100 text-white gap-3 ",
+            onChange: (item) => { }
+        }, options);
 
-        // usuarios.render();
-        // sucursales.render();
-        // company.render();
-        // clausules.render();
-        this.filterBarProductos()
+        const isDark = opts.theme === "dark";
+
+        const colors = {
+            containerBg: isDark ? ""   : "bg-white",
+            textColor  : isDark ? "text-white"     : "text-gray-600",
+            leftPaneBg : isDark ? "bg-[#1F2A37]"   : "bg-gray-100",
+            inputBg    : isDark ? "bg-[#111827]"   : "bg-white",
+            borderColor: isDark ? "border-gray-700": "border-gray-300",
+            cardGridBg : isDark ? "bg-[#111827]"   : "bg-white",
+            tabBg: isDark ? ""   : "bg-gray-100"
+        };
+
+        // 📦 Container principal
+        const container = $("<div>", {
+            id: opts.id,
+            class: `${opts.class} ${colors.containerBg} ${colors.textColor}`
+        });
+
+        // 🟩 Left Pane
+        const leftPane = $("<div>", {
+            class: `flex-1 flex sm:w-[60%] flex-col rounded-xl overflow-hidden ${colors.leftPaneBg} border ${colors.borderColor} shadow-md`
+        });
+
+        // 🔍 Contenedor de búsqueda
+        const searchContainer = $("<div>", {
+            class: `p-3 flex items-center justify-between space-x-2  ${colors.borderColor}`
+        });
+
+        const searchInputWrap = $("<div>", {
+            class: "relative w-full md:w-[20rem]"
+        });
+
+        const inputSearch = $("<input>", {
+            id: "searchProduct",
+            type: "text",
+            placeholder: "Buscar productos...",
+            class: `pl-10 py-2 pr-3 rounded-md border ${colors.borderColor} ${colors.inputBg} ${colors.textColor} w-full focus:outline-none focus:ring-2 focus:ring-blue-500`
+        }).on("input", function () {
+            const keyword = $(this).val().toLowerCase();
+            opts.onChange(keyword);
+        });
+
+        const searchIcon = $("<i>", {
+            class: `icon-search absolute left-3 top-2 ${isDark ? "text-gray-400" : "text-gray-500"}`
+        });
+
+        searchInputWrap.append(inputSearch, searchIcon);
+        searchContainer.append(searchInputWrap);
+
+        // 🔽 Área visual de tabs de categoría (temporal)
+        const categoryTabs = $("<div>", {
+            id: "categoryTabs",
+            class: `${colors.textColor} p-4 ${colors.tabBg} mb-2 text-center ${colors.borderColor}`,
+            text: "Tabs Categoría"
+        });
+
+        // 🧁 Contenedor de cards
+        const productGridContainer = $("<div>", {
+            class: "flex-1 overflow-auto p-3"
+        });
+
+        const grid = $("<div>", {
+            id: "productGrid",
+            class: `grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4  ${colors.borderColor} p-4 rounded ${colors.cardGridBg}`
+        });
+
+        productGridContainer.append(grid);
+
+        // Ensamblar left pane
+        leftPane.append(searchContainer, categoryTabs, productGridContainer);
+
+        // 🟥 Ticket
+        const rightPane = $("<div>", {
+            id: "orderPanel",
+          class: `w-full xs:w-[40%] md:w-[27rem] flex flex-col ${colors.leftPaneBg} border ${colors.borderColor} rounded-xl shadow-md`,
+        });
+
+        container.append(leftPane, rightPane);
+        $(`#${opts.parent}`).html(container);
+    }
+
+    createProductTabs(options) {
+        const opts = Object.assign({
+            parent: "categoryTabs",
+            data: [
+                { text: "Chocolate", id: "chocolate", icon: "icon-cake" },
+                { text: "Frutas", id: "frutas", emoji: "🍓" },
+                { text: "Queso", id: "queso" },
+                { text: "Merengue", id: "merengue" },
+                { text: "Todos", id: "todos" }
+            ],
+            active: null, // Si es null, se activa el primero
+            activeColor: "bg-blue-600",
+            inactiveColor: "", // auto-definido por tema
+            hoverColor: "",
+            theme: "dark",
+            onChange: (category) => { }
+        }, options);
+
+        const isDark = opts.theme === "dark";
+        const hoverClass = opts.hoverColor || (isDark ? "hover:bg-[#1E293B]" : "hover:bg-gray-300");
+        const inactiveColor = opts.inactiveColor || (isDark ? "bg-gray-700" : "bg-gray-200");
+        const textColor = isDark ? "text-white" : "text-gray-800";
+
+        const container = $(`#${opts.parent}`).empty().addClass("flex gap-2 flex-wrap px-4 py-2 mt-2 rounded-md");
+
+        // Aseguramos que siempre haya uno activo
+        const defaultActiveId = opts.active ?? (opts.data.length > 0 ? opts.data[0].id : null);
+
+        opts.data.forEach((cat, index) => {
+            const isActive = cat.id === defaultActiveId;
+
+            // Icono o emoji opcional
+            let prefix = "";
+            if (cat.icon) prefix = `<i class="${cat.icon} mr-1"></i>`;
+            else if (cat.emoji) prefix = `${cat.emoji} `;
+
+            const formattedText = cat.text.charAt(0).toUpperCase() + cat.text.slice(1).toLowerCase();
+
+            const btn = $("<button>", {
+                class: `tab-btn flex-1 ${textColor} px-2 py-2 rounded-lg text-sm transition-colors duration-200 text-center ${isActive ? opts.activeColor : `${inactiveColor} ${hoverClass}`}`,
+                html: `${prefix}${formattedText}`,
+                "data-category": cat.id,
+                click: function () {
+                    container.find(".tab-btn").each(function () {
+                        $(this)
+                            .removeClass(opts.activeColor)
+                            .removeClass(inactiveColor)
+                            .removeClass(hoverClass)
+                            .addClass(`${inactiveColor} ${hoverClass}`);
+                    });
+
+                    $(this)
+                        .removeClass(inactiveColor)
+                        .removeClass(hoverClass)
+                        .addClass(opts.activeColor);
+
+                    // Callback general
+                    opts.onChange(cat.id);
+
+                    // Callback individual si existe
+                    if (typeof cat.onClick === "function") {
+                        cat.onClick(cat.id);
+                    }
+                }
+            });
+
+            container.append(btn);
+        });
+    }
+
+
+    createProductGrid(options) {
+        const defaults = {
+            parent: "productGrid",
+            data: [],
+            theme: "dark",
+            icon: "icon-star", // Ícono por defecto si no hay imagen
+            onClick: (item) => { }
+        };
+
+        const opts = Object.assign(defaults, options);
+
+        const isDark = opts.theme === "dark";
+        const cardBg = isDark ? "bg-[#111827]" : "bg-white";
+        const borderColor = isDark ? "border-gray-700" : "border-gray-300";
+        const textColor = isDark ? "text-white" : "text-gray-800";
+        const priceColor = isDark ? "text-blue-300" : "text-blue-600";
+        const buttonColor = "bg-blue-600 hover:bg-blue-700";
+
+        const container = $(`#${opts.parent}`).empty();
+        const baseUrl = "https://huubie.com.mx/";
+
+        opts.data.forEach(item => {
+            const card = $("<div>", {
+                class: `${cardBg} border ${borderColor} rounded-xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-200 card`,
+                click: () => opts.onClick(item)
+            });
+
+            // Imagen o ícono
+            const imageWrap = $("<div>", {
+                class: "bg-gray-800 h-28 flex items-center justify-center"
+            });
+
+            if (item.image && item.image.trim() !== "") {
+                imageWrap.append(
+                    $("<img>", {
+                        src: baseUrl + item.image,
+                        alt: item.name,
+                        class: "object-cover h-full w-full"
+                    })
+                );
+            } else {
+                imageWrap.append(
+                    $("<i>", {
+                        class: `${item.icon || opts.icon} text-4xl text-gray-500`
+                    })
+                );
+            }
+
+            const body = $("<div>", { class: "p-2" }).append(
+                $("<h3>", {
+                    class: `${textColor} text-sm font-medium truncate`,
+                    text: item.name ?? item.valor
+                }),
+                $("<p>", {
+                    class: `${priceColor} font-semibold text-lg mt-1`,
+                    text: `${formatPrice(item.price)}`
+                }),
+                $("<div>", { class: "text-right mt-1" }).append(
+                    $("<button>", {
+                        class: `inline-block ${buttonColor} text-white rounded px-2 py-1 text-xs`,
+                        html: `<i class="icon-eye"></i>`,
+                        click: (e) => {
+                            e.stopPropagation();
+                            opts.onClick(item);
+                        }
+                    })
+                )
+            );
+
+            card.append(imageWrap, body);
+            container.append(card);
+        });
+    }
+
+
+    posLayout(options) {
+        const defaults = {
+            parent: "container-package",
+            id: "posLayout",
+            class: "flex text-sm text-white gap-4 p-4 bg-[#0F172A]",
+            data: [],
+            json: [],
+            onAdd: () => { },
+            onGet: () => { },
+            onDelete: () => { }
+        };
+
+        const opts = Object.assign({}, defaults, options);
+
+        const container = $("<div>", {
+            id: opts.id,
+            class: opts.class
+        });
+
+        const leftPane = $("<div>", {
+            class: "flex-1 flex flex-col rounded-xl overflow-hidden bg-[#1F2A37] border border-gray-600 shadow-md"
+        });
+
+        const rightPane = $("<div>", {
+            class: "w-full md:w-[27rem] flex flex-col bg-[#1F2A37] border border-gray-600 rounded-xl shadow-md"
+        });
+
+        const headerRight = $("<div>", {
+            class: "p-2 border-gray-700 flex justify-between items-center"
+        }).append(
+            $("<h2>", {
+                class: "text-lg font-semibold text-white",
+                text: "Orden Actual"
+            }),
+            $("<button>", {
+                id: "clearOrder",
+                class: "text-red-400 border border-[#C53030] px-2 py-1 rounded hover:bg-red-700",
+                html: "🗑 Limpiar",
+                click: () => {
+                    $("#orderItems").html("");
+                    $("#subtotal").text("$0.00");
+                    $("#tax").text("$0.00");
+                    $("#total").text("$0.00");
+                }
+            })
+        );
+
+        const orderItems = $("<div>", {
+            id: "orderItems",
+            class: "flex-1 overflow-auto p-3 space-y-3"
+        });
+
+        const totals = $("<div>", {
+            class: "p-4 border-t border-gray-700 bg-[#333D4C]"
+        }).append(
+            $("<div>", { class: "space-y-1 text-sm text-gray-300" }).append(
+                $("<div>", { class: "flex justify-between" }).append(
+                    $("<span>").text("Subtotal:"),
+                    $("<span>", { id: "subtotal", text: "$0.00" })
+                ),
+                $("<div>", { class: "flex justify-between" }).append(
+                    $("<span>").text("IVA (16%):"),
+                    $("<span>", { id: "tax", text: "$0.00" })
+                ),
+                $("<div>", { class: "border-t my-2 border-gray-700" }),
+                $("<div>", { class: "flex justify-between font-bold text-blue-400" }).append(
+                    $("<span>").text("Total:"),
+                    $("<span>", { id: "total", text: "$0.00" })
+                )
+            ),
+            $("<div>", { class: "grid grid-cols-2 gap-2 mt-4" }).append(
+                $("<button>", {
+                    class: "border border-gray-600 text-white rounded px-3 py-2 text-sm",
+                    html: "🖨 Imprimir"
+                }),
+                $("<button>", {
+                    class: "bg-blue-700 text-white rounded px-3 py-2 text-sm hover:bg-blue-800",
+                    html: "Cobrar"
+                })
+            )
+        );
+
+        const searchContainer = $("<div>", {
+            class: "p-4 flex items-center justify-between space-x-2 border-gray-700 bg-[#111827]"
+        });
+
+        const searchInputWrap = $("<div>", {
+            class: "relative w-full md:w-[20rem]"
+        });
+
+        const inputSearch = $("<input>", {
+            id: "searchProduct",
+            type: "text",
+            placeholder: "Buscar productos...",
+            class: "pl-10 py-2 pr-3 rounded-md border border-gray-700 bg-[#111827] text-white w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+        });
+
+        const searchIcon = $("<i>", {
+            class: "icon-search absolute left-3 top-3 text-gray-400"
+        });
+
+        const btnPastel = $("<button>", {
+            id: "btnArmarPastel",
+            class: "bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2",
+            text: "¡Arma tu pastel! 🎂"
+        });
+
+        const tabs = $("<div>", {
+            id: "categoryTabs",
+            class: "px-4 py-3 flex gap-2 flex-wrap border-b border-gray-700 bg-[#1E293B]"
+        });
+
+        const categories = [
+            { text: "☕ Chocolate", category: "chocolate" },
+            { text: "🍇 Frutas", category: "frutas" },
+            { text: "🧀 Queso", category: "queso" },
+            { text: "🍰 Merengue", category: "merengue" },
+            { text: "🎂 Todos", category: "todos" },
+        ];
+
+        categories.forEach(c => {
+            const btn = $("<button>", {
+                class: "tab-btn bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg",
+                text: c.text,
+                "data-category": c.category
+            });
+            tabs.append(btn);
+        });
+
+        const productGridContainer = $("<div>", {
+            class: "flex-1 overflow-auto p-4"
+        });
+
+        const grid = $("<div>", {
+            id: "productGrid",
+            class: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+        });
+
+        const sampleData = opts.data.length > 0 ? opts.data : [
+            {
+                id: 1,
+                name: "Pastel de Chocolate",
+                price: "25.00",
+                image: "https://www.casadulce.com.mx/wp-content/uploads/2019/09/chocolate-extremo-grande.jpg"
+            },
+            {
+                id: 2,
+                name: "Pastel Negro por Siempre",
+                price: "35.00",
+                image: "https://lospastelesdelaura.com/wp-content/uploads/2020/06/2020-04-17-Chocolate-Chocolate-Drip-Cake.jpeg"
+            },
+            {
+                id: 3,
+                name: "Bosque de Chocolate",
+                price: "40.00",
+                image: "https://img.freepik.com/fotos-premium/tarta-rollo-troncos-navidad-navidad_1148901-918.jpg"
+            },
+        ];
+
+        sampleData.forEach((item) => {
+            const card = $("<div>", {
+                class: "bg-[#111827] border border-gray-700 rounded-xl shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-all duration-200"
+            });
+
+            const imageWrap = $("<div>", {
+                class: "bg-gray-800 h-32 flex items-center justify-center"
+            }).append(
+                $("<img>", {
+                    src: item.image,
+                    alt: item.name,
+                    class: "object-cover h-full w-full"
+                })
+            );
+
+            const body = $("<div>", {
+                class: "p-3"
+            }).append(
+                $("<h3>", {
+                    class: "text-white text-sm font-medium truncate",
+                    text: item.name
+                }),
+                $("<p>", {
+                    class: "text-blue-300 font-semibold text-sm mt-1",
+                    text: `$${item.price}`
+                }),
+                $("<div>", {
+                    class: "text-right mt-2"
+                }).append(
+                    $("<button>", {
+                        class: "inline-block bg-blue-600 text-white rounded px-2 py-1 text-xs",
+                        html: '<i class="icon-eye"></i>',
+                        click: () => opts.onGet(item.id)
+                    })
+                )
+            );
+
+            card.append(imageWrap, body);
+            grid.append(card);
+        });
+
+        // Ensamblaje
+        searchInputWrap.append(inputSearch, searchIcon);
+        searchContainer.append(searchInputWrap, btnPastel);
+        productGridContainer.append(grid);
+        leftPane.append(searchContainer, tabs, productGridContainer);
+
+        rightPane.append(headerRight, orderItems, totals);
+        container.append(leftPane, rightPane);
+
+        $(`#${opts.parent}`).html(container);
+    }
+
+    createOrderPanel(options) {
+        const opts = Object.assign({
+            parent: "orderPanel", // ID donde se monta
+            title: "Orden Actual",
+            onClear: () => {
+                // lógica externa que puedes conectar
+            }
+        }, options);
+
+        const container = $(`#${opts.parent}`).empty();
+
+        // 🧾 Header
+        const header = $("<div>", {
+            class: "p-4 border-b border-gray-700 flex justify-between items-center"
+        }).append(
+            $("<h2>", {
+                class: "text-lg font-semibold text-white",
+                text: opts.title
+            }),
+            $("<button>", {
+                class: "text-red-400 border border-[#C53030] px-2 py-1 rounded hover:bg-red-700",
+                html: "🗑 Limpiar",
+                click: opts.onClear
+            })
+        );
+
+        // 📦 Lista de productos agregados
+        const orderItems = $("<div>", {
+            id: "orderItems",
+            class: "flex-1 overflow-auto p-3 space-y-3"
+        });
+
+        // 💰 Totales
+        const totals = $("<div>", {
+            class: "p-4 border-t border-gray-700 bg-[#333D4C]"
+        }).append(
+            $("<div>", { class: "space-y-1 text-sm text-gray-300" }).append(
+                $("<div>", { class: "flex justify-between" }).append(
+                    $("<span>").text("Subtotal:"),
+                    $("<span>", { id: "subtotal", text: "$0.00" })
+                ),
+                $("<div>", { class: "flex justify-between" }).append(
+                    $("<span>").text("IVA (16%):"),
+                    $("<span>", { id: "tax", text: "$0.00" })
+                ),
+                $("<div>", { class: "border-t my-2 border-gray-700" }),
+                $("<div>", { class: "flex justify-between font-bold text-blue-400" }).append(
+                    $("<span>").text("Total:"),
+                    $("<span>", { id: "total", text: "$0.00" })
+                )
+            ),
+            $("<div>", { class: "grid grid-cols-2 gap-2 mt-4" }).append(
+                $("<button>", {
+                    class: "border border-gray-600 text-white rounded px-3 py-2 text-sm",
+                    html: "🖨 Imprimir"
+                }),
+                $("<button>", {
+                    class: "bg-blue-700 text-white rounded px-3 py-2 text-sm hover:bg-blue-800",
+                    html: "Cobrar"
+                })
+            )
+        );
+
+        // 🧩 Ensamblar
+        container.append(header, orderItems, totals);
+    }
+
+    // auxiliares.
+    searchFilter(options) {
+        const opts = Object.assign({
+            parent: "searchProduct",   // ID del input de búsqueda
+            gridId: "productGrid",      // ID del grid con las cards
+            selector: ".card",          // Clase que identifica cada producto (card)
+            targetTextSelector: "h3"    // Elemento dentro de cada card que contiene el nombre
+        }, options);
+
+        const input = $(`#${opts.parent}`);
+        const grid = document.querySelector(`#${opts.gridId}`);
+
+        console.log(input, grid);
+
+        if (!input.length || !grid) return;
+
+        const search = () => {
+            const keyword = input.val().toLowerCase().trim();
+            const cards = grid.querySelectorAll(opts.selector);
+
+            cards.forEach(card => {
+                const label = card.querySelector(opts.targetTextSelector)?.textContent.toLowerCase() || "";
+                card.style.display = label.includes(keyword) ? "" : "none";
+            });
+        };
+
+        input.off("input").on("input", search);
     }
 
 
 
+
+
+
+   
+   
    
 }
