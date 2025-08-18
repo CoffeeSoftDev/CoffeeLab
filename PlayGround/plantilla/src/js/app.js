@@ -145,9 +145,6 @@ class App extends Templates {
     }
 
 
-
-
-
     layout() {
         this.primaryLayout({
             parent: "root",
