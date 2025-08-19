@@ -1,12 +1,15 @@
 let url = 'https://huubie.com.mx/dev/pedidos/ctrl/ctrl-admin.php';
 let api = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-pedidos-catalogo.php";
 let app;
-let modifier,products;
+let modifier, products;
+let idFolio;
+
 $(async () => {
 
-    const data = await useFetch({ url: api, data: { opc: "init" } });
-    modifier = data.modifier;
-    products = data.products;
+    // const data = await useFetch({ url: api, data: { opc: "init" } });
+    // modifier = data.modifier;
+    // products = data.products;
+    // idFolio  = data.products;
     app = new App(api, 'root');
     app.init();
     // sub.init();
@@ -19,20 +22,14 @@ class App extends Templates {
     }
 
     init() {
-
         this.render();
-
     }
-
 
     render() {
         this.layout();
-       
-       
-        // this.createFilterBar();
+        this.layoutPos();
     }
 
-  
     layout() {
         this.primaryLayout({
             parent: "root",
@@ -50,42 +47,76 @@ class App extends Templates {
         });
 
         this.tabLayout({
-          parent: "container" + this.PROJECT_NAME,
-          id: "tabsPedido",
-          theme: "dark",
-          type: "short",
-          content: { class: "" },
-          json: [
-            {
-              id: "datos",
+            parent: "container" + this.PROJECT_NAME,
+            id: "tabsPedido",
+            theme: "dark",
+            type: "short",
+            content: { class: "" },
+            json: [
+                {
+                    id: "datos",
 
-              tab: "Datos del pedido",
-            },
-            {
-              id: "package",
-              active: true,
+                    tab: "Datos del pedido",
+                },
+                {
+                    id: "package",
+                    active: true,
 
-              tab: "Paquetes",
-            },
-          ],
+                    tab: "Paquetes",
+                },
+            ],
         });
 
-        this.createPOSContainers({ 
-            parent: "container-package", 
-            id: "pedido",
-            onChange:(item)=>{
-                this.searchFilter({ parent:'searchProduct'})
-            }
-        });
-        
-        this.createProductTabs({ data:modifier });
-        this.createProductGrid({ data: products });
-        this.createOrderPanel();
+        // this.createPOSContainers({
+        //     parent: "container-package",
+        //     id: "pedido",
+        //     onChange: (item) => {
+        //         this.searchFilter({ parent: 'searchProduct' })
+        //     }
+        // });
 
+        // this.createProductTabs({ data: modifier });
+
+        // this.createProductGrid({
+        //     data: products,
+        //     onClick: (request) => {
+
+        //     }
+        // });
+
+        // this.createOrderPanel();
 
     }
 
-   
+
+    async layoutPos() {
+
+        const pos = await useFetch({ url: api, data: { opc: "init" } });
+        idFolio = pos.id;
+
+        this.createPOSContainers({
+            parent: "container-package",
+            id: "pedido",
+            onChange: (item) => {
+                this.searchFilter({ parent: 'searchProduct' })
+            }
+        });
+
+        this.createProductTabs({ data: pos.modifier });
+
+        this.createProductGrid({ 
+            data: pos.products,
+
+            onClick: (item) => { 
+                
+                this.addProduct(item.id)
+            } 
+        });
+
+        this.createOrderPanel();
+  
+    }
+
     createPOSContainers(options) {
         const opts = Object.assign({
             parent: "container-package",
@@ -98,13 +129,13 @@ class App extends Templates {
         const isDark = opts.theme === "dark";
 
         const colors = {
-            containerBg: isDark ? ""   : "bg-white",
-            textColor  : isDark ? "text-white"     : "text-gray-600",
-            leftPaneBg : isDark ? "bg-[#1F2A37]"   : "bg-gray-100",
-            inputBg    : isDark ? "bg-[#111827]"   : "bg-white",
-            borderColor: isDark ? "border-gray-700": "border-gray-300",
-            cardGridBg : isDark ? "bg-[#111827]"   : "bg-white",
-            tabBg: isDark ? ""   : "bg-gray-100"
+            containerBg: isDark ? "" : "bg-white",
+            textColor: isDark ? "text-white" : "text-gray-600",
+            leftPaneBg: isDark ? "bg-[#1F2A37]" : "bg-gray-100",
+            inputBg: isDark ? "bg-[#111827]" : "bg-white",
+            borderColor: isDark ? "border-gray-700" : "border-gray-300",
+            cardGridBg: isDark ? "bg-[#111827]" : "bg-white",
+            tabBg: isDark ? "" : "bg-gray-100"
         };
 
         // 📦 Container principal
@@ -115,7 +146,7 @@ class App extends Templates {
 
         // 🟩 Left Pane
         const leftPane = $("<div>", {
-            class: `flex-1 flex sm:w-[60%] flex-col rounded-xl overflow-hidden ${colors.leftPaneBg} border ${colors.borderColor} shadow-md`
+            class: `flex-1 flex sm:w-[60%] flex-col rounded-xl overflow-hidden ${colors.leftPaneBg}  ${colors.borderColor} shadow-md`
         });
 
         // 🔍 Contenedor de búsqueda
@@ -169,7 +200,7 @@ class App extends Templates {
         // 🟥 Ticket
         const rightPane = $("<div>", {
             id: "orderPanel",
-          class: `w-full xs:w-[40%] md:w-[27rem] flex flex-col ${colors.leftPaneBg} border ${colors.borderColor} rounded-xl shadow-md`,
+            class: `w-full xs:w-[40%] md:w-[27rem] flex flex-col ${colors.leftPaneBg} ${colors.borderColor} rounded-xl shadow-md`,
         });
 
         container.append(leftPane, rightPane);
@@ -246,13 +277,12 @@ class App extends Templates {
         });
     }
 
-
     createProductGrid(options) {
         const defaults = {
             parent: "productGrid",
             data: [],
             theme: "dark",
-            icon: "icon-star", // Ícono por defecto si no hay imagen
+            icon: "icon-star",
             onClick: (item) => { }
         };
 
@@ -280,6 +310,7 @@ class App extends Templates {
             });
 
             if (item.image && item.image.trim() !== "") {
+
                 imageWrap.append(
                     $("<img>", {
                         src: baseUrl + item.image,
@@ -287,10 +318,11 @@ class App extends Templates {
                         class: "object-cover h-full w-full"
                     })
                 );
+
             } else {
                 imageWrap.append(
                     $("<i>", {
-                        class: `${item.icon || opts.icon} text-4xl text-gray-500`
+                        class: `${item.icon || opts.icon} text-3xl text-gray-500`
                     })
                 );
             }
@@ -301,7 +333,7 @@ class App extends Templates {
                     text: item.name ?? item.valor
                 }),
                 $("<p>", {
-                    class: `${priceColor} font-semibold text-lg mt-1`,
+                    class: `${priceColor} font-semibold text-sm mt-1`,
                     text: `${formatPrice(item.price)}`
                 }),
                 $("<div>", { class: "text-right mt-1" }).append(
@@ -320,7 +352,6 @@ class App extends Templates {
             container.append(card);
         });
     }
-
 
     posLayout(options) {
         const defaults = {
@@ -342,11 +373,11 @@ class App extends Templates {
         });
 
         const leftPane = $("<div>", {
-            class: "flex-1 flex flex-col rounded-xl overflow-hidden bg-[#1F2A37] border border-gray-600 shadow-md"
+            class: "flex-1 flex flex-col rounded-xl overflow-hidden bg-[#1F2A37]  shadow-md"
         });
 
         const rightPane = $("<div>", {
-            class: "w-full md:w-[27rem] flex flex-col bg-[#1F2A37] border border-gray-600 rounded-xl shadow-md"
+            class: "w-full md:w-[27rem] flex flex-col bg-[#1F2A37]  rounded-xl shadow-md"
         });
 
         const headerRight = $("<div>", {
@@ -601,13 +632,28 @@ class App extends Templates {
         container.append(header, orderItems, totals);
     }
 
+    async addProduct(product_id){
+
+        const data = await useFetch({ 
+        url: api,
+        data: {
+            opc       : "addProduct",
+            id        : id,
+            product_id: product_id
+        } 
+        });
+
+
+    }
+
     // auxiliares.
     searchFilter(options) {
         const opts = Object.assign({
-            parent: "searchProduct",   // ID del input de búsqueda
-            gridId: "productGrid",      // ID del grid con las cards
-            selector: ".card",          // Clase que identifica cada producto (card)
-            targetTextSelector: "h3"    // Elemento dentro de cada card que contiene el nombre
+            parent: "searchProduct",
+            gridId: "productGrid",
+            selector: ".card",
+            targetTextSelector: "h3"
+
         }, options);
 
         const input = $(`#${opts.parent}`);
@@ -631,11 +677,5 @@ class App extends Templates {
     }
 
 
-
-
-
-
-   
-   
-   
 }
+
