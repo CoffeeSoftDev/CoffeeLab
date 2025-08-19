@@ -395,34 +395,34 @@ class Components extends Complements {
                     extendsAjax.then((data) => {
 
 
-                            let attr_table_filter = {
-                                data: data,
-                                f_size: '14',
-                                id: 'tbSearch'
-                            };
+                        let attr_table_filter = {
+                            data: data,
+                            f_size: '14',
+                            id: 'tbSearch'
+                        };
 
-                            attr_table_filter = Object.assign(attr_table_filter, opts.attr);
+                        attr_table_filter = Object.assign(attr_table_filter, opts.attr);
 
-                            opts.methods.send(data);
+                        opts.methods.send(data);
 
-                            if (opts.success)
-                                opts.success(data);
+                        if (opts.success)
+                            opts.success(data);
 
 
-                            if (opts.coffeesoft) {
+                        if (opts.coffeesoft) {
 
-                                attr_table_filter.parent = opts.parent;
+                            attr_table_filter.parent = opts.parent;
 
-                                this.createCoffeTable(attr_table_filter);
+                            this.createCoffeTable(attr_table_filter);
 
-                            } else {
+                        } else {
 
-                                $('#' + options.parent).rpt_json_table2(attr_table_filter);
-                            }
+                            $('#' + options.parent).rpt_json_table2(attr_table_filter);
+                        }
 
-                            if (dataConfig.datatable) {
-                                window[dataConfig.fn_datatable]('#' + attr_table_filter.id, dataConfig.pag);
-                            }
+                        if (dataConfig.datatable) {
+                            window[dataConfig.fn_datatable]('#' + attr_table_filter.id, dataConfig.pag);
+                        }
 
 
 
@@ -1635,7 +1635,7 @@ class Components extends Complements {
             color_th: "bg-[#003360] text-gray-100",
             color_row: "bg-white hover:bg-gray-50",
             color_group: "bg-gray-200",
-            class: "w-full table-fixed text-sm text-gray-800",
+            class: "w-full table-auto text-sm text-gray-800",
             onEdit: () => { },
             onDelete: () => { },
             extends: true,
@@ -1652,7 +1652,7 @@ class Components extends Complements {
             defaults.color_th = "bg-[#0F172A] text-white";
             defaults.color_row = "bg-[#1E293B] text-white";
             defaults.color_group = "bg-[#334155] text-white";
-            defaults.class = "w-full table-fixed text-sm text-white";
+            defaults.class = "w-full table-auto text-sm text-white";
             defaults.border_table = "";
             defaults.border_row = "border-t border-gray-700";
             defaults.color_row_alt = "bg-[#111827]";
@@ -1660,15 +1660,26 @@ class Components extends Complements {
             defaults.color_th = "bg-[#003360] text-white";
             defaults.color_row = "bg-white ";
             defaults.color_group = "bg-gray-100 ";
-            defaults.class = "w-full table-auto text-sm ";
+            defaults.class = "w-full text-sm ";
             defaults.border_table = "border rounded-lg  border-gray-300";
             defaults.border_row = "border-t border-gray-300";
             defaults.color_row_alt = "bg-gray-100";
-        } else {
+        }
+
+        else if (options.theme === 'shadcdn') {
+            defaults.color_th = "bg-[#111827] text-white";
+            defaults.color_row = "bg-white text-[#111827]";
+            defaults.color_group = "bg-[#F1F5F9]";
+            defaults.class = "w-full table-auto text-sm";
+            defaults.border_table = "border rounded-md border-[#CBD5E1]";
+            defaults.border_row = "border-t border-[#E2E8F0]";
+            defaults.color_row_alt = "bg-[#F8FAFC]";
+        }
+        else {
             defaults.color_th = "bg-[#F2F5F9] text-[#003360]";
             defaults.color_row = "bg-white hover:bg-gray-600";
             defaults.color_group = "bg-gray-200";
-            defaults.class = "w-full table-fixed text-sm text-gray-800";
+            defaults.class = "w-full table-auto text-sm text-gray-800";
             defaults.border_table = "border rounded-lg  border-gray-300";
             defaults.border_row = "border-t border-gray-200";
             defaults.color_row_alt = "bg-gray-50";
@@ -1680,24 +1691,14 @@ class Components extends Complements {
         });
 
         if (opts.title) {
-            const titleContainer = $("<div>", {
-                class: `flex flex-col gap-1 px-4 py-3 rounded-t-md ${opts.dark ? 'bg-gray-800 text-gray-100' : 'bg-white text-gray-800'
-                    }`
-            });
-            const title = $("<h2>", {
-                class: "text-lg font-semibold leading-tight",
-                text: opts.title,
-            });
-            titleContainer.append(title);
-            if (opts.subtitle) {
-                const subtitle = $("<p>", {
-                    class: `text-sm mt-1 ${opts.dark ? 'text-gray-400' : 'text-gray-600'}`,
-                    text: opts.subtitle,
-                });
-                titleContainer.append(subtitle);
-            }
-            container.append(titleContainer);
+            const titleRow = $(`
+            <div class="flex flex-col py-2 ">
+                <span class="text-lg font-semibold ${opts.dark ? 'text-gray-100' : 'text-gray-800'}">${opts.title}</span>
+                ${opts.subtitle ? `<p class="text-sm ${opts.dark ? 'text-gray-400' : 'text-gray-600'} mt-1">${opts.subtitle}</p>` : ''}
+            </div>`);
+            container.append(titleRow);
         }
+
         const table = $("<table>", { id: opts.id, class: ` border-separate border-spacing-0 ${opts.border_table} ${opts.class}` });
         const thead = $("<thead>");
 
@@ -1747,7 +1748,7 @@ class Components extends Complements {
                 if (clave != "opc" && clave != "id") {
                     clave = (clave == 'btn' || clave == 'btn_personalizado' || clave == 'a' || clave == 'dropdown') ? '<i class="icon-gear"> </i>' : clave;
                     autoHeaderRow.append($("<th>", {
-                        class: `px-3 py-2 ${opts.color_th} capitalize text-center font-semibold`,
+                        class: `px-2 py-2 ${opts.color_th} capitalize text-center font-semibold`,
                         style: `font-size:${opts.f_size}px;`
                     }).html(clave));
                 }
@@ -1759,6 +1760,28 @@ class Components extends Complements {
         const tbody = $("<tbody>");
 
         opts.data.row.forEach((data, i) => {
+
+            // 🚩 Detectamos fila de agrupación horizontal
+            if (data.colgroup) {
+                const colspan = opts.data.thead?.length || Object.keys(data).length - 2; // exclude id, colgroup
+                const labelKey = Object.keys(data).find(key => !['id', 'colgroup'].includes(key));
+                const labelText = data[labelKey] || "";
+                const paddingClass = labelText ? "py-2" : "py-1";
+
+                const colgroupRow = $("<tr>").append(
+                    $("<td>", {
+                        colspan: colspan,
+                        class: `px-3 ${paddingClass} font-semibold lowercase capitalize ${opts.border_row} ${opts.color_group}`,
+                        html: labelText
+                    })
+                );
+
+                tbody.append(colgroupRow);
+                return; // Salta esta iteración
+            }
+
+
+
             let bg_grupo = "";
 
             if (data.opc) {
@@ -1793,7 +1816,7 @@ class Components extends Complements {
                 let cellAttributes = {
                     id: `${key}_${data.id}`,
                     style: `font-size:${opts.f_size}px;`,
-                    class: `${align} ${opts.border_row} px-3 py-2  ${colorBg}`,
+                    class: `${align} ${opts.border_row} px-3 py-2 truncate ${colorBg}`,
                     html: tdText
                 };
 
@@ -1802,7 +1825,7 @@ class Components extends Complements {
                 // Si opts.extends está activo y data[key] es objeto, sobrescribe atributos
                 if (opts.extends && typeof data[key] === 'object' && data[key] !== null) {
                     cellAttributes = Object.assign(cellAttributes, data[key]);
-                    cellAttributes.class += ` ${opts.border_row} `;
+                    cellAttributes.class += ` ${opts.border_row} ${colorBg} `;
                 }
 
                 tr.append($("<td>", cellAttributes));
@@ -1816,44 +1839,42 @@ class Components extends Complements {
 
                     const button_a = $("<a>", atributos);
                     actions.append(button_a);
-
                 });
                 tr.append(actions);
             }
 
             if (data.dropdown) {
-                actions = $("<td>", { class: `px-2 py-2 relative justify-center items-center ${colorBg} ${opts.border_row}` });
+                actions = $("<td>", { class: `px-2 py-2 flex justify-center items-center ${colorBg} ${opts.border_row}` });
 
-                const wrapper = $("<div>", { class: "relative" });
+                const wrapper = $("<div>", {
+                    class: "relative"
+                });
 
                 const btn = $("<button>", {
-                    class: "icon-dot-3 text-gray-500 hover:text-gray-800",
+                    class: "icon-dot-3 text-gray-600 hover:text-blue-600",
                     click: function (e) {
                         e.stopPropagation();
-                        // Cierra todos los menús antes de mostrar el actual
-                        $("ul.dropdown-menu-custom").hide();
                         $(this).next("ul").toggle();
                     }
                 });
 
                 const menu = $("<ul>", {
-                    class: "absolute right-0 mt-2 w-44 z-10 pointer bg-white border rounded-md shadow-md hidden dropdown-menu-custom",
+                    class: "absolute right-0 mt-2 w-44 z-10 bg-white border rounded-md shadow-md hidden",
                 });
 
                 data.dropdown.forEach((item) =>
                     menu.append(`
-                    <li>
-                        <a onclick="${item.onclick}" text-left class="block px-3 py-2 text-sm hover:bg-gray-200 text-gray-800">
-                        <i class="${item.icon} text-blue-600"></i> ${item.text}
-                        </a>
-                    </li>`)
+                    <li><a onclick="${item.onclick}"text-left class="block px-4 py-2 text-sm hover:bg-gray-100 text-gray-800">
+                    <i class="${item.icon} "></i> ${item.text}</a></li>`)
                 );
+
+
+
+
 
                 wrapper.append(btn, menu);
                 actions.append(wrapper);
-
-                // Oculta todos los menús al hacer click fuera
-                $(document).on("click", () => $("ul.dropdown-menu-custom").hide());
+                $(document).on("click", () => menu.hide());
             }
 
             tr.append(actions);
@@ -1872,7 +1893,6 @@ class Components extends Complements {
         `).appendTo("head");
     }
 
-
     tabLayout(options) {
         const defaults = {
             parent: "root",
@@ -1883,7 +1903,7 @@ class Components extends Complements {
             tab: {
                 size: 'px-3 py-1',
             },
-            content: { class:'',id:''},
+            content: { class: '', id: '' },
             renderContainer: true,
 
             json: [

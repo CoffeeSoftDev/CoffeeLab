@@ -2,7 +2,8 @@
 // init vars.
 let app, sub;
 let api = "https://erp-varoch.com/DEV/capital-humano/ctrl/ctrl-rotacion-de-personal.php";
-let api2 = "https://erp-varoch.com/ERP24/produccion/control-fogaza/ctrl/ctrl-pedidos.php";
+let api2 = "https://erp-varoch.com/DEV/kpi/ctrl/ctrl-ingresos.php";
+let data;
 
 $(async () => {
     // instancias.
@@ -13,7 +14,7 @@ $(async () => {
 class App extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
-        this.PROJECT_NAME = "";
+        this.PROJECT_NAME = "Ingresos";
     }
 
     init() {
@@ -21,10 +22,109 @@ class App extends Templates {
     }
 
     render(options) {
-        // this.layout();
-        // this.filterBar();
-        this.dashboard();
+        this.layout();
+        this.filterBar();
+        this.lsIngresos();
+
     }
+// 
+    layout() {
+        this.primaryLayout({
+            parent: `root`,
+            id: this.PROJECT_NAME,
+            card: {
+                filterBar: { class: 'w-full  border-b pb-2 ', id: `filterBar${this.PROJECT_NAME}` },
+                container: { class: 'w-full my-2 h-full ', id: `container${this.PROJECT_NAME}` }
+            }
+        });
+    }
+
+    filterBar() {
+        this.createfilterBar({
+            parent: `filterBar${this.PROJECT_NAME}`,
+            data: [
+                {
+                    opc: "select",
+                    id: "udn",
+                    lbl: "Seleccionar udn",
+
+                    class: "col-sm-3",
+                    data: [
+                        {id:'5',valor:'BAOS'}
+                    ],
+                    onchange: `ingresos.lsIngresos()`,
+                },
+                {
+                    opc: "select",
+                    id: "anio",
+                    lbl: "Año",
+                    class: "col-sm-3",
+                    data: [
+                        { id: "2025", valor: "2025" },
+                        { id: "2024", valor: "2024" },
+                        { id: "2023", valor: "2023" },
+
+                    ],
+                    onchange: `ingresos.lsIngresos()`,
+
+                },
+                {
+                    opc: "select",
+                    id: "mes",
+                    lbl: "Mes",
+                    class: "col-sm-3",
+                    data: moment.months().map((m, i) => ({ id: i + 1, valor: m })),
+                    onchange: `app.lsIngresos()`,
+
+                },
+
+                {
+                    opc: "select",
+                    id: "type",
+                    lbl: "Consultar",
+                    class: "col-sm-3",
+                    data: [
+                        { id: "1", valor: " Ingresos por día" },
+                        { id: "2", valor: "Captura de ingresos" },
+                    ],
+                    onchange: `app.lsIngresos()`,
+                },
+            ],
+        });
+    }
+
+    lsIngresos() {
+
+        $("#containerIngresos").html(`
+            <div class="px-2 pt-2 pb-2">
+                <h2 class="text-2xl font-semibold ">📦 VENTAS DIARIAS</h2>
+                <p class="text-gray-400">Consultar y capturar ventas diaria por unidad de negocio (ingresos)</p>
+            </div>
+
+            <div id="container-table-ingresos"></div>`);
+
+        this.createTable({
+            parent: "container-table-ingresos",
+            idFilterBar: `filterBarIngresos`,
+            data: { opc: 'list' },
+            coffeesoft: true,
+            conf: { datatable: false, pag: 15 },
+            attr: {
+                id: "tbIngresos",
+                theme: 'corporativo',
+                center: [1, 2, 3],
+                right: [4, 6]
+            },
+
+        });
+
+    }
+
+
+
+
+
+
 
     dashboard() {
 
@@ -145,24 +245,7 @@ class App extends Templates {
     }
 
 
-    layout() {
-        this.primaryLayout({
-            parent: "root",
-            id: this.PROJECT_NAME,
-            card: {
-                filterBar: {
-                    class: "line",
-                    id: "filterBar" + this.PROJECT_NAME,
-                },
-                container: {
-                    id: "container" + this.PROJECT_NAME,
-                    class: ''
-                },
-            },
-        });
-
-        // this.addModifier()
-    }
+   
 
     // Rotation.
     layoutNewRotation(request) {
@@ -214,7 +297,6 @@ class App extends Templates {
 
         this.newRotation(data);
     }
-
 
     async viewLayout() {
         const mes = moment().format('MMMM').toUpperCase();

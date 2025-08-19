@@ -102,13 +102,18 @@ class App extends Templates {
             }
         });
 
-        this.createProductTabs({ data: pos.modifier });
+        this.createProductTabs({ data: pos.modifier, 
+            
+        onChange: (category) => { 
+            console.log(category)
+            this.listProduct()
+        } 
+        
+        });
 
         this.createProductGrid({ 
             data: pos.products,
-
             onClick: (item) => { 
-                
                 this.addProduct(item.id)
             } 
         });
@@ -632,13 +637,35 @@ class App extends Templates {
         container.append(header, orderItems, totals);
     }
 
+
+
+    // Product.
+
+    async listProduct(){
+
+        const pos = await useFetch({ url: api, data: { opc: "init" } });
+
+        this.createProductGrid({
+            data: pos.products,
+            onClick: (item) => {
+                this.addProduct(item.id)
+            }
+        });
+
+
+    }
+
+
+
+
+
     async addProduct(product_id){
 
         const data = await useFetch({ 
         url: api,
         data: {
             opc       : "addProduct",
-            id        : id,
+            id: idFolio,
             product_id: product_id
         } 
         });
