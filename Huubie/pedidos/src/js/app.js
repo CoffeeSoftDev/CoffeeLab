@@ -194,7 +194,7 @@ class App extends Templates {
 
         const grid = $("<div>", {
             id: "productGrid",
-            class: `grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4  ${colors.borderColor} p-4 rounded ${colors.cardGridBg}`
+            class: `grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-4  ${colors.borderColor} p-4 rounded ${colors.cardGridBg}`
         });
 
         productGridContainer.append(grid);
