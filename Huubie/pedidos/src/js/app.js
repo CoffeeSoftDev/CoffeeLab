@@ -67,24 +67,7 @@ class App extends Templates {
             ],
         });
 
-        // this.createPOSContainers({
-        //     parent: "container-package",
-        //     id: "pedido",
-        //     onChange: (item) => {
-        //         this.searchFilter({ parent: 'searchProduct' })
-        //     }
-        // });
 
-        // this.createProductTabs({ data: modifier });
-
-        // this.createProductGrid({
-        //     data: products,
-        //     onClick: (request) => {
-
-        //     }
-        // });
-
-        // this.createOrderPanel();
 
     }
 
@@ -102,12 +85,13 @@ class App extends Templates {
             }
         });
 
-        this.createProductTabs({ data: pos.modifier,
+        this.createProductTabs({
+            data: pos.modifier,
 
-        onChange: (category) => {
-            console.log('>',category);
-            this.listProduct(category)
-        }
+            onChange: (category) => {
+                console.log(category);
+                this.listProduct(category)
+            }
 
         });
 
@@ -119,6 +103,9 @@ class App extends Templates {
         });
 
         this.createOrderPanel();
+        this.updateCart({
+            data: pos.ls,
+        });
 
     }
 
@@ -127,7 +114,7 @@ class App extends Templates {
             parent: "container-package",
             id: "posLayout",
             theme: "dark", // 'light' | 'dark'
-            class: "flex text-sm h-100 text-white gap-3 ",
+            class: "flex flex-col md:flex-row text-sm h-100 text-white gap-3",
             onChange: (item) => { }
         }, options);
 
@@ -151,12 +138,12 @@ class App extends Templates {
 
         // 🟩 Left Pane
         const leftPane = $("<div>", {
-            class: `flex-1 flex sm:w-[60%] flex-col rounded-xl overflow-hidden ${colors.leftPaneBg}  ${colors.borderColor} shadow-md`
+            class: `flex-1 flex flex-col rounded-xl overflow-hidden ${colors.leftPaneBg} ${colors.borderColor} shadow-md`
         });
 
         // 🔍 Contenedor de búsqueda
         const searchContainer = $("<div>", {
-            class: `p-3 flex items-center justify-between space-x-2  ${colors.borderColor}`
+            class: `p-3 flex items-center justify-between space-x-2 ${colors.borderColor}`
         });
 
         const searchInputWrap = $("<div>", {
@@ -180,7 +167,7 @@ class App extends Templates {
         searchInputWrap.append(inputSearch, searchIcon);
         searchContainer.append(searchInputWrap);
 
-        // 🔽 Área visual de tabs de categoría (temporal)
+        // 🔽 Área visual de tabs de categoría
         const categoryTabs = $("<div>", {
             id: "categoryTabs",
             class: `${colors.textColor} p-4 ${colors.tabBg} mb-2 text-center ${colors.borderColor}`,
@@ -194,7 +181,7 @@ class App extends Templates {
 
         const grid = $("<div>", {
             id: "productGrid",
-            class: `grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 lg:grid-cols-6 gap-4  ${colors.borderColor} p-4 rounded ${colors.cardGridBg}`
+            class: `grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 ${colors.borderColor} p-4 rounded ${colors.cardGridBg}`
         });
 
         productGridContainer.append(grid);
@@ -202,10 +189,19 @@ class App extends Templates {
         // Ensamblar left pane
         leftPane.append(searchContainer, categoryTabs, productGridContainer);
 
-        // 🟥 Ticket
+        // 🟥 Ticket (Right Panel)
         const rightPane = $("<div>", {
             id: "orderPanel",
-            class: `w-full xs:w-[40%] md:w-[27rem] flex flex-col ${colors.leftPaneBg} ${colors.borderColor} rounded-xl shadow-md`,
+            class: `
+            w-full
+            md:w-[27rem]
+            max-w-full
+            flex flex-col
+            ${colors.leftPaneBg}
+            ${colors.borderColor}
+            rounded-xl
+            shadow-md
+        `
         });
 
         container.append(leftPane, rightPane);
@@ -637,13 +633,84 @@ class App extends Templates {
         container.append(header, orderItems, totals);
     }
 
+    updateCart(options) {
+        const opts = Object.assign({
+            parent  : "orderItems",
+            data    : [],
+            theme   : "dark",
+            onQuanty: (id, action) => { },
+            onEdit  : (id) => { },
+            onRemove: (id) => { }
+        }, options);
+
+        const isDark      = opts.theme === "dark";
+        const textColor   = isDark ? "text-white" : "text-gray-800";
+        const subColor    = isDark ? "text-blue-300" : "text-blue-600";
+        const borderColor = isDark ? "border-gray-700" : "border-gray-300";
+        const bgCard      = isDark ? "bg-[#1E293B]" : "bg-white";
+        const mutedColor  = isDark ? "text-gray-300" : "text-gray-600";
+
+        const container = $(`#${opts.parent}`).empty();
+
+        opts.data.forEach(item => {
+            const card = $("<div>", {
+                class: `flex justify-between items-center ${bgCard} border ${borderColor} rounded-xl p-4 shadow-sm`
+            });
+
+            // 🧁 Info producto
+            const left = $("<div>", { class: "flex-1" }).append(
+                $("<p>", { class: `${textColor} font-medium text-sm`, text: item.name }),
+                $("<p>", { class: `${subColor} font-semibold text-sm`, text: formatPrice(item.price) })
+            );
+
+            // ⚙️ Acciones
+            const right = $("<div>", { class: "flex flex-col items-end gap-2" });
+
+            const quantityRow = $("<div>", { class: "flex items-center gap-2" }).append(
+                $("<button>", {
+                    class: "bg-gray-700 text-white rounded px-2",
+                    html: "−",
+                    click: () => opts.onQuanty(item.id, 0)
+                }),
+                $("<span>", {
+                    class: `${textColor}`,
+                    text: item.qty
+                }),
+                $("<button>", {
+                    class: "bg-gray-700 text-white rounded px-2",
+                    html: "+",
+                    click: () => opts.onQuanty(item.id, 2)
+                }),
+                $("<button>", {
+                    class: "text-blue-400 hover:text-blue-600",
+                    html: `<i class="icon-pencil"></i>`,
+                    click: () => opts.onEdit(item.id)
+                }),
+                $("<button>", {
+                    class: "text-gray-400 hover:text-red-400",
+                    html: `<i class="icon-trash"></i>`,
+                    click: () => opts.onRemove(item.id)
+                })
+            );
+
+            const subtotal = $("<p>", {
+                class: `${mutedColor} text-sm`,
+                text: `Subtotal: ${formatPrice(item.price * item.qty)}`
+            });
+
+            right.append(quantityRow, subtotal);
+            card.append(left, right);
+            container.append(card);
+        });
+    }
+
 
 
     // Product.
 
-    async listProduct(id){
+    async listProduct(id) {
 
-        const pos = await useFetch({ url: api, data: { opc: "lsProducto",id:id } });
+        const pos = await useFetch({ url: api, data: { opc: "lsProducto", id: id } });
 
         this.createProductGrid({
             data: pos.products,
@@ -655,21 +722,16 @@ class App extends Templates {
 
     }
 
-
-
-
-
-    async addProduct(product_id){
+    async addProduct(product_id) {
 
         const data = await useFetch({
-        url: api,
-        data: {
-            opc       : "addProduct",
-            id: idFolio,
-            product_id: product_id
-        }
+            url: api,
+            data: {
+                opc       : "addProduct",
+                pedidos_id: idFolio,
+                product_id: product_id
+            }
         });
-
 
     }
 
