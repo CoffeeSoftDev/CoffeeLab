@@ -104,7 +104,7 @@ class App extends Templates {
 
         this.createOrderPanel();
         this.updateCart({
-            data: pos.ls,
+            data: pos.list,
         });
 
     }
@@ -635,51 +635,72 @@ class App extends Templates {
 
     updateCart(options) {
         const opts = Object.assign({
-            parent  : "orderItems",
-            data    : [],
-            theme   : "dark",
-            onQuanty: (id, action) => { },
-            onEdit  : (id) => { },
+            parent: "orderItems",
+            data: [],
+            theme: "dark",
+            onQuanty: (id, action, newQuantity) => { },
+            onEdit: (id) => { },
             onRemove: (id) => { }
         }, options);
 
-        const isDark      = opts.theme === "dark";
-        const textColor   = isDark ? "text-white" : "text-gray-800";
-        const subColor    = isDark ? "text-blue-300" : "text-blue-600";
+        const isDark = opts.theme === "dark";
+        const textColor = isDark ? "text-white" : "text-gray-800";
+        const subColor = isDark ? "text-blue-300" : "text-blue-600";
         const borderColor = isDark ? "border-gray-700" : "border-gray-300";
-        const bgCard      = isDark ? "bg-[#1E293B]" : "bg-white";
-        const mutedColor  = isDark ? "text-gray-300" : "text-gray-600";
+        const bgCard = isDark ? "bg-[#1E293B]" : "bg-white";
+        const mutedColor = isDark ? "text-gray-300" : "text-gray-600";
 
         const container = $(`#${opts.parent}`).empty();
 
-        opts.data.forEach(item => {
+        // Clonar los datos
+        const data = [...opts.data];
+
+        data.forEach((item, index) => {
             const card = $("<div>", {
                 class: `flex justify-between items-center ${bgCard} border ${borderColor} rounded-xl p-4 shadow-sm`
             });
 
-            // 🧁 Info producto
-            const left = $("<div>", { class: "flex-1" }).append(
-                $("<p>", { class: `${textColor} font-medium text-sm`, text: item.name }),
-                $("<p>", { class: `${subColor} font-semibold text-sm`, text: formatPrice(item.price) })
+            const info = $("<div>", { class: "flex-1" }).append(
+                $("<p>", {
+                    class: `${textColor} font-medium text-sm`,
+                    text: item.name
+                }),
+                $("<p>", {
+                    class: `${subColor} font-semibold text-sm`,
+                    text: formatPrice(item.price)
+                })
             );
 
-            // ⚙️ Acciones
-            const right = $("<div>", { class: "flex flex-col items-end gap-2" });
+            const actions = $("<div>", { class: "flex flex-col items-end gap-2" });
 
-            const quantityRow = $("<div>", { class: "flex items-center gap-2" }).append(
+            const quantityRow = $("<div>", { class: "flex items-center gap-2" });
+
+            quantityRow.append(
                 $("<button>", {
                     class: "bg-gray-700 text-white rounded px-2",
                     html: "−",
-                    click: () => opts.onQuanty(item.id, 0)
+                    click: () => {
+                        if (item.quantity > 1) {
+                            item.quantity--;
+                            opts.onQuanty(item.id, 0, item.quantity);
+                            opts.data = data;
+                            this.updateCart(opts);
+                        }
+                    }
                 }),
                 $("<span>", {
                     class: `${textColor}`,
-                    text: item.qty
+                    text: item.quantity
                 }),
                 $("<button>", {
                     class: "bg-gray-700 text-white rounded px-2",
                     html: "+",
-                    click: () => opts.onQuanty(item.id, 2)
+                    click: () => {
+                        item.quantity++;
+                        opts.onQuanty(item.id, 2, item.quantity);
+                        opts.data = data;
+                        this.updateCart(opts);
+                    }
                 }),
                 $("<button>", {
                     class: "text-blue-400 hover:text-blue-600",
@@ -689,22 +710,26 @@ class App extends Templates {
                 $("<button>", {
                     class: "text-gray-400 hover:text-red-400",
                     html: `<i class="icon-trash"></i>`,
-                    click: () => opts.onRemove(item.id)
+                    click: () => {
+                        // Eliminar producto del arreglo
+                        data.splice(index, 1);
+                        opts.onRemove(item.id);
+                        opts.data = data;
+                        this.updateCart(opts);
+                    }
                 })
             );
 
             const subtotal = $("<p>", {
                 class: `${mutedColor} text-sm`,
-                text: `Subtotal: ${formatPrice(item.price * item.qty)}`
+                text: `Subtotal: ${formatPrice(item.price * item.quantity)}`
             });
 
-            right.append(quantityRow, subtotal);
-            card.append(left, right);
+            actions.append(quantityRow, subtotal);
+            card.append(info, actions);
             container.append(card);
         });
     }
-
-
 
     // Product.
 
@@ -724,14 +749,19 @@ class App extends Templates {
 
     async addProduct(product_id) {
 
-        const data = await useFetch({
+        const pos = await useFetch({
             url: api,
             data: {
-                opc       : "addProduct",
+                opc: "addProduct",
                 pedidos_id: idFolio,
                 product_id: product_id
             }
         });
+
+        this.updateCart({
+            data: pos.list,
+        });
+
 
     }
 
