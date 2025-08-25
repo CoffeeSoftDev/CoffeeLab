@@ -102,9 +102,19 @@ class App extends Templates {
             }
         });
 
-        this.createOrderPanel();
-        this.updateCart({
+        this.createOrderPanel({
+          title: `Orden #P-00${idFolio}`,
+            onClear: () => {
+                this.confirmClearOrder(idFolio);
+            }
+
+        });
+
+        this.renderCart({
             data: pos.list,
+            onRemove: (id) => {
+                this.removeProduct(id);
+            }
         });
 
     }
@@ -114,7 +124,7 @@ class App extends Templates {
             parent: "container-package",
             id: "posLayout",
             theme: "dark", // 'light' | 'dark'
-            class: "flex flex-col md:flex-row text-sm h-100 text-white gap-3",
+            class: "flex flex-col md:flex-row text-sm h-screen text-white ",
             onChange: (item) => { }
         }, options);
 
@@ -138,7 +148,7 @@ class App extends Templates {
 
         // 🟩 Left Pane
         const leftPane = $("<div>", {
-            class: `flex-1 flex flex-col rounded-xl overflow-hidden ${colors.leftPaneBg} ${colors.borderColor} shadow-md`
+            class: `flex-1 flex flex-col  overflow-hidden ${colors.leftPaneBg} ${colors.borderColor}`
         });
 
         // 🔍 Contenedor de búsqueda
@@ -197,10 +207,10 @@ class App extends Templates {
             md:w-[27rem]
             max-w-full
             flex flex-col
+            border-l
             ${colors.leftPaneBg}
             ${colors.borderColor}
-            rounded-xl
-            shadow-md
+           
         `
         });
 
@@ -566,6 +576,8 @@ class App extends Templates {
         $(`#${opts.parent}`).html(container);
     }
 
+    // Order ticket
+
     createOrderPanel(options) {
         const opts = Object.assign({
             parent: "orderPanel", // ID donde se monta
@@ -603,15 +615,15 @@ class App extends Templates {
             class: "p-4 border-t border-gray-700 bg-[#333D4C]"
         }).append(
             $("<div>", { class: "space-y-1 text-sm text-gray-300" }).append(
-                $("<div>", { class: "flex justify-between" }).append(
-                    $("<span>").text("Subtotal:"),
-                    $("<span>", { id: "subtotal", text: "$0.00" })
-                ),
-                $("<div>", { class: "flex justify-between" }).append(
-                    $("<span>").text("IVA (16%):"),
-                    $("<span>", { id: "tax", text: "$0.00" })
-                ),
-                $("<div>", { class: "border-t my-2 border-gray-700" }),
+                // $("<div>", { class: "flex justify-between" }).append(
+                //     $("<span>").text("Subtotal:"),
+                //     $("<span>", { id: "subtotal", text: "$0.00" })
+                // ),
+                // $("<div>", { class: "flex justify-between" }).append(
+                //     $("<span>").text("IVA (16%):"),
+                //     $("<span>", { id: "tax", text: "$0.00" })
+                // ),
+                // $("<div>", { class: "border-t my-2 border-gray-700" }),
                 $("<div>", { class: "flex justify-between font-bold text-blue-400" }).append(
                     $("<span>").text("Total:"),
                     $("<span>", { id: "total", text: "$0.00" })
@@ -624,7 +636,7 @@ class App extends Templates {
                 }),
                 $("<button>", {
                     class: "bg-blue-700 text-white rounded px-3 py-2 text-sm hover:bg-blue-800",
-                    html: "Cobrar"
+                    html: "Terminar"
                 })
             )
         );
@@ -633,14 +645,16 @@ class App extends Templates {
         container.append(header, orderItems, totals);
     }
 
-    updateCart(options) {
+    renderCart(options) {
         const opts = Object.assign({
             parent: "orderItems",
             data: [],
             theme: "dark",
+            totalSelector: "#total",
             onQuanty: (id, action, newQuantity) => { },
             onEdit: (id) => { },
-            onRemove: (id) => { }
+            onRemove: (id) => { },
+            onCleared: () => { } // callback opcional tras limpiar todo
         }, options);
 
         const isDark = opts.theme === "dark";
@@ -652,27 +666,20 @@ class App extends Templates {
 
         const container = $(`#${opts.parent}`).empty();
 
-        // Clonar los datos
         const data = [...opts.data];
+        let totalAcc = 0;
 
         data.forEach((item, index) => {
             const card = $("<div>", {
-                class: `flex justify-between items-center ${bgCard} border ${borderColor} rounded-xl p-4 shadow-sm`
+                class: `flex justify-between items-center ${bgCard} border ${borderColor} rounded-xl p-3 shadow-sm`
             });
 
             const info = $("<div>", { class: "flex-1" }).append(
-                $("<p>", {
-                    class: `${textColor} font-medium text-sm`,
-                    text: item.name
-                }),
-                $("<p>", {
-                    class: `${subColor} font-semibold text-sm`,
-                    text: formatPrice(item.price)
-                })
+                $("<p>", { class: `${textColor} font-medium text-sm`, text: item.name }),
+                $("<p>", { class: `${subColor} font-semibold text-sm`, text: formatPrice(item.price) })
             );
 
             const actions = $("<div>", { class: "flex flex-col items-end gap-2" });
-
             const quantityRow = $("<div>", { class: "flex items-center gap-2" });
 
             quantityRow.append(
@@ -684,14 +691,11 @@ class App extends Templates {
                             item.quantity--;
                             opts.onQuanty(item.id, 0, item.quantity);
                             opts.data = data;
-                            this.updateCart(opts);
+                            this.renderCart(opts);
                         }
                     }
                 }),
-                $("<span>", {
-                    class: `${textColor}`,
-                    text: item.quantity
-                }),
+                $("<span>", { class: `${textColor}`, text: item.quantity }),
                 $("<button>", {
                     class: "bg-gray-700 text-white rounded px-2",
                     html: "+",
@@ -699,7 +703,7 @@ class App extends Templates {
                         item.quantity++;
                         opts.onQuanty(item.id, 2, item.quantity);
                         opts.data = data;
-                        this.updateCart(opts);
+                        this.renderCart(opts);
                     }
                 }),
                 $("<button>", {
@@ -711,25 +715,69 @@ class App extends Templates {
                     class: "text-gray-400 hover:text-red-400",
                     html: `<i class="icon-trash"></i>`,
                     click: () => {
-                        // Eliminar producto del arreglo
                         data.splice(index, 1);
                         opts.onRemove(item.id);
                         opts.data = data;
-                        this.updateCart(opts);
+                        this.renderCart(opts);
                     }
                 })
             );
 
-            const subtotal = $("<p>", {
+            const lineTotal = (item.price || 0) * (item.quantity || 0);
+            totalAcc += lineTotal;
+
+            const totalEl = $("<p>", {
                 class: `${mutedColor} text-sm`,
-                text: `Subtotal: ${formatPrice(item.price * item.quantity)}`
+                text: `Total: ${formatPrice(lineTotal)}`
             });
 
-            actions.append(quantityRow, subtotal);
+            actions.append(quantityRow, totalEl);
             card.append(info, actions);
             container.append(card);
         });
+
+        if (opts.totalSelector) $(opts.totalSelector).text(formatPrice(totalAcc));
+
+        // Enlazar botón "Limpiar" si existe en el DOM (id="clearOrder")
+        $(document).off("click", "#clearOrder").on("click", "#clearOrder", () => {
+            this.confirmClearOrder({
+                onDone: () => {
+                    // Tras limpiar en backend, vaciamos UI
+                    opts.data = [];
+                    this.renderCart(opts);
+                    if (typeof opts.onCleared === "function") opts.onCleared();
+                }
+            });
+        });
     }
+
+    confirmClearOrder(id) {
+    
+
+        this.swalQuestion({
+            opts: {
+                title: "¿Desea eliminar todos los productos del ticket?",
+                text: "Esta acción vaciará el pedido actual.",
+                icon: "warning"
+            },
+            data: {
+                opc: "deleteAllProducts",
+                pedidos_id:  idFolio 
+            },
+            methods: {
+                send: (response) => {
+                    if (response?.status === 200) {
+                        alert({ icon: "success", text: response.message || "Ticket limpiado." });
+                       
+                    } else {
+                        alert({ icon: "info", title: "Oops!...", text: response?.message || "No se pudo limpiar el ticket." });
+                    }
+                }
+            }
+        });
+    }
+
+
 
     // Product.
 
@@ -753,17 +801,44 @@ class App extends Templates {
             url: api,
             data: {
                 opc: "addProduct",
+                quantity:1,
                 pedidos_id: idFolio,
                 product_id: product_id
             }
         });
 
-        this.updateCart({
+        this.renderCart({
             data: pos.list,
+            onRemove: (id) => {
+                this.removeProduct(id);
+            }
+        });
+    }
+
+
+    async removeProduct(id) {
+        console.log(id);
+        const pos = await useFetch({
+            url: api,
+            data: {
+                opc: "removeProduct",
+                pedidos_id: idFolio,
+                id: id
+            }
         });
 
 
+
+        // this.renderCart({
+        //     data: pos.list,
+        //     onRemove: (id) => {
+        //         console.log(id)
+        //     }
+        // });
     }
+
+
+
 
     // auxiliares.
     searchFilter(options) {
