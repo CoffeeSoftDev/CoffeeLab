@@ -1,6 +1,6 @@
 let url = 'https://huubie.com.mx/dev/pedidos/ctrl/ctrl-admin.php';
 let api = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-pedidos-catalogo.php";
-let app,pos;
+let app, pos;
 let modifier, products;
 let idFolio;
 
@@ -23,17 +23,17 @@ class Pos extends Templates {
         this.PROJECT_NAME = "Order";
     }
 
-    render(){
+    render() {
         this.layout();
 
     }
 
-    layout(){
+    layout() {
 
         this.createPOSContainers({
             parent: "container-package",
             id: "pedido",
-            theme:'dark',
+            theme: 'dark',
             onChange: (item) => {
                 this.searchFilter({ parent: 'searchProduct' })
             }
@@ -346,9 +346,9 @@ class Pos extends Templates {
                     html: "🖨 Imprimir"
                 }),
                 $("<button>", {
-                    id   : 'finishOrder',
+                    id: 'finishOrder',
                     class: "bg-blue-700 text-white rounded px-3 py-2 text-sm hover:bg-blue-800",
-                    html : "Terminar"
+                    html: "Terminar"
                 })
             )
         );
@@ -540,7 +540,7 @@ class Pos extends Templates {
             theme: "dark",
             totalSelector: "#total",
             onQuanty: (id, action, newQuantity) => { },
-            onEdit: (id) => { },  // ← aseguramos el callback
+            onEdit: (id) => { },
             onRemove: (id) => { },
             onCleared: () => { }
         }, options);
@@ -558,7 +558,6 @@ class Pos extends Templates {
         const data = [...opts.data];
         let totalAcc = 0;
 
-        // 🛒 Empty state
         if (data.length === 0) {
             const empty = $("<div>", {
                 class: "w-full h-full flex items-center justify-center"
@@ -586,15 +585,16 @@ class Pos extends Templates {
             return;
         }
 
-        // 🔁 Render items
         data.forEach((item, index) => {
             const card = $("<div>", {
                 class: `flex justify-between items-center ${bgCard} border ${borderColor} rounded-xl p-3 shadow-sm`
             });
 
-            const info = $("<div>", { class: "flex-1" }).append(
+            const info = $("<div>", { class: "flex-1 space-y-1" }).append(
                 $("<p>", { class: `${textColor} font-medium text-sm`, text: item.name }),
-                $("<p>", { class: `${subColor} font-semibold text-sm`, text: formatPrice(item.price) })
+                $("<p>", { class: `${subColor} font-semibold text-sm`, text: formatPrice(item.price) }),
+                item.dedication ? $("<p>", { class: `${mutedColor} text-xs italic`, text: `Dedicatoria: ${item.dedication}` }) : null,
+                item.order_details ? $("<p>", { class: `${mutedColor} text-xs`, text: `Detalles: ${item.order_details}` }) : null
             );
 
             const actions = $("<div>", { class: "flex flex-col items-end gap-2" });
@@ -624,8 +624,6 @@ class Pos extends Templates {
                         this.renderCart(opts);
                     }
                 }),
-
-                // ✏️ Botón editar
                 $("<button>", {
                     class: "text-blue-400 hover:text-blue-600",
                     html: `<i class="icon-pencil"></i>`,
@@ -633,7 +631,6 @@ class Pos extends Templates {
                         if (typeof opts.onEdit === "function") opts.onEdit(item.id);
                     }
                 }),
-
                 $("<button>", {
                     class: "text-gray-400 hover:text-red-400",
                     html: `<i class="icon-trash"></i>`,
@@ -661,14 +658,12 @@ class Pos extends Templates {
 
         if (opts.totalSelector) $(opts.totalSelector).text(formatPrice(totalAcc));
 
-        // 🔗 Botón limpiar
         $(document).off("click", "#clearOrder").on("click", "#clearOrder", () => {
             opts.data = [];
             this.renderCart(opts);
             if (typeof opts.onCleared === "function") opts.onCleared();
         });
     }
-
 
 
     // auxiliares.
@@ -797,12 +792,13 @@ class App extends Pos {
 
         this.renderCart({
             data: pos.list,
+
             onRemove: (id) => {
                 this.removeProduct(id);
             },
-            onEdit: (id) => { 
-                editProduct(id);
-            }, 
+            onEdit: (id) => {
+                this.editProduct(id);
+            },
         });
 
 
@@ -858,7 +854,6 @@ class App extends Pos {
 
     confirmClearOrder(id) {
 
-
         this.swalQuestion({
             opts: {
                 title: "¿Desea eliminar todos los productos del ticket?",
@@ -890,31 +885,79 @@ class App extends Pos {
     }
 
     async editProduct(id) {
-        const product = await useFetch({
+
+        const request = await useFetch({
             url: api,
             data: {
                 opc: "getProduct",
-                product_id
+                id: id
             }
         });
-       
 
-        const modalContent = $(`
-        <div class="p-4 bg-[#111827] rounded-lg">
-        
-        <h2 class="text-xl text-white font-semibold mb-1"></h2>
-        <p class="text-blue-400 text-md font-bold mb-2">$</p>
-        <p class="text-gray-400 text-sm">Descripción del producto disponible próximamente.</p>
-        </div>
-    `);
+        let product = request.data;
 
-        bootbox.dialog({
-            title: ``,
-            size: "large",
-            id: 'modalAdvance',
-            closeButton: true,
-            message: modalContent,
+        this.createModalForm({
+            id: 'formProductoView',
+            data: { opc: 'editProduct', id: id },
+            bootbox: {
+                title: ` <h2 class="text-lg font-semibold text-white">🎂 ${product.name} </h2>`,
+                // size: "large",
+                closeButton: true
+            },
+            autofill: product,
+            json: [
+
+
+                {
+                    opc: "input",
+                    id: "dedication",
+                    lbl: "dedicatoria",
+                    class: "col-12  mb-3",
+                },
+
+                {
+                    opc: "textarea",
+                    id: "order_details",
+                    lbl: "Observaciones",
+                    class: "col-12 mb-3",
+                    disabled: true
+                },
+
+                {
+                    opc: "div",
+                    id: "image",
+                    lbl: "Foto del producto",
+                    class: "col-12 mt-2",
+                    html: `
+                    <div class="col-12 mb-2">
+                        <div class="w-full p-2 border-2 border-dashed border-gray-500 rounded-xl text-center">
+                            <input
+                                type="file"
+                                id="archivos"
+                                name="archivos"
+                                class="hidden"
+                                multiple
+                                accept="image/*"
+                                onchange="app.previewImages(this, 'previewImagenes')"
+                            >
+                            <div class="flex flex-col items-center justify-center py-2 cursor-pointer" onclick="document.getElementById('archivos').click()">
+                                <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center mb-2">
+                                    <i class="icon-upload text-white"></i>
+                                </div>
+                                <p class="text-xs">Drag & Drop or <span class="text-purple-400 underline">choose file</span></p>
+                                <p class="text-[10px] text-gray-400 mt-1">JPEG, PNG</p>
+                            </div>
+                            <div id="previewImagenes" class="flex gap-2 flex-wrap mt-1"></div>
+                        </div>
+                    </div>
+                `
+                },
+
+
+
+            ]
         });
+
     }
 
     // Pos.
@@ -945,7 +988,7 @@ class App extends Pos {
                     min: 0, // 📛 Evita valores negativos desde el input
                     onkeyup: 'app.(' + saldoOriginal + ')'
                 },
-             
+
 
                 {
                     opc: "select",
