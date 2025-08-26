@@ -42,8 +42,6 @@ class Pos extends Templates {
     }
 
 
-
-
     // Components.
     createPOSContainers(options) {
         const opts = Object.assign({
@@ -542,7 +540,7 @@ class Pos extends Templates {
             theme: "dark",
             totalSelector: "#total",
             onQuanty: (id, action, newQuantity) => { },
-            onEdit: (id) => { },
+            onEdit: (id) => { },  // ← aseguramos el callback
             onRemove: (id) => { },
             onCleared: () => { }
         }, options);
@@ -557,22 +555,20 @@ class Pos extends Templates {
         const emptySub = isDark ? "text-gray-400" : "text-gray-500";
 
         const container = $(`#${opts.parent}`).empty();
-
         const data = [...opts.data];
         let totalAcc = 0;
 
-        // 🛒 Empty state (como en la imagen)
+        // 🛒 Empty state
         if (data.length === 0) {
             const empty = $("<div>", {
                 class: "w-full h-full flex items-center justify-center"
             }).append(
                 $("<div>", { class: "text-center" }).append(
-                    // SVG carrito (compatible sin dependencias)
                     $(`<svg xmlns="http://www.w3.org/2000/svg" class="mx-auto mb-3" width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="${isDark ? '#9CA3AF' : '#6B7280'}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-             <circle cx="9" cy="21" r="1"></circle>
-             <circle cx="20" cy="21" r="1"></circle>
-             <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h7.72a2 2 0 0 0 2-1.61L21 6H6"></path>
-           </svg>`),
+                    <circle cx="9" cy="21" r="1"></circle>
+                    <circle cx="20" cy="21" r="1"></circle>
+                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h7.72a2 2 0 0 0 2-1.61L21 6H6"></path>
+                </svg>`),
                     $("<p>", { class: `text-base font-medium ${emptyTitle}`, text: "No hay productos en la orden" }),
                     $("<p>", { class: `text-sm mt-1 ${emptySub}`, text: "Selecciona productos del catálogo" })
                 )
@@ -581,17 +577,16 @@ class Pos extends Templates {
             container.append(empty);
             if (opts.totalSelector) $(opts.totalSelector).text(formatPrice(0));
 
-            // Aún así dejamos enlazado el botón limpiar
             $(document).off("click", "#clearOrder").on("click", "#clearOrder", () => {
                 opts.data = [];
                 this.renderCart(opts);
                 if (typeof opts.onCleared === "function") opts.onCleared();
             });
 
-            return; // no continuar renderizando cards
+            return;
         }
 
-        // 🔁 Render de items
+        // 🔁 Render items
         data.forEach((item, index) => {
             const card = $("<div>", {
                 class: `flex justify-between items-center ${bgCard} border ${borderColor} rounded-xl p-3 shadow-sm`
@@ -629,6 +624,16 @@ class Pos extends Templates {
                         this.renderCart(opts);
                     }
                 }),
+
+                // ✏️ Botón editar
+                $("<button>", {
+                    class: "text-blue-400 hover:text-blue-600",
+                    html: `<i class="icon-pencil"></i>`,
+                    click: () => {
+                        if (typeof opts.onEdit === "function") opts.onEdit(item.id);
+                    }
+                }),
+
                 $("<button>", {
                     class: "text-gray-400 hover:text-red-400",
                     html: `<i class="icon-trash"></i>`,
@@ -656,13 +661,14 @@ class Pos extends Templates {
 
         if (opts.totalSelector) $(opts.totalSelector).text(formatPrice(totalAcc));
 
-        // 🔗 Botón Limpiar
+        // 🔗 Botón limpiar
         $(document).off("click", "#clearOrder").on("click", "#clearOrder", () => {
             opts.data = [];
             this.renderCart(opts);
             if (typeof opts.onCleared === "function") opts.onCleared();
         });
     }
+
 
 
     // auxiliares.
@@ -793,7 +799,10 @@ class App extends Pos {
             data: pos.list,
             onRemove: (id) => {
                 this.removeProduct(id);
-            }
+            },
+            onEdit: (id) => { 
+                editProduct(id);
+            }, 
         });
 
 
@@ -880,6 +889,34 @@ class App extends Pos {
         });
     }
 
+    async editProduct(id) {
+        const product = await useFetch({
+            url: api,
+            data: {
+                opc: "getProduct",
+                product_id
+            }
+        });
+       
+
+        const modalContent = $(`
+        <div class="p-4 bg-[#111827] rounded-lg">
+        
+        <h2 class="text-xl text-white font-semibold mb-1"></h2>
+        <p class="text-blue-400 text-md font-bold mb-2">$</p>
+        <p class="text-gray-400 text-sm">Descripción del producto disponible próximamente.</p>
+        </div>
+    `);
+
+        bootbox.dialog({
+            title: ``,
+            size: "large",
+            id: 'modalAdvance',
+            closeButton: true,
+            message: modalContent,
+        });
+    }
+
     // Pos.
     addPayment(data) {
 
@@ -895,7 +932,7 @@ class App extends Pos {
         this.createModalForm({
             id: "modalRegisterPayment",
             bootbox: { title: "Registrar Pago", id: "registerPaymentModal", size: "medium" },
-            data: { opc: 'addPayment', total: 0, id: idFolio },
+            data: { opc: 'addPayment', total: total, id: idFolio },
             json: [
                 {
                     opc: "input",
@@ -906,7 +943,7 @@ class App extends Pos {
                     placeholder: "$ 0",
                     required: true,
                     min: 0, // 📛 Evita valores negativos desde el input
-                    onkeyup: 'payment.updateSaldoEvent(' + saldoOriginal + ')'
+                    onkeyup: 'app.(' + saldoOriginal + ')'
                 },
              
 
@@ -929,6 +966,7 @@ class App extends Pos {
                     html: `<strong>Monto a pagar</strong><br> <span id="SaldoEvent">${saldo}</span>`
                 }
             ],
+
             success: (response) => {
                 if (response.status == 200) {
                     alert({ icon: "success", text: response.message, btn1: true, btn1Text: "Ok" });
