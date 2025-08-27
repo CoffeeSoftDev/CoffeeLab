@@ -534,14 +534,15 @@ class Pos extends Templates {
     }
 
     renderCart(options) {
+
         const opts = Object.assign({
             parent: "orderItems",
             data: [],
             theme: "dark",
             totalSelector: "#total",
-            onQuanty: (id, action, newQuantity) => { },
-            onEdit: (id) => { },
-            onRemove: (id) => { },
+            onQuanty : (id, action, newQuantity) => { },
+            onEdit   : (id) => { },
+            onRemove : (id) => { },
             onCleared: () => { }
         }, options);
 
@@ -854,7 +855,6 @@ class Pos extends Templates {
             if (typeof opts.onFinish === "function") opts.onFinish(opts.data);
         });
     }
-
 
 
     // auxiliares.
@@ -1249,7 +1249,7 @@ class App extends Pos {
                     lbl: "Pago",
                     class: "col-12 mb-3",
                     placeholder: "$ 0",
-                    required: true,
+                    required: false,
                     min: 0, // 📛 Evita valores negativos desde el input
                     onkeyup: 'app.(' + saldoOriginal + ')'
                 },
@@ -1277,7 +1277,7 @@ class App extends Pos {
             success: (response) => {
                 if (response.status == 200) {
                     alert({ icon: "success", text: response.message, btn1: true, btn1Text: "Ok" });
-                    app.ls();
+                    // app.ls();
                 } else {
                     alert({ icon: "error", text: response.message, btn1: true, btn1Text: "Ok" });
                 }
