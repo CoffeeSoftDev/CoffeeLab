@@ -594,7 +594,7 @@ class Pos extends Templates {
                 $("<p>", { class: `${textColor} font-medium text-sm`, text: item.name }),
                 $("<p>", { class: `${subColor} font-semibold text-sm`, text: formatPrice(item.price) }),
                 item.dedication ? $("<p>", { class: `${mutedColor} text-xs italic`, text: `Dedicatoria: ${item.dedication}` }) : null,
-                item.order_details ? $("<p>", { class: `${mutedColor} text-xs`, text: `Detalles: ${item.order_details}` }) : null
+                item.order_details ? $("<p>", { class: `${mutedColor} text-xs`, text: `Observación: ${item.order_details}` }) : null
             );
 
             const actions = $("<div>", { class: "flex flex-col items-end gap-2" });
@@ -885,9 +885,8 @@ class App extends Pos {
     }
 
     async editProduct(id) {
-
         const request = await useFetch({
-            url: api,
+            url: this._link,
             data: {
                 opc: "getProduct",
                 id: id
@@ -896,25 +895,25 @@ class App extends Pos {
 
         let product = request.data;
 
-        this.createModalForm({
-            id: 'formProductoView',
-            data: { opc: 'editProduct', id: id },
-            bootbox: {
-                title: ` <h2 class="text-lg font-semibold text-white">🎂 ${product.name} </h2>`,
-                // size: "large",
-                closeButton: true
-            },
+        const modal = bootbox.dialog({
+            closeButton: true,
+            title: `<h2 class="text-lg text-white"> 🎂 ${product.name} </h2>`,
+            message: `<div><form id="formEditProducto" novalidate></form></div>`
+        });
+
+        this.createForm({
+            id: 'formEditProductoInternal',
+            parent: 'formEditProducto',
+            autovalidation: false,
             autofill: product,
+            data: { opc: 'editProduct', id: id },
             json: [
-
-
                 {
                     opc: "input",
                     id: "dedication",
                     lbl: "dedicatoria",
                     class: "col-12  mb-3",
                 },
-
                 {
                     opc: "textarea",
                     id: "order_details",
@@ -922,14 +921,13 @@ class App extends Pos {
                     class: "col-12 mb-3",
                     disabled: true
                 },
-
                 {
                     opc: "div",
                     id: "image",
-                    lbl: "Foto del producto",
-                    class: "col-12 mt-2",
+                    lbl: "Imagenes de referencia del producto",
+                    class: "col-12 ",
                     html: `
-                    <div class="col-12 mb-2">
+                    <div class="col-12 mt-2 mb-2">
                         <div class="w-full p-2 border-2 border-dashed border-gray-500 rounded-xl text-center">
                             <input
                                 type="file"
@@ -952,13 +950,84 @@ class App extends Pos {
                     </div>
                 `
                 },
+                {
+                    opc: "button",
+                    id: "btnEditProducto",
+                    class: "col-12 ",
+                    className: "w-full p-2",
+                    text: "Actualizar Producto",
+                    onClick: () => {
+                        const form = document.getElementById('formEditProducto');
+                        const formData = new FormData(form);
 
+                        formData.append('opc', 'editProduct');
+                        formData.append('id', id);
 
+                        const files = document.getElementById('archivos').files;
+                        for (let i = 0; i < files.length; i++) {
+                            formData.append('archivos[]', files[i]);
+                        }
 
+                        fetch(this._link, {
+                            method: 'POST',
+                            body: formData
+                        })
+                            .then(response => response.json())
+                            .then(response => {
+                                if (response.status === 200) {
+                                    alert({ icon: "success", text: response.message });
+                                    // this.lsProductos();
+                                    modal.modal('hide');
+                                } else {
+                                    alert({ icon: "info", title: "Oops!...", text: response.message, btn1: true, btn1Text: "Ok" });
+                                }
+                            });
+                    }
+                }
             ]
         });
 
+        this.renderImages(request.images,'previewImagenes')
     }
+
+    // aux method.
+    previewImages(input, previewId) {
+        const previewContainer = document.getElementById(previewId);
+        previewContainer.innerHTML = "";
+        Array.from(input.files).forEach(file => {
+            if (file.type.startsWith("image/")) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = document.createElement("img");
+                    img.src = e.target.result;
+                    img.classList.add("w-20", "h-20", "object-cover", "rounded");
+                    previewContainer.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    renderImages(images, previewId) {
+        const previewContainer = document.getElementById(previewId);
+        previewContainer.innerHTML = ""; // Limpia el contenedor
+
+        const urlBase = 'https://huubie.com.mx/';
+
+        // Si solo es una imagen (objeto), conviértelo a arreglo
+        const imageList = Array.isArray(images) ? images : [{ path: images }];
+
+        console.log(imageList);
+
+        imageList.forEach(imgData => {
+            const img = document.createElement("img");
+            img.src = urlBase + imgData.path;
+            img.alt = imgData.original_name || "Imagen del producto";
+            img.classList.add("w-20", "h-20", "object-cover", "rounded", "border");
+            previewContainer.appendChild(img);
+        });
+    }
+
 
     // Pos.
     addPayment(data) {
