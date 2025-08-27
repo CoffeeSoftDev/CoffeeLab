@@ -665,6 +665,197 @@ class Pos extends Templates {
         });
     }
 
+    orderPanelComponent(options) {
+        const defaults = {
+            parent: "root",
+            id: "orderPanel",
+            title: "Orden Actual",
+            data: [],
+            theme: "dark",
+            totalSelector: "#total",
+            emptyTitle: "No hay productos en la orden",
+            emptySub: "Selecciona productos del catálogo",
+            onClear: () => { },
+            onQuanty: (id, action, newQuantity) => { },
+            onEdit: (id) => { },
+            onRemove: (id) => { },
+            onCleared: () => { },
+            onPrint: () => { },
+            onFinish: () => { }
+        };
+
+        const opts = Object.assign({}, defaults, options);
+
+        const isDark = opts.theme === "dark";
+        const textColor = isDark ? "text-white" : "text-gray-800";
+        const subColor = isDark ? "text-blue-300" : "text-blue-600";
+        const borderColor = isDark ? "border-gray-700" : "border-gray-300";
+        const bgCard = isDark ? "bg-[#1E293B]" : "bg-white";
+        const mutedColor = isDark ? "text-gray-300" : "text-gray-600";
+        const emptyTitle = isDark ? "text-gray-300" : "text-gray-700";
+        const emptySub = isDark ? "text-gray-400" : "text-gray-500";
+
+        const container = $(`#${opts.parent}`).empty();
+
+        const header = $("<div>", {
+            class: "p-4 border-b border-gray-700 flex justify-between items-center"
+        }).append(
+            $("<h2>", {
+                class: "text-lg font-semibold text-white",
+                text: opts.title
+            }),
+            $("<button>", {
+                id: "clearOrder",
+                class: "text-red-400 border border-[#C53030] px-2 py-1 rounded hover:bg-red-700",
+                html: "🗑 Limpiar",
+                click: opts.onClear
+            })
+        );
+
+        const orderItems = $("<div>", {
+            id: "orderItems",
+            class: "flex-1 overflow-auto p-3 space-y-3"
+        });
+
+        const footer = $("<div>", {
+            class: "p-4 border-t border-gray-700 bg-[#333D4C]"
+        }).append(
+            $("<div>", { class: "space-y-1 text-sm text-gray-300" }).append(
+                $("<div>", {
+                    class: "flex justify-between font-bold text-blue-400"
+                }).append(
+                    $("<span>").text("Total:"),
+                    $("<span>", { id: "total", text: "$0.00" })
+                )
+            ),
+            $("<div>", { class: "grid grid-cols-2 gap-2 mt-4" }).append(
+                $("<button>", {
+                    id: "printOrder",
+                    class: "border border-gray-600 text-white rounded px-3 py-2 text-sm",
+                    html: "🖨 Imprimir"
+                }),
+                $("<button>", {
+                    id: "finishOrder",
+                    class: "bg-blue-700 text-white rounded px-3 py-2 text-sm hover:bg-blue-800",
+                    html: "Terminar"
+                })
+            )
+        );
+
+        container.append(header, orderItems, footer);
+
+        const data = [...opts.data];
+        let totalAcc = 0;
+
+        if (data.length === 0) {
+            const empty = $("<div>", {
+                class: "w-full h-full flex items-center justify-center"
+            }).append(
+                $("<div>", { class: "text-center" }).append(
+                    $("<svg>", {
+                        class: "mx-auto mb-3",
+                        width: "52",
+                        height: "52",
+                        html: `<circle cx="9" cy="21" r="1"></circle>
+                 <circle cx="20" cy="21" r="1"></circle>
+                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h7.72a2 2 0 0 0 2-1.61L21 6H6"></path>`
+                    }),
+                    $("<p>", { class: `text-base font-medium ${emptyTitle}`, text: opts.emptyTitle }),
+                    $("<p>", { class: `text-sm mt-1 ${emptySub}`, text: opts.emptySub })
+                )
+            );
+            orderItems.append(empty);
+            if (opts.totalSelector) $(opts.totalSelector).text(formatPrice(0));
+            return;
+        }
+
+        data.forEach((item, index) => {
+            const card = $("<div>", {
+                class: `flex justify-between items-center ${bgCard} border ${borderColor} rounded-xl p-3 shadow-sm`
+            });
+
+            const info = $("<div>", { class: "flex-1 space-y-1" }).append(
+                $("<p>", { class: `${textColor} font-medium text-sm`, text: item.name }),
+                $("<p>", { class: `${subColor} font-semibold text-sm`, text: formatPrice(item.price) }),
+                item.dedication ? $("<p>", { class: `${mutedColor} text-xs italic`, text: `Dedicatoria: ${item.dedication}` }) : null,
+                item.order_details ? $("<p>", { class: `${mutedColor} text-xs`, text: `Detalles: ${item.order_details}` }) : null
+            );
+
+            const actions = $("<div>", { class: "flex flex-col items-end gap-2" });
+            const quantityRow = $("<div>", { class: "flex items-center gap-2" });
+
+            quantityRow.append(
+                $("<button>", {
+                    class: "bg-gray-700 text-white rounded px-2",
+                    html: "−",
+                    click: () => {
+                        if (item.quantity > 1) {
+                            item.quantity--;
+                            opts.onQuanty(item.id, 0, item.quantity);
+                            opts.data = data;
+                            this.orderPanelComponent(opts);
+                        }
+                    }
+                }),
+                $("<span>", { class: `${textColor}`, text: item.quantity }),
+                $("<button>", {
+                    class: "bg-gray-700 text-white rounded px-2",
+                    html: "+",
+                    click: () => {
+                        item.quantity++;
+                        opts.onQuanty(item.id, 2, item.quantity);
+                        opts.data = data;
+                        this.orderPanelComponent(opts);
+                    }
+                }),
+                $("<button>", {
+                    class: "text-blue-400 hover:text-blue-600",
+                    html: `<i class="icon-pencil"></i>`,
+                    click: () => opts.onEdit(item.id)
+                }),
+                $("<button>", {
+                    class: "text-gray-400 hover:text-red-400",
+                    html: `<i class="icon-trash"></i>`,
+                    click: () => {
+                        data.splice(index, 1);
+                        opts.onRemove(item.id);
+                        opts.data = data;
+                        this.orderPanelComponent(opts);
+                    }
+                })
+            );
+
+            const lineTotal = (item.price || 0) * (item.quantity || 0);
+            totalAcc += lineTotal;
+
+            const totalEl = $("<p>", {
+                class: `${mutedColor} text-sm`,
+                text: `Total: ${formatPrice(lineTotal)}`
+            });
+
+            actions.append(quantityRow, totalEl);
+            card.append(info, actions);
+            orderItems.append(card);
+        });
+
+        if (opts.totalSelector) $(opts.totalSelector).text(formatPrice(totalAcc));
+
+        $(document).off("click", "#clearOrder").on("click", "#clearOrder", () => {
+            opts.data = [];
+            this.orderPanelComponent(opts);
+            if (typeof opts.onCleared === "function") opts.onCleared();
+        });
+
+        $(document).off("click", "#printOrder").on("click", "#printOrder", () => {
+            if (typeof opts.onPrint === "function") opts.onPrint(opts.data);
+        });
+
+        $(document).off("click", "#finishOrder").on("click", "#finishOrder", () => {
+            if (typeof opts.onFinish === "function") opts.onFinish(opts.data);
+        });
+    }
+
+
 
     // auxiliares.
     searchFilter(options) {
@@ -755,7 +946,6 @@ class App extends Pos {
 
     }
 
-
     async initPos() {
 
         const pos = await useFetch({ url: api, data: { opc: "init" } });
@@ -779,27 +969,38 @@ class App extends Pos {
             }
         });
 
-        this.createOrderPanel({
+        this.orderPanelComponent({
             title: `Orden Actual #P-00${idFolio}`,
-            onClear: () => {
-                this.confirmClearOrder(idFolio);
-            },
-            onFinish: (data) => {
-                this.addPayment(data);
-            }
-
-        });
-
-        this.renderCart({
+            parent: "orderPanel",
             data: pos.list,
 
-            onRemove: (id) => {
-                this.removeProduct(id);
+            onFinish: (data) => {
+                this.addPayment(data);
             },
-            onEdit: (id) => {
+                 onEdit: (id) => {
                 this.editProduct(id);
             },
         });
+
+        // this.renderOrderPanel({
+        //     title: `Orden Actual #P-00${idFolio}`,
+        //     onClear: () => {
+        //         this.confirmClearOrder(idFolio);
+        //     },
+       
+
+        // });
+
+        // this.renderCart({
+       
+
+        //     onRemove: (id) => {
+        //         this.removeProduct(id);
+        //     },
+        //     onEdit: (id) => {
+        //         this.editProduct(id);
+        //     },
+        // });
 
 
     }
@@ -962,12 +1163,7 @@ class App extends Pos {
 
     // Pos.
     addPayment(data) {
-
-        console.log(data)
-
-        // let tr = $(event.target).closest("tr");
-
-        // // Obtiene el valor
+   
         let saldo = $('#total').text();
         let saldoOriginal = $('#total').text().replace(/[^0-9.-]+/g, "");
         let total = parseFloat(saldoOriginal);
@@ -988,7 +1184,6 @@ class App extends Pos {
                     min: 0, // 📛 Evita valores negativos desde el input
                     onkeyup: 'app.(' + saldoOriginal + ')'
                 },
-
 
                 {
                     opc: "select",
