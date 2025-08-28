@@ -14,6 +14,7 @@ $(async () => {
     pos = new Pos(api, 'root');
     app.init();
     pos.render();
+    app.printOrder();
 });
 
 class Pos extends Templates {
@@ -48,8 +49,9 @@ class Pos extends Templates {
             parent: "container-package",
             id: "posLayout",
             theme: "dark", // 'light' | 'dark'
-            class: "flex flex-col md:flex-row text-sm h-screen text-white ",
-            onChange: (item) => { }
+            class: "flex flex-col md:flex-row text-sm h-screen text-white",
+            onChange: (item) => { },
+            onBuildCake: () => { alert("Función 'Arma tu pastel' no implementada 🎂"); }
         }, options);
 
         const isDark = opts.theme === "dark";
@@ -60,7 +62,7 @@ class Pos extends Templates {
             leftPaneBg: isDark ? "bg-[#1F2A37]" : "bg-gray-100",
             inputBg: isDark ? "bg-[#111827]" : "bg-white",
             borderColor: isDark ? "border-gray-700" : "border-gray-300",
-            cardGridBg: isDark ? "" : "bg-white",//bg-[#111827]
+            cardGridBg: isDark ? "" : "bg-white",
             tabBg: isDark ? "" : "bg-gray-100"
         };
 
@@ -72,12 +74,12 @@ class Pos extends Templates {
 
         // 🟩 Left Pane
         const leftPane = $("<div>", {
-            class: `flex-1 flex flex-col  overflow-hidden ${colors.leftPaneBg} ${colors.borderColor}`
+            class: `flex-1 flex flex-col overflow-hidden ${colors.leftPaneBg} ${colors.borderColor}`
         });
 
-        // 🔍 Contenedor de búsqueda
+        // 🔍 Contenedor de búsqueda + botón
         const searchContainer = $("<div>", {
-            class: `p-3 flex items-center justify-between space-x-2 ${colors.borderColor}`
+            class: `p-3 flex items-center justify-between flex-wrap gap-2 ${colors.borderColor}`
         });
 
         const searchInputWrap = $("<div>", {
@@ -99,7 +101,15 @@ class Pos extends Templates {
         });
 
         searchInputWrap.append(inputSearch, searchIcon);
-        searchContainer.append(searchInputWrap);
+
+        const buildCakeBtn = $("<button>", {
+            id: "buildCakeBtn",
+            class: "bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-md whitespace-nowrap transition-colors duration-200",
+            html: "¡Arma tu pastel! 🎂",
+            click: () => opts.onBuildCake()
+        });
+
+        searchContainer.append(searchInputWrap, buildCakeBtn);
 
         // 🔽 Área visual de tabs de categoría
         const categoryTabs = $("<div>", {
@@ -115,7 +125,7 @@ class Pos extends Templates {
 
         const grid = $("<div>", {
             id: "productGrid",
-            class: `grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 ${colors.borderColor} p-3  rounded ${colors.cardGridBg}`
+            class: `grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-2 ${colors.borderColor} p-3 rounded ${colors.cardGridBg}`
         });
 
         productGridContainer.append(grid);
@@ -126,19 +136,10 @@ class Pos extends Templates {
         // 🟥 Ticket (Right Panel)
         const rightPane = $("<div>", {
             id: "orderPanel",
-            class: `
-            w-full
-
-            md:w-[25rem]
-            max-w-full
-            flex flex-col
-            border-l
-            ${colors.leftPaneBg}
-            ${colors.borderColor}
-
-        `
+            class: `w-full md:w-[25rem] max-w-full flex flex-col border-l ${colors.leftPaneBg} ${colors.borderColor}`
         });
 
+        // Armar layout final
         container.append(leftPane, rightPane);
         $(`#${opts.parent}`).html(container);
     }
@@ -224,11 +225,11 @@ class Pos extends Templates {
 
         const opts = Object.assign(defaults, options);
 
-        const isDark = opts.theme === "dark";
-        const cardBg = isDark ? "bg-[#111827]" : "bg-white";
+        const isDark      = opts.theme === "dark";
+        const cardBg      = isDark ? "bg-[#111827]" : "bg-white";
         const borderColor = isDark ? "border-gray-700" : "border-gray-300";
-        const textColor = isDark ? "text-white" : "text-gray-800";
-        const priceColor = isDark ? "text-blue-300" : "text-blue-600";
+        const textColor   = isDark ? "text-white" : "text-gray-800";
+        const priceColor  = isDark ? "text-blue-300" : "text-blue-600";
         const buttonColor = "bg-blue-600 hover:bg-blue-700";
 
         const container = $(`#${opts.parent}`).empty();
@@ -977,30 +978,24 @@ class App extends Pos {
             onFinish: (data) => {
                 this.addPayment(data);
             },
-                 onEdit: (id) => {
+            onEdit: (id) => {
                 this.editProduct(id);
+            },
+            onRemove: (id) => {
+                this.removeProduct(id);
+            },
+
+            onPrint: () => {
+                console.log("print");
+                this.printOrder(idFolio);
+            },
+
+            onClear: () => {
+                this.confirmClearOrder(idFolio);
             },
         });
 
-        // this.renderOrderPanel({
-        //     title: `Orden Actual #P-00${idFolio}`,
-        //     onClear: () => {
-        //         this.confirmClearOrder(idFolio);
-        //     },
-       
 
-        // });
-
-        // this.renderCart({
-       
-
-        //     onRemove: (id) => {
-        //         this.removeProduct(id);
-        //     },
-        //     onEdit: (id) => {
-        //         this.editProduct(id);
-        //     },
-        // });
 
 
     }
@@ -1033,11 +1028,20 @@ class App extends Pos {
             }
         });
 
-        this.renderCart({
+        this.orderPanelComponent({
+            title: `Orden Actual #P-00${idFolio}`,
+            parent: "orderPanel",
             data: pos.list,
+
+            onFinish: (data) => {
+                this.addPayment(data);
+            },
+            onEdit: (id) => {
+                this.editProduct(id);
+            },
             onRemove: (id) => {
                 this.removeProduct(id);
-            }
+            },
         });
     }
 
@@ -1232,33 +1236,70 @@ class App extends Pos {
 
     // Pos.
     addPayment(data) {
-   
+
         let saldo = $('#total').text();
         let saldoOriginal = $('#total').text().replace(/[^0-9.-]+/g, "");
         let total = parseFloat(saldoOriginal);
 
         this.createModalForm({
             id: "modalRegisterPayment",
-            bootbox: { title: "Registrar Pago", id: "registerPaymentModal", size: "medium" },
+            bootbox: {
+                title: `
+                    <div class="flex items-center gap-2 text-white text-lg font-semibold">
+                        <i class="icon-dollar text-blue-400 text-xl"></i>
+                        Registrar Pago
+                    </div>
+                `, id: "registerPaymentModal", size: "medium" },
             data: { opc: 'addPayment', total: total, id: idFolio },
+
+
             json: [
+                {
+                    opc: "div",
+                    id: "Price",
+                    class: "col-12 ",
+                    html: `
+                        <div class="bg-gray-800 text-white text-center rounded-xl py-4 ">
+                            <p class="text-sm tracking-wide opacity-90">Monto a pagar</p>
+                            <p class="text-3xl font-bold mt-1">${saldo}</p>
+                        </div>
+                    `
+                },
+                {
+                    opc: "div",
+                    id: "anticipoSwitch",
+                    class: "col-12 mb-2",
+                    html: `
+                        <div class="flex items-center justify-between text-white p-3 rounded-lg border border-gray-700 bg-[#1F2937]">
+                            <div class="flex items-center gap-2">
+                            <i id="iconAnticipo" class="icon-minus-square text-gray-400 transition-colors duration-200"></i>
+                            <label id="labelAnticipo" class="text-sm">Dejar anticipo</label>
+                            </div>
+
+                            <label class="inline-flex items-center cursor-pointer relative">
+                                <input type="checkbox" id="toggleAnticipo" class="sr-only peer" onchange="app.toggleAnticipoView()">
+                                <div class="w-11 h-6 bg-gray-700 peer-checked:bg-blue-600 rounded-full transition-colors duration-300"></div>
+                                <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
+                            </label>
+                        </div>
+                    `
+                },
                 {
                     opc: "input",
                     type: "number",
-                    id: "pay",
-                    lbl: "Pago",
-                    class: "col-12 mb-3",
+                    id: "advanced_pay",
+                    lbl: "Monto del anticipo",
+                    class: "col-12 mb-3 hidden",
                     placeholder: "$ 0",
                     required: false,
-                    min: 0, // 📛 Evita valores negativos desde el input
-                    onkeyup: 'app.(' + saldoOriginal + ')'
+                    min: 0,
+                    onkeyup: 'app.updateSaldoEvent(' + total + ')'
                 },
-
                 {
                     opc: "select",
                     id: "method_pay_id",
-                    lbl: "Método de pago",
-                    class: "col-12 mb-3",
+                    lbl: "Método de pago del anticipo",
+                    class: "col-12 mb-3 hidden",
                     data: [
                         { id: "1", valor: "Efectivo" },
                         { id: "2", valor: "Tarjeta" },
@@ -1268,12 +1309,16 @@ class App extends Pos {
                 },
                 {
                     opc: "div",
-                    id: "dueAmount",
-                    class: "col-12 text-center bg-gray-800 text-white p-2 rounded",
-                    html: `<strong>Monto a pagar</strong><br> <span id="SaldoEvent">${saldo}</span>`
+                    id: "Amount",
+                    class: "col-12",
+                    html: `
+                        <div id="dueAmount" class="bg-gradient-to-r from-blue-600 to-blue-500 text-white text-center rounded-xl py-4  hidden">
+                            <p class="text-sm tracking-wide">Monto restante</p>
+                            <p id="SaldoEvent" class="text-3xl font-bold mt-1">${saldo}</p>
+                        </div>
+                    `
                 }
             ],
-
             success: (response) => {
                 if (response.status == 200) {
                     alert({ icon: "success", text: response.message, btn1: true, btn1Text: "Ok" });
@@ -1284,9 +1329,325 @@ class App extends Pos {
             }
         });
 
+        setTimeout(() => {
+            document.getElementById("toggleAnticipo")?.addEventListener("change", () => app.toggleAnticipoView());
+        }, 500);
+
         $("#btnSuccess").addClass("text-white");
         $("#btnExit").addClass("text-white");
     }
+
+    async printOrder(){
+        
+        const pos = await useFetch({ url: api, data: { opc: "lsProductOrderPackage",id:4 } });
+
+        const modal = bootbox.dialog({
+            closeButton: true,
+            title: ` <div class="flex items-center gap-2 text-white text-lg font-semibold">
+                        <i class="icon-print text-blue-400 text-xl"></i>
+                        Imprimir
+                    </div>`,
+            message: `<div id="containerPrintOrder"></div>`
+        });
+
+
+        this.ticketPasteleria({ 
+          parent:'containerPrintOrder',
+          data:{
+              head: { data: {} },
+              row: [],
+
+              products:pos.row  
+          } 
+        })
+
+    }
+
+    createTicket(options = {}) {
+        const defaults = {
+            parent: "container", // contenedor donde se insertará
+            data: {
+                head: { data: {} },
+                row: [],
+                products: []
+            }
+        };
+
+        const opts        = Object.assign({}, defaults, options);
+        const parent      = opts.parent;
+        const data        = opts.data.head.data || {};
+        const products    = opts.data.products || [];
+        const cliente     = data.cliente || "[cliente]";
+        const fecha       = data.pedido || "[fecha]";
+        const hora        = data.horapedido || "[hora]";
+        const observacion = data.observacion || "[nota]";
+        const costo       = data.total || 0;
+        const anticipo    = data.anticipo || 0;
+        const restante    = costo - anticipo;
+        const container = $("<div>", { id: "containerTicks", class: "bg-white text-gray-800 rounded-lg mb-4 font-mono p-4" });
+
+        // Header
+        container.append(`
+        <div class="flex flex-col items-center">
+            <img src="https://erp-varoch.com/ERP24/src/img/udn/fz_black.png" alt="Panadería y pastelería" class="w-48 max-w-full mt-2" />
+            <h1 class="p-2 text-center font-bold">PEDIDOS DE PASTELERÍA</h1>
+        </div>
+        `);
+
+        container.append(`
+        <div class="flex-1 text-xs  space-y-4">
+            <div class="flex justify-between gap-6">
+                <div>
+                    <div class="font-bold">NOMBRE:</div>
+                    <div class="uppercase">${cliente}</div>
+                </div>
+                <div>
+                    <div class="font-bold">FECHA Y HORA DE ENTREGA:</div>
+                    <div class="uppercase">${fecha} ${hora}</div>
+                </div>
+            </div>
+            <div>
+                <div class="font-bold">NOTA:</div>
+                <div>${observacion}</div>
+            </div>
+            <hr class="border-dashed" />
+        </div>
+    `);
+
+        // Productos
+        let totalProductos = 0;
+        if (products.length > 0) {
+            container.append(`
+                <div class="text-xs font-mono px-2 mt-2">
+                    <div class="text-center font-bold mb-2">PRODUCTOS</div>
+                    <div class="flex justify-between  py-3">
+                        <div class="w-1/6">CANT.</div>
+                        <div class="w-3/6">DESCRIPCIÓN</div>
+                        <div class="w-2/6 text-right">IMPORTE</div>
+                    </div>
+
+                    ${products.map(product => {
+                            const price = parseFloat(product.price || 0);
+                            const quantity = parseInt(product.quantity || 1);
+                            const total = price * quantity;
+                            totalProductos += total;
+
+                            return `
+                            <div class="flex justify-between py-1">
+                                <div class="w-1/6">${quantity}</div>
+                                <div class="w-3/6 truncate">${product.name}</div>
+                                <div class="w-2/6 text-right">${product.price}</div>
+                            </div>
+                            ${product.dedication ? `<div class="pl-4 italic text-[10px] text-gray-600">* ${product.dedication}</div>` : ""}
+                        `;
+                        }).join("")}
+
+                    <div class="border-t my-2 pt-2 text-right font-bold">
+                        TOTAL PRODUCTOS: ${formatPrice(totalProductos)}
+                    </div>
+                </div>
+            `);
+
+
+        }
+
+     
+     
+
+        $(`#${parent}`).html(container);
+    }
+
+    ticketPasteleria(options) {
+        const defaults = {
+            parent: "root",
+            id: "ticketPasteleria",
+            class: "bg-white p-4 rounded-lg shadow font-mono text-gray-900",
+            data: {
+                head: {
+                    data: {
+                        cliente: "[cliente]",
+                        pedido: "[fecha]",
+                        horapedido: "[hora]",
+                        observacion: "[nota]",
+                        total: 0,
+                        anticipo: 0
+                    }
+                },
+                products: []
+            }
+        };
+
+        const opts = Object.assign({}, defaults, options);
+        const data = opts.data.head.data || {};
+        const productos = opts.data.products || [];
+
+        const total = parseFloat(data.total || 0);
+        const anticipo = parseFloat(data.anticipo || 0);
+        const restante = total - anticipo;
+
+        function formatPrice(value) {
+            return `$${parseFloat(value || 0).toFixed(2)}`;
+        }
+
+        const container = $("<div>", {
+            id: opts.id,
+            class: opts.class
+        });
+
+        // Header
+        const header = `
+    <div class="flex flex-col items-center mb-4">
+        <img src="https://erp-varoch.com/ERP24/src/img/udn/fz_black.png" alt="Logo" class="w-32" />
+        <h1 class="text-lg font-bold mt-2">PEDIDOS DE PASTELERÍA</h1>
+    </div>
+    <div class="text-sm space-y-2">
+        <div class="flex justify-between">
+            <div>
+                <div class="font-semibold">NOMBRE:</div>
+                <div class="uppercase">${data.cliente}</div>
+            </div>
+            <div>
+                <div class="font-semibold">FECHA Y HORA DE ENTREGA:</div>
+                <div class="uppercase">${data.pedido} ${data.horapedido}</div>
+            </div>
+        </div>
+        <div>
+            <div class="font-semibold">NOTA:</div>
+            <div>${data.observacion}</div>
+        </div>
+        <hr class="border-dashed border-t my-2" />
+    </div>
+  `;
+
+        // Productos
+        let listaProductos = "";
+        let totalProductos = 0;
+
+        if (productos.length > 0) {
+            listaProductos += `
+        <div class="text-xs mt-4">
+            <div class="text-center font-bold mb-2">PRODUCTOS</div>
+            <div class="flex justify-between border-b pb-2 font-semibold">
+                <div class="w-1/6">CANT.</div>
+                <div class="w-3/6">DESCRIPCIÓN</div>
+                <div class="w-2/6 text-right">IMPORTE</div>
+            </div>
+        `;
+
+            listaProductos += productos.map(product => {
+                const quantity = parseInt(product.quantity || 1);
+                const price = parseFloat(product.price || 0);
+                const total = quantity * price;
+                totalProductos += total;
+
+                return `
+            <div class="flex justify-between py-1">
+                <div class="w-1/6">${quantity}</div>
+                <div class="w-3/6 truncate">${product.name}</div>
+                <div class="w-2/6 text-right">${formatPrice(price)}</div>
+            </div>
+            ${product.dedication ? `<div class="pl-4 italic text-[10px] text-gray-600">* ${product.dedication}</div>` : ""}
+          `;
+            }).join("");
+
+            listaProductos += `
+           
+        </div>
+        `;
+        }
+
+        // Totales (con precio en grande)
+        const totales = `
+    <div class="text-right text-sm mt-4 space-y-1">
+        <div class="text-base">Subtotal: <span class="font-semibold">${formatPrice(total)}</span></div>
+        <div>IVA: <span class="font-semibold">${formatPrice(0)}</span></div>
+        <div class="text-xl font-bold mt-2">TOTAL: ${formatPrice(total)}</div>
+        <div class="text-red-600 font-bold">Anticipo: ${formatPrice(anticipo)}</div>
+        <div class="text-green-800 font-bold">Restante: ${formatPrice(restante)}</div>
+    </div>
+  `;
+
+        // Footer estilo ticket
+        const footer = `
+            <div class="text-center mt-6 text-xs font-bold text-gray-900 space-y-1">
+                <p class="mt-2">GRACIAS POR SU PREFERENCIA</p>
+                <p>ESTE NO ES UN COMPROBANTE FISCAL</p>
+                <p>FACTURA EN: VIRTUALUNISOFT-CLOUD.COM</p>
+                <p>SOFT RESTAURANT V9.5 PRO</p>
+            </div>
+            `;
+
+        container.append(header);
+        container.append(listaProductos);
+        container.append(totales);
+        container.append(footer);
+
+        $(`#${opts.parent}`).html(container);
+    }
+
+
+
+
+
+
+ 
+    toggleAnticipoView() {
+        const show = document.getElementById("toggleAnticipo")?.checked;
+
+        const advancedPay = document.getElementById("advanced_pay")?.parentElement;
+        const methodPay = document.getElementById("method_pay_id")?.parentElement;
+        const dueAmount = document.getElementById("dueAmount");
+
+        const icon = document.getElementById("iconAnticipo");
+        const label = document.getElementById("labelAnticipo");
+
+        if (show) {
+            advancedPay?.classList.remove("hidden");
+            methodPay?.classList.remove("hidden");
+            dueAmount?.classList.remove("hidden");
+
+            // 🔄 Cambiar ícono y texto
+            if (icon) icon.className = "icon-check-square text-blue-400 transition-colors duration-200";
+            if (label) label.textContent = "Anticipo seleccionado";
+        } else {
+            advancedPay?.classList.add("hidden");
+            methodPay?.classList.add("hidden");
+            dueAmount?.classList.add("hidden");
+
+            if (icon) icon.className = "icon-minus-square text-gray-400 transition-colors duration-200";
+            if (label) label.textContent = "Dejar anticipo";
+        }
+    }
+
+    updateSaldoEvent(saldo) {
+        let payInput = document.getElementById("advanced_pay");
+        let saldoElement = document.getElementById("SaldoEvent");
+        let pagarBtn = document.querySelector(".bootbox .btn-primary");
+
+        if (payInput && saldoElement && pagarBtn) {
+            let saldoOriginal = parseFloat(saldo) || 0;
+            let pago = parseFloat(payInput.value) || 0;
+
+            // ⛔ Bloquear si el valor es negativo
+            if (pago < 0) {
+                payInput.value = 0;
+                pago = 0;
+            }
+
+            let nuevoSaldo = saldoOriginal - pago;
+
+            saldoElement.textContent = formatPrice(nuevoSaldo);
+
+            if (nuevoSaldo < 0) {
+                saldoElement.classList.add("text-red-500");
+            } else {
+                saldoElement.classList.remove("text-red-500");
+            }
+
+            pagarBtn.disabled = nuevoSaldo < 0 || pago <= 0;
+        }
+    }
+
 
 
 
