@@ -91,15 +91,241 @@ debe llevar la siguiente nomenclatura
 
 - ls()
   - Carga datos de la tabla utilizando createTable(), incluyendo paginación y configuración responsiva.
-- add()
+```javascript
+  ls() {
+
+        let rangePicker = getDataRangePicker("calendar");
+
+        this.createTable({
+
+            parent     : `container${this.PROJECT_NAME}`,
+            idFilterBar: `filterBar${this.PROJECT_NAME}`,
+            data: { opc: "list", fi: rangePicker.fi, ff: rangePicker.ff },
+            conf       : { datatable: true, pag: 10 },
+            coffeesoft : true,
+
+            attr: {
+                id      : `tb${this.PROJECT_NAME}`,
+                theme   : 'dark',
+                title   : 'Lista de registros',
+                subtitle: '',
+                center  : [1, 2,  7, 8,9,10,11],
+                right   : [4,5,6],
+                extends : true,
+            },
+        });
+    }
+
+
+```
+
+- add[Entidad]()
   - Despliega un formulario modal mediante createModalForm() para agregar nuevos registros
+  ```javascript
+      add[Entidad]() {
+        this.createForm({
+            parent: "addForm",
+            id: "formEntidad",
+            data: { opc: "add" },
+            json: this.json[Entidad](),
+
+            success: (response) => {
+                if (response.status == 200) {
+
+                alert({
+                      icon: "success",
+                      title: "Pedido creado con éxito",
+                      text: response.message,
+                      btn1: true,
+                      btn1Text: "Aceptar"
+                  });
+
+              } else {
+                    alert({
+                        icon: "error",
+                        text: response.message,
+                        btn1: true,
+                        btn1Text: "Ok"
+                    });
+                }
+            }
+        });
+
+        // extras.
+        $("#lblCliente").addClass("border-b p-1");
+      }
+  ```
+
+
 - edit(id)
   - usa async en las funciones
   - Realiza una consulta asincrónica useFetch({ opc: 'get', id: id }).
   - Posteriormente despliega un formulario modal de edición, usando autofill para precargar los datos obtenidos.
   - El formulario, al ser enviado, debe ejecutar el flujo opc: 'edit'.
+
+    ```javascript
+      async edit[Entidad](id) {
+            
+        const request = await useFetch({ url: this._link, data: { opc: "get", id } });
+        this.createForm({
+            parent: "formEditPedido",
+            id: "formPedido",
+            data: { opc: "edit", id },
+            autofill: order,
+            json: this.json(),
+            success: (response) => {
+
+              if (response.status == 200) {
+                    alert({
+                        icon: "success",
+                        title: "Pedido actualizado",
+                        text: response.message,
+                        btn1: true,
+                        btn1Text: "Aceptar"
+                    });
+              } else {
+                    alert({
+                        icon: "error",
+                        text: response.message,
+                        btn1: true,
+                        btn1Text: "Ok"
+                    });
+                }
+            }
+        });
+
+      }
+  ```
+-json[Entidad]
+  - Genera un objeto JSON con los datos del formulario, y los devuelve.
+  - El objeto JSON debe tener el siguiente formato:
+  ```javascript
+   jsonOrder() {
+        return [
+            {
+                opc: "label",
+                id: "lblCliente",
+                text: "Información del cliente",
+                class: "col-12 fw-bold text-lg mb-2  p-1"
+            },
+            {
+                opc: "input",
+                lbl: "Nombre del cliente",
+                id: "name",
+                tipo: "texto",
+                class: "col-12 col-sm-6 col-lg-4 mb-3"
+            },
+            {
+                opc: "input",
+                lbl: "Teléfono",
+                id: "phone",
+                tipo: "tel",
+                class: "col-12 col-sm-6 col-lg-4 mb-3"
+            },
+            {
+                opc: "input",
+                lbl: "Correo electrónico",
+                id: "email",
+                tipo: "email",
+                class: "col-12 col-sm-6 col-lg-4 mb-3",
+                required: false
+            },
+
+            {
+                opc: "input",
+                lbl: "Fecha de cumpleaños",
+                id: "date_birthday",
+                type: "date",
+                class: "col-12 col-sm-6 col-lg-4 mb-3"
+            },
+
+            {
+                opc: "label",
+                id: "lblPedido",
+                text: "Datos del pedido",
+                class: "col-12 fw-bold text-lg  mb-2 p-1"
+            },
+
+
+            {
+                opc: "input",
+                lbl: "Fecha de entrega",
+                id: "date_order",
+                type: "date",
+                class: "col-12 col-lg-3 mb-3"
+            },
+
+            {
+                opc: "input",
+                lbl: "Hora de entrega",
+                id: "time_order",
+                type: "time",
+                class: "col-12  col-lg-3 mb-3"
+            },
+
+
+
+            {
+                opc: "textarea",
+                id: "note",
+                lbl: "Notas adicionales",
+                rows: 3,
+                class: "col-12 mb-3"
+            },
+
+
+
+            {
+                opc: "btn-submit",
+                id: "btnGuardarPedido",
+                text: "Guardar Pedido",
+                class: "col-12  offset-md-8 offset-lg-6 col-md-2 col-lg-3 "
+            },
+            {
+                opc: "button",
+                id: "btnRegresar",
+                text: "Salir",
+                class: "col-12 col-lg-3 col-md-2 ",
+                className: 'w-full',
+                icono: "fas fa-arrow-left",
+                color_btn: "danger",
+                onClick: () => order.init()
+            },
+        ];
+
+    }
+  ```
+
 - cancel(id)
   - Utiliza swalQuestion() para confirmar la cancelación de un registro, y luego envía la acción opc: 'cancel'.
+
+  ``` javascript
+    cancelOrder(id) {
+        const row = event.target.closest('tr');
+        const folio = row.querySelectorAll('td')[0]?.innerText || '';
+
+        this.swalQuestion({
+            opts: {
+                title: `¿Esta seguro?`,
+                html: `¿Deseas cancelar la reservación con folio <strong>${folio}</strong>?
+                Esta acción actualizará el estado a "Cancelado" en la tabla [reservaciones].`,
+            },
+            data: { opc: "cancelOrder", status: 4, id: id },
+            methods: {
+                request: (data) => {
+                    alert({
+                        icon: "success",
+                        title: "Cancelado",
+                        text: "El pedido fue cancelado exitosamente.",
+                        btn1: true
+                    });
+
+                    this.ls();
+                },
+            },
+        });
+    }
+  ```
 
 
 **Consideraciones Finales**

@@ -1,47 +1,27 @@
-let url = 'https://huubie.com.mx/dev/pedidos/ctrl/ctrl-admin.php';
-let api = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-pedidos-catalogo.php";
-let app, pos;
-let modifier, products;
-let idFolio;
+# Product Overview
+Sistema POS para gestionar **pedidos de clientes y ventas de productos de catálogo.**
+Permite crear órdenes de pedido, navegar por categorías, agregar productos al carrito dinámicamente y generar estadísticas de venta.
 
-$(async () => {
+# key Features
+**Catálogo inteligente** con buscador, filtros y categorías dinámicas.
+**Carrito de pedidos** con sumatoria automática, edición de cantidades y control visual del total.
+**Visualización** atractiva de productos con imágenes, precio y botón de acción.
+**Creación de órdenes** rápida, ordenada y visualmente clara.
+**Formulario modal** para agregar o editar productos directamente desde el panel.
+Panel de estado para monitorear totales y número de ítems en tiempo real.
+Botón de limpiar carrito para reiniciar la orden en curso.
+Preparado para punto de venta táctil.
 
-    // const data = await useFetch({ url: api, data: { opc: "init" } });
-    // modifier = data.modifier;
-    // products = data.products;
-    // idFolio  = data.products;
-    app = new App(api, 'root');
-    pos = new Pos(api, 'root');
-    app.init();
-    pos.render();
-    app.printOrder();
-});
+# Organization
+Se encuentra separado en dos clases POS y Catalog Product
 
-class Pos extends Templates {
-
-    constructor(link, divModule) {
-        super(link, divModule);
-        this.PROJECT_NAME = "Order";
+ ## POS.js [Front JS]
+```Javascript
+  class Pos extends Templates {
+    constructor(link, div_modulo) {
+        super(link, div_modulo);
+        this.PROJECT_NAME = "";
     }
-
-    render() {
-        this.layout();
-
-    }
-
-    layout() {
-
-        this.createPOSContainers({
-            parent: "container-package",
-            id: "pedido",
-            theme: 'dark',
-            onChange: (item) => {
-                this.searchFilter({ parent: 'searchProduct' })
-            }
-        });
-
-    }
-
 
     // Components.
     createPOSContainers(options) {
@@ -857,7 +837,6 @@ class Pos extends Templates {
         });
     }
 
-
     // auxiliares.
     searchFilter(options) {
         const opts = Object.assign({
@@ -888,13 +867,17 @@ class Pos extends Templates {
         input.off("input").on("input", search);
     }
 
-
 }
 
-class App extends Pos {
-    constructor(link, divModule) {
-        super(link, divModule);
-        this.PROJECT_NAME = "Order";
+```
+
+## Catalog Product.js [Front JS]
+
+```javascript 
+class CatalogProduct extends Pos {
+    constructor(link, div_modulo) {
+        super(link, div_modulo);
+        this.PROJECT_NAME = "CatalogProduct";
     }
 
     init() {
@@ -903,54 +886,95 @@ class App extends Pos {
 
     render() {
         this.layout();
-        this.initPos();
+        this.formCreateOrder();
+        this.layoutPos();
     }
 
     layout() {
+
         this.primaryLayout({
             parent: "root",
             id: this.PROJECT_NAME,
-            class: "flex mx-2 my-2 mt-5 p-2",
+            class: "flex mx-2 my-2 h-full mt-5 p-2",
             card: {
                 filterBar: {
                     id: "filterBar" + this.PROJECT_NAME,
                     class: "w-full my-3"
                 },
                 container: {
-                    class: "w-full my-3 bg-[#1F2A37] rounded-lg p-4",
+                    class: "w-full my-3 h-full bg-[#1F2A37] rounded-lg p-4",
                 },
             },
         });
+    }
 
+    formCreateOrder() {
         this.tabLayout({
             parent: "container" + this.PROJECT_NAME,
             id: "tabsPedido",
             theme: "dark",
-            type: "short",
+            type: 'short',
             content: { class: "" },
             json: [
                 {
-                    id: "datos",
+                    id: "pedido",
+                    tab: "Crear orden de pedido",
+                    active: true,
 
-                    tab: "Datos del pedido",
                 },
                 {
                     id: "package",
-                    active: true,
-
-                    tab: "Paquetes",
-                },
-            ],
+                    tab: "Catálogo de productos"
+                }
+            ]
         });
 
+        order.addOrder();
+    }
 
 
+
+
+
+    // System Pos.
+
+    layoutPos() {
+
+        console.log(idFolio)
+        if (!idFolio) {
+            $("#container-package").html(`
+             <div class="w-full p-6 bg-[#1F2A37] text-center rounded-lg">
+                <div class="flex justify-center mb-4">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center bg-purple-500 ">
+                        <i class="icon-birthday text-white text-2xl"></i>
+                    </div>
+                </div>
+                <h2 class="text-lg font-bold text-purple-400">Sin Órdenes Activas</h2>
+                <p class="text-gray-300 mt-2">
+                    Para comenzar a agregar productos a tu carrito, primero necesitas
+                    <a href="#" id="btnNuevaOrden" class="text-blue-400 ">iniciar una nueva orden</a>.
+                </p>
+            </div>
+            `);
+            return;
+        }
+
+        this.createPOSContainers({
+            parent: "container-package",
+            id: "pedido",
+            theme: 'dark',
+            onChange: (item) => {
+                this.searchFilter({ parent: 'searchProduct' })
+            }
+        });
+
+        this.initPos();
     }
 
     async initPos() {
 
-        const pos = await useFetch({ url: api, data: { opc: "init" } });
-        idFolio = pos.id;
+        const pos = await useFetch({ url: this._link, data: { opc: "init" } });
+        // idFolio = pos.id;
 
         // tabs product.
 
@@ -1004,7 +1028,7 @@ class App extends Pos {
 
     async listProduct(id) {
 
-        const pos = await useFetch({ url: api, data: { opc: "lsProducto", id: id } });
+        const pos = await useFetch({ url: this._link, data: { opc: "lsProducto", id: id } });
 
         this.createProductGrid({
             data: pos.products,
@@ -1019,7 +1043,7 @@ class App extends Pos {
     async addProduct(product_id) {
 
         const pos = await useFetch({
-            url: api,
+            url: this._link,
             data: {
                 opc: "addProduct",
                 quantity: 1,
@@ -1042,12 +1066,21 @@ class App extends Pos {
             onRemove: (id) => {
                 this.removeProduct(id);
             },
+
+            onPrint: () => {
+                console.log("print");
+                this.printOrder(idFolio);
+            },
+
+            onClear: () => {
+                this.confirmClearOrder(idFolio);
+            },
         });
     }
 
     async removeProduct(id) {
         const pos = await useFetch({
-            url: api,
+            url: this._link,
             data: {
                 opc: "removeProduct",
                 pedidos_id: idFolio,
@@ -1124,6 +1157,7 @@ class App extends Pos {
                     id: "order_details",
                     lbl: "Observaciones",
                     class: "col-12 mb-3",
+                    height:32,
                     disabled: true
                 },
                 {
@@ -1141,7 +1175,7 @@ class App extends Pos {
                                 class="hidden"
                                 multiple
                                 accept="image/*"
-                                onchange="app.previewImages(this, 'previewImagenes')"
+                                onchange="normal.previewImages(this, 'previewImagenes')"
                             >
                             <div class="flex flex-col items-center justify-center py-2 cursor-pointer" onclick="document.getElementById('archivos').click()">
                                 <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center mb-2">
@@ -1162,7 +1196,8 @@ class App extends Pos {
                     className: "w-full p-2",
                     text: "Actualizar Producto",
                     onClick: () => {
-                        const form = document.getElementById('formEditProducto');
+
+                        const form     = document.getElementById('formEditProducto');
                         const formData = new FormData(form);
 
                         formData.append('opc', 'editProduct');
@@ -1180,10 +1215,13 @@ class App extends Pos {
                             .then(response => response.json())
                             .then(response => {
                                 if (response.status === 200) {
+
                                     alert({ icon: "success", text: response.message });
                                     // this.lsProductos();
                                     modal.modal('hide');
+
                                 } else {
+
                                     alert({ icon: "info", title: "Oops!...", text: response.message, btn1: true, btn1Text: "Ok" });
                                 }
                             });
@@ -1197,15 +1235,19 @@ class App extends Pos {
 
     // aux method.
     previewImages(input, previewId) {
+
         const previewContainer = document.getElementById(previewId);
         previewContainer.innerHTML = "";
+
         Array.from(input.files).forEach(file => {
             if (file.type.startsWith("image/")) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    const img = document.createElement("img");
-                    img.src = e.target.result;
-                    img.classList.add("w-20", "h-20", "object-cover", "rounded");
+
+                    const img     = document.createElement("img");
+                          img.src = e.target.result;
+
+                    img.classList.add("w-28", "h-28", "object-cover", "rounded");
                     previewContainer.appendChild(img);
                 };
                 reader.readAsDataURL(file);
@@ -1222,13 +1264,14 @@ class App extends Pos {
         // Si solo es una imagen (objeto), conviértelo a arreglo
         const imageList = Array.isArray(images) ? images : [{ path: images }];
 
-        console.log(imageList);
 
         imageList.forEach(imgData => {
-            const img = document.createElement("img");
-            img.src = urlBase + imgData.path;
-            img.alt = imgData.original_name || "Imagen del producto";
-            img.classList.add("w-20", "h-20", "object-cover", "rounded", "border");
+
+            const img     = document.createElement("img");
+                  img.src = urlBase + imgData.path;
+                  img.alt = imgData.original_name || "Imagen del producto";
+
+            img.classList.add("w-32", "h-32", "object-cover", "rounded", "border");
             previewContainer.appendChild(img);
         });
     }
@@ -1237,9 +1280,9 @@ class App extends Pos {
     // Pos.
     addPayment(data) {
 
-        let saldo = $('#total').text();
+        let saldo         = $('#total').text();
         let saldoOriginal = $('#total').text().replace(/[^0-9.-]+/g, "");
-        let total = parseFloat(saldoOriginal);
+        let total         = parseFloat(saldoOriginal);
 
         this.createModalForm({
             id: "modalRegisterPayment",
@@ -1278,7 +1321,7 @@ class App extends Pos {
                             </div>
 
                             <label class="inline-flex items-center cursor-pointer relative">
-                                <input type="checkbox" id="toggleAnticipo" class="sr-only peer" onchange="app.toggleAnticipoView()">
+                                <input type="checkbox" id="toggleAnticipo" class="sr-only peer" onchange="normal.toggleAnticipoView()">
                                 <div class="w-11 h-6 bg-gray-700 peer-checked:bg-blue-600 rounded-full transition-colors duration-300"></div>
                                 <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
                             </label>
@@ -1294,7 +1337,7 @@ class App extends Pos {
                     placeholder: "$ 0",
                     required: false,
                     min: 0,
-                    onkeyup: 'app.updateSaldoEvent(' + total + ')'
+                    onkeyup: 'normal.updateSaldoEvent(' + total + ')'
                 },
                 {
                     opc: "select",
@@ -1323,7 +1366,7 @@ class App extends Pos {
             success: (response) => {
                 if (response.status == 200) {
                     alert({ icon: "success", text: response.message, btn1: true, btn1Text: "Ok" });
-                    // app.ls();
+                    order.init();
                 } else {
                     alert({ icon: "error", text: response.message, btn1: true, btn1Text: "Ok" });
                 }
@@ -1342,7 +1385,7 @@ class App extends Pos {
 
         const pos = await useFetch({
             url: this._link,
-            data: { opc: "getOrder", id: 4 }
+            data: { opc: "getOrder", id: idFolio }
         });
 
         const modal = bootbox.dialog({
@@ -1366,36 +1409,37 @@ class App extends Pos {
 
     }
 
-    createTicket(options = {}) {
+
+    createTicket(options) {
         const defaults = {
             parent: "container", // contenedor donde se insertará
             data: {
-                head: { data: {} },
-                row: [],
+                head    : { data: {} },
+                row     : [],
                 products: []
             }
         };
 
-        const opts = Object.assign({}, defaults, options);
-        const parent = opts.parent;
-        const data = opts.data.head.data || {};
-        const products = opts.data.products || [];
-        const cliente = data.cliente || "[cliente]";
-        const fecha = data.pedido || "[fecha]";
-        const hora = data.horapedido || "[hora]";
+        const opts        = Object.assign({}, defaults, options);
+        const parent      = opts.parent;
+        const data        = opts.data.head.data || {};
+        const products    = opts.data.products || [];
+
+        const cliente     = data.cliente || "[cliente]";
+        const fecha       = data.pedido || "[fecha]";
+        const hora        = data.horapedido || "[hora]";
         const observacion = data.observacion || "[nota]";
-        const costo = data.total || 0;
-        const anticipo = data.anticipo || 0;
-        const restante = costo - anticipo;
-        const container = $("<div>", { id: "containerTicks", class: "bg-white text-gray-800 rounded-lg mb-4 font-mono p-4" });
+        const costo       = data.total || 0;
+        const anticipo    = data.anticipo || 0;
+        const restante    = costo - anticipo;
+        const container   = $("<div>", { id: "containerTicks", class: "bg-white text-gray-800 rounded-lg mb-4 font-mono p-4" });
 
         // Header
         container.append(`
         <div class="flex flex-col items-center">
             <img src="https://erp-varoch.com/ERP24/src/img/udn/fz_black.png" alt="Panadería y pastelería" class="w-48 max-w-full mt-2" />
             <h1 class="p-2 text-center font-bold">PEDIDOS DE PASTELERÍA</h1>
-        </div>
-        `);
+        </div>`);
 
         container.append(`
         <div class="flex-1 text-xs  space-y-4">
@@ -1499,9 +1543,11 @@ class App extends Pos {
             class: opts.class
         });
 
+
+
         const header = `
             <div class="flex flex-col items-center mb-4">
-                ${data.logo ? `<img src="${data.logo}" alt="Logo" class="w-32 mb-1" />` : ""}
+                ${data.logo ? `<img src="https://huubie.com.mx/alpha${data.logo}" alt="Logo" class="w-20 mb-1" />` : ""}
                 ${data.company ? `<div class="text-xs font-semibold uppercase mb-1">${data.company}</div>` : ""}
                 <h1 class="text-lg font-bold">PEDIDOS DE PASTELERÍA</h1>
                 ${data.is_quote ? `<div class="text-xs font-bold text-red-600 uppercase">COTIZACIÓN</div>` : ""}
@@ -1531,7 +1577,7 @@ class App extends Pos {
                 </div>` : ""}
                 <hr class="border-dashed border-t my-2" />
             </div> `;
-        
+
 
 
         let listaProductos = "";
@@ -1544,7 +1590,7 @@ class App extends Pos {
                     <div class="w-3/6">DESCRIPCIÓN</div>
                     <div class="w-2/6 text-right">IMPORTE</div>
                 </div>
-             
+
         `;
 
             listaProductos += productos.map(product => {
@@ -1613,7 +1659,7 @@ class App extends Pos {
         <div class="text-center mt-6 text-xs font-bold text-gray-900 space-y-1">
             <p class="mt-2">GRACIAS POR SU PREFERENCIA</p>
             <p>ESTE NO ES UN COMPROBANTE FISCAL</p>
-           
+
             <p class="text-purple-800 text-sm">Huubie</p>
         </div>
     `;
@@ -1625,7 +1671,6 @@ class App extends Pos {
 
         $(`#${opts.parent}`).html(container);
     }
-
 
     toggleAnticipoView() {
         const show = document.getElementById("toggleAnticipo")?.checked;
@@ -1691,5 +1736,8 @@ class App extends Pos {
 
 
 
+
 }
 
+```
+ 
