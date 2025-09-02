@@ -24,10 +24,11 @@ class App extends Templates {
     render(options) {
         this.layout();
         this.filterBar();
-        this.lsIngresos();
+       
+        this.navBar()
 
     }
-// 
+ 
     layout() {
         this.primaryLayout({
             parent: `root`,
@@ -121,9 +122,153 @@ class App extends Templates {
     }
 
 
+    navBar(options) {
+        const defaults = {
+            id: "navBar",
+            theme: "light", // "light" | "dark"
+            class: "h-[56px] px-4 shadow-md",
+            logoFull: "https://erp-varoch.com/ERP24/src/img/logos/logo_row_wh.png",
+            logoMini: "https://erp-varoch.com/ERP24/src/img/logos/logo_icon_wh.png",
+            user: {
+                name: "Sergio Osorio",
+                photo: "https://huubie.com.mx/alpha/src/img/perfil/fotoUser26_20250803_120920.png",
+                onProfile: () => redireccion('perfil/perfil.php'),
+                onLogout: () => cerrar_sesion()
+            },
+            apps: [
+                { icon: "icon-calculator", name: "Contabilidad", color: "text-indigo-600" },
+                { icon: "icon-box", name: "Inventario", color: "text-blue-600" },
+                { icon: "icon-cart", name: "Ventas", color: "text-green-600" },
+                { icon: "icon-bag", name: "Compras", color: "text-yellow-500" },
+                { icon: "icon-users", name: "Recursos Humanos", color: "text-pink-500" },
+                { icon: "icon-chart", name: "Reportes", color: "text-purple-600" },
+                { icon: "icon-handshake", name: "CRM", color: "text-red-500" },
+                { icon: "icon-industry", name: "Producción", color: "text-orange-500" },
+                { icon: "icon-cog", name: "Configuración", color: "text-gray-700" }
+            ]
 
+        };
 
+        const opts = Object.assign({}, defaults, options);
+        const isDark = opts.theme === "dark";
 
+        const colors = {
+            navbar: isDark ? "bg-[#003B6B] text-white" : "bg-[#0A2B4B] text-white",
+            dropdownBg: isDark ? "bg-[#003B6B] text-white" : "bg-white text-gray-800",
+            hoverText: isDark ? "hover:text-blue-300" : "hover:text-blue-200",
+            userHover: isDark ? "hover:bg-[#2c2c2c]" : "hover:bg-blue-100",
+            userBg: isDark ? "bg-[#003B6B]" : "bg-white",
+            border: isDark ? "border border-gray-700" : "border border-gray-200"
+        };
+
+        // 🧱 NAVBAR
+        const header = $("<header>", {
+            id: opts.id,
+            class: `${colors.navbar} ${opts.class} flex justify-between items-center w-full fixed top-0 left-0 z-40`
+        });
+
+        const left = $("<div>", { class: "flex items-center gap-4" }).append(
+            $("<span>", {
+                id: "btnSidebar",
+                html: `<i class="icon-menu text-2xl cursor-pointer ${colors.hoverText}"></i> `
+            }),
+            $("<img>", {
+                src: opts.logoFull,
+                class: "h-8 hidden sm:block cursor-pointer",
+                click: () => location.reload()
+            }),
+            $("<img>", {
+                src: opts.logoMini,
+                class: "h-8 block sm:hidden cursor-pointer",
+                click: () => location.reload()
+            })
+        );
+
+        const launcherButton = $("<div>", {
+            id: "launcherBtn",
+            class: `relative ${colors.hoverText} text-xl cursor-pointer`,
+            html: `<i class="icon-th-3"></i> `,
+            click: (e) => {
+                e.stopPropagation();
+                $("#appsLauncher").toggleClass("hidden");
+            }
+        });
+
+        const user = $("<div>", {
+            class: "flex items-center gap-2 ml-4 cursor-pointer relative group"
+        }).append(
+            $("<img>", {
+                src: opts.user.photo,
+                class: "w-9 h-9 rounded-full border-2 border-white shadow"
+            }),
+            $("<span>", {
+                class: "hidden sm:block font-medium text-sm",
+                text: opts.user.name
+            }),
+            $("<ul>", {
+                class: `hidden fixed top-16 right-4 w-[300px] ${colors.dropdownBg} rounded-lg ${colors.border} shadow p-4 z-50 backdrop-blur`
+            }).append(
+                $("<li>", {
+                    html: `<i class="icon-user mr-2"></i> Mi perfil`,
+                    class: `px-4 py-2 ${colors.userHover} cursor-pointer`,
+                    click: opts.user.onProfile
+                }),
+                $("<li>", { class: `border-t my-1 ${colors.border}` }),
+                $("<li>", {
+                    html: `<i class="icon-off mr-2"></i> Cerrar sesión`,
+                    class: `px-4 py-2 ${colors.userHover} cursor-pointer`,
+                    click: opts.user.onLogout
+                })
+            )
+        );
+
+        const right = $("<div>", {
+            class: "flex items-center gap-3 relative"
+        }).append(launcherButton, user);
+
+        header.append(left, right);
+        $("body").prepend(header);
+
+        // 🌐 Apps Launcher
+        const launcher = $("<div>", {
+            id: "appsLauncher",
+            class: `hidden fixed top-16 right-4 w-[300px] ${colors.dropdownBg} rounded-lg ${colors.border} shadow p-4 z-50 backdrop-blur`
+        }).append(
+            $("<h3>", {
+                class: "text-md font-semibold mb-1",
+                text: "Módulos ERP"
+            }),
+            $("<p>", {
+                class: "text-xs text-gray-400 mb-4",
+                text: "Selecciona una aplicación para comenzar"
+            }),
+            $("<div>", {
+                class: "grid grid-cols-3 gap-4"
+            }).append(
+                ...opts.apps.map(app =>
+                    $("<div>", {
+                        class: "flex flex-col items-center text-center text-xs cursor-pointer hover:scale-105 transition"
+                    }).append(
+                        $("<div>", {
+                            class: `rounded-lg w-12 h-12 flex items-center justify-center text-xl mb-2 ${app.color}`
+                        }).append(
+                            $("<i>", { class: app.icon })
+                        ),
+                        $("<span>", { text: app.name })
+                    )
+                )
+            )
+        );
+
+        $("body").append(launcher);
+
+        // 🔒 Cierra launcher al dar clic fuera
+        $(document).on("click", (e) => {
+            if (!$(e.target).closest("#launcherBtn").length && !$(e.target).closest("#appsLauncher").length) {
+                $("#appsLauncher").addClass("hidden");
+            }
+        });
+    }
 
 
     dashboard() {
