@@ -24,15 +24,25 @@ class App extends Templates {
     render(options) {
         this.layout();
         this.filterBar();
+
+      
+        this.sideBar()
+        this.navBar({
+            onToggle: () => {
+               
+                // $("#sidebar").toggleClass("-translate-x-full");
+            }
+        });
+
        
-        this.navBar()
 
     }
- 
+
     layout() {
         this.primaryLayout({
             parent: `root`,
             id: this.PROJECT_NAME,
+            class: '9',
             card: {
                 filterBar: { class: 'w-full  border-b pb-2 ', id: `filterBar${this.PROJECT_NAME}` },
                 container: { class: 'w-full my-2 h-full ', id: `container${this.PROJECT_NAME}` }
@@ -51,7 +61,7 @@ class App extends Templates {
 
                     class: "col-sm-3",
                     data: [
-                        {id:'5',valor:'BAOS'}
+                        { id: '5', valor: 'BAOS' }
                     ],
                     onchange: `ingresos.lsIngresos()`,
                 },
@@ -121,56 +131,65 @@ class App extends Templates {
 
     }
 
-
     navBar(options) {
         const defaults = {
             id: "navBar",
-            theme: "light", // "light" | "dark"
+            theme: "dark", // "light" | "dark" (Huubie)
             class: "h-[56px] px-4 shadow-md",
             logoFull: "https://erp-varoch.com/ERP24/src/img/logos/logo_row_wh.png",
             logoMini: "https://erp-varoch.com/ERP24/src/img/logos/logo_icon_wh.png",
             user: {
-                name: "Sergio Osorio",
+                name: "Rosy Dev",
                 photo: "https://huubie.com.mx/alpha/src/img/perfil/fotoUser26_20250803_120920.png",
                 onProfile: () => redireccion('perfil/perfil.php'),
                 onLogout: () => cerrar_sesion()
             },
             apps: [
-                { icon: "icon-calculator", name: "Contabilidad", color: "text-indigo-600" },
-                { icon: "icon-box", name: "Inventario", color: "text-blue-600" },
+                { icon: "icon-calculator", name: "Contabilidad", color: "text-indigo-400" },
+                { icon: "icon-gmail", name: "Inventario", color: "text-red-600" },
                 { icon: "icon-cart", name: "Ventas", color: "text-green-600" },
-                { icon: "icon-bag", name: "Compras", color: "text-yellow-500" },
-                { icon: "icon-users", name: "Recursos Humanos", color: "text-pink-500" },
+                { icon: "icon-bag", name: "Compras", color: "text-yellow-600" },
+                { icon: "icon-users", name: "Recursos", color: "text-pink-600" },
                 { icon: "icon-chart", name: "Reportes", color: "text-purple-600" },
-                { icon: "icon-handshake", name: "CRM", color: "text-red-500" },
-                { icon: "icon-industry", name: "Producción", color: "text-orange-500" },
-                { icon: "icon-cog", name: "Configuración", color: "text-gray-700" }
+                { icon: "icon-dollar", name: "POS", color: "text-orange-600" },
+                { icon: "icon-industry", name: "Producción", color: "text-purple-600" },
+                { icon: "icon-cog", name: "Configuración", color: "text-gray-600" }
             ]
-
         };
 
         const opts = Object.assign({}, defaults, options);
-        const isDark = opts.theme === "dark";
 
+        // ===== THEME: Huubie Dark =====
+        const isDark = String(opts.theme).toLowerCase() === "dark";
         const colors = {
-            navbar: isDark ? "bg-[#003B6B] text-white" : "bg-[#0A2B4B] text-white",
-            dropdownBg: isDark ? "bg-[#003B6B] text-white" : "bg-white text-gray-800",
+            navbar: isDark ? "bg-[#1F2A37] text-white" : "bg-[#0A2B4B] text-white", // Huubie dark / Light azul prof.
+            dropdownBg: isDark ? "bg-[#1F2A37] text-white" : "bg-white text-gray-800",
             hoverText: isDark ? "hover:text-blue-300" : "hover:text-blue-200",
-            userHover: isDark ? "hover:bg-[#2c2c2c]" : "hover:bg-blue-100",
-            userBg: isDark ? "bg-[#003B6B]" : "bg-white",
-            border: isDark ? "border border-gray-700" : "border border-gray-200"
+            userHover: isDark ? "" : "hover:bg-blue-100",
+            userBg: isDark ? "bg-[#1F2A37]" : "bg-white",
+            border: isDark ? "border border-gray-700" : "border border-gray-200",
+            chipBg: isDark ? "bg-gray-700" : "bg-gray-100"
         };
 
-        // 🧱 NAVBAR
+        // NAVBAR
         const header = $("<header>", {
             id: opts.id,
             class: `${colors.navbar} ${opts.class} flex justify-between items-center w-full fixed top-0 left-0 z-40`
         });
 
         const left = $("<div>", { class: "flex items-center gap-4" }).append(
-            $("<span>", {
+            $("<button>", {
                 id: "btnSidebar",
-                html: `<i class="icon-menu text-2xl cursor-pointer ${colors.hoverText}"></i> `
+                class: "text-white hover:text-blue-400 transition-colors duration-200 p-2 rounded focus:outline-none",
+                html: `<i class="icon-menu text-2xl"></i>`,
+                click: () => {
+                    if (typeof opts.onToggle === "function") {
+                        opts.onToggle(); // Evento externo personalizado
+                    } else {
+                        // Comportamiento por defecto: toggle de clase .active
+                        $("#sidebar").toggleClass("active");
+                    }
+                }
             }),
             $("<img>", {
                 src: opts.logoFull,
@@ -187,15 +206,17 @@ class App extends Templates {
         const launcherButton = $("<div>", {
             id: "launcherBtn",
             class: `relative ${colors.hoverText} text-xl cursor-pointer`,
-            html: `<i class="icon-th-3"></i> `,
+            html: `<i class="icon-th-3"></i>`,
             click: (e) => {
                 e.stopPropagation();
                 $("#appsLauncher").toggleClass("hidden");
             }
         });
 
+        // USER (click para abrir menú)
         const user = $("<div>", {
-            class: "flex items-center gap-2 ml-4 cursor-pointer relative group"
+            class: "flex items-center gap-2 ml-4 cursor-pointer relative",
+            id: "userDropdown"
         }).append(
             $("<img>", {
                 src: opts.user.photo,
@@ -206,17 +227,18 @@ class App extends Templates {
                 text: opts.user.name
             }),
             $("<ul>", {
-                class: `hidden fixed top-16 right-4 w-[300px] ${colors.dropdownBg} rounded-lg ${colors.border} shadow p-4 z-50 backdrop-blur`
+                id: "userMenu",
+                class: `hidden fixed top-16 right-4 w-[280px] ${colors.dropdownBg} rounded-lg ${colors.border} shadow p-2 z-50`
             }).append(
                 $("<li>", {
-                    html: `<i class="icon-user mr-2"></i> Mi perfil`,
-                    class: `px-4 py-2 ${colors.userHover} cursor-pointer`,
+                    class: `px-3 py-2 rounded ${colors.userHover} cursor-pointer flex items-center gap-2`,
+                    html: `<i class="icon-user"></i><span>Mi perfil</span>`,
                     click: opts.user.onProfile
                 }),
-                $("<li>", { class: `border-t my-1 ${colors.border}` }),
+                $("<li>", { class: `my-1 ${colors.border}` }),
                 $("<li>", {
-                    html: `<i class="icon-off mr-2"></i> Cerrar sesión`,
-                    class: `px-4 py-2 ${colors.userHover} cursor-pointer`,
+                    class: `px-3 py-2 rounded ${colors.userHover} cursor-pointer flex items-center gap-2`,
+                    html: `<i class="icon-off"></i><span>Cerrar sesión</span>`,
                     click: opts.user.onLogout
                 })
             )
@@ -229,32 +251,25 @@ class App extends Templates {
         header.append(left, right);
         $("body").prepend(header);
 
-        // 🌐 Apps Launcher
+        // APPS LAUNCHER (Huubie dark)
         const launcher = $("<div>", {
             id: "appsLauncher",
-            class: `hidden fixed top-16 right-4 w-[300px] ${colors.dropdownBg} rounded-lg ${colors.border} shadow p-4 z-50 backdrop-blur`
+            class: `hidden fixed top-16 right-4 w-[320px] ${colors.dropdownBg} rounded-lg ${colors.border} shadow p-4 z-50`
         }).append(
-            $("<h3>", {
-                class: "text-md font-semibold mb-1",
-                text: "Módulos ERP"
-            }),
-            $("<p>", {
-                class: "text-xs text-gray-400 mb-4",
-                text: "Selecciona una aplicación para comenzar"
-            }),
-            $("<div>", {
-                class: "grid grid-cols-3 gap-4"
-            }).append(
+            $("<div>", { class: "mb-3 flex items-center justify-between" }).append(
+                $("<h3>", { class: "text-sm font-semibold", text: "Módulos ERP" }),
+                $("<span>", { class: `text-[10px] px-2 py-1 rounded ${colors.chipBg} opacity-80`, text: "Huubie UI" })
+            ),
+            $("<div>", { class: "grid grid-cols-3 gap-3" }).append(
                 ...opts.apps.map(app =>
-                    $("<div>", {
-                        class: "flex flex-col items-center text-center text-xs cursor-pointer hover:scale-105 transition"
+                    $("<button>", {
+                        type: "button",
+                        class: `flex flex-col items-center gap-2 text-xs px-2 pt-2 pb-3 rounded hover:scale-105 transition ${colors.userHover}`
                     }).append(
                         $("<div>", {
-                            class: `rounded-lg w-12 h-12 flex items-center justify-center text-xl mb-2 ${app.color}`
-                        }).append(
-                            $("<i>", { class: app.icon })
-                        ),
-                        $("<span>", { text: app.name })
+                            class: `w-12 h-12 rounded-lg flex items-center justify-center text-xl ${app.color} ${colors.chipBg}`
+                        }).append($("<i>", { class: app.icon })),
+                        $("<span>", { class: "opacity-90", text: app.name })
                     )
                 )
             )
@@ -262,13 +277,105 @@ class App extends Templates {
 
         $("body").append(launcher);
 
-        // 🔒 Cierra launcher al dar clic fuera
+        // Eventos de toggle/cierre (user & launcher)
+        $("#userDropdown").on("click", function (e) {
+            e.stopPropagation();
+            $("#userMenu").toggleClass("hidden");
+            $("#appsLauncher").addClass("hidden");
+        });
+
         $(document).on("click", (e) => {
             if (!$(e.target).closest("#launcherBtn").length && !$(e.target).closest("#appsLauncher").length) {
                 $("#appsLauncher").addClass("hidden");
             }
+            if (!$(e.target).closest("#userDropdown").length && !$(e.target).closest("#userMenu").length) {
+                $("#userMenu").addClass("hidden");
+            }
         });
     }
+
+
+  
+    sideBar(options) {
+        const defaults = {
+            parent: "body",
+            id: "sidebar",
+            theme: "dark",
+            groups: [
+                {
+                    name: "Administración",
+                    icon: "icon-cog",
+                    items: [
+                        { name: "Usuarios", icon: "icon-user", onClick: () => alert("Usuarios") },
+                        { name: "Roles", icon: "icon-key", onClick: () => alert("Roles") }
+                    ]
+                },
+                {
+                    name: "Ventas",
+                    icon: "icon-cart",
+                    items: [
+                        { name: "Pedidos", icon: "icon-file-text", onClick: () => alert("Pedidos") },
+                        { name: "Clientes", icon: "icon-users", onClick: () => alert("Clientes") }
+                    ]
+                }
+            ]
+        };
+
+        const opts = Object.assign({}, defaults, options);
+        const isDark = opts.theme === "dark";
+
+        const colors = {
+            bg: isDark ? "bg-[#1F2A37]" : "bg-white",
+            text: isDark ? "text-white" : "text-gray-800",
+            hover: isDark ? "hover:bg-[#1E3A5F]" : "hover:bg-gray-100",
+            border: isDark ? "border-gray-700" : "border-gray-200"
+        };
+
+        const container = $("<aside>", {
+            id: opts.id,
+            class: `${colors.bg} ${colors.text} w-64 h-[calc(100vh-56px)] fixed top-[56px] left-0 z-30 shadow-lg transition-transform duration-300 transform -translate-x-full`
+        });
+
+        const content = $("<div>", { class: "p-4 space-y-4" });
+
+        opts.groups.forEach(group => {
+            const groupContainer = $("<div>", { class: "space-y-2" });
+
+            const groupTitle = $("<h3>", {
+                class: "uppercase text-xs font-bold opacity-70",
+                html: `<i class="${group.icon} mr-1"></i>${group.name}`
+            });
+
+            const itemList = $("<ul>", { class: "ml-2 space-y-1" });
+
+            group.items.forEach(item => {
+                itemList.append(
+                    $("<li>", {
+                        class: `flex items-center gap-2 px-2 py-1 rounded cursor-pointer ${colors.hover}`,
+                        html: `<i class="${item.icon} text-sm"></i> <span>${item.name}</span>`,
+                        click: item.onClick
+                    })
+                );
+            });
+
+            groupContainer.append(groupTitle, itemList);
+            content.append(groupContainer);
+        });
+
+        container.append(content);
+        $(`${opts.parent}`).append(container);
+
+        // 🧩 Toggle sidebar y root layout
+        $(document).on("click", "#btnSidebar", () => {
+            $("#sidebar").toggleClass("-translate-x-full");
+            $("#root").toggleClass("ml-64 transition-all duration-300");
+        });
+    }
+
+
+
+
+
 
 
     dashboard() {
@@ -390,7 +497,7 @@ class App extends Templates {
     }
 
 
-   
+
 
     // Rotation.
     layoutNewRotation(request) {
