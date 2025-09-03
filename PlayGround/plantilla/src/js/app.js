@@ -26,15 +26,15 @@ class App extends Templates {
         this.filterBar();
 
       
-        this.sideBar()
+        this.sideBar();
+
         this.navBar({
             onToggle: () => {
                
                 // $("#sidebar").toggleClass("-translate-x-full");
             }
         });
-
-       
+        
 
     }
 
@@ -134,7 +134,7 @@ class App extends Templates {
     navBar(options) {
         const defaults = {
             id: "navBar",
-            theme: "dark", // "light" | "dark" (Huubie)
+            theme: "light", // "light" | "dark" (Huubie)
             class: "h-[56px] px-4 shadow-md",
             logoFull: "https://erp-varoch.com/ERP24/src/img/logos/logo_row_wh.png",
             logoMini: "https://erp-varoch.com/ERP24/src/img/logos/logo_icon_wh.png",
@@ -293,14 +293,12 @@ class App extends Templates {
             }
         });
     }
-
-
   
     sideBar(options) {
         const defaults = {
             parent: "body",
             id: "sidebar",
-            theme: "dark",
+            theme: "light",
             groups: [
                 {
                     name: "Administración",
@@ -371,12 +369,6 @@ class App extends Templates {
             $("#root").toggleClass("ml-64 transition-all duration-300");
         });
     }
-
-
-
-
-
-
 
     dashboard() {
 
@@ -495,8 +487,6 @@ class App extends Templates {
 
         $(`#${opts.parent}`).html(container);
     }
-
-
 
 
     // Rotation.
