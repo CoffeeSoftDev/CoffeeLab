@@ -36,7 +36,7 @@ class App extends Templates {
     navBar(options) {
         const defaults = {
             id: "navBar",
-            theme: "dark", // "light" | "dark" (Huubie)
+            theme: "light", // "light" | "dark" (Huubie)
             class: "h-[56px] px-4 shadow-md",
             logoFull: "https://erp-varoch.com/ERP24/src/img/logos/logo_row_wh.png",
             logoMini: "https://erp-varoch.com/ERP24/src/img/logos/logo_icon_wh.png",
