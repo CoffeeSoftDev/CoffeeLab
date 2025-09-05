@@ -25,16 +25,16 @@ class App extends Templates {
         this.layout();
         this.filterBar();
 
+      
+        this.sideBar();
 
-        this.sideBar()
         this.navBar({
             onToggle: () => {
 
                 // $("#sidebar").toggleClass("-translate-x-full");
             }
         });
-
-
+        
 
     }
 
@@ -133,39 +133,28 @@ class App extends Templates {
 
     navBar(options) {
         const defaults = {
-          id: "navBar",
-          theme: "light", // "light" | "dark" (Huubie)
-          class: "h-[56px] px-4 shadow-md",
-          logoFull:
-            "https://erp-varoch.com/ERP24/src/img/logos/logo_row_wh.png",
-          logoMini:
-            "https://erp-varoch.com/ERP24/src/img/logos/logo_icon_wh.png",
-          user: {
-            name: "Rosy Dev",
-            photo:
-              "https://huubie.com.mx/alpha/src/img/perfil/fotoUser26_20250803_120920.png",
-            onProfile: () => redireccion("perfil/perfil.php"),
-            onLogout: () => cerrar_sesion(),
-          },
-          apps: [
-            {
-              icon: "icon-calculator",
-              name: "Contabilidad",
-              color: "text-indigo-400",
+            id: "navBar",
+            theme: "light", // "light" | "dark" (Huubie)
+            class: "h-[56px] px-4 shadow-md",
+            logoFull: "https://erp-varoch.com/ERP24/src/img/logos/logo_row_wh.png",
+            logoMini: "https://erp-varoch.com/ERP24/src/img/logos/logo_icon_wh.png",
+            user: {
+                name: "Rosy Dev",
+                photo: "https://huubie.com.mx/alpha/src/img/perfil/fotoUser26_20250803_120920.png",
+                onProfile: () => redireccion('perfil/perfil.php'),
+                onLogout: () => cerrar_sesion()
             },
-            { icon: "icon-gmail", name: "Gmail", color: "text-red-600" },
-            { icon: "icon-cart", name: "Ventas", color: "text-green-600" },
-            { icon: "icon-bag", name: "Compras", color: "text-yellow-600" },
-            { icon: "icon-users", name: "Recursos", color: "text-pink-600" },
-            { icon: "icon-chart", name: "Reportes", color: "text-purple-600" },
-            { icon: "icon-dollar", name: "POS", color: "text-orange-600" },
-            {
-              icon: "icon-industry",
-              name: "Producción",
-              color: "text-purple-600",
-            },
-            { icon: "icon-cog", name: "Configuración", color: "text-gray-600" },
-          ],
+            apps: [
+                { icon: "icon-calculator", name: "Contabilidad", color: "text-indigo-400" },
+                { icon: "icon-gmail", name: "Inventario", color: "text-red-600" },
+                { icon: "icon-cart", name: "Ventas", color: "text-green-600" },
+                { icon: "icon-bag", name: "Compras", color: "text-yellow-600" },
+                { icon: "icon-users", name: "Recursos", color: "text-pink-600" },
+                { icon: "icon-chart", name: "Reportes", color: "text-purple-600" },
+                { icon: "icon-dollar", name: "POS", color: "text-orange-600" },
+                { icon: "icon-industry", name: "Producción", color: "text-purple-600" },
+                { icon: "icon-cog", name: "Configuración", color: "text-gray-600" }
+            ]
         };
 
         const opts = Object.assign({}, defaults, options);
@@ -304,14 +293,12 @@ class App extends Templates {
             }
         });
     }
-
-
-
+  
     sideBar(options) {
         const defaults = {
             parent: "body",
             id: "sidebar",
-            theme: "dark",
+            theme: "light",
             groups: [
                 {
                     name: "Administración",
@@ -382,12 +369,6 @@ class App extends Templates {
             $("#root").toggleClass("ml-64 transition-all duration-300");
         });
     }
-
-
-
-
-
-
 
     dashboard() {
 
@@ -506,8 +487,6 @@ class App extends Templates {
 
         $(`#${opts.parent}`).html(container);
     }
-
-
 
 
     // Rotation.
