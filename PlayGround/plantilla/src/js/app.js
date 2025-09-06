@@ -2,13 +2,14 @@
 // init vars.
 let app, sub;
 let api = "https://erp-varoch.com/DEV/capital-humano/ctrl/ctrl-rotacion-de-personal.php";
-let api2 = "https://erp-varoch.com/DEV/kpi/ctrl/ctrl-ingresos.php";
-let data;
+let api2 = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-pedidos-catalogo.php";
+let data,idFolio;
 
 $(async () => {
     // instancias.
     app = new App(api2, 'root');
     app.init();
+    idFolio = 24;
 });
 
 class App extends Templates {
@@ -24,18 +25,9 @@ class App extends Templates {
     render(options) {
         this.layout();
         this.filterBar();
-
-      
-        this.sideBar();
-
-        this.navBar({
-            onToggle: () => {
-               
-                // $("#sidebar").toggleClass("-translate-x-full");
-            }
-        });
-        
-
+        this.sideBar({theme:'dark'});
+        this.navBar({ theme:'dark'});
+        this.addPayment(24)
     }
 
     layout() {
@@ -258,7 +250,7 @@ class App extends Templates {
         }).append(
             $("<div>", { class: "mb-3 flex items-center justify-between" }).append(
                 $("<h3>", { class: "text-sm font-semibold", text: "Módulos ERP" }),
-                $("<span>", { class: `text-[10px] px-2 py-1 rounded ${colors.chipBg} opacity-80`, text: "Huubie UI" })
+                $("<span>", { class: `text-[10px] px-2 py-1 rounded ${colors.chipBg} opacity-80`, text: "" })
             ),
             $("<div>", { class: "grid grid-cols-3 gap-3" }).append(
                 ...opts.apps.map(app =>
@@ -369,6 +361,230 @@ class App extends Templates {
             $("#root").toggleClass("ml-64 transition-all duration-300");
         });
     }
+
+    // payment.
+
+    async addPayment(id) {
+
+        let saldo, saldoOriginal, total, total_paid;
+
+        if (id) {
+            const req = await useFetch({ url: this._link, data: { opc: "getPayment", id: id } });
+            const response = req.order;
+
+            saldo = formatPrice(response.total_pay);
+            saldoOriginal = response.total_pay;
+            total = response.total_pay;
+            total_paid = req.total_paid;
+
+        } else {
+            const totalText = $('#total').text();
+            saldo = totalText;
+            saldoOriginal = totalText.replace(/[^0-9.-]+/g, "");
+            total = parseFloat(saldoOriginal);
+        }
+
+        this.createModalForm({
+            id: "modalRegisterPayment",
+            bootbox: {
+                title: `
+                <div class="flex items-center gap-2 text-white text-lg font-semibold">
+                    <i class="icon-dollar text-blue-400 text-xl"></i>
+                    Registrar Pago
+                </div>
+            `,
+                id: "registerPaymentModal",
+                size: "medium"
+            },
+            data: { opc: 'addPayment', total: total, id: idFolio },
+
+            json: [
+
+
+                this.cardTotalPay(total, total_paid),
+
+
+                {
+                    opc: "div",
+                    id: "anticipoSwitch",
+                    class: "col-12 mb-2",
+                    html: `
+                    <div class="flex items-center justify-between text-white p-3 rounded-lg border border-gray-700 bg-[#1F2937]">
+                        <div class="flex items-center gap-2">
+                            <i id="iconAnticipo" class="icon-minus-square text-gray-400 transition-colors duration-200"></i>
+                            <label id="labelAnticipo" class="text-sm">Abonar</label>
+                        </div>
+
+                        <label class="inline-flex items-center cursor-pointer relative">
+                            <input type="checkbox" id="toggleAnticipo" class="sr-only peer" onchange="app.toggleAnticipoView()">
+                            <div class="w-11 h-6 bg-gray-700 peer-checked:bg-blue-600 rounded-full transition-colors duration-300"></div>
+                            <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
+                        </label>
+                    </div>
+                `
+                },
+                {
+                    opc: "input",
+                    type: "number",
+                    id: "advanced_pay",
+                    lbl: "Importe",
+                    class: "col-6 mb-3 hidden",
+                    placeholder: "$ 0",
+                    required: false,
+                    min: 0,
+                    onkeyup: 'app.updateSaldoEvent(' + total + ', ' + (total_paid || 0) + ')'
+                },
+                {
+                    opc: "select",
+                    id: "method_pay_id",
+                    lbl: "Método de pago del anticipo",
+                    class: "col-6 mb-3 hidden",
+                    data: [
+                        { id: "1", valor: "Efectivo" },
+                        { id: "2", valor: "Tarjeta" },
+                        { id: "3", valor: "Transferencia" }
+                    ],
+                    required: true
+                },
+              
+                
+            ],
+            success: (response) => {
+                if (response.status == 200) {
+                    alert({ icon: "success", text: response.message, btn1: true, btn1Text: "Ok" });
+                    order.init();
+                } else {
+                    alert({ icon: "error", text: response.message, btn1: true, btn1Text: "Ok" });
+                }
+            }
+        });
+
+        setTimeout(() => {
+            document.getElementById("toggleAnticipo")?.addEventListener("change", () => app.toggleAnticipoView());
+        }, 500);
+
+        $("#btnSuccess").addClass("text-white");
+        $("#btnExit").addClass("text-white");
+    }
+
+    cardTotalPay(total, total_paid = 0) {
+        const restante = total - total_paid;
+
+        // Si no hay abonos previos, solo se muestra el monto restante
+        if (!total_paid || total_paid <= 0) {
+            return {
+                opc: "div",
+                id: "Amount",
+                class: "col-12",
+                html: `
+                <div id="dueAmount" class="p-3 rounded-xl bg-[#1F2937] text-white ">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center gap-2">
+                            <i class="icon-arrow-right-c text-white text-lg"></i>
+                            <span class="text-sm font-semibold">Monto restante</span>
+                        </div>
+                        <div id="SaldoEvent" class="text-right font-bold text-white text-lg">
+                            ${formatPrice(restante)}
+                        </div>
+                    </div>
+                </div>
+            `
+            };
+        }
+
+        // Si hay abono previo, mostrar resumen completo
+        return {
+            opc: "div",
+            id: "Amount",
+            class: "col-12",
+            html: `
+            <div id="dueAmount" class="p-3 rounded-xl bg-[#1F2937] border border-blue-700 text-blue-100 space-y-4 shadow-sm">
+                
+                <!-- Total -->
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <i class="icon-dollar text-blue-400 text-lg"></i>
+                        <span class="text-sm font-semibold">Total de la venta</span>
+                    </div>
+                    <div class="text-right font-bold text-blue-100 text-lg">${formatPrice(total)}</div>
+                </div>
+
+                <!-- Abono -->
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <i class="icon-check-circle text-green-400 text-lg"></i>
+                        <span class="text-sm font-semibold">Abono realizado</span>
+                    </div>
+                    <div id="abonoRealizado" class="text-right text-green-100 font-bold text-lg">${formatPrice(total_paid)}</div>
+                </div>
+
+                <!-- Restante -->
+                <div class="flex justify-between items-center border-t border-blue-800 pt-3 mt-1">
+                    <div class="flex items-center gap-2">
+                        <i class="icon-arrow-right-c text-yellow-400 text-lg"></i>
+                        <span class="text-sm font-semibold">Monto restante</span>
+                    </div>
+                    <div id="SaldoEvent" class="text-right text-yellow-100 font-bold text-lg">
+                        ${formatPrice(restante)}
+                    </div>
+                </div>
+            </div>
+        `
+        };
+    }
+
+
+    updateSaldoEvent(totalOriginal, totalPaid = 0) {
+        const input = document.getElementById("advanced_pay");
+        const display = document.getElementById("SaldoEvent");
+
+        if (!input || !display) return;
+
+        let anticipo = parseFloat(input.value) || 0;
+        let restante = totalOriginal - totalPaid - anticipo;
+
+        // Validación: no permitir que anticipo exceda el monto disponible
+        if (anticipo + totalPaid > totalOriginal) {
+            anticipo = totalOriginal - totalPaid;
+            input.value = anticipo.toFixed(2);
+            restante = 0;
+        }
+
+        display.textContent = `$${restante.toFixed(2)}`;
+    }
+
+    toggleAnticipoView() {
+        const show = document.getElementById("toggleAnticipo")?.checked;
+
+        const advancedPay = document.getElementById("advanced_pay")?.parentElement;
+        const methodPay = document.getElementById("method_pay_id")?.parentElement;
+        // const dueAmount = document.getElementById("dueAmount");
+
+        const icon = document.getElementById("iconAnticipo");
+        const label = document.getElementById("labelAnticipo");
+
+        if (show) {
+            advancedPay?.classList.remove("hidden");
+            methodPay?.classList.remove("hidden");
+            // dueAmount?.classList.remove("hidden");
+
+            // 🔄 Cambiar ícono y texto
+            if (icon) icon.className = "icon-check-square text-blue-400 transition-colors duration-200";
+            if (label) label.textContent = "No dejar abono";
+        } else {
+            advancedPay?.classList.add("hidden");
+            methodPay?.classList.add("hidden");
+            // dueAmount?.classList.add("hidden");
+
+            if (icon) icon.className = "icon-minus-square text-gray-400 transition-colors duration-200";
+            if (label) label.textContent = "Realizar abono";
+        }
+    }
+
+
+
+
+    // 
 
     dashboard() {
 

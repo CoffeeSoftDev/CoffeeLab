@@ -9,6 +9,7 @@ $(async () => {
     // instancias.
     app = new App(api, 'root');
     app.init();
+    idFolio = 24;
 
 
 });
@@ -27,19 +28,16 @@ class App extends Templates {
     }
 
     render() {
-        // this.layoutDashboard();
         this.navBar()
         this.layout();
-
-        // interface.
-        this.addPayment(24)
+        this.addPayment(24);
 
     }
 
     navBar(options) {
         const defaults = {
             id: "navBar",
-            theme: "light", // "light" | "dark" (Huubie)
+            theme: "dark", // "light" | "dark" (Huubie)
             class: "h-[56px] px-4 shadow-md",
             logoFull: "https://erp-varoch.com/ERP24/src/img/logos/logo_row_wh.png",
             logoMini: "https://erp-varoch.com/ERP24/src/img/logos/logo_icon_wh.png",
@@ -190,109 +188,85 @@ class App extends Templates {
         });
     }
 
-
     layout() {
-
         this.primaryLayout({
             parent: `root`,
-            class:'mt-3 p-3',
             id: this.PROJECT_NAME,
+            class:'mt-3 p-3 h-full',
+
         });
     }
 
-    // Pos.
+    // payment.
     async addPayment(id) {
 
-        let saldo, saldoOriginal, total;
+        let saldo, saldoOriginal, total, total_paid;
 
         if (id) {
-            const req = await useFetch({  url: this._link,  data: { opc: "getPayment", id: id,}});
+            const req = await useFetch({ url: this._link, data: { opc: "getPayment", id: id } });
             const response = req.order;
 
-            saldo         = formatPrice(response.total_pay);
+            saldo = formatPrice(response.total_pay);
             saldoOriginal = response.total_pay;
-            total         = response.total_pay;
-        } else {
+            total = response.total_pay;
+            total_paid = req.total_paid;
 
-            const totalText     = $('#total').text();
-                  saldo         = totalText;
-                  saldoOriginal = totalText.replace(/[^0-9.-]+/g, "");
-                  total         = parseFloat(saldoOriginal);
+        } else {
+            const totalText = $('#total').text();
+            saldo = totalText;
+            saldoOriginal = totalText.replace(/[^0-9.-]+/g, "");
+            total = parseFloat(saldoOriginal);
         }
-        
 
         this.createModalForm({
             id: "modalRegisterPayment",
             bootbox: {
                 title: `
-                    <div class="flex items-center gap-2 text-white text-lg font-semibold">
-                        <i class="icon-dollar text-blue-400 text-xl"></i>
-                        Registrar Pago
-                    </div>
-                `, id: "registerPaymentModal", size: "medium"
+                <div class="flex items-center gap-2 text-white text-lg font-semibold">
+                    <i class="icon-dollar text-blue-400 text-xl"></i>
+                    Registrar Pago
+                </div>
+            `,
+                id: "registerPaymentModal",
+                size: "medium"
             },
             data: { opc: 'addPayment', total: total, id: idFolio },
 
-
             json: [
-                {
-                    opc: "div",
-                    id: "Price",
-                    class: "col-12 ",
-                    html: `
-                        <div class="bg-gray-800 text-white text-center rounded-xl py-4 ">
-                            <p class="text-sm tracking-wide opacity-90">Monto a pagar</p>
-                            <p class="text-3xl font-bold mt-1">${saldo}</p>
-                        </div>
-                    `
-                },
+
+
+                this.cardTotalPay(total, total_paid),
+
+
                 {
                     opc: "div",
                     id: "anticipoSwitch",
-                    class: "col-12 ",
+                    class: "col-12 mb-2",
                     html: `
-                        <div class="flex items-center justify-between text-white p-3 rounded-lg border border-gray-700 bg-[#1F2937]">
-                            <div class="flex items-center gap-2">
-                            <i id="iconAnticipo" class="icon-minus-square text-gray-400 transition-colors duration-200"></i>
-                            <label id="labelAnticipo" class="text-sm">Dejar anticipo</label>
-                            </div>
+                    <div   class = "flex items-center justify-between text-white p-3 rounded-lg border border-gray-700 bg-[#1F2937]">
+                        <div   class = "flex items-center gap-2">
+                        <i     id    = "iconAnticipo" class  = "icon-minus-square text-gray-400 transition-colors duration-200"></i>
+                        <label id    = "labelAnticipo" class = "text-sm">Dejar abono</label>
+                        </div>
 
-                            <label class="inline-flex items-center cursor-pointer relative">
-                                <input type="checkbox" id="toggleAnticipo" class="sr-only peer" onchange="app.toggleAnticipoView()">
-                                <div class="w-11 h-6 bg-gray-700 peer-checked:bg-blue-600 rounded-full transition-colors duration-300"></div>
-                                <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
-                            </label>
-                        </div>
-                    `
-                },
-                {
-                    opc: "div",
-                    id: "summaryAnticipo",
-                    class: "col-12 ",
-                    html: `
-                    <div class="p-3 rounded-xl border border-purple-600 bg-[#2D2E4D] text-purple-400">
-                        <div class="flex justify-between items-center">
-                            <div class="flex flex-col">
-                                <div class="flex items-center gap-2">
-                                    <i class="icon-mobile text-lg"></i>
-                                    <span class="font-semibold">Abono</span>
-                                </div>
-                                <span class="text-xs text-purple-300 mt-1">2025-01-17</span>
-                            </div>
-                            <div class="text-right text-purple-400 font-bold text-lg">$75.00</div>
-                        </div>
-                    </div>`
+                        <label class = "inline-flex items-center cursor-pointer relative">
+                        <input type  = "checkbox" id = "toggleAnticipo" class = "sr-only peer" onchange = "app.toggleAnticipoView()">
+                        <div   class = "w-11 h-6 bg-gray-700 peer-checked:bg-blue-600 rounded-full transition-colors duration-300"></div>
+                        <div   class = "absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
+                        </label>
+                    </div>
+                `
                 },
                 {
                     opc: "input",
                     type: "number",
                     id: "advanced_pay",
-                    lbl: "Monto",
+                    lbl: "Importe",
                     class: "col-12 mb-3 hidden",
                     placeholder: "$ 0",
                     required: false,
                     min: 0,
-                    onkeyup: 'normal.updateSaldoEvent(' + total + ')'
+                    onkeyup: 'app.updateSaldoEvent(' + total + ', ' + (total_paid || 0) + ')'
                 },
                 {
                     opc: "select",
@@ -306,17 +280,8 @@ class App extends Templates {
                     ],
                     required: true
                 },
-                {
-                    opc: "div",
-                    id: "Amount",
-                    class: "col-12",
-                    html: `
-                        <div id="dueAmount" class="bg-gradient-to-r from-blue-600 to-blue-500 text-white text-center rounded-xl py-4  hidden">
-                            <p class="text-sm tracking-wide">Monto restante</p>
-                            <p id="SaldoEvent" class="text-3xl font-bold mt-1">${saldo}</p>
-                        </div>
-                    `
-                }
+
+
             ],
             success: (response) => {
                 if (response.status == 200) {
@@ -330,42 +295,125 @@ class App extends Templates {
 
         setTimeout(() => {
             document.getElementById("toggleAnticipo")?.addEventListener("change", () => app.toggleAnticipoView());
-
         }, 500);
 
         $("#btnSuccess").addClass("text-white");
         $("#btnExit").addClass("text-white");
     }
 
-    toggleAnticipoView() {
+    cardTotalPay(total, total_paid = 0) {
+        const restante = total - total_paid;
 
+        // Si no hay abonos previos, solo se muestra el monto restante
+        if (!total_paid || total_paid <= 0) {
+            return {
+                opc: "div",
+                id: "Amount",
+                class: "col-12",
+                html: `
+                <div id="dueAmount" class="p-4 rounded-xl bg-[#1E293B] text-white text-center">
+                    <p class="text-sm opacity-80">Monto a pagar</p>
+                    <p id="SaldoEvent" class="text-3xl font-bold mt-1">
+                        ${formatPrice(restante)}
+                    </p>
+                </div>
+
+            `
+            };
+        }
+
+        // Si hay abono previo, mostrar resumen completo
+        return {
+            opc: "div",
+            id: "Amount",
+            class: "col-12",
+            html: `
+           <div id="dueAmount" class="p-4 rounded-xl bg-[#1E293B] text-white space-y-4 border border-slate-800 shadow-sm">
+
+                <!-- Total de la venta -->
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center gap-2">
+                        <span class="text-sm font-semibold">Total de la venta</span>
+                    </div>
+                    <div class="text-right text-white font-bold text-lg">
+                        ${formatPrice(total)}
+                    </div>
+                </div>
+
+
+
+                <hr class="border-slate-600">
+
+                <!-- Monto restante -->
+                <div class="flex justify-between items-center">
+                    <span class="text-sm font-semibold">Restante</span>
+                    <div id="SaldoEvent" class="text-right text-white font-bold text-md">
+                        ${formatPrice(restante)}
+                    </div>
+                </div>
+            </div>
+
+        `
+        };
+    }
+
+    updateSaldoEvent(totalOriginal, totalPaid = 0) {
+        const input = document.getElementById("advanced_pay");
+        const display = document.getElementById("SaldoEvent");
+        const btnOk = document.getElementById("btnSuccess");
+        const btnExit = document.getElementById("btnExit");
+
+        if (!input || !display) return;
+
+        let anticipo = parseFloat(input.value) || 0;
+        let restante = totalOriginal - totalPaid - anticipo;
+
+        // Validación: no permitir que anticipo exceda el monto disponible
+        if (anticipo + totalPaid > totalOriginal) {
+            anticipo = totalOriginal - totalPaid;
+            input.value = anticipo.toFixed(2);
+            restante = 0;
+        }
+
+        display.textContent = `$${restante.toFixed(2)}`;
+
+        // Activar o desactivar botones según el valor del anticipo
+        const isValid = anticipo > 0;
+
+        if (btnOk) btnOk.disabled = !isValid;
+        if (btnExit) btnExit.disabled = !isValid;
+    }
+
+
+    toggleAnticipoView() {
         const show = document.getElementById("toggleAnticipo")?.checked;
 
         const advancedPay = document.getElementById("advanced_pay")?.parentElement;
         const methodPay = document.getElementById("method_pay_id")?.parentElement;
-        const dueAmount = document.getElementById("dueAmount");
+        // const dueAmount = document.getElementById("dueAmount");
+
         const icon = document.getElementById("iconAnticipo");
         const label = document.getElementById("labelAnticipo");
 
         if (show) {
             advancedPay?.classList.remove("hidden");
             methodPay?.classList.remove("hidden");
-            dueAmount?.classList.remove("hidden");
+            // dueAmount?.classList.remove("hidden");
 
             // 🔄 Cambiar ícono y texto
             if (icon) icon.className = "icon-check-square text-blue-400 transition-colors duration-200";
-            if (label) label.textContent = "Anticipo seleccionado";
+            if (label) label.textContent = "Abono selecionado";
         } else {
             advancedPay?.classList.add("hidden");
             methodPay?.classList.add("hidden");
-            dueAmount?.classList.add("hidden");
+            // dueAmount?.classList.add("hidden");
 
             if (icon) icon.className = "icon-minus-square text-gray-400 transition-colors duration-200";
-            if (label) label.textContent = "Dejar anticipo";
+            if (label) label.textContent = "Dejar abono";
         }
     }
 
-3
+
 
 
 }
