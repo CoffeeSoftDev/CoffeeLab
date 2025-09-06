@@ -235,7 +235,7 @@ class App extends Templates {
             json: [
 
 
-                this.cardTotalPay(total, total_paid),
+                this.cardPay(total, total_paid),
 
 
                 {
@@ -250,7 +250,7 @@ class App extends Templates {
                         </div>
 
                         <label class = "inline-flex items-center cursor-pointer relative">
-                        <input type  = "checkbox" id = "toggleAnticipo" class = "sr-only peer" onchange = "app.toggleAnticipoView()">
+                        <input type  = "checkbox" id = "toggleAnticipo" class = "sr-only peer" onchange = "app.toggleExtraFields()">
                         <div   class = "w-11 h-6 bg-gray-700 peer-checked:bg-blue-600 rounded-full transition-colors duration-300"></div>
                         <div   class = "absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
                         </label>
@@ -266,7 +266,7 @@ class App extends Templates {
                     placeholder: "$ 0",
                     required: false,
                     min: 0,
-                    onkeyup: 'app.updateSaldoEvent(' + total + ', ' + (total_paid || 0) + ')'
+                    onkeyup: 'app.updateTotal(' + total + ', ' + (total_paid || 0) + ')'
                 },
                 {
                     opc: "select",
@@ -293,15 +293,13 @@ class App extends Templates {
             }
         });
 
-        setTimeout(() => {
-            document.getElementById("toggleAnticipo")?.addEventListener("change", () => app.toggleAnticipoView());
-        }, 500);
+      
 
         $("#btnSuccess").addClass("text-white");
         $("#btnExit").addClass("text-white");
     }
 
-    cardTotalPay(total, total_paid = 0) {
+    cardPay(total, total_paid = 0) {
         const restante = total - total_paid;
 
         // Si no hay abonos previos, solo se muestra el monto restante
@@ -357,7 +355,7 @@ class App extends Templates {
         };
     }
 
-    updateSaldoEvent(totalOriginal, totalPaid = 0) {
+    updateTotal(totalOriginal, totalPaid = 0) {
         const input = document.getElementById("advanced_pay");
         const display = document.getElementById("SaldoEvent");
         const btnOk = document.getElementById("btnSuccess");
@@ -384,8 +382,7 @@ class App extends Templates {
         if (btnExit) btnExit.disabled = !isValid;
     }
 
-
-    toggleAnticipoView() {
+    toggleExtraFields() {
         const show = document.getElementById("toggleAnticipo")?.checked;
 
         const advancedPay = document.getElementById("advanced_pay")?.parentElement;
