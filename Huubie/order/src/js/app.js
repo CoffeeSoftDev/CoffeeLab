@@ -203,19 +203,21 @@ class App extends Templates {
         let saldo, saldoOriginal, total, total_paid;
 
         if (id) {
-            const req = await useFetch({ url: this._link, data: { opc: "getPayment", id: id } });
+            
+            const req      = await useFetch({ url: this._link, data: { opc: "getPayment", id: id } });
             const response = req.order;
 
-            saldo = formatPrice(response.total_pay);
+            saldo         = formatPrice(response.total_pay);
             saldoOriginal = response.total_pay;
-            total = response.total_pay;
-            total_paid = req.total_paid;
+            total         = response.total_pay;
+            total_paid    = req.total_paid;
 
         } else {
-            const totalText = $('#total').text();
-            saldo = totalText;
-            saldoOriginal = totalText.replace(/[^0-9.-]+/g, "");
-            total = parseFloat(saldoOriginal);
+
+            const totalText     = $('#total').text();
+                  saldo         = totalText;
+                  saldoOriginal = totalText.replace(/[^0-9.-]+/g, "");
+                  total         = parseFloat(saldoOriginal);
         }
 
         this.createModalForm({
@@ -294,7 +296,6 @@ class App extends Templates {
         });
 
       
-
         $("#btnSuccess").addClass("text-white");
         $("#btnExit").addClass("text-white");
     }
