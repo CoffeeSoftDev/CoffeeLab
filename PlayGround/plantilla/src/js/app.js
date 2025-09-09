@@ -24,23 +24,83 @@ class App extends Templates {
 
     render(options) {
         this.layout();
-        this.filterBar();
+        // this.filterBar();
         this.sideBar({theme:'dark'});
-        this.navBar({ theme:'dark'});
-        this.addPayment(24)
+        this.navBar({ theme:'light'});
+        
     }
 
     layout() {
         this.primaryLayout({
             parent: `root`,
             id: this.PROJECT_NAME,
-            class: '9',
             card: {
-                filterBar: { class: 'w-full  border-b pb-2 ', id: `filterBar${this.PROJECT_NAME}` },
-                container: { class: 'w-full my-2 h-full ', id: `container${this.PROJECT_NAME}` }
+                filterBar: { class: 'w-full  pb-3 ', id: `filterBar${this.PROJECT_NAME}` },
+                container: { class: 'w-full mt-5 bg-white rounded-lg p-3 h-[calc(100vh-6rem)] ', id: `container${this.PROJECT_NAME}` }
             }
         });
+
+        this.renderTabsCostsSys()
     }
+
+
+
+
+
+
+    renderTabsCostsSys() {
+        this.tabLayout({
+            parent: "container" + this.PROJECT_NAME,
+            id: "tabsCostsSys",
+            // theme: "dark",
+            type: "short",
+            json: [
+                {
+                    id: "ventasCategoria",
+                    tab: "Dashboard",
+                    onClick: () => this.lsVentas(),
+                },
+                {
+                    id: "ventasCategoria",
+                    tab: "Costo Potencial",
+                    onClick: () => this.lsVentas(),
+
+                },
+                {
+                    id: "costosPotenciales",
+                    tab: "Desplazamiento por Mes",
+                    onClick: () => this.lsCostos(),
+
+                },
+           
+                {
+                    id: "ventasMes",
+                    tab: "Ventas por Mes",
+                    onClick: () => this.lsVentasMes(),
+                    active: true
+
+                }
+            ]
+        });
+
+        $("#container" + this.PROJECT_NAME).prepend(`
+            <div class="px-4 pt-3 pb-3">
+            <h2 class="text-2xl font-semibold text-gray-900">📊 Panel CostSys</h2>
+            <p class="text-gray-400">Consulta y visualiza ventas, costos y desplazamientos.</p>
+        </div>
+        `);
+
+        // Crear contenedores visibles por pestaña
+        $("#ventasCategoria").html(`
+    <div id="cardVentas" class="mb-4"></div>
+    <div id="tablaVentasCategoria"></div>
+  `);
+
+        $("#costosPotenciales").html(`<div id="tablaCostos"></div>`);
+        $("#desplazamiento").html(`<div id="tablaDesplazamiento"></div>`);
+        $("#ventasMes").html(`<div id="tablaVentasMes"></div>`);
+    }
+
 
     filterBar() {
         this.createfilterBar({
