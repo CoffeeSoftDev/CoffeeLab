@@ -1,6 +1,6 @@
 
 // init vars.
-let app, category, concept;
+let app, category, concept,order;
 let api = "https://erp-varoch.com/DEV/capital-humano/ctrl/ctrl-rotacion-de-personal.php";
 let api2 = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-pedidos-catalogo.php";
 let data,idFolio;
@@ -10,6 +10,7 @@ $(function () {
     app = new App(api, "root");
     category = new Category(api, "root");
     concept = new Concept(api, "root");
+    order = new Order(api, "root");
     // app.init();
 
     app.layoutPedidos();
@@ -17,6 +18,7 @@ $(function () {
     // render tabs content
     category.layout();
     concept.layout();
+    order.layout();
 });
 
 class App extends Templates {
@@ -190,8 +192,13 @@ class App extends Templates {
             type: "short",
             json: [
                 {
-                    id: "ventasCategoria",
+                    id: "Dashboard",
                     tab: "Dashboard",
+                    onClick: () => this.lsVentas(),
+                },
+                {
+                    id: "ventasCategoria",
+                    tab: "categor",
                     onClick: () => this.lsVentas(),
                 },
                 {
@@ -255,9 +262,22 @@ class App extends Templates {
         this.tabLayout({
             parent: "container" + this.PROJECT_NAME,
             id: "tabsCostsSys",
-            // theme: "dark",
+            theme: "light",
             type: "short",
             json: [
+                {
+                    id: "dashboard",
+                    tab: "Dashboard",
+                    onClick: () => this.lsCategoria(),
+                },
+                {
+                    id: "order",
+                    tab: "Capturar Información",
+                    onClick: () => this.layoutCaptura(),
+                    active: true,
+
+                },
+
                 {
                     id: "categoria",
                     tab: "Categoría",
@@ -267,14 +287,9 @@ class App extends Templates {
                     id: "Concept",
                     tab: "Conceptos",
                     onClick: () => this.lsConceptos(),
-                    active: true,
 
                 },
-                {
-                    id: "captura",
-                    tab: "Capturar Información",
-                    onClick: () => this.layoutCaptura()
-                }
+             
             ],
         });
 
@@ -836,5 +851,184 @@ class Concept extends Templates {
         });
     }
 }
+
+class Order extends Templates {
+    constructor(link, div_modulo) {
+        super(link, div_modulo);
+        this.PROJECT_NAME = "order";
+    }
+
+    render() {
+        this.layout();
+    }
+
+    layout() {
+        this.primaryLayout({
+            parent: `container-${this.PROJECT_NAME}`,
+            id: this.PROJECT_NAME,
+            class: 'flex  h-100 ',
+            card: {
+                filterBar: {
+                    class: "w-full ",
+                    id: "filterBarPedidos"
+                },
+                container: {
+                    class: "w-full my-3 h-full  rounded-lg p-3",
+                    id: "container-pedidos"
+                }
+            }
+        });
+
+
+        $("#container-order").prepend(`
+        <div class="px-4 pt-3 ">
+            <h2 class="text-xl font-bold ">PEDIDOS SONORA'S MEAT 2025</h2>
+            <p class="text-gray-500 text-sm">Pedidos por canal para el análisis mensual.</p>
+        </div>
+        `);
+
+
+        this.filterBarPedidos();
+        this.lsPedidos();
+    }
+
+    filterBarPedidos() {
+        $("#container-pedidos").prepend(`
+      <div id="filterbar-pedidos" class="mb-3"></div>
+      <div id="tabla-pedidos"></div>
+    `);
+
+        this.createfilterBar({
+            parent: "filterbar-pedidos",
+            data: [
+                {
+                    opc: "select",
+                    id: "anio",
+                    class: "col-md-3",
+                    lbl: "Año",
+                    data: [
+                        { id: "2025", valor: "2025" },
+                        { id: "2024", valor: "2024" }
+                    ],
+                    onchange: "pedidos.lsPedidos()"
+                },
+                {
+                    opc: "select",
+                    id: "mes",
+                    class: "col-md-3",
+                    lbl: "Mes",
+                    data: [
+                        { id: "01", valor: "Enero" },
+                        { id: "02", valor: "Febrero" },
+                        { id: "03", valor: "Marzo" },
+                        { id: "04", valor: "Abril" },
+                        { id: "05", valor: "Mayo" },
+                        { id: "06", valor: "Junio" },
+                        { id: "07", valor: "Julio" }
+                    ],
+                    onchange: "pedidos.lsPedidos()"
+                },
+                {
+                    opc: "button",
+                    class: "col-md-3",
+                    className: "w-100",
+                    id: "btnNuevoPedido",
+                    text: "+ Nuevo registro de pedidos",
+                    onClick: () => this.agregarPedidos()
+                }
+            ]
+        });
+    }
+
+    lsPedidos() {
+        this.createCoffeTable({
+            parent: "tabla-pedidos",
+            id: "tbPedidos",
+            theme: "corporativo",
+            data: this.jsonPedidos(),
+            center: [0, 8],
+            right: [9]
+        });
+    }
+
+    jsonPedidos() {
+        return {
+            row: [
+                {
+                    "Mes": "Enero 2025",
+                    "Llamada": 49,
+                    "WhatsApp": 129,
+                    "Facebook": 0,
+                    "Meep": 10,
+                    "Ecommerce": 8,
+                    "Uber": 3,
+                    "Otro": 0,
+                    "Total": 199
+                },
+                {
+                    "Mes": "Febrero 2025",
+                    "Llamada": 62,
+                    "WhatsApp": 79,
+                    "Facebook": 0,
+                    "Meep": 5,
+                    "Ecommerce": 15,
+                    "Uber": 5,
+                    "Otro": 1,
+                    "Total": 167
+                }
+            ],
+            th: "0"
+        };
+    }
+
+    agregarPedidos() {
+        this.createModalForm({
+            id: "formNuevoPedido",
+            data: { opc: "addPedido" },
+            bootbox: {
+                title: "Agregar pedidos mensuales"
+            },
+            json: [
+                {
+                    opc: "select",
+                    id: "mes",
+                    lbl: "Mes",
+                    class: "col-md-6 mb-3",
+                    data: [
+                        { id: "01", valor: "Enero" },
+                        { id: "02", valor: "Febrero" },
+                        { id: "03", valor: "Marzo" },
+                        { id: "04", valor: "Abril" },
+                        { id: "05", valor: "Mayo" },
+                        { id: "06", valor: "Junio" },
+                        { id: "07", valor: "Julio" }
+                    ]
+                },
+                {
+                    opc: "select",
+                    id: "anio",
+                    lbl: "Año",
+                    class: "col-md-6 mb-3",
+                    data: [
+                        { id: "2025", valor: "2025" },
+                        { id: "2024", valor: "2024" }
+                    ]
+                },
+                { opc: "input", id: "llamada", lbl: "Llamada", class: "col-md-3 mb-3" },
+                { opc: "input", id: "whatsapp", lbl: "WhatsApp", class: "col-md-3 mb-3" },
+                { opc: "input", id: "facebook", lbl: "Facebook", class: "col-md-3 mb-3" },
+                { opc: "input", id: "meep", lbl: "Meep", class: "col-md-3 mb-3" },
+                { opc: "input", id: "ecommerce", lbl: "Ecommerce", class: "col-md-3 mb-3" },
+                { opc: "input", id: "uber", lbl: "Uber", class: "col-md-3 mb-3" },
+                { opc: "input", id: "otro", lbl: "Otro", class: "col-md-3 mb-3" }
+            ],
+            success: (response) => {
+                alert({ icon: "success", text: "Registro agregado" });
+                this.lsPedidos();
+            }
+        });
+    }
+}
+
 
 
