@@ -1309,51 +1309,7 @@ class Order extends Templates {
     }
 
     agregarPedidos() {
-        this.createModalForm({
-            id: "formNuevoPedido",
-            data: { opc: "addPedido" },
-            bootbox: {
-                title: "Agregar pedidos mensuales"
-            },
-            json: [
-                {
-                    opc: "select",
-                    id: "mes",
-                    lbl: "Mes",
-                    class: "col-md-6 mb-3",
-                    data: [
-                        { id: "01", valor: "Enero" },
-                        { id: "02", valor: "Febrero" },
-                        { id: "03", valor: "Marzo" },
-                        { id: "04", valor: "Abril" },
-                        { id: "05", valor: "Mayo" },
-                        { id: "06", valor: "Junio" },
-                        { id: "07", valor: "Julio" }
-                    ]
-                },
-                {
-                    opc: "select",
-                    id: "anio",
-                    lbl: "Año",
-                    class: "col-md-6 mb-3",
-                    data: [
-                        { id: "2025", valor: "2025" },
-                        { id: "2024", valor: "2024" }
-                    ]
-                },
-                { opc: "input", id: "llamada", lbl: "Llamada", class: "col-md-3 mb-3" },
-                { opc: "input", id: "whatsapp", lbl: "WhatsApp", class: "col-md-3 mb-3" },
-                { opc: "input", id: "facebook", lbl: "Facebook", class: "col-md-3 mb-3" },
-                { opc: "input", id: "meep", lbl: "Meep", class: "col-md-3 mb-3" },
-                { opc: "input", id: "ecommerce", lbl: "Ecommerce", class: "col-md-3 mb-3" },
-                { opc: "input", id: "uber", lbl: "Uber", class: "col-md-3 mb-3" },
-                { opc: "input", id: "otro", lbl: "Otro", class: "col-md-3 mb-3" }
-            ],
-            success: (response) => {
-                alert({ icon: "success", text: "Registro agregado" });
-                this.lsPedidos();
-            }
-        });
+       
     }
 }
 
@@ -1544,7 +1500,7 @@ class Dashboard extends Templates {
         const defaults = {
             parent: "containerChequePro",
             id: "chart",
-            title: "Comparativa Cheque Promedio",
+            title: "",
             class: "border p-4 rounded-xl",
             data: {},
             json: [],
@@ -1588,21 +1544,7 @@ class Dashboard extends Templates {
                 responsive: true,
                 animation: {
                     onComplete: function () {
-                        const chart = this;
-                        const ctx = chart.ctx;
-                        ctx.font = "12px sans-serif";
-                        ctx.textAlign = "center";
-                        ctx.textBaseline = "bottom";
-                        ctx.fillStyle = "#000";
-
-                        chart.data.datasets.forEach(function (dataset, i) {
-                            const meta = chart.getDatasetMeta(i);
-                            meta.data.forEach(function (bar, index) {
-                                const value = dataset.data[index];
-                                const label = typeof formatPrice === "function" ? formatPrice(value) : value;
-                                ctx.fillText(label, bar.x, bar.y - 5);
-                            });
-                        });
+                      
                     }
                 },
                 plugins: {
