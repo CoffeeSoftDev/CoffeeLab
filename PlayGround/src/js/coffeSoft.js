@@ -1816,7 +1816,7 @@ class Components extends Complements {
                 let cellAttributes = {
                     id: `${key}_${data.id}`,
                     style: `font-size:${opts.f_size}px;`,
-                    class: `${align} ${opts.border_row} px-3 py-2 truncate ${colorBg}`,
+                    class: `${align} ${opts.border_row} px-2 py-2 truncate ${colorBg}`,
                     html: tdText
                 };
 
@@ -1825,7 +1825,7 @@ class Components extends Complements {
                 // Si opts.extends está activo y data[key] es objeto, sobrescribe atributos
                 if (opts.extends && typeof data[key] === 'object' && data[key] !== null) {
                     cellAttributes = Object.assign(cellAttributes, data[key]);
-                    cellAttributes.class += ` ${opts.border_row} ${colorBg} `;
+                    cellAttributes.class += `${align} px-2 ${opts.border_row} ${colorBg} `;
                 }
 
                 tr.append($("<td>", cellAttributes));
@@ -1844,7 +1844,7 @@ class Components extends Complements {
             }
 
             if (data.dropdown) {
-                actions = $("<td>", { class: `px-2 py-2 flex justify-center items-center ${colorBg} ${opts.border_row}` });
+                actions = $("<td>", { class: `px-2 py-2 relative justify-center items-center ${colorBg} ${opts.border_row}` });
 
                 const wrapper = $("<div>", {
                     class: "relative"
@@ -1854,12 +1854,14 @@ class Components extends Complements {
                     class: "icon-dot-3 text-gray-600 hover:text-blue-600",
                     click: function (e) {
                         e.stopPropagation();
+                        $("ul.dropdown-menu").hide(); // cerrar todos los menús antes
+
                         $(this).next("ul").toggle();
                     }
                 });
 
                 const menu = $("<ul>", {
-                    class: "absolute right-0 mt-2 w-44 z-10 bg-white border rounded-md shadow-md hidden",
+                    class: "dropdown-menu absolute top-full right-0 mt-2 w-44 z-10 bg-white border rounded-md shadow-md hidden"
                 });
 
                 data.dropdown.forEach((item) =>
@@ -1874,7 +1876,11 @@ class Components extends Complements {
 
                 wrapper.append(btn, menu);
                 actions.append(wrapper);
-                $(document).on("click", () => menu.hide());
+
+                // Cerrar todos los dropdowns al hacer clic fuera
+                $(document).on("click", () => {
+                    $("ul.dropdown-menu").hide();
+                });
             }
 
             tr.append(actions);
@@ -2498,7 +2504,7 @@ class Templates extends Components {
             ],
         };
         this.createPlantilla({ data: jsonComponents, parent: opts.parent, design: false });
-    } 
+    }
 
     secondaryLayout(components) {
         let name = components.id ? components.id : 'secondaryLayout';
