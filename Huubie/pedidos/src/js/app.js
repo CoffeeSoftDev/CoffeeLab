@@ -1,6 +1,6 @@
 let url = 'https://huubie.com.mx/dev/pedidos/ctrl/ctrl-admin.php';
 let api = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-pedidos-catalogo.php";
-let app, pos;
+let app,main, pos;
 let modifier, products;
 let idFolio;
 
@@ -10,6 +10,8 @@ $(async () => {
     app = new App(api, 'root');
     app.init();
 
+    main = new MainApp(api, 'root');
+    main.navBar({theme:'dark'});
 
 });
 
@@ -19,7 +21,7 @@ class App extends Templates {
 
     constructor(link, divModule) {
         super(link, divModule);
-        this.PROJECT_NAME = "Order";
+        this.PROJECT_NAME = "Orders";
     }
 
     init() {
@@ -27,13 +29,145 @@ class App extends Templates {
     }
 
     render() {
-        // this.layoutDashboard();
-        this.navBar()
         this.layout();
 
         // interface.
-        this.addPayment(24)
+        this.showOrder(27)
 
+    }
+
+    layout() {
+
+        this.primaryLayout({
+            parent: `root`,
+            class:'mt-3 p-3',
+            id: this.PROJECT_NAME,
+        });
+    }
+
+    // Pos.
+
+    async showOrder(id) {
+        // Obtener datos de la reservación
+        const res = await useFetch({ url: api, data: { opc: "getOrder", id: id } });
+        const data = res.order;
+
+        // Mostrar modal y renderizar contenido
+        bootbox.dialog({
+            title: "📅 Pedido",
+            closeButton: true,
+            message: '<div id="containerOrder"></div>',
+        });
+
+        this.tabLayout({
+            parent: "containerOrder",
+            id: "tabsOrderDetails",
+            theme: "dark",
+            content: { class: "" },
+            json: [
+                {
+                    id: "detail",
+                    tab: "Detalles del pedido",
+                    active: true,
+
+                },
+                {
+                    id: "product-detail",
+                    tab: "Pedido"
+                }
+            ]
+        });
+
+        this.menuResumenPaquete({parent:'container-detail'})
+
+        // this.detailCard({
+        //     parent: "container-detail",
+        //     data: [
+        //         { text: "Folio", value: 'P-00' + data.folio, icon: "icon-doc-text-1" },
+        //         { text: "Nombre", value: data.name, icon: "icon-user-1" },
+        //         { text: "Fecha del pedido", value: data.date_order, icon: "icon-calendar" },
+        //         { text: "Hora de entrega", value: data.time_order, icon: "icon-clock" },
+        //         { type: "observacion", value: data.note }
+        //     ]
+        // });
+
+
+    }
+
+    menuResumenPaquete(options) {
+        const defaults = {
+            parent: "root",
+            id: "menuResumenPaquete",
+            title: "Menú",
+            class: "p-3 h-full rounded-lg bg-[#1F2A37]",
+            total: "24,500.00",
+            json: [
+                {
+                    cantidad: 50,
+                    paquete: "BUFFET DESAYUNO",
+                    precio: "24,500.00",
+                    detalles: ["1 Pan Dulce"]
+                }
+            ]
+        };
+
+        const opts = Object.assign({}, defaults, options);
+
+        const $container = $(`
+            <div id="${opts.id}" class="${opts.class}">
+            <div class="text-xs mt-3">
+                <h3 class="text-sm font-bold text-white mb-2">${opts.title}</h3>
+                <div class="flex justify-between text-[13px] text-white font-semibold border-b pb-1 mb-2">
+                <div class="w-1/4 text-left"><i class="icon-basket-alt"></i> Cantidad</div>
+                <div class="w-1/2 text-center"><i class="icon-dropbox"></i> Paquete</div>
+                <div class="w-1/4 text-right"><i class="icon-dollar"></i> Precio</div>
+                </div>
+            </div>
+            </div>
+        `);
+
+        opts.json.forEach((item) => {
+            const $row = $(`
+      <div class="mb-3">
+        <div class="flex justify-between text-white font-medium py-1 border-b border-dashed">
+          <div class="w-1/4 text-left">(${item.cantidad})</div>
+          <div class="w-1/2 text-start">${item.paquete}</div>
+          <div class="w-1/4 text-right">$${item.precio}</div>
+        </div>
+        <ul class="text-xs text-white pl-4 mt-1">
+          ${item.detalles.map(d => `<li>- ${d}</li>`).join("")}
+        </ul>
+      </div>
+    `);
+            $container.find("div.text-xs").append($row);
+        });
+
+        const $footer = $(`
+            <div class="mt-2 ">
+            <div class="flex justify-end">
+                <div class="text-white text-lg font-bold">
+                Total: $${opts.total}
+                </div>
+            </div>
+            </div>
+        `);
+
+        $container.find("div.text-xs").append($footer);
+
+        $(`#${opts.parent}`).html($container);
+    }
+
+
+}
+
+class MainApp extends Templates{
+    constructor(link, divModule) {
+        super(link, divModule);
+        this.PROJECT_NAME = "Order";
+    }
+
+    init() {
+        this.navBar('nav');
     }
 
     navBar(options) {
@@ -190,182 +324,6 @@ class App extends Templates {
         });
     }
 
-
-    layout() {
-
-        this.primaryLayout({
-            parent: `root`,
-            class:'mt-3 p-3',
-            id: this.PROJECT_NAME,
-        });
-    }
-
-    // Pos.
-    async addPayment(id) {
-
-        let saldo, saldoOriginal, total;
-
-        if (id) {
-            const req = await useFetch({  url: this._link,  data: { opc: "getPayment", id: id,}});
-            const response = req.order;
-
-            saldo         = formatPrice(response.total_pay);
-            saldoOriginal = response.total_pay;
-            total         = response.total_pay;
-        } else {
-
-            const totalText     = $('#total').text();
-                  saldo         = totalText;
-                  saldoOriginal = totalText.replace(/[^0-9.-]+/g, "");
-                  total         = parseFloat(saldoOriginal);
-        }
-        
-
-        this.createModalForm({
-            id: "modalRegisterPayment",
-            bootbox: {
-                title: `
-                    <div class="flex items-center gap-2 text-white text-lg font-semibold">
-                        <i class="icon-dollar text-blue-400 text-xl"></i>
-                        Registrar Pago
-                    </div>
-                `, id: "registerPaymentModal", size: "medium"
-            },
-            data: { opc: 'addPayment', total: total, id: idFolio },
-
-
-            json: [
-                {
-                    opc: "div",
-                    id: "Price",
-                    class: "col-12 ",
-                    html: `
-                        <div class="bg-gray-800 text-white text-center rounded-xl py-4 ">
-                            <p class="text-sm tracking-wide opacity-90">Monto a pagar</p>
-                            <p class="text-3xl font-bold mt-1">${saldo}</p>
-                        </div>
-                    `
-                },
-                {
-                    opc: "div",
-                    id: "anticipoSwitch",
-                    class: "col-12 ",
-                    html: `
-                        <div class="flex items-center justify-between text-white p-3 rounded-lg border border-gray-700 bg-[#1F2937]">
-                            <div class="flex items-center gap-2">
-                            <i id="iconAnticipo" class="icon-minus-square text-gray-400 transition-colors duration-200"></i>
-                            <label id="labelAnticipo" class="text-sm">Dejar anticipo</label>
-                            </div>
-
-                            <label class="inline-flex items-center cursor-pointer relative">
-                                <input type="checkbox" id="toggleAnticipo" class="sr-only peer" onchange="app.toggleAnticipoView()">
-                                <div class="w-11 h-6 bg-gray-700 peer-checked:bg-blue-600 rounded-full transition-colors duration-300"></div>
-                                <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
-                            </label>
-                        </div>
-                    `
-                },
-                {
-                    opc: "div",
-                    id: "summaryAnticipo",
-                    class: "col-12 ",
-                    html: `
-                    <div class="p-3 rounded-xl border border-purple-600 bg-[#2D2E4D] text-purple-400">
-                        <div class="flex justify-between items-center">
-                            <div class="flex flex-col">
-                                <div class="flex items-center gap-2">
-                                    <i class="icon-mobile text-lg"></i>
-                                    <span class="font-semibold">Abono</span>
-                                </div>
-                                <span class="text-xs text-purple-300 mt-1">2025-01-17</span>
-                            </div>
-                            <div class="text-right text-purple-400 font-bold text-lg">$75.00</div>
-                        </div>
-                    </div>`
-                },
-                {
-                    opc: "input",
-                    type: "number",
-                    id: "advanced_pay",
-                    lbl: "Monto",
-                    class: "col-12 mb-3 hidden",
-                    placeholder: "$ 0",
-                    required: false,
-                    min: 0,
-                    onkeyup: 'normal.updateSaldoEvent(' + total + ')'
-                },
-                {
-                    opc: "select",
-                    id: "method_pay_id",
-                    lbl: "Método de pago del anticipo",
-                    class: "col-12 mb-3 hidden",
-                    data: [
-                        { id: "1", valor: "Efectivo" },
-                        { id: "2", valor: "Tarjeta" },
-                        { id: "3", valor: "Transferencia" }
-                    ],
-                    required: true
-                },
-                {
-                    opc: "div",
-                    id: "Amount",
-                    class: "col-12",
-                    html: `
-                        <div id="dueAmount" class="bg-gradient-to-r from-blue-600 to-blue-500 text-white text-center rounded-xl py-4  hidden">
-                            <p class="text-sm tracking-wide">Monto restante</p>
-                            <p id="SaldoEvent" class="text-3xl font-bold mt-1">${saldo}</p>
-                        </div>
-                    `
-                }
-            ],
-            success: (response) => {
-                if (response.status == 200) {
-                    alert({ icon: "success", text: response.message, btn1: true, btn1Text: "Ok" });
-                    order.init();
-                } else {
-                    alert({ icon: "error", text: response.message, btn1: true, btn1Text: "Ok" });
-                }
-            }
-        });
-
-        setTimeout(() => {
-            document.getElementById("toggleAnticipo")?.addEventListener("change", () => app.toggleAnticipoView());
-
-        }, 500);
-
-        $("#btnSuccess").addClass("text-white");
-        $("#btnExit").addClass("text-white");
-    }
-
-    toggleAnticipoView() {
-
-        const show = document.getElementById("toggleAnticipo")?.checked;
-
-        const advancedPay = document.getElementById("advanced_pay")?.parentElement;
-        const methodPay = document.getElementById("method_pay_id")?.parentElement;
-        const dueAmount = document.getElementById("dueAmount");
-        const icon = document.getElementById("iconAnticipo");
-        const label = document.getElementById("labelAnticipo");
-
-        if (show) {
-            advancedPay?.classList.remove("hidden");
-            methodPay?.classList.remove("hidden");
-            dueAmount?.classList.remove("hidden");
-
-            // 🔄 Cambiar ícono y texto
-            if (icon) icon.className = "icon-check-square text-blue-400 transition-colors duration-200";
-            if (label) label.textContent = "Anticipo seleccionado";
-        } else {
-            advancedPay?.classList.add("hidden");
-            methodPay?.classList.add("hidden");
-            dueAmount?.classList.add("hidden");
-
-            if (icon) icon.className = "icon-minus-square text-gray-400 transition-colors duration-200";
-            if (label) label.textContent = "Dejar anticipo";
-        }
-    }
-
-3
 
 
 }
