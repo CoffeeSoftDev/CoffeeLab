@@ -126,7 +126,7 @@ $.fn.content_json_form = function (options) {
         // Etiqueta del componente
         div_hijo.append(
             $("<label>", {
-                class: "",
+                class: "mb-2",
                 html: x.lbl,
             })
         );
