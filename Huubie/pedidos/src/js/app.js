@@ -56,7 +56,7 @@ class App extends Templates {
 
     // Order
      async historyPay(id) {
-        
+
         let data = await useFetch({ url: this._link, data: { opc: 'getHistory', id: id } });
 
 
@@ -109,7 +109,7 @@ class App extends Templates {
         $('#container-payment').html(``);
 
 
-        // this.renderResumenPagos(data.info);
+        this.renderResumenPagos(data.info);
         this.lsPay(id);
 
     }
@@ -129,7 +129,7 @@ class App extends Templates {
             total_paid     = req.total_paid;
             saldo_restante = total - total_paid;
 
-        } 
+        }
 
         this.createForm({
             id: "formRegisterPayment",
@@ -151,7 +151,7 @@ class App extends Templates {
 
                     `
             },
-               
+
                 {
                     opc: "input",
                     type: "number",
@@ -193,6 +193,58 @@ class App extends Templates {
         });
         $("#btnSuccess").addClass("text-white");
         $("#btnExit").addClass("text-white");
+    }
+
+    renderResumenPagos(totales) {
+        const totalPagado = totales?.pagado ?? 0;
+        const discount = totales?.discount ?? 0;
+        const totalEvento = totales?.total ?? 0;
+
+        // El total sin descuento es el total actual + lo descontado
+        const totalConDescuento = totalEvento - discount;
+        const restante = totalConDescuento - totalPagado;
+
+        // Formateador de moneda
+        const fmt = (n) => n.toLocaleString('es-MX', {
+            style: 'currency',
+            currency: 'MXN',
+            minimumFractionDigits: 2
+        });
+
+        let originalHTML = `<p class="text-2xl font-bold text-blue-900" id="totalEvento">${fmt(totalEvento)}</p>`;
+
+        // Si hay descuento, mostrar desglose visual
+        if (discount > 0) {
+            originalHTML = `
+            <p class="text-2xl font-bold text-blue-900" id="totalEvento">${fmt(totalConDescuento)}</p>
+            <p class="text-sm text-gray-400 line-through -mt-1">${fmt(totalEvento)}</p>
+            <p class="text-sm text-blue-700 mt-1">
+                <i class="icon-tag"></i> Descuento:
+                <span class="font-semibold">${fmt(discount)}</span>
+            </p>
+        `;
+        }
+
+        $('#container-info-payment').prepend(`
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+
+            <div class="bg-green-100 p-4 rounded-lg text-center shadow">
+                <p class="text-sm text-green-700">Total Pagado</p>
+                <p class="text-2xl font-bold text-green-900" id="totalPagado">${fmt(totalPagado)}</p>
+            </div>
+
+            <div class="bg-blue-100 p-4 rounded-lg text-center shadow">
+                <p class="text-sm text-blue-700">Total del Evento</p>
+                ${originalHTML}
+            </div>
+
+            <div class="bg-red-100 p-4 rounded-lg text-center shadow">
+                <p class="text-sm text-red-700">Restante</p>
+                <p class="text-2xl font-bold text-red-900" id="totalRestante">${fmt(restante)}</p>
+            </div>
+
+        </div>
+    `);
     }
 
     lsPay(id) {
