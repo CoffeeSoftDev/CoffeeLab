@@ -113,8 +113,8 @@ class App extends Templates {
     async renderDashboard() {
 
         this.dashboardComponent({
-            parent: "container" + this.PROJECT_NAME,
-            title: "📊  · Dashboard de Eventos",
+            parent  : "container" + this.PROJECT_NAME,
+            title   : "📊  · Dashboard de Eventos",
             subtitle: "Resumen mensual · Cotizaciones · Pagados · Cancelados",
             json: [
                 { type: "grafico", id: "ventasMes", title: "Ventas del mes" },
@@ -195,6 +195,71 @@ class App extends Templates {
         });
 
         $(`#${opts.parent}`).html(container);
+    }
+
+    barChart(options) {
+        const defaults = {
+            parent: "containerChequePro",
+            id: "chart",
+            title: "",
+            class: "border p-4 rounded-xl",
+            data: {},
+            json: [],
+            onShow: () => { },
+        };
+
+        const opts = Object.assign({}, defaults, options);
+
+        const container = $("<div>", { class: opts.class });
+
+        const title = $("<h2>", {
+            class: "text-lg font-bold mb-2",
+            text: opts.title
+        });
+
+        const canvas = $("<canvas>", {
+            id: opts.id,
+            class: "w-full h-[300px]"
+        });
+
+        container.append(title, canvas);
+        $('#' + opts.parent).append(container); // 🔹 cambio: append en vez de html()
+
+        const ctx = document.getElementById(opts.id).getContext("2d");
+
+        // 🔹 guardar instancias de charts en un objeto
+        if (!window._charts) window._charts = {};
+
+        if (window._charts[opts.id]) {
+            window._charts[opts.id].destroy();
+        }
+
+        window._charts[opts.id] = new Chart(ctx, {
+            type: "bar",
+            data: opts.data,
+            options: {
+                responsive: true,
+                animation: {
+                    onComplete: function () { }
+                },
+                plugins: {
+                    legend: { position: "bottom" },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.dataset.label}: ${formatPrice(ctx.parsed.y)}`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: (v) => formatPrice(v)
+                        }
+                    }
+                }
+            }
+        });
     }
 
 
