@@ -4,11 +4,13 @@ let api_pedidos = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-pedidos.php";
 let app, main, pos;
 let modifier, products;
 let idFolio;
+let orders;
 
 $(async () => {
 
     // instancias.
     app = new App(api_pedidos, 'root');
+    orders = app; // Variable global para acceder desde el botón
     app.init();
 
     main = new MainApp(api, 'root');
@@ -31,11 +33,10 @@ class App extends Templates {
 
     render() {
         this.layout();
-
+        
         // interface.
-        this.renderDashboard(); 
-      
-
+        this.renderDashboard();
+        this.createFilterBar();
 
     }
 
@@ -55,15 +56,69 @@ class App extends Templates {
         });
     }
 
-    async renderDashboard(){
+    createFilterBar() {
+        this.createfilterBar({
+            parent: `filterBarDashboard`,
+            data: [
+                {
+                    opc: "select",
+                    class: "col-sm-3",
+                    id: "mes" + this.PROJECT_NAME,
+                    lbl: "Mes: ",
+                    data: [
+                        { id: "01", valor: "Enero" },
+                  
+                    ]
+                },
+                {
+                    opc: "select",
+                    class: "col-sm-3",
+                    id: "anio" + this.PROJECT_NAME,
+                    lbl: "Año: ",
+                    options: [
+                        { value: "2023", text: "2023" },
+                        { value: "2024", text: "2024" },
+                        { value: "2025", text: "2025" }
+                    ]
+                },
+                {
+                    opc: "button",
+                    class: "col-sm-2",
+                    className:'w-full mt-2',
+                    color_btn: "primary",
+                    id: "btnBuscar",
+                    text: "Buscar",
+                  
+                }
+            ],
+        });
+    }
+
+    ls() {
+        const mes = $(`#mes${this.PROJECT_NAME}`).val();
+        const anio = $(`#anio${this.PROJECT_NAME}`).val();
+
+        console.log('Buscando pedidos:', { mes, anio });
+
+        // Aquí se implementaría la lógica de búsqueda
+        // this.useFetch({
+        //     opc: 'list',
+        //     mes: mes,
+        //     anio: anio
+        // }).then(response => {
+        //     // Procesar respuesta y actualizar tabla
+        // });
+    }
+
+    async renderDashboard() {
 
         this.dashboardComponent({
             parent: "container" + this.PROJECT_NAME,
-            title: "📊 Huubie · Dashboard de Eventos",
+            title: "📊  · Dashboard de Eventos",
             subtitle: "Resumen mensual · Cotizaciones · Pagados · Cancelados",
             json: [
                 { type: "grafico", id: "ventasMes", title: "Ventas del mes" },
-                { type: "tabla", id: "tablaUsuarios", title: "Usuarios activos", icon: "icon-user" },
+                { type: "tabla", id: "tablaUsuarios", title: "Usuarios activos" },
                 { type: "filterBar", id: "filtros", title: "Opciones de búsqueda", emoji: "👤" }
             ]
         });
@@ -77,53 +132,63 @@ class App extends Templates {
             id: "dashboardComponent",
             title: "📊 Huubie · Dashboard de Eventos",
             subtitle: "Resumen mensual · Cotizaciones · Pagados · Cancelados",
-            json: []
+            json: [
+                { type: "card", id: "infoCards", class: '' },
+                { type: "grafico", id: "barChartContainer", title: "Eventos por sucursal" },
+                { type: "tabla", id: "tableSucursal", title: "Tabla de sucursales" },
+                { type: "grafico", id: "donutChartContainer", title: "Ventas vs Entrada de dinero" },
+                { type: "grafico", id: "topClientsChartContainer", title: "Top 10 clientes" },
+                { type: "tabla", id: "tableClientes", title: "Tabla de clientes" }
+            ]
         };
 
         const opts = Object.assign(defaults, options);
 
-        // Diccionario de íconos por tipo (fallback)
-        const typeIcons = {
-            grafico: "📊",
-            tabla: "📋",
-            card: "🗂️",
-            filterBar: "🔎"
-        };
-
         const container = $(`
-            <div id="${opts.id}" class="w-full bg-[#111928] text-white">
-                <!-- Header -->
-                <header class="bg-[#0F172A] p-6 border-b border-[#1E293B] shadow">
-                    <div class="max-w-7xl mx-auto">
-                        <h1 class="text-2xl font-bold text-white">${opts.title}</h1>
-                        <p class="text-sm text-slate-300">${opts.subtitle}</p>
-                    </div>
-                </header>
-    
-                <!-- Content -->
-                <section id="content-${opts.id}" class="max-w-7xl mx-auto px-4 py-6 grid gap-6 lg:grid-cols-2"></section>
-            </div>
-        `);
+        <div id="${opts.id}" class="w-full bg-[#111928] text-white">
+            <!-- Header -->
+            <header class="bg-[#0F172A] p-6 border-b border-[#1E293B] shadow">
+                <div class="max-w-7xl mx-auto">
+                    <h1 class="text-2xl font-bold text-white">${opts.title}</h1>
+                    <p class="text-sm text-slate-300">${opts.subtitle}</p>
+                </div>
+            </header>
+
+            <!-- FilterBar -->
+            <section id="filterBarDashboard" class="max-w-7xl mx-auto px-4 py-4 ">
+                <!-- Aquí puedes renderizar selects, inputs o botones -->
+            </section>
+
+            <!-- Content -->
+            <section id="content-${opts.id}" class="max-w-7xl mx-auto px-4 py-6 grid gap-6 lg:grid-cols-2"></section>
+        </div>`);
 
         // Renderizar contenedores desde JSON
         opts.json.forEach(item => {
             let block = $("<div>", {
                 id: item.id,
-                class: "bg-slate-800 p-4 rounded-xl shadow min-h-[150px]"
+                class: "bg-slate-800 p-4 rounded-xl shadow min-h-[200px]"
             });
 
-            // 🔹 Determinar icono (prioridad: item.icon > item.emoji > typeIcons)
-            let iconHtml = "";
-            if (item.icon) {
-                iconHtml = `<i class="${item.icon} mr-1"></i>`;
-            } else if (item.emoji) {
-                iconHtml = `${item.emoji} `;
-            } else {
-                iconHtml = `${typeIcons[item.type] || "📦"} `;
-            }
-
             if (item.title) {
-                block.prepend(`<h3 class="text-sm font-bold mb-2">${iconHtml}${item.title}</h3>`);
+                // Emojis por defecto según el tipo
+                const defaultEmojis = {
+                    'grafico': '📊',
+                    'tabla': '📋',
+                    'doc': '📄',
+                    'filterBar': '🔍'
+                };
+
+                // Usar emoji personalizado o por defecto
+                const emoji = item.emoji || defaultEmojis[item.type] || '';
+                
+                // Usar icono si está definido
+                const iconHtml = item.icon ? `<i class="${item.icon}"></i> ` : '';
+                
+                // Construir el título con emoji e icono
+                const titleContent = `${emoji} ${iconHtml}${item.title}`;
+                
+                block.prepend(`<h3 class="text-sm font-bold mb-2">${titleContent}</h3>`);
             }
 
             $(`#content-${opts.id}`, container).append(block);
@@ -131,9 +196,6 @@ class App extends Templates {
 
         $(`#${opts.parent}`).html(container);
     }
-
-
-
 
 
 }
