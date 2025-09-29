@@ -263,6 +263,7 @@ class App extends Templates {
                 center: [1, , 3, 6, 7],
                 right: [4,],
                 extends: true,
+                f_size:12
             },
         });
 
