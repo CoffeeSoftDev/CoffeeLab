@@ -1,7 +1,7 @@
 let url = 'https://huubie.com.mx/dev/pedidos/ctrl/ctrl-admin.php';
 let api = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-pedidos-catalogo.php";
 let api_pedidos = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-pedidos.php";
-let app,main, pos;
+let app, main, pos;
 let modifier, products;
 let idFolio;
 
@@ -12,7 +12,7 @@ $(async () => {
     app.init();
 
     main = new MainApp(api, 'root');
-    main.navBar({theme:'dark'});
+    main.navBar({ theme: 'dark' });
 
 });
 
@@ -33,8 +33,9 @@ class App extends Templates {
         this.layout();
 
         // interface.
-        // this.showOrder(27)
-        this.historyPay(30)
+        this.renderDashboard(); 
+      
+
 
     }
 
@@ -42,350 +43,102 @@ class App extends Templates {
 
         this.primaryLayout({
             parent: `root`,
-            class:'mt-3 mx-2 sm:mx-4 p-3',
+            class: 'pt-14  p-3',
             id: this.PROJECT_NAME,
 
-            card:{
+            card: {
                 container: {
-                class: 'w-full my-3 bg-[#1F2A37] rounded-lg h-[calc(100vh-7rem)] overflow-auto',
-                id: 'container' + this.PROJECT_NAME
-            }
-            }
-        });
-    }
-
-    // Order
-     async historyPay(id) {
-
-        let data = await useFetch({ url: this._link, data: { opc: 'getHistory', id: id } });
-
-
-        bootbox.dialog({
-            title      : ``,
-            size       : "large",
-            id         : 'modalAdvance',
-            closeButton: true,
-            message    : `<div id="containerChat"></div>`,
-
-        }).on("shown.bs.modal", function () {
-            $('.modal-body').css('min-height', '520px');
-        });;
-
-        this.tabLayout({
-            parent: "containerChat",
-            id: "tabComponent",
-            content: { class: "" },
-            theme: "dark",
-            json: [
-                {
-                    id: "payment",
-                    tab: "Pagos",
-                    icon: "",
-                    active: true,
-                },
-                {
-                    id: "listPayment",
-                    tab: "Lista de pagos",
-
-                    onClick: () => { },
-                },
-
-
-            ],
-        });
-
-        // Layout payment
-        this.addPayment(id);
-
-
-
-        // Contenido de las pestañas
-
-        $('#container-listPayment').html(`
-            <div id="container-info-payment"></div>
-            <div id="container-methodPay"></div>
-        `);
-
-        $('#container-payment').html(``);
-
-
-        this.renderResumenPagos(data.info);
-        this.lsPay(id);
-
-    }
-
-    async addPayment(id) {
-
-        let saldo, saldoOriginal, total, total_paid, saldo_restante;
-        const req      = await useFetch({ url: api, data: { opc: "getPayment", id: id } });
-        const response = req.order;
-
-        if (req.total_paid) {
-
-
-            saldo          = formatPrice(response.total_pay);
-            saldoOriginal  = response.total_pay;
-            total          = response.total_pay;
-            total_paid     = req.total_paid;
-            saldo_restante = total - total_paid;
-
-        }
-
-        this.createForm({
-            id: "formRegisterPayment",
-            parent:'container-payment',
-            data: { opc: 'addPayment', total: total, saldo: saldo_restante, id: id },
-            json: [
-                // this.cardPay(total, total_paid),
-                 {
-                    opc: "div",
-                    id: "Amount",
-                    class: "col-12",
-                    html: `
-                    <div id="dueAmount" class="p-4 rounded-xl bg-[#1E293B] text-white text-center">
-                        <p class="text-sm opacity-80">Monto restante a pagar</p>
-                        <p id="SaldoEvent" class="text-3xl font-bold mt-1">
-                            ${formatPrice(total)}
-                        </p>
-                </div>
-
-                    `
-            },
-
-                {
-                    opc: "input",
-                    type: "number",
-                    id: "advanced_pay",
-                    lbl: "Importe",
-                    class: "col-12 mb-3 mt-2",
-                    placeholder: "0.00",
-                    required: false,
-                    min: 0,
-                    onkeyup: 'normal.updateTotal(' + total + ', ' + (total_paid || 0) + ')'
-                },
-                {
-                    opc: "select",
-                    id: "method_pay_id",
-                    lbl: "Método de pago del anticipo",
-                    class: "col-12 mb-3 ",
-                    data: [
-                        { id: "1", valor: "Efectivo" },
-                        { id: "2", valor: "Tarjeta" },
-                        { id: "3", valor: "Transferencia" }
-                    ],
-                    required: true
-                },
-                {
-                    opc:'btn-submit',
-                    id:'btnSuccess',
-                    class:'col-12',
-                    text:'Aceptar'
+                    class: 'w-full my-3 bg-[#1F2A37] rounded-lg ',
+                    id: 'container' + this.PROJECT_NAME
                 }
-            ],
-            success: (response) => {
-                // if (response.status == 200) {
-                //     alert({ icon: "success", text: response.message, btn1: true, btn1Text: "Ok" });
-                //     app.init();
-                // } else {
-                //     alert({ icon: "error", text: response.message, btn1: true, btn1Text: "Ok" });
-                // }
             }
         });
-        $("#btnSuccess").addClass("text-white");
-        $("#btnExit").addClass("text-white");
     }
 
-    renderResumenPagos(totales) {
-        const totalPagado = totales?.pagado ?? 0;
-        const discount = totales?.discount ?? 0;
-        const totalEvento = totales?.total ?? 0;
+    async renderDashboard(){
 
-        // El total sin descuento es el total actual + lo descontado
-        const totalConDescuento = totalEvento - discount;
-        const restante = totalConDescuento - totalPagado;
-
-        // Formateador de moneda
-        const fmt = (n) => n.toLocaleString('es-MX', {
-            style: 'currency',
-            currency: 'MXN',
-            minimumFractionDigits: 2
-        });
-
-        let originalHTML = `<p class="text-2xl font-bold text-blue-900" id="totalEvento">${fmt(totalEvento)}</p>`;
-
-        // Si hay descuento, mostrar desglose visual
-        if (discount > 0) {
-            originalHTML = `
-            <p class="text-2xl font-bold text-blue-900" id="totalEvento">${fmt(totalConDescuento)}</p>
-            <p class="text-sm text-gray-400 line-through -mt-1">${fmt(totalEvento)}</p>
-            <p class="text-sm text-blue-700 mt-1">
-                <i class="icon-tag"></i> Descuento:
-                <span class="font-semibold">${fmt(discount)}</span>
-            </p>
-        `;
-        }
-
-        $('#container-info-payment').prepend(`
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-
-            <div class="bg-green-100 p-4 rounded-lg text-center shadow">
-                <p class="text-sm text-green-700">Total Pagado</p>
-                <p class="text-2xl font-bold text-green-900" id="totalPagado">${fmt(totalPagado)}</p>
-            </div>
-
-            <div class="bg-blue-100 p-4 rounded-lg text-center shadow">
-                <p class="text-sm text-blue-700">Total del Evento</p>
-                ${originalHTML}
-            </div>
-
-            <div class="bg-red-100 p-4 rounded-lg text-center shadow">
-                <p class="text-sm text-red-700">Restante</p>
-                <p class="text-2xl font-bold text-red-900" id="totalRestante">${fmt(restante)}</p>
-            </div>
-
-        </div>
-    `);
-    }
-
-    lsPay(id) {
-
-        this.createTable({
-
-            parent: "container-methodPay",
-            idFilterBar: "filterBarEventos",
-            data: { opc: 'listPagos', id: id },
-            conf: { datatable: true, pag: 8 },
-            coffeesoft: true,
-
-            attr: {
-                id: "tableOrder",
-                theme: 'dark',
-                center: [1, , 3, 6, 7],
-                right: [4,],
-                extends: true,
-                f_size:12
-            },
-        });
-
-    }
-
-
-    // Pos.
-
-    async showOrder(id) {
-        // Obtener datos de la reservación
-        const res = await useFetch({ url: api, data: { opc: "getOrder", id: id } });
-        const data = res.order;
-
-        // Mostrar modal y renderizar contenido
-        bootbox.dialog({
-            title: "📅 Pedido",
-            closeButton: true,
-            message: '<div id="containerOrder"></div>',
-        });
-
-        this.tabLayout({
-            parent: "containerOrder",
-            id: "tabsOrderDetails",
-            theme: "dark",
-            content: { class: "" },
+        this.dashboardComponent({
+            parent: "container" + this.PROJECT_NAME,
+            title: "📊 Huubie · Dashboard de Eventos",
+            subtitle: "Resumen mensual · Cotizaciones · Pagados · Cancelados",
             json: [
-                {
-                    id: "detail",
-                    tab: "Detalles del pedido",
-                    active: true,
-
-                },
-                {
-                    id: "product-detail",
-                    tab: "Pedido"
-                }
+                { type: "grafico", id: "ventasMes", title: "Ventas del mes" },
+                { type: "tabla", id: "tablaUsuarios", title: "Usuarios activos", icon: "icon-user" },
+                { type: "filterBar", id: "filtros", title: "Opciones de búsqueda", emoji: "👤" }
             ]
         });
 
-        this.menuResumenPaquete({parent:'container-detail'})
-
-        // this.detailCard({
-        //     parent: "container-detail",
-        //     data: [
-        //         { text: "Folio", value: 'P-00' + data.folio, icon: "icon-doc-text-1" },
-        //         { text: "Nombre", value: data.name, icon: "icon-user-1" },
-        //         { text: "Fecha del pedido", value: data.date_order, icon: "icon-calendar" },
-        //         { text: "Hora de entrega", value: data.time_order, icon: "icon-clock" },
-        //         { type: "observacion", value: data.note }
-        //     ]
-        // });
-
-
     }
 
-    menuResumenPaquete(options) {
+    // Components.
+    dashboardComponent(options) {
         const defaults = {
             parent: "root",
-            id: "menuResumenPaquete",
-            title: "Menú",
-            class: "p-3 h-full rounded-lg bg-[#1F2A37]",
-            total: "24,500.00",
-            json: [
-                {
-                    cantidad: 50,
-                    paquete: "BUFFET DESAYUNO",
-                    precio: "24,500.00",
-                    detalles: ["1 Pan Dulce"]
-                }
-            ]
+            id: "dashboardComponent",
+            title: "📊 Huubie · Dashboard de Eventos",
+            subtitle: "Resumen mensual · Cotizaciones · Pagados · Cancelados",
+            json: []
         };
 
-        const opts = Object.assign({}, defaults, options);
+        const opts = Object.assign(defaults, options);
 
-        const $container = $(`
-            <div id="${opts.id}" class="${opts.class}">
-            <div class="text-xs mt-3">
-                <h3 class="text-sm font-bold text-white mb-2">${opts.title}</h3>
-                <div class="flex justify-between text-[13px] text-white font-semibold border-b pb-1 mb-2">
-                <div class="w-1/4 text-left"><i class="icon-basket-alt"></i> Cantidad</div>
-                <div class="w-1/2 text-center"><i class="icon-dropbox"></i> Paquete</div>
-                <div class="w-1/4 text-right"><i class="icon-dollar"></i> Precio</div>
-                </div>
-            </div>
+        // Diccionario de íconos por tipo (fallback)
+        const typeIcons = {
+            grafico: "📊",
+            tabla: "📋",
+            card: "🗂️",
+            filterBar: "🔎"
+        };
+
+        const container = $(`
+            <div id="${opts.id}" class="w-full bg-[#111928] text-white">
+                <!-- Header -->
+                <header class="bg-[#0F172A] p-6 border-b border-[#1E293B] shadow">
+                    <div class="max-w-7xl mx-auto">
+                        <h1 class="text-2xl font-bold text-white">${opts.title}</h1>
+                        <p class="text-sm text-slate-300">${opts.subtitle}</p>
+                    </div>
+                </header>
+    
+                <!-- Content -->
+                <section id="content-${opts.id}" class="max-w-7xl mx-auto px-4 py-6 grid gap-6 lg:grid-cols-2"></section>
             </div>
         `);
 
-        opts.json.forEach((item) => {
-            const $row = $(`
-      <div class="mb-3">
-        <div class="flex justify-between text-white font-medium py-1 border-b border-dashed">
-          <div class="w-1/4 text-left">(${item.cantidad})</div>
-          <div class="w-1/2 text-start">${item.paquete}</div>
-          <div class="w-1/4 text-right">$${item.precio}</div>
-        </div>
-        <ul class="text-xs text-white pl-4 mt-1">
-          ${item.detalles.map(d => `<li>- ${d}</li>`).join("")}
-        </ul>
-      </div>
-    `);
-            $container.find("div.text-xs").append($row);
+        // Renderizar contenedores desde JSON
+        opts.json.forEach(item => {
+            let block = $("<div>", {
+                id: item.id,
+                class: "bg-slate-800 p-4 rounded-xl shadow min-h-[150px]"
+            });
+
+            // 🔹 Determinar icono (prioridad: item.icon > item.emoji > typeIcons)
+            let iconHtml = "";
+            if (item.icon) {
+                iconHtml = `<i class="${item.icon} mr-1"></i>`;
+            } else if (item.emoji) {
+                iconHtml = `${item.emoji} `;
+            } else {
+                iconHtml = `${typeIcons[item.type] || "📦"} `;
+            }
+
+            if (item.title) {
+                block.prepend(`<h3 class="text-sm font-bold mb-2">${iconHtml}${item.title}</h3>`);
+            }
+
+            $(`#content-${opts.id}`, container).append(block);
         });
 
-        const $footer = $(`
-            <div class="mt-2 ">
-            <div class="flex justify-end">
-                <div class="text-white text-lg font-bold">
-                Total: $${opts.total}
-                </div>
-            </div>
-            </div>
-        `);
-
-        $container.find("div.text-xs").append($footer);
-
-        $(`#${opts.parent}`).html($container);
+        $(`#${opts.parent}`).html(container);
     }
+
+
+
 
 
 }
 
-class MainApp extends Templates{
+class MainApp extends Templates {
     constructor(link, divModule) {
         super(link, divModule);
         this.PROJECT_NAME = "Order";
@@ -552,7 +305,3 @@ class MainApp extends Templates{
 
 
 }
-
-
-
-
