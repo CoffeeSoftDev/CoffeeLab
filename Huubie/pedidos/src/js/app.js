@@ -105,7 +105,7 @@ class App extends Templates {
         //     opc: 'list',
         //     mes: mes,
         //     anio: anio
-        // }).then(response => {
+        // }).then(response => {1
         //     // Procesar respuesta y actualizar tabla
         // });
     }
