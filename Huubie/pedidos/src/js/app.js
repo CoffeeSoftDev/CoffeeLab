@@ -116,14 +116,20 @@ class App extends Templates {
             parent  : "container" + this.PROJECT_NAME,
             title   : "📊  · Dashboard de Eventos",
             subtitle: "Resumen mensual · Cotizaciones · Pagados · Cancelados",
+            
             json: [
-                { type: "grafico", id: "ventasMes", title: "Ventas del mes" },
-                { id: "tablaUsuarios", title: "Usuarios activos", emoji: "👤" },
-                {  id: "filtros", title: "Opciones de búsqueda", emoji: "👤" }
+                { type: "grafico", id: "ventasMes", title: "Cuantos eventos se han hecho en el mes" },
+                { type: "grafico", id: "ventasMes", title: "Cuantos eventos se realizaron este mes por sucursal" },
+                { type: "grafico", id: "ventasMes", title: "Cuanto dinero entro este mes de anticipo ( los que no se cerraron )" },
+                { type: "grafico", id: "ventasMes", title: "Cuanto dinero entro este mes de anticipo ( de los que se cerraron )" },
+                { type: "grafico", id: "ventasMes", title: "Cuanto se vendio en total este mes ( entrada de dinero ) " },
+                { type: "grafico", id: "ventasMes", title: "Cuanto dinero se pudo haber ganado ( pero se cancelo ) " },
+                { type: "grafico", id: "ventasMes", title: "TOP 10 Clientes " },
+             
             ]
         });
 
-        this.themeSelector();
+       
 
         this.barChart({
             parent: 'ventasMes',
@@ -141,104 +147,7 @@ class App extends Templates {
 
     }
 
-    themeSelector() {
-        const themeContainer = $('<div>', {
-            class: 'fixed top-4 right-4 z-50 bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border'
-        });
-
-        const themeLabel = $('<label>', {
-            class: 'block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300',
-            text: '🎨 Tema:'
-        });
-
-        const themeSelect = $('<select>', {
-            id: 'themeSelector',
-            class: 'w-full p-2 border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white'
-        });
-
-        const themes = [
-            { value: 'light', text: '☀️ Light' },
-            { value: 'dark', text: '🌙 Dark' },
-            { value: 'coffeeSoft', text: '☕ CoffeeSoft' }
-        ];
-
-        themes.forEach(theme => {
-            const option = $('<option>', {
-                value: theme.value,
-                text: theme.text
-            });
-            themeSelect.append(option);
-        });
-
-        themeSelect.on('change', (e) => {
-            this.setTheme(e.target.value);
-        });
-
-        themeContainer.append(themeLabel, themeSelect);
-        $('body').append(themeContainer);
-
-        // Cargar tema guardado o por defecto
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        themeSelect.val(savedTheme);
-        this.setTheme(savedTheme);
-    }
-
-    setTheme(theme) {
-        const body = $('body');
-        
-        // Remover clases de tema anteriores
-        body.removeClass('theme-light theme-dark theme-coffeesoft');
-        
-        // Aplicar nuevo tema
-        switch(theme) {
-            case 'dark':
-                body.addClass('theme-dark dark');
-                document.documentElement.classList.add('dark');
-                break;
-            case 'coffeeSoft':
-                body.addClass('theme-coffeesoft');
-                document.documentElement.classList.remove('dark');
-                this.applyCoffeeSoftTheme();
-                break;
-            default: // light
-                body.addClass('theme-light');
-                document.documentElement.classList.remove('dark');
-                break;
-        }
-        
-        // Guardar tema en localStorage
-        localStorage.setItem('theme', theme);
-    }
-
-    applyCoffeeSoftTheme() {
-        const style = $('<style id="coffeesoft-theme">');
-        style.html(`
-            .theme-coffeesoft {
-                background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
-                color: #F5DEB3;
-            }
-            .theme-coffeesoft .border {
-                border-color: #CD853F !important;
-            }
-            .theme-coffeesoft .bg-white {
-                background-color: #8B4513 !important;
-                color: #F5DEB3 !important;
-            }
-            .theme-coffeesoft .text-gray-700 {
-                color: #F5DEB3 !important;
-            }
-            .theme-coffeesoft .bg-gray-50 {
-                background-color: #A0522D !important;
-            }
-            .theme-coffeesoft .shadow-lg {
-                box-shadow: 0 10px 15px -3px rgba(139, 69, 19, 0.3) !important;
-            }
-        `);
-        
-        // Remover estilo anterior si existe
-        $('#coffeesoft-theme').remove();
-        $('head').append(style);
-    }
+  
 
     // Components.
     dashboardComponent(options) {
