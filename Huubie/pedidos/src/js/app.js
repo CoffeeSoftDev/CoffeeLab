@@ -82,10 +82,10 @@ class App extends Templates {
                     ]
                 },
                 {
-                    opc: "button",
-                    class: "col-sm-2",
-                    className:'w-full mt-2',
-                    color_btn: "primary",
+                    opc: "btn",
+                    class: "col-sm-2 d-flex align-items-end",
+                    className:'w-100 mt-4',
+                    color_btn: "success",
                     id: "btnBuscar",
                     text: "Buscar",
                   
@@ -118,11 +118,126 @@ class App extends Templates {
             subtitle: "Resumen mensual · Cotizaciones · Pagados · Cancelados",
             json: [
                 { type: "grafico", id: "ventasMes", title: "Ventas del mes" },
-                { type: "tabla", id: "tablaUsuarios", title: "Usuarios activos" },
-                { type: "filterBar", id: "filtros", title: "Opciones de búsqueda", emoji: "👤" }
+                { id: "tablaUsuarios", title: "Usuarios activos", emoji: "👤" },
+                {  id: "filtros", title: "Opciones de búsqueda", emoji: "👤" }
             ]
         });
 
+        this.themeSelector();
+
+        this.barChart({
+            parent: 'ventasMes',
+            data: this.jsonBarEventos()
+        })
+
+        // Agregar contenido personalizado después del gráfico
+        const customContent = $('<div>', {
+            id: 'tableChart',
+            class: 'border p-4 rounded mt-4',
+            text: 'ContainerText'
+        });
+        
+        $('#ventasMes').append(customContent);
+
+    }
+
+    themeSelector() {
+        const themeContainer = $('<div>', {
+            class: 'fixed top-4 right-4 z-50 bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border'
+        });
+
+        const themeLabel = $('<label>', {
+            class: 'block text-sm font-medium mb-2 text-gray-700 dark:text-gray-300',
+            text: '🎨 Tema:'
+        });
+
+        const themeSelect = $('<select>', {
+            id: 'themeSelector',
+            class: 'w-full p-2 border rounded-md bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white'
+        });
+
+        const themes = [
+            { value: 'light', text: '☀️ Light' },
+            { value: 'dark', text: '🌙 Dark' },
+            { value: 'coffeeSoft', text: '☕ CoffeeSoft' }
+        ];
+
+        themes.forEach(theme => {
+            const option = $('<option>', {
+                value: theme.value,
+                text: theme.text
+            });
+            themeSelect.append(option);
+        });
+
+        themeSelect.on('change', (e) => {
+            this.setTheme(e.target.value);
+        });
+
+        themeContainer.append(themeLabel, themeSelect);
+        $('body').append(themeContainer);
+
+        // Cargar tema guardado o por defecto
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        themeSelect.val(savedTheme);
+        this.setTheme(savedTheme);
+    }
+
+    setTheme(theme) {
+        const body = $('body');
+        
+        // Remover clases de tema anteriores
+        body.removeClass('theme-light theme-dark theme-coffeesoft');
+        
+        // Aplicar nuevo tema
+        switch(theme) {
+            case 'dark':
+                body.addClass('theme-dark dark');
+                document.documentElement.classList.add('dark');
+                break;
+            case 'coffeeSoft':
+                body.addClass('theme-coffeesoft');
+                document.documentElement.classList.remove('dark');
+                this.applyCoffeeSoftTheme();
+                break;
+            default: // light
+                body.addClass('theme-light');
+                document.documentElement.classList.remove('dark');
+                break;
+        }
+        
+        // Guardar tema en localStorage
+        localStorage.setItem('theme', theme);
+    }
+
+    applyCoffeeSoftTheme() {
+        const style = $('<style id="coffeesoft-theme">');
+        style.html(`
+            .theme-coffeesoft {
+                background: linear-gradient(135deg, #8B4513 0%, #D2691E 100%);
+                color: #F5DEB3;
+            }
+            .theme-coffeesoft .border {
+                border-color: #CD853F !important;
+            }
+            .theme-coffeesoft .bg-white {
+                background-color: #8B4513 !important;
+                color: #F5DEB3 !important;
+            }
+            .theme-coffeesoft .text-gray-700 {
+                color: #F5DEB3 !important;
+            }
+            .theme-coffeesoft .bg-gray-50 {
+                background-color: #A0522D !important;
+            }
+            .theme-coffeesoft .shadow-lg {
+                box-shadow: 0 10px 15px -3px rgba(139, 69, 19, 0.3) !important;
+            }
+        `);
+        
+        // Remover estilo anterior si existe
+        $('#coffeesoft-theme').remove();
+        $('head').append(style);
     }
 
     // Components.
@@ -147,7 +262,7 @@ class App extends Templates {
         const container = $(`
         <div id="${opts.id}" class="w-full bg-[#111928] text-white">
             <!-- Header -->
-            <header class="bg-[#0F172A] p-6 border-b border-[#1E293B] shadow">
+            <header class="bg-[#0F172A] p-6 border-b border-[#1E293B] ">
                 <div class="max-w-7xl mx-auto">
                     <h1 class="text-2xl font-bold text-white">${opts.title}</h1>
                     <p class="text-sm text-slate-300">${opts.subtitle}</p>
@@ -191,10 +306,72 @@ class App extends Templates {
                 block.prepend(`<h3 class="text-sm font-bold mb-2">${titleContent}</h3>`);
             }
 
+            // Procesar contenido personalizado antes de agregar el bloque
+            if (item.content && Array.isArray(item.content)) {
+                item.content.forEach(contentItem => {
+                    const element = $(`<${contentItem.type}>`, {
+                        id: contentItem.id || '',
+                        class: contentItem.class || '',
+                        text: contentItem.text || ''
+                    });
+                    
+                    // Agregar atributos adicionales si existen
+                    if (contentItem.attributes) {
+                        Object.keys(contentItem.attributes).forEach(attr => {
+                            element.attr(attr, contentItem.attributes[attr]);
+                        });
+                    }
+                    
+                    // Agregar HTML interno si existe
+                    if (contentItem.html) {
+                        element.html(contentItem.html);
+                    }
+                    
+                    // Agregar el contenido directamente al bloque
+                    block.append(element);
+                });
+            }
+            
             $(`#content-${opts.id}`, container).append(block);
         });
 
         $(`#${opts.parent}`).html(container);
+    }
+
+    jsonBarEventos() {
+        return {
+            labels: ['Centro', 'Norte', 'Sur'],
+            datasets: [
+                {
+                    label: 'Total',
+                    data: [7, 5, 3],
+                    backgroundColor: '#3B82F6',
+                    borderColor: '#3B82F6',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Cotizaciones',
+                    data: [2, 1, 1],
+                    backgroundColor: '#EC4899',
+                    borderColor: '#EC4899',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Pagados',
+                    data: [4, 3, 1],
+                    backgroundColor: '#10B981',
+                    borderColor: '#10B981',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Cancelados',
+                    data: [1, 1, 1],
+                    backgroundColor: '#F97316',
+                    borderColor: '#F97316',
+                    borderWidth: 1
+                }
+            ]
+        };
     }
 
     barChart(options) {
