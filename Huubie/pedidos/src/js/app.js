@@ -1,15 +1,10 @@
 let url = 'https://huubie.com.mx/dev/pedidos/ctrl/ctrl-admin.php';
-let api = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-pedidos-catalogo.php";
-let api_pedidos = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-pedidos.php";
-let app, main, pos;
-let modifier, products;
-let idFolio;
-let orders;
+let api = "https://huubie.com.mx/alpha/eventos/ctrl/ctrl-eventos.php";
 
 $(async () => {
 
     // instancias.
-    app = new App(api_pedidos, 'root');
+    app = new App(api, 'root');
     orders = app; // Variable global para acceder desde el botón
     app.init();
 
@@ -36,7 +31,7 @@ class App extends Templates {
         
         // interface.
         this.renderDashboard();
-        this.createFilterBar();
+     
 
     }
 
@@ -63,23 +58,22 @@ class App extends Templates {
                 {
                     opc: "select",
                     class: "col-sm-3",
-                    id: "mes" + this.PROJECT_NAME,
+                    id: "mes",
                     lbl: "Mes: ",
                     data: [
-                        { id: "01", valor: "Enero" },
+                        { id: 9, valor: "Septiembre" },
                   
                     ]
                 },
                 {
                     opc: "select",
                     class: "col-sm-3",
-                    id: "anio" + this.PROJECT_NAME,
+                    id: "anio",
                     lbl: "Año: ",
-                    options: [
-                        { value: "2023", text: "2023" },
-                        { value: "2024", text: "2024" },
-                        { value: "2025", text: "2025" }
-                    ]
+                    data: Array.from({ length: 2 }, (_, i) => {
+                        const year = 2025 - i;
+                        return { id: year, valor: year };
+                    })
                 },
                 {
                     opc: "btn",
@@ -116,137 +110,181 @@ class App extends Templates {
             parent  : "container" + this.PROJECT_NAME,
             title   : "📊  · Dashboard de Eventos",
             subtitle: "Resumen mensual · Cotizaciones · Pagados · Cancelados",
-            
             json: [
-                { type: "grafico", id: "ventasMes", title: "Cuantos eventos se han hecho en el mes" },
-                { type: "grafico", id: "ventasMes", title: "Cuantos eventos se realizaron este mes por sucursal" },
-                { type: "grafico", id: "ventasMes", title: "Cuanto dinero entro este mes de anticipo ( los que no se cerraron )" },
-                { type: "grafico", id: "ventasMes", title: "Cuanto dinero entro este mes de anticipo ( de los que se cerraron )" },
-                { type: "grafico", id: "ventasMes", title: "Cuanto se vendio en total este mes ( entrada de dinero ) " },
-                { type: "grafico", id: "ventasMes", title: "Cuanto dinero se pudo haber ganado ( pero se cancelo ) " },
-                { type: "grafico", id: "ventasMes", title: "TOP 10 Clientes " },
-             
+                { type: "grafico", id: "ventasMes", title: "Cuantos eventos se han hecho en el mes",},
+                { type: "grafico", id: "eventMonth", title: "Cuantos eventos se realizaron este mes por sucursal" },
+                { type: "grafico", id: "containerPayChart", title: "Cuanto dinero entro este mes de anticipo ( los que no se cerraron )" },
+                { type: "grafico", id: "containerPayChartClosed", title: "Cuanto dinero entro este mes de anticipo ( de los que se cerraron )" },
+                { type: "grafico", id: "containerTotalPay", title: "Cuanto se vendio en total este mes ( entrada de dinero ) " },
+                { type: "grafico", id: "containerSales", title: "Cuanto dinero se pudo haber ganado ( pero se cancelo ) " },
+                { type: "grafico", id: "ContainerTop", title: "TOP 10 Clientes " },
             ]
         });
+
+        // Components.
+
+        this.createFilterBar();
+
+        const mes  = $(`#mes`).val();
+        const anio = $(`#anio`).val();
+        
+        const data = await useFetch({ 
+
+            url : api,
+            data: { 
+                opc: "apiVentas",
+                mes : mes,
+                anio: anio
+            } 
+        });
+
+        this.showCardsDashboard(data.cards);
+
+        this.barChart({  parent: 'ventasMes', data: this.jsonBarEventos()
+        })
+
+        this.graficoEventosPorSucursal();
+        this.chartEstatus()
+        this.chartPaymentClosed()
+        
+      
+      
 
        
 
-        this.barChart({
-            parent: 'ventasMes',
-            data: this.jsonBarEventos()
-        })
+       
+
+      
 
         // Agregar contenido personalizado después del gráfico
-        const customContent = $('<div>', {
-            id: 'tableChart',
-            class: 'border p-4 rounded mt-4',
-            text: 'ContainerText'
-        });
         
-        $('#ventasMes').append(customContent);
 
     }
 
-  
+    showCardsDashboard(data){
 
-    // Components.
-    dashboardComponent(options) {
-        const defaults = {
-            parent: "root",
-            id: "dashboardComponent",
-            title: "📊 Huubie · Dashboard de Eventos",
-            subtitle: "Resumen mensual · Cotizaciones · Pagados · Cancelados",
+        this.cardsDashboard({ 
+            parent:'cardDashboard',
+            theme: 'dark',
             json: [
-                { type: "card", id: "infoCards", class: '' },
-                { type: "grafico", id: "barChartContainer", title: "Eventos por sucursal" },
-                { type: "tabla", id: "tableSucursal", title: "Tabla de sucursales" },
-                { type: "grafico", id: "donutChartContainer", title: "Ventas vs Entrada de dinero" },
-                { type: "grafico", id: "topClientsChartContainer", title: "Top 10 clientes" },
-                { type: "tabla", id: "tableClientes", title: "Tabla de clientes" }
+                {
+                    title: "Eventos realizados este mes",
+                    id: "eventosUsuario",
+                    data: {
+                        value: data.eventos,
+                        description: "Eventos finales",
+                        color: "text-purple-400"
+                    }
+                },
+                {
+                    title: "Dinero entrante este mes",
+                    id: "dineroEntrado",
+                    data: {
+                        value: formatPrice(data.sales),
+                        // description: "$950.00 anticipos (no cerrados) • $24,450.00 anticipos (cerrados)",
+                        color: "text-pink-400"
+                    }
+                },
+                {
+                    title: "Ventas del mes",
+                    id: "ventasMonth",
+                    data: {
+                        value: "$28,600.00",
+                        description: "Comparado con entrada de dinero: $25,400.00",
+                        color: "text-cyan-400"
+                    }
+                },
+                {
+                    title: "Potencial perdido (cancelaciones)",
+                    id: "potencialPerdido",
+                    data: {
+                        value: "$5,900.00",
+                        description: "Suma de pedidos cancelados del mes",
+                        color: "text-red-400"
+                    }
+                }
+            ]
+        });
+    }
+
+    graficoEventosPorSucursal() {
+        this.linearChart({
+            parent: "eventMonth",
+            id: "graficoEventosSucursal",
+            data: this.jsonEventosPorSucursal(),
+        });
+    }
+
+    chartEstatus() {
+        this.payChart({
+            parent: "containerPayChart",
+            id: "chartEstatus",
+            data: this.jsonEstatus()
+        });
+    }
+
+    chartPaymentClosed() {
+        this.payChart({
+            parent: "containerPayChartClosed",
+            id: "chartPaymentClosed",
+            data: this.jsonPaymentClosed()
+        });
+    }
+
+
+
+    // json
+    jsonEventosPorSucursal() {
+        return {
+            labels: ["Centro", "Norte", "Sur", "Este", "Oeste"],
+            datasets: [
+                {
+                    label: "Eventos",
+                    data: [25, 18, 14, 10, 16],
+                    borderColor: "#10B981",
+                    backgroundColor: "rgba(16, 185, 129, 0.2)",
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: "#10B981",
+                    pointBorderColor: "#fff",
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                }
+            ],
+            tooltip: ["Centro", "Norte", "Sur", "Este", "Oeste"]
+        };
+    }
+
+    jsonEstatus() {
+        return {
+            labels: ["Pendientes", "En Proceso", "Confirmados"],
+            datasets: [
+                {
+                    label: "Estatus de pagos",
+                    data: [9500, 12000, 8500],
+                    backgroundColor: ["#8B5CF6", "#06B6D4", "#84CC16"],
+                    borderWidth: 2,
+                    borderColor: "#1F2937"
+                }
             ]
         };
-
-        const opts = Object.assign(defaults, options);
-
-        const container = $(`
-        <div id="${opts.id}" class="w-full bg-[#111928] text-white">
-            <!-- Header -->
-            <header class="bg-[#0F172A] p-6 border-b border-[#1E293B] ">
-                <div class="max-w-7xl mx-auto">
-                    <h1 class="text-2xl font-bold text-white">${opts.title}</h1>
-                    <p class="text-sm text-slate-300">${opts.subtitle}</p>
-                </div>
-            </header>
-
-            <!-- FilterBar -->
-            <section id="filterBarDashboard" class="max-w-7xl mx-auto px-4 py-4 ">
-                <!-- Aquí puedes renderizar selects, inputs o botones -->
-            </section>
-
-            <!-- Content -->
-            <section id="content-${opts.id}" class="max-w-7xl mx-auto px-4 py-6 grid gap-6 lg:grid-cols-2"></section>
-        </div>`);
-
-        // Renderizar contenedores desde JSON
-        opts.json.forEach(item => {
-            let block = $("<div>", {
-                id: item.id,
-                class: "bg-slate-800 p-4 rounded-xl shadow min-h-[200px]"
-            });
-
-            if (item.title) {
-                // Emojis por defecto según el tipo
-                const defaultEmojis = {
-                    'grafico': '📊',
-                    'tabla': '📋',
-                    'doc': '📄',
-                    'filterBar': '🔍'
-                };
-
-                // Usar emoji personalizado o por defecto
-                const emoji = item.emoji || defaultEmojis[item.type] || '';
-                
-                // Usar icono si está definido
-                const iconHtml = item.icon ? `<i class="${item.icon}"></i> ` : '';
-                
-                // Construir el título con emoji e icono
-                const titleContent = `${emoji} ${iconHtml}${item.title}`;
-                
-                block.prepend(`<h3 class="text-sm font-bold mb-2">${titleContent}</h3>`);
-            }
-
-            // Procesar contenido personalizado antes de agregar el bloque
-            if (item.content && Array.isArray(item.content)) {
-                item.content.forEach(contentItem => {
-                    const element = $(`<${contentItem.type}>`, {
-                        id: contentItem.id || '',
-                        class: contentItem.class || '',
-                        text: contentItem.text || ''
-                    });
-                    
-                    // Agregar atributos adicionales si existen
-                    if (contentItem.attributes) {
-                        Object.keys(contentItem.attributes).forEach(attr => {
-                            element.attr(attr, contentItem.attributes[attr]);
-                        });
-                    }
-                    
-                    // Agregar HTML interno si existe
-                    if (contentItem.html) {
-                        element.html(contentItem.html);
-                    }
-                    
-                    // Agregar el contenido directamente al bloque
-                    block.append(element);
-                });
-            }
-            
-            $(`#content-${opts.id}`, container).append(block);
-        });
-
-        $(`#${opts.parent}`).html(container);
     }
 
+    jsonPaymentClosed() {
+        return {
+            labels: ["Completados", "Facturados", "Cobrados"],
+            datasets: [
+                {
+                    label: "Pagos cerrados",
+                    data: [12000, 8500, 5000], // valores de ejemplo
+                    backgroundColor: ["#F87171", "#F97316", "#FACC15"],
+                    borderWidth: 2,
+                    borderColor: "#1F2937"
+                }
+            ]
+        };
+    }
+    
     jsonBarEventos() {
         return {
             labels: ['Centro', 'Norte', 'Sur'],
@@ -282,70 +320,182 @@ class App extends Templates {
             ]
         };
     }
+    
 
-    barChart(options) {
+  
+
+    // Components.
+    dashboardComponent(options) {
         const defaults = {
-            parent: "containerChequePro",
-            id: "chart",
-            title: "",
-            class: "border p-4 rounded-xl",
-            data: {},
+            parent: "root",
+            id: "dashboardComponent",
+            title: "📊 Huubie · Dashboard de Eventos",
+            subtitle: "Resumen mensual · Cotizaciones · Pagados · Cancelados",
+            json: [
+                { type: "card", id: "infoCards", class: '' },
+                { type: "grafico", id: "barChartContainer", title: "Eventos por sucursal" },
+                { type: "tabla", id: "tableSucursal", title: "Tabla de sucursales" },
+                { type: "grafico", id: "donutChartContainer", title: "Ventas vs Entrada de dinero" },
+                { type: "grafico", id: "topClientsChartContainer", title: "Top 10 clientes" },
+                { type: "tabla", id: "tableClientes", title: "Tabla de clientes" }
+            ]
+        };
+
+        const opts = Object.assign(defaults, options);
+
+        const container = $(`
+        <div id="${opts.id}" class="w-full bg-[#111928] text-white">
+            <!-- Header -->
+            <header class="bg-[#0F172A] p-6 border-b border-[#1E293B] ">
+                <div class="max-w-7xl mx-auto">
+                    <h1 class="text-2xl font-semibold text-white">${opts.title}</h1>
+                    <p class="text-sm text-slate-300">${opts.subtitle}</p>
+                </div>
+            </header>
+
+            <!-- FilterBar -->
+            <div id="filterBarDashboard" class="max-w-7xl mx-auto px-4 py-4  ">
+          
+            </div>
+
+             <section id="cardDashboard" class="max-w-7xl mx-auto px-4 py-4 ">
+              
+            </section>
+
+            <!-- Content -->
+            <section id="content-${opts.id}" class="max-w-7xl mx-auto px-4 py-6 grid gap-6 lg:grid-cols-2"></section>
+        </div>`);
+
+        // Renderizar contenedores desde JSON
+        opts.json.forEach(item => {
+            let block = $("<div>", {
+                id: item.id,
+                class: "bg-slate-800 p-4 rounded-xl shadow min-h-[200px]"
+            });
+
+            if (item.title) {
+                // Emojis por defecto según el tipo
+                const defaultEmojis = {
+                    'grafico': '📊',
+                    'tabla': '📋',
+                    'doc': '📄',
+                    'filterBar': '🔍'
+                };
+
+                // Usar emoji personalizado o por defecto
+                const emoji = item.emoji || defaultEmojis[item.type] || '';
+                
+                // Usar icono si está definido
+                const iconHtml = item.icon ? `<i class="${item.icon}"></i> ` : '';
+                
+                // Construir el título con emoji e icono
+                const titleContent = `${emoji} ${iconHtml}${item.title}`;
+                
+                block.prepend(`<h3 class="text-sm font-semibold mb-3">${titleContent}</h3>`);
+            }
+
+            // Procesar contenido personalizado antes de agregar el bloque
+            if (item.content && Array.isArray(item.content)) {
+                item.content.forEach(contentItem => {
+                    const element = $(`<${contentItem.type}>`, {
+                        id: contentItem.id || '',
+                        class: contentItem.class || '',
+                        text: contentItem.text || ''
+                    });
+                    
+                    // Agregar atributos adicionales si existen
+                    if (contentItem.attributes) {
+                        Object.keys(contentItem.attributes).forEach(attr => {
+                            element.attr(attr, contentItem.attributes[attr]);
+                        });
+                    }
+                    
+                    // Agregar HTML interno si existe
+                    if (contentItem.html) {
+                        element.html(contentItem.html);
+                    }
+                    
+                    // Agregar el contenido directamente al bloque
+                    block.append(element);
+                });
+            }
+            
+            $(`#content-${opts.id}`, container).append(block);
+        });
+
+        $(`#${opts.parent}`).html(container);
+    }
+
+    
+
+    
+
+    cardsDashboard(options) {
+        const defaults = {
+            parent: "root",
+            id: "infoCardKPI",
+            class: "",
+            theme: "light", // light | dark
             json: [],
-            onShow: () => { },
+            data: {
+                value: "0",
+                description: "",
+                color: "text-gray-800"
+            },
+            onClick: () => { }
         };
 
         const opts = Object.assign({}, defaults, options);
 
-        const container = $("<div>", { class: opts.class });
+        const isDark = opts.theme === "dark";
 
-        const title = $("<h2>", {
-            class: "text-lg font-bold mb-2",
-            text: opts.title
-        });
+        const cardBase = isDark
+            ? "bg-[#1F2A37] text-white rounded-xl shadow"
+            : "bg-white text-gray-800 rounded-xl shadow";
 
-        const canvas = $("<canvas>", {
+        const titleColor = isDark ? "text-gray-300" : "text-gray-600";
+        const descColor = isDark ? "text-gray-400" : "text-gray-500";
+
+        const renderCard = (card, i = "") => {
+            const box = $("<div>", {
+                id: `${opts.id}_${i}`,
+                class: `${cardBase} p-4`
+            });
+
+            const title = $("<p>", {
+                class: `text-sm ${titleColor}`,
+                text: card.title
+            });
+
+            const value = $("<p>", {
+                id: card.id || "",
+                class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
+                text: card.data?.value
+            });
+
+            const description = $("<p>", {
+                class: `text-xs mt-1 ${card.data?.color || descColor}`,
+                text: card.data?.description
+            });
+
+            box.append(title, value, description);
+            return box;
+        };
+
+        const container = $("<div>", {
             id: opts.id,
-            class: "w-full h-[300px]"
+            class: `grid grid-cols-2 md:grid-cols-4 gap-4 ${opts.class}`
         });
 
-        container.append(title, canvas);
-        $('#' + opts.parent).append(container); // 🔹 cambio: append en vez de html()
-
-        const ctx = document.getElementById(opts.id).getContext("2d");
-
-        // 🔹 guardar instancias de charts en un objeto
-        if (!window._charts) window._charts = {};
-
-        if (window._charts[opts.id]) {
-            window._charts[opts.id].destroy();
+        if (opts.json.length > 0) {
+            opts.json.forEach((item, i) => {
+                container.append(renderCard(item, i));
+            });
+        } else {
+            container.append(renderCard(opts));
         }
 
-        window._charts[opts.id] = new Chart(ctx, {
-            type: "bar",
-            data: opts.data,
-            options: {
-                responsive: true,
-                animation: {
-                    onComplete: function () { }
-                },
-                plugins: {
-                    legend: { position: "bottom" },
-                    tooltip: {
-                        callbacks: {
-                            label: (ctx) => `${ctx.dataset.label}: ${formatPrice(ctx.parsed.y)}`
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: (v) => formatPrice(v)
-                        }
-                    }
-                }
-            }
-        });
+        $(`#${opts.parent}`).html(container);
     }
 
 

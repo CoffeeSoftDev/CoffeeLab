@@ -23,6 +23,10 @@ Debe respetarse el formato de CoffeeSoft
 
 - Si dos modulos , el segundo debe heredar la clase App
 - Solo genera un submodulo si se necesita
+- Si se genera un submodulo, debe crear una class aparte no juntar todo en la misma.
+
+
+
 ```JS
     class SubModulo extends App{}
 ```
@@ -99,14 +103,14 @@ debe llevar la siguiente nomenclatura
         this.createTable({
 
             parent     : `container${this.PROJECT_NAME}`,
-            idFilterBar: `filterBar${this.PROJECT_NAME}`,
+            idFilterBar: `filterBar${this.PROJECT_NAME}`,// importante siempre incluirla
             data: { opc: "list", fi: rangePicker.fi, ff: rangePicker.ff },
             conf       : { datatable: true, pag: 10 },
             coffeesoft : true,
 
             attr: {
                 id      : `tb${this.PROJECT_NAME}`,
-                theme   : 'dark',
+                theme   : 'shadcdn',
                 title   : 'Lista de registros',
                 subtitle: '',
                 center  : [1, 2,  7, 8,9,10,11],
