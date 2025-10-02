@@ -285,6 +285,41 @@ class App extends Templates {
         };
     }
     
+    jsonBarEventos() {
+        return {
+            labels: ['Centro', 'Norte', 'Sur'],
+            datasets: [
+                {
+                    label: 'Total',
+                    data: [7, 5, 3],
+                    backgroundColor: '#3B82F6',
+                    borderColor: '#3B82F6',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Cotizaciones',
+                    data: [2, 1, 1],
+                    backgroundColor: '#EC4899',
+                    borderColor: '#EC4899',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Pagados',
+                    data: [4, 3, 1],
+                    backgroundColor: '#10B981',
+                    borderColor: '#10B981',
+                    borderWidth: 1
+                },
+                {
+                    label: 'Cancelados',
+                    data: [1, 1, 1],
+                    backgroundColor: '#F97316',
+                    borderColor: '#F97316',
+                    borderWidth: 1
+                }
+            ]
+        };
+    }
     
 
   
@@ -391,229 +426,6 @@ class App extends Templates {
         $(`#${opts.parent}`).html(container);
     }
 
-    jsonBarEventos() {
-        return {
-            labels: ['Centro', 'Norte', 'Sur'],
-            datasets: [
-                {
-                    label: 'Total',
-                    data: [7, 5, 3],
-                    backgroundColor: '#3B82F6',
-                    borderColor: '#3B82F6',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Cotizaciones',
-                    data: [2, 1, 1],
-                    backgroundColor: '#EC4899',
-                    borderColor: '#EC4899',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Pagados',
-                    data: [4, 3, 1],
-                    backgroundColor: '#10B981',
-                    borderColor: '#10B981',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Cancelados',
-                    data: [1, 1, 1],
-                    backgroundColor: '#F97316',
-                    borderColor: '#F97316',
-                    borderWidth: 1
-                }
-            ]
-        };
-    }
-
-    barChart(options) {
-        const defaults = {
-            parent: "containerChequePro",
-            id: "chart",
-            title: "",
-            class: "border p-4 rounded-xl",
-            data: {},
-            json: [],
-            onShow: () => { },
-        };
-
-        const opts = Object.assign({}, defaults, options);
-
-        const container = $("<div>", { class: opts.class });
-
-        const title = $("<h2>", {
-            class: "text-lg font-bold mb-2",
-            text: opts.title
-        });
-
-        const canvas = $("<canvas>", {
-            id: opts.id,
-            class: "w-full h-[150px]"
-        });
-
-        container.append(title, canvas);
-        $('#' + opts.parent).append(container); // 🔹 cambio: append en vez de html()
-
-        const ctx = document.getElementById(opts.id).getContext("2d");
-
-        // 🔹 guardar instancias de charts en un objeto
-        if (!window._charts) window._charts = {};
-
-        if (window._charts[opts.id]) {
-            window._charts[opts.id].destroy();
-        }
-
-        window._charts[opts.id] = new Chart(ctx, {
-            type: "bar",
-            data: opts.data,
-            options: {
-                responsive: true,
-                aspectRatio: 3,
-                animation: {
-                    onComplete: function () { }
-                },
-                plugins: {
-                    legend: { position: "bottom" },
-                    tooltip: {
-                        callbacks: {
-                            label: (ctx) => `${ctx.dataset.label}: ${formatPrice(ctx.parsed.y)}`
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: (v) => formatPrice(v)
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    linearChart(options) {
-        const defaults = {
-            parent: "containerLineChart",
-            id: "linearChart",
-            title: "",
-            class: "border p-3 rounded-xl",
-            data: {},   // <- puede contener { labels: [], datasets: [], tooltip: [] }
-            json: [],
-            onShow: () => { },
-        };
-
-        const opts = Object.assign({}, defaults, options);
-
-        const container = $("<div>", { class: opts.class });
-        const title = $("<h2>", {
-            class: "text-lg font-bold mb-2",
-            text: opts.title
-        });
-        const canvas = $("<canvas>", {
-            id: opts.id,
-            class: "w-full h-[150px]"
-        });
-
-        container.append(title, canvas);
-        $('#' + opts.parent).append(container);
-
-        const ctx = document.getElementById(opts.id).getContext("2d");
-        if (!window._charts) window._charts = {};
-        if (window._charts[opts.id]) {
-            window._charts[opts.id].destroy();
-        }
-
-        window._charts[opts.id] = new Chart(ctx, {
-            type: "line",
-            data: opts.data,
-            options: {
-                responsive: true,
-                aspectRatio: 3,
-                plugins: {
-                    legend: { position: "bottom" },
-                    tooltip: {
-                        callbacks: {
-                            title: (items) => {
-                                const index = items[0].dataIndex;
-                                const tooltips = opts.data.tooltip || opts.data.labels;
-                                return tooltips[index];
-                            },
-                            label: (ctx) => `${ctx.dataset.label}: ${formatPrice(ctx.parsed.y)}`
-                        }
-                    },
-                    datalabels: {
-                        display: true,
-                        align: 'top',
-                        anchor: 'end',
-                        color: '#1E3A8A',
-                        font: {
-                            weight: 'bold',
-                            size: 12
-                        },
-                        formatter: (value) => value
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: (v) => v
-                        }
-                    }
-                }
-            },
-            plugins: [ChartDataLabels]
-        });
-    }
-
-    payChart(options) {
-        const defaults = {
-            parent: "containerPayChart",
-            id: "payChart",
-            title: "",
-            class: "border p-3 rounded-xl",
-            data: {},
-        };
-
-        const opts = Object.assign({}, defaults, options);
-
-        const container = $("<div>", { class: opts.class });
-        const title = $("<h2>", {
-            class: "text-lg font-bold mb-2",
-            text: opts.title
-        });
-        const canvas = $("<canvas>", {
-            id: opts.id,
-            class: "w-full h-[200px]"
-        });
-
-        container.append(title, canvas);
-        $("#" + opts.parent).append(container);
-
-        const ctx = document.getElementById(opts.id).getContext("2d");
-        if (!window._charts) window._charts = {};
-        if (window._charts[opts.id]) {
-            window._charts[opts.id].destroy();
-        }
-
-        window._charts[opts.id] = new Chart(ctx, {
-            type: "doughnut",
-            data: opts.data,
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: { position: "bottom" },
-                    tooltip: {
-                        callbacks: {
-                            label: (ctx) => `${ctx.label}: ${formatPrice(ctx.parsed)}`
-                        }
-                    }
-                }
-            }
-        });
-    }
     
 
     
