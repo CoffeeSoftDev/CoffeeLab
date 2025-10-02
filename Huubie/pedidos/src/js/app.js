@@ -1,15 +1,10 @@
 let url = 'https://huubie.com.mx/dev/pedidos/ctrl/ctrl-admin.php';
-let api = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-pedidos-catalogo.php";
-let api_pedidos = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-pedidos.php";
-let app, main, pos;
-let modifier, products;
-let idFolio;
-let orders;
+let api = "https://huubie.com.mx/alpha/eventos/ctrl/ctrl-eventos.php";
 
 $(async () => {
 
     // instancias.
-    app = new App(api_pedidos, 'root');
+    app = new App(api, 'root');
     orders = app; // Variable global para acceder desde el botón
     app.init();
 
@@ -36,7 +31,7 @@ class App extends Templates {
         
         // interface.
         this.renderDashboard();
-        this.createFilterBar();
+     
 
     }
 
@@ -63,23 +58,22 @@ class App extends Templates {
                 {
                     opc: "select",
                     class: "col-sm-3",
-                    id: "mes" + this.PROJECT_NAME,
+                    id: "mes",
                     lbl: "Mes: ",
                     data: [
-                        { id: "01", valor: "Enero" },
+                        { id: 9, valor: "Septiembre" },
                   
                     ]
                 },
                 {
                     opc: "select",
                     class: "col-sm-3",
-                    id: "anio" + this.PROJECT_NAME,
+                    id: "anio",
                     lbl: "Año: ",
-                    options: [
-                        { value: "2023", text: "2023" },
-                        { value: "2024", text: "2024" },
-                        { value: "2025", text: "2025" }
-                    ]
+                    data: Array.from({ length: 2 }, (_, i) => {
+                        const year = 2025 - i;
+                        return { id: year, valor: year };
+                    })
                 },
                 {
                     opc: "btn",
@@ -116,36 +110,182 @@ class App extends Templates {
             parent  : "container" + this.PROJECT_NAME,
             title   : "📊  · Dashboard de Eventos",
             subtitle: "Resumen mensual · Cotizaciones · Pagados · Cancelados",
-            
             json: [
-                { type: "grafico", id: "ventasMes", title: "Cuantos eventos se han hecho en el mes" },
-                { type: "grafico", id: "ventasMes", title: "Cuantos eventos se realizaron este mes por sucursal" },
-                { type: "grafico", id: "ventasMes", title: "Cuanto dinero entro este mes de anticipo ( los que no se cerraron )" },
-                { type: "grafico", id: "ventasMes", title: "Cuanto dinero entro este mes de anticipo ( de los que se cerraron )" },
-                { type: "grafico", id: "ventasMes", title: "Cuanto se vendio en total este mes ( entrada de dinero ) " },
-                { type: "grafico", id: "ventasMes", title: "Cuanto dinero se pudo haber ganado ( pero se cancelo ) " },
-                { type: "grafico", id: "ventasMes", title: "TOP 10 Clientes " },
-             
+                { type: "grafico", id: "ventasMes", title: "Cuantos eventos se han hecho en el mes",},
+                { type: "grafico", id: "eventMonth", title: "Cuantos eventos se realizaron este mes por sucursal" },
+                { type: "grafico", id: "containerPayChart", title: "Cuanto dinero entro este mes de anticipo ( los que no se cerraron )" },
+                { type: "grafico", id: "containerPayChartClosed", title: "Cuanto dinero entro este mes de anticipo ( de los que se cerraron )" },
+                { type: "grafico", id: "containerTotalPay", title: "Cuanto se vendio en total este mes ( entrada de dinero ) " },
+                { type: "grafico", id: "containerSales", title: "Cuanto dinero se pudo haber ganado ( pero se cancelo ) " },
+                { type: "grafico", id: "ContainerTop", title: "TOP 10 Clientes " },
             ]
         });
 
-       
+        // Components.
 
-        this.barChart({
-            parent: 'ventasMes',
-            data: this.jsonBarEventos()
+        this.createFilterBar();
+
+        const mes  = $(`#mes`).val();
+        const anio = $(`#anio`).val();
+        
+        const data = await useFetch({ 
+
+            url : api,
+            data: { 
+                opc: "apiVentas",
+                mes : mes,
+                anio: anio
+            } 
+        });
+
+        this.showCardsDashboard(data.cards);
+
+        this.barChart({  parent: 'ventasMes', data: this.jsonBarEventos()
         })
 
-        // Agregar contenido personalizado después del gráfico
-        const customContent = $('<div>', {
-            id: 'tableChart',
-            class: 'border p-4 rounded mt-4',
-            text: 'ContainerText'
-        });
+        this.graficoEventosPorSucursal();
+        this.chartEstatus()
+        this.chartPaymentClosed()
         
-        $('#ventasMes').append(customContent);
+      
+      
+
+       
+
+       
+
+      
+
+        // Agregar contenido personalizado después del gráfico
+        
 
     }
+
+    showCardsDashboard(data){
+
+        this.cardsDashboard({ 
+            parent:'cardDashboard',
+            theme: 'dark',
+            json: [
+                {
+                    title: "Eventos realizados este mes",
+                    id: "eventosUsuario",
+                    data: {
+                        value: data.eventos,
+                        description: "Eventos finales",
+                        color: "text-purple-400"
+                    }
+                },
+                {
+                    title: "Dinero entrante este mes",
+                    id: "dineroEntrado",
+                    data: {
+                        value: formatPrice(data.sales),
+                        // description: "$950.00 anticipos (no cerrados) • $24,450.00 anticipos (cerrados)",
+                        color: "text-pink-400"
+                    }
+                },
+                {
+                    title: "Ventas del mes",
+                    id: "ventasMonth",
+                    data: {
+                        value: "$28,600.00",
+                        description: "Comparado con entrada de dinero: $25,400.00",
+                        color: "text-cyan-400"
+                    }
+                },
+                {
+                    title: "Potencial perdido (cancelaciones)",
+                    id: "potencialPerdido",
+                    data: {
+                        value: "$5,900.00",
+                        description: "Suma de pedidos cancelados del mes",
+                        color: "text-red-400"
+                    }
+                }
+            ]
+        });
+    }
+
+    graficoEventosPorSucursal() {
+        this.linearChart({
+            parent: "eventMonth",
+            id: "graficoEventosSucursal",
+            data: this.jsonEventosPorSucursal(),
+        });
+    }
+
+    chartEstatus() {
+        this.payChart({
+            parent: "containerPayChart",
+            id: "chartEstatus",
+            data: this.jsonEstatus()
+        });
+    }
+
+    chartPaymentClosed() {
+        this.payChart({
+            parent: "containerPayChartClosed",
+            id: "chartPaymentClosed",
+            data: this.jsonPaymentClosed()
+        });
+    }
+
+
+
+    // json
+    jsonEventosPorSucursal() {
+        return {
+            labels: ["Centro", "Norte", "Sur", "Este", "Oeste"],
+            datasets: [
+                {
+                    label: "Eventos",
+                    data: [25, 18, 14, 10, 16],
+                    borderColor: "#10B981",
+                    backgroundColor: "rgba(16, 185, 129, 0.2)",
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: "#10B981",
+                    pointBorderColor: "#fff",
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                }
+            ],
+            tooltip: ["Centro", "Norte", "Sur", "Este", "Oeste"]
+        };
+    }
+
+    jsonEstatus() {
+        return {
+            labels: ["Pendientes", "En Proceso", "Confirmados"],
+            datasets: [
+                {
+                    label: "Estatus de pagos",
+                    data: [9500, 12000, 8500],
+                    backgroundColor: ["#8B5CF6", "#06B6D4", "#84CC16"],
+                    borderWidth: 2,
+                    borderColor: "#1F2937"
+                }
+            ]
+        };
+    }
+
+    jsonPaymentClosed() {
+        return {
+            labels: ["Completados", "Facturados", "Cobrados"],
+            datasets: [
+                {
+                    label: "Pagos cerrados",
+                    data: [12000, 8500, 5000], // valores de ejemplo
+                    backgroundColor: ["#F87171", "#F97316", "#FACC15"],
+                    borderWidth: 2,
+                    borderColor: "#1F2937"
+                }
+            ]
+        };
+    }
+    
+    
 
   
 
@@ -173,14 +313,18 @@ class App extends Templates {
             <!-- Header -->
             <header class="bg-[#0F172A] p-6 border-b border-[#1E293B] ">
                 <div class="max-w-7xl mx-auto">
-                    <h1 class="text-2xl font-bold text-white">${opts.title}</h1>
+                    <h1 class="text-2xl font-semibold text-white">${opts.title}</h1>
                     <p class="text-sm text-slate-300">${opts.subtitle}</p>
                 </div>
             </header>
 
             <!-- FilterBar -->
-            <section id="filterBarDashboard" class="max-w-7xl mx-auto px-4 py-4 ">
-                <!-- Aquí puedes renderizar selects, inputs o botones -->
+            <div id="filterBarDashboard" class="max-w-7xl mx-auto px-4 py-4  ">
+          
+            </div>
+
+             <section id="cardDashboard" class="max-w-7xl mx-auto px-4 py-4 ">
+              
             </section>
 
             <!-- Content -->
@@ -212,7 +356,7 @@ class App extends Templates {
                 // Construir el título con emoji e icono
                 const titleContent = `${emoji} ${iconHtml}${item.title}`;
                 
-                block.prepend(`<h3 class="text-sm font-bold mb-2">${titleContent}</h3>`);
+                block.prepend(`<h3 class="text-sm font-semibold mb-3">${titleContent}</h3>`);
             }
 
             // Procesar contenido personalizado antes de agregar el bloque
@@ -305,7 +449,7 @@ class App extends Templates {
 
         const canvas = $("<canvas>", {
             id: opts.id,
-            class: "w-full h-[300px]"
+            class: "w-full h-[150px]"
         });
 
         container.append(title, canvas);
@@ -325,6 +469,7 @@ class App extends Templates {
             data: opts.data,
             options: {
                 responsive: true,
+                aspectRatio: 3,
                 animation: {
                     onComplete: function () { }
                 },
@@ -346,6 +491,199 @@ class App extends Templates {
                 }
             }
         });
+    }
+
+    linearChart(options) {
+        const defaults = {
+            parent: "containerLineChart",
+            id: "linearChart",
+            title: "",
+            class: "border p-3 rounded-xl",
+            data: {},   // <- puede contener { labels: [], datasets: [], tooltip: [] }
+            json: [],
+            onShow: () => { },
+        };
+
+        const opts = Object.assign({}, defaults, options);
+
+        const container = $("<div>", { class: opts.class });
+        const title = $("<h2>", {
+            class: "text-lg font-bold mb-2",
+            text: opts.title
+        });
+        const canvas = $("<canvas>", {
+            id: opts.id,
+            class: "w-full h-[150px]"
+        });
+
+        container.append(title, canvas);
+        $('#' + opts.parent).append(container);
+
+        const ctx = document.getElementById(opts.id).getContext("2d");
+        if (!window._charts) window._charts = {};
+        if (window._charts[opts.id]) {
+            window._charts[opts.id].destroy();
+        }
+
+        window._charts[opts.id] = new Chart(ctx, {
+            type: "line",
+            data: opts.data,
+            options: {
+                responsive: true,
+                aspectRatio: 3,
+                plugins: {
+                    legend: { position: "bottom" },
+                    tooltip: {
+                        callbacks: {
+                            title: (items) => {
+                                const index = items[0].dataIndex;
+                                const tooltips = opts.data.tooltip || opts.data.labels;
+                                return tooltips[index];
+                            },
+                            label: (ctx) => `${ctx.dataset.label}: ${formatPrice(ctx.parsed.y)}`
+                        }
+                    },
+                    datalabels: {
+                        display: true,
+                        align: 'top',
+                        anchor: 'end',
+                        color: '#1E3A8A',
+                        font: {
+                            weight: 'bold',
+                            size: 12
+                        },
+                        formatter: (value) => value
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: (v) => v
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        });
+    }
+
+    payChart(options) {
+        const defaults = {
+            parent: "containerPayChart",
+            id: "payChart",
+            title: "",
+            class: "border p-3 rounded-xl",
+            data: {},
+        };
+
+        const opts = Object.assign({}, defaults, options);
+
+        const container = $("<div>", { class: opts.class });
+        const title = $("<h2>", {
+            class: "text-lg font-bold mb-2",
+            text: opts.title
+        });
+        const canvas = $("<canvas>", {
+            id: opts.id,
+            class: "w-full h-[200px]"
+        });
+
+        container.append(title, canvas);
+        $("#" + opts.parent).append(container);
+
+        const ctx = document.getElementById(opts.id).getContext("2d");
+        if (!window._charts) window._charts = {};
+        if (window._charts[opts.id]) {
+            window._charts[opts.id].destroy();
+        }
+
+        window._charts[opts.id] = new Chart(ctx, {
+            type: "doughnut",
+            data: opts.data,
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: "bottom" },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.label}: ${formatPrice(ctx.parsed)}`
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+
+    
+
+    cardsDashboard(options) {
+        const defaults = {
+            parent: "root",
+            id: "infoCardKPI",
+            class: "",
+            theme: "light", // light | dark
+            json: [],
+            data: {
+                value: "0",
+                description: "",
+                color: "text-gray-800"
+            },
+            onClick: () => { }
+        };
+
+        const opts = Object.assign({}, defaults, options);
+
+        const isDark = opts.theme === "dark";
+
+        const cardBase = isDark
+            ? "bg-[#1F2A37] text-white rounded-xl shadow"
+            : "bg-white text-gray-800 rounded-xl shadow";
+
+        const titleColor = isDark ? "text-gray-300" : "text-gray-600";
+        const descColor = isDark ? "text-gray-400" : "text-gray-500";
+
+        const renderCard = (card, i = "") => {
+            const box = $("<div>", {
+                id: `${opts.id}_${i}`,
+                class: `${cardBase} p-4`
+            });
+
+            const title = $("<p>", {
+                class: `text-sm ${titleColor}`,
+                text: card.title
+            });
+
+            const value = $("<p>", {
+                id: card.id || "",
+                class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
+                text: card.data?.value
+            });
+
+            const description = $("<p>", {
+                class: `text-xs mt-1 ${card.data?.color || descColor}`,
+                text: card.data?.description
+            });
+
+            box.append(title, value, description);
+            return box;
+        };
+
+        const container = $("<div>", {
+            id: opts.id,
+            class: `grid grid-cols-2 md:grid-cols-4 gap-4 ${opts.class}`
+        });
+
+        if (opts.json.length > 0) {
+            opts.json.forEach((item, i) => {
+                container.append(renderCard(item, i));
+            });
+        } else {
+            container.append(renderCard(opts));
+        }
+
+        $(`#${opts.parent}`).html(container);
     }
 
 
