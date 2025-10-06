@@ -12,11 +12,13 @@ class ctrl extends mdl {
 
     function init() {
         return [
-            'udn' => $this->lsUDN(),
-            'campaigns' => $this->listCampaigns(),
-            'types' => $this->listCampaignTypes([1, 1]),
+            
+            'udn'             => $this->lsUDN(),
+            'campaigns'       => $this->listCampaigns(),
+            'types'           => $this->listCampaignTypes([1, 1]),
             'classifications' => $this->listCampaignClassification([1, 1]),
-            'socialNetworks' => [
+
+            'socialNetworks'  => [
                 ['id' => 'Facebook', 'valor' => 'Facebook'],
                 ['id' => 'Instagram', 'valor' => 'Instagram'],
                 ['id' => 'TikTok', 'valor' => 'TikTok'],
@@ -308,14 +310,14 @@ class ctrl extends mdl {
             ];
 
             $imageHtml = !empty($key['image']) 
-                ? '<img src="' . $key['image'] . '" class="w-12 h-12 object-cover rounded" />' 
+                ? '<img src="' . $key['image'] . '" class="w-12 h-12 py-2 object-cover rounded" />' 
                 : '<div class="w-12 h-12 bg-gray-300 rounded flex items-center justify-center"><i class="icon-image text-gray-500"></i></div>';
 
             $__row[] = [
                 'id' => $key['id'],
+                'Imagen' => ['html' => $imageHtml, 'class' => 'text-center'],
                 'Título' => $key['title'],
                 'Subtítulo' => $key['subtitle'],
-                'Imagen' => ['html' => $imageHtml, 'class' => 'text-center'],
                 'Campaña' => $key['campaign_name'],
                 'Anuncio' => $key['ad_name'],
                 'Clasificación' => $key['classification_name'],
@@ -373,7 +375,7 @@ class ctrl extends mdl {
     }
 
     function editCampaignAd() {
-        $status = 500;
+        $status  = 500;
         $message = 'Error al editar anuncio';
 
         $edit = $this->updateCampaignAd($this->util->sql($_POST, 1));

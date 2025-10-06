@@ -1,7 +1,124 @@
-// Redes Module
 
 
-class DashboardRedes extends Templates {
+let api = "ctrl/ctrl-kpi-redes.php";
+let app, redesCategory, metricas, socialNetworkCapture, socialnetworkDashboard; 
+let udn, lsudn, clasification, mkt;
+
+
+
+$(async () => {
+    // const data                = await useFetch({ url: api_campaign, data: { opc: "init" } });
+    //       udnList             = data.udn;
+    //       campaignsList       = data.campaigns;
+    //       typesList           = data.types;
+    //       classificationsList = data.classifications;
+    //       socialNetworksList  = data.socialNetworks;
+    app = new App(api, "root");
+
+  
+    
+    socialnetworkDashboard = new SocialnetworkDashboard(api, "root");
+    socialNetworkCapture   = new SocialNetworkCapture(api, "root");
+    // redesCategory = new RedesCategory(api_redes_sociales, "root");
+    // metricas = new Metricas(api_redes_sociales, "root");
+
+    app.render()
+});
+
+
+class App extends Templates {
+    constructor(link, div_modulo) {
+        super(link, div_modulo);
+        this.PROJECT_NAME = "orders";
+    }
+
+
+    render() {
+        this.layoutRedes();
+
+        socialnetworkDashboard.render();
+        socialNetworkCapture.render();
+        // redesCategory.render();
+        // metricas.render();
+
+    }
+
+    layoutRedes() {
+        this.primaryLayout({
+            parent: "root",
+            id: this.PROJECT_NAME,
+            class: "w-full",
+            card: {
+                filterBar: { class: "w-full", id: "filterBarRedes" },
+                container: { class: "w-full h-full", id: "containerRedes" },
+            },
+        });
+
+        this.headerBar({
+            parent: `filterBarRedes`,
+            title: "📱 Redes Sociales",
+            subtitle: "Monitorea la actividad de redes sociales y estadísticas de interacción.",
+            onClick: () => app.init(),
+        });
+
+        // Tabs
+        this.tabLayout({
+            parent: "containerRedes",
+            id: "tabsRedes",
+            theme: 'light',
+            type: "short",
+            json: [
+                { id: "dashboard", tab: "Dashboard", active: true, },
+                { id: "redes", tab: "Capturar Información de redes"},
+                { id: "metricas", tab: "Metricas" },
+                { id: "socialnetwork", tab: "Redes Sociales", onClick: () => { redesCategory.lsSocialNetwork() } },
+            ],
+        });
+
+        $('#content-tabsRedes').removeClass('h-screen');
+
+        // redesDashboard.render();
+        // redes.render();
+        // redesCategory.render();
+        // metricas.render();
+
+    }
+
+    headerBar(options) {
+        const defaults = {
+            parent: "root",
+            title: "Default Title",
+            subtitle: "Default subtitle",
+            onClick: null,
+        };
+
+        const opts = Object.assign({}, defaults, options);
+
+        const container = $(`
+            <div class="flex justify-between items-center px-2 pt-3 pb-3">
+                <div>
+                    <h2 class="text-2xl font-semibold">${opts.title}</h2>
+                    <p class="text-gray-400">${opts.subtitle}</p>
+                </div>
+                <div>
+                    <button class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded transition flex items-center">
+                        <i class="icon-home mr-2"></i>Inicio
+                    </button>
+                </div>
+            </div>
+        `);
+
+        container.find("button").on("click", () => {
+            if (typeof opts.onClick === "function") {
+                opts.onClick();
+            }
+        });
+
+        $(`#${opts.parent}`).append(container);
+    }
+}
+
+class SocialnetworkDashboard extends Templates {
 
     constructor(link, div_modulo) {
         super(link, div_modulo);
@@ -399,7 +516,7 @@ class DashboardRedes extends Templates {
 
 }
 
-class CapturaRedes extends Templates {
+class SocialNetworkCapture extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "redes";
@@ -420,18 +537,11 @@ class CapturaRedes extends Templates {
                     id: "filterBarCaptura"
                 },
                 container: {
-                    class: "w-full my-3 h-full rounded-lg p-3",
+                    class: "w-full mb-3 h-full rounded-lg p-3",
                     id: "container-captura-redes"
                 }
             }
         });
-
-        $("#container-capturaRedes").prepend(`
-            <div class="px-4 pt-3">
-                <h2 class="text-xl font-bold">📊 Captura de métricas por Red Social</h2>
-                <p class="text-gray-500 text-sm">Monitoreo mensual de indicadores clave por canal.</p>
-            </div>
-        `);
 
         this.filterBarCaptura();
         this.lsCaptura();
@@ -456,7 +566,7 @@ class CapturaRedes extends Templates {
                         { id: "instagram", valor: "INSTAGRAM" },
                         { id: "tiktok", valor: "TIKTOK" }
                     ],
-                    onchange: "redes.lsCaptura()"
+                    onchange: "socialNetworkCapture.lsCaptura()"
                 },
                 {
                     opc: "select",
@@ -467,7 +577,7 @@ class CapturaRedes extends Templates {
                         { id: "2025", valor: "2025" },
                         { id: "2024", valor: "2024" }
                     ],
-                    onchange: "redes.lsCaptura()"
+                    onchange: "socialNetworkCapture.lsCaptura()"
                 },
                 {
                     opc: "select",
@@ -479,7 +589,7 @@ class CapturaRedes extends Templates {
                         { id: 2, valor: "Comparativa mensual" },
                         { id: 3, valor: "Comparativa anual" },
                     ],
-                    onchange: "redes.lsCaptura()"
+                    onchange: "socialNetworkCapture.lsCaptura()"
                 },
 
 
