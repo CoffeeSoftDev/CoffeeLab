@@ -2086,6 +2086,74 @@ class Components extends Complements {
 
     }
 
+    cardsDashboard(options) {
+        const defaults = {
+            parent: "root",
+            id: "infoCardKPI",
+            class: "",
+            theme: "light", // light | dark
+            json: [],
+            data: {
+                value: "0",
+                description: "",
+                color: "text-gray-800"
+            },
+            onClick: () => { }
+        };
+
+        const opts = Object.assign({}, defaults, options);
+
+        const isDark = opts.theme === "dark";
+
+        const cardBase = isDark
+            ? "bg-[#1F2A37] text-white rounded-xl shadow"
+            : "bg-white text-gray-800 rounded-xl shadow";
+
+        const titleColor = isDark ? "text-gray-300" : "text-gray-600";
+        const descColor = isDark ? "text-gray-400" : "text-gray-500";
+
+        const renderCard = (card, i = "") => {
+            const box = $("<div>", {
+                id: `${opts.id}_${i}`,
+                class: `${cardBase} p-4`
+            });
+
+            const title = $("<p>", {
+                class: `text-sm ${titleColor}`,
+                text: card.title
+            });
+
+            const value = $("<p>", {
+                id: card.id || "",
+                class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
+                text: card.data?.value
+            });
+
+            const description = $("<p>", {
+                class: `text-xs mt-1 ${card.data?.color || descColor}`,
+                text: card.data?.description
+            });
+
+            box.append(title, value, description);
+            return box;
+        };
+
+        const container = $("<div>", {
+            id: opts.id,
+            class: `grid grid-cols-2 md:grid-cols-4 gap-4 ${opts.class}`
+        });
+
+        if (opts.json.length > 0) {
+            opts.json.forEach((item, i) => {
+                container.append(renderCard(item, i));
+            });
+        } else {
+            container.append(renderCard(opts));
+        }
+
+        $(`#${opts.parent}`).html(container);
+    }
+
     barChart(options) {
         const defaults = {
             parent: "containerChequePro",
