@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual Técnico - Sistema de Contabilidad CoffeeSoft</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #6B4E3D, #8B6F47);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin: -20px -20px 30px -20px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        .nav-menu {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .nav-menu ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .nav-menu li {
+            background-color: #6B4E3D;
+            border-radius: 5px;
+        }
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 15px;
+            display: block;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .nav-menu a:hover {
+            background-color: #8B6F47;
+        }
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            border-left: 4px solid #6B4E3D;
+            background-color: #fafafa;
+        }
+        h2 {
+            color: #6B4E3D;
+            border-bottom: 2px solid #6B4E3D;
+            padding-bottom: 10px;
+        }
+        h3 {
+            color: #8B6F47;
+            margin-top: 25px;
+        }
+        .code-block {
+            background-color: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #6B4E3D;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .module-card {
+            background-color: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .emoji {
+            font-size: 1.2em;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><span class="emoji">📚</span>Manual Técnico del Sistema de Contabilidad CoffeeSoft</h1>
+            <p>Documentación completa para desarrolladores y administradores del sistema</p>
+        </div>
+
+        <nav class="nav-menu">
+            <ul>
+                <li><a href="#introduccion">Introducción</a></li>
+                <li><a href="#arquitectura">Arquitectura</a></li>
+                <li><a href="#modulos">Módulos</a></li>
+                <li><a href="#permisos">Permisos</a></li>
+                <li><a href="#configuracion">Configuración</a></li>
+                <li><a href="#troubleshooting">Solución de Problemas</a></li>
+                <li><a href="#reportes">Reportes</a></li>
+                <li><a href="#integracion">Integración</a></li>
+            </ul>
+        </nav>
+
+        <section id="introduccion" class="section">
+            <h2><span class="emoji">🎯</span>1. Introducción</h2>
+            <p>El Sistema de Contabilidad CoffeeSoft es una solución integral diseñada para la gestión financiera y contable de empresas. Este manual técnico proporciona información detallada sobre la arquitectura, funcionalidades, configuración y mantenimiento del sistema.</p>
+            
+            <h3>Características Principales</h3>
+            <ul>
+                <li><strong>Arquitectura MVC:</strong> Separación clara entre modelo, vista y controlador</li>
+                <li><strong>Gestión de Sobres:</strong> Control centralizado de documentos contables</li>
+                <li><strong>Control de Turnos:</strong> Seguimiento operacional por períodos</li>
+                <li><strong>Gestión Financiera:</strong> Ingresos, compras, pagos y facturación</li>
+                <li><strong>Administración de Terceros:</strong> Clientes y proveedores</li>
+                <li><strong>Sistema de Archivos:</strong> Gestión documental integrada</li>
+            </ul>
+        </section>
+
+        <section id="arquitectura" class="section">
+            <h2><span class="emoji">🏗️</span>2. Arquitectura del Sistema</h2>
+            
+            <h3>Estructura MVC</h3>
+            <div class="info">
+                <p><strong>Modelo-Vista-Controlador (MVC):</strong> El sistema sigue el patrón arquitectónico MVC para garantizar la separación de responsabilidades y facilitar el mantenimiento.</p>
+            </div>
+
+            <div class="module-card">
+                <h4>📁 Estructura de Directorios</h4>
+                <div class="code-block">
+contabilidad/
+├── index.php              # Punto de entrada principal
+├── caratula.php          # Vista de carátula
+├── consultas.php         # Vista de consultas
+├── sobres.php            # Vista de gestión de sobres
+├── ctrl/                 # Controladores
+│   ├── _Apertura.php
+│   ├── _Archivos.php
+│   ├── _Caratula.php
+│   ├── _Clientes.php
+│   ├── _Compras.php
+│   ├── _Facturas.php
+│   ├── _Ingresos.php
+│   ├── _Pagos.php
+│   ├── _Sobres.php
+│   └── _Turnos.php
+├── mdl/                  # Modelos
+│   ├── mdl-pagos.php
+│   └── mdl-turno.php
+├── layout/               # Plantillas
+│   ├── head.php
+│   └── script.php
+└── src/                  # Recursos estáticos
+    ├── css/
+    └── js/
+                </div>
+            </div>
+
+            <h3>Flujo de Datos</h3>
+            <ol>
+                <li><strong>Vista (View):</strong> Interfaz de usuario que presenta la información</li>
+                <li><strong>Controlador (Controller):</strong> Procesa las solicitudes y coordina las operaciones</li>
+                <li><strong>Modelo (Model):</strong> Gestiona los datos y la lógica de negocio</li>
+                <li><strong>Base de Datos:</strong> Almacenamiento persistente de información</li>
+            </ol>
+        </section>
+
+        <section id="modulos" class="section">
+            <h2><span class="emoji">🧩</span>3. Módulos del Sistema</h2>
+
+            <div class="module-card">
+                <h3><span class="emoji">📋</span>3.1 Sobres (Gestión Principal)</h3>
+                <p><strong>Propósito:</strong> Control centralizado de documentos contables y transacciones.</p>
+                <h4>Funcionalidades:</h4>
+                <ul>
+                    <li>Creación y gestión de sobres contables</li>
+                    <li>Asignación de documentos a sobres</li>
+                    <li>Control de estados y validaciones</li>
+                    <li>Trazabilidad de cambios</li>
+                </ul>
+                <h4>Archivos Relacionados:</h4>
+                <div class="code-block">
+- ctrl/_Sobres.php    # Controlador principal
+- sobres.php          # Vista de gestión
+- Modelo integrado en sistema CRUD
+                </div>
+            </div>
+
+            <div class="module-card">
+                <h3><span class="emoji">⏰</span>3.2 Turnos (Control Operacional)</h3>
+                <p><strong>Propósito:</strong> Seguimiento y control de períodos operacionales.</p>
+                <h4>Funcionalidades:</h4>
+                <ul>
+                    <li>Apertura y cierre de turnos</li>
+                    <li>Control de horarios operacionales</li>
+                    <li>Seguimiento de actividades por turno</li>
+                    <li>Reportes de productividad</li>
+                </ul>
+                <h4>Archivos Relacionados:</h4>
+                <div class="code-block">
+- ctrl/_Turnos.php    # Controlador de turnos
+- mdl/mdl-turno.php   # Modelo de datos
+                </div>
+            </div>
+
+            <div class="module-card">
+                <h3><span class="emoji">💰</span>3.3 Ingresos (Gestión de Ingresos)</h3>
+                <p><strong>Propósito:</strong> Control y registro de todos los ingresos de la empresa.</p>
+                <h4>Funcionalidades:</h4>
+                <ul>
+                    <li>Registro de ingresos por diferentes conceptos</li>
+                    <li>Categorización de tipos de ingreso</li>
+                    <li>Control de fechas y períodos</li>
+                    <li>Validaciones de integridad</li>
+                </ul>
+                <h4>Archivos Relacionados:</h4>
+                <div class="code-block">
+- ctrl/_Ingresos.php  # Controlador de ingresos
+                </div>
+            </div>
+
+            <div class="module-card">
+                <h3><span class="emoji">🛒</span>3.4 Compras (Gestión de Compras)</h3>
+                <p><strong>Propósito:</strong> Control de adquisiciones y gastos de la empresa.</p>
+                <h4>Funcionalidades:</h4>
+                <ul>
+                    <li>Registro de compras y gastos</li>
+                    <li>Gestión de proveedores</li>
+                    <li>Control de presupuestos</li>
+                    <li>Seguimiento de órdenes de compra</li>
+                </ul>
+                <h4>Archivos Relacionados:</h4>
+                <div class="code-block">
+- ctrl/_Compras.php   # Controlador de compras
+                </div>
+            </div>
+
+            <div class="module-card">
+                <h3><span class="emoji">💳</span>3.5 Pagos (Gestión de Pagos)</h3>
+                <p><strong>Propósito:</strong> Control de pagos realizados y por realizar.</p>
+                <h4>Funcionalidades:</h4>
+                <ul>
+                    <li>Registro de pagos efectuados</li>
+                    <li>Control de cuentas por pagar</li>
+                    <li>Programación de pagos</li>
+                    <li>Conciliación bancaria</li>
+                </ul>
+                <h4>Archivos Relacionados:</h4>
+                <div class="code-block">
+- ctrl/_Pagos.php     # Controlador de pagos
+- mdl/mdl-pagos.php   # Modelo de datos
+                </div>
+            </div>
+
+            <div class="module-card">
+                <h3><span class="emoji">👥</span>3.6 Clientes (Gestión de Clientes)</h3>
+                <p><strong>Propósito:</strong> Administración de la cartera de clientes.</p>
+                <h4>Funcionalidades:</h4>
+                <ul>
+                    <li>Registro y actualización de datos de clientes</li>
+                    <li>Historial de transacciones</li>
+                    <li>Control de créditos y límites</li>
+                    <li>Segmentación de clientes</li>
+                </ul>
+                <h4>Archivos Relacionados:</h4>
+                <div class="code-block">
+- ctrl/_Clientes.php  # Controlador de clientes
+                </div>
+            </div>
+
+            <div class="module-card">
+                <h3><span class="emoji">🏢</span>3.7 Proveedores (Gestión de Proveedores)</h3>
+                <p><strong>Propósito:</strong> Administración de proveedores y relaciones comerciales.</p>
+                <h4>Funcionalidades:</h4>
+                <ul>
+                    <li>Registro de proveedores</li>
+                    <li>Evaluación de desempeño</li>
+                    <li>Control de contratos</li>
+                    <li>Gestión de condiciones comerciales</li>
+                </ul>
+            </div>
+
+            <div class="module-card">
+                <h3><span class="emoji">📁</span>3.8 Archivos (Gestión Documental)</h3>
+                <p><strong>Propósito:</strong> Control y almacenamiento de documentos del sistema.</p>
+                <h4>Funcionalidades:</h4>
+                <ul>
+                    <li>Carga y almacenamiento de documentos</li>
+                    <li>Organización por categorías</li>
+                    <li>Control de versiones</li>
+                    <li>Búsqueda y recuperación</li>
+                </ul>
+                <h4>Archivos Relacionados:</h4>
+                <div class="code-block">
+- ctrl/_Archivos.php  # Controlador de archivos
+                </div>
+            </div>
+        </section>
+
+        <section id="permisos" class="section">
+            <h2><span class="emoji">🔐</span>4. Sistema de Permisos</h2>
+            
+            <div class="warning">
+                <p><strong>⚠️ Importante:</strong> El sistema implementa un control de acceso basado en roles y permisos específicos para cada módulo.</p>
+            </div>
+
+            <h3>Niveles de Acceso</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nivel</th>
+                        <th>Descripción</th>
+                        <th>Permisos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Administrador</td>
+                        <td>Acceso completo al sistema</td>
+                        <td>Crear, Leer, Actualizar, Eliminar</td>
+                    </tr>
+                    <tr>
+                        <td>Supervisor</td>
+                        <td>Acceso a módulos específicos</td>
+                        <td>Crear, Leer, Actualizar</td>
+                    </tr>
+                    <tr>
+                        <td>Operador</td>
+                        <td>Acceso limitado a operaciones</td>
+                        <td>Crear, Leer</td>
+                    </tr>
+                    <tr>
+                        <td>Consulta</td>
+                        <td>Solo visualización</td>
+                        <td>Leer</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Validaciones de Seguridad</h3>
+            <ul>
+                <li>Validación de sesión activa</li>
+                <li>Verificación de permisos por módulo</li>
+                <li>Control de acceso a funciones específicas</li>
+                <li>Registro de actividades (audit trail)</li>
+            </ul>
+        </section>
+
+        <section id="configuracion" class="section">
+            <h2><span class="emoji">⚙️</span>5. Configuración y Mantenimiento</h2>
+            
+            <h3>Archivos de Configuración</h3>
+            <div class="module-card">
+                <h4>Configuración Principal</h4>
+                <div class="code-block">
+../../conf/_CRUD.php      # Clase base para operaciones CRUD
+../../conf/_Utileria.php  # Utilidades y funciones auxiliares
+../../conf/_Conect.php    # Configuración de base de datos
+../../conf/_conf.php      # Configuraciones generales
+                </div>
+            </div>
+
+            <h3>Mantenimiento Preventivo</h3>
+            <div class="success">
+                <h4>✅ Tareas Recomendadas</h4>
+                <ul>
+                    <li>Respaldo diario de base de datos</li>
+                    <li>Limpieza de logs semanalmente</li>
+                    <li>Verificación de integridad de datos</li>
+                    <li>Actualización de índices de base de datos</li>
+                    <li>Monitoreo de espacio en disco</li>
+                </ul>
+            </div>
+
+            <h3>Variables de Entorno</h3>
+            <div class="code-block">
+# Configuraciones típicas
+DB_HOST=localhost
+DB_NAME=contabilidad_db
+DB_USER=usuario
+DB_PASS=contraseña
+DEBUG_MODE=false
+LOG_LEVEL=INFO
+            </div>
+        </section>
+
+        <section id="troubleshooting" class="section">
+            <h2><span class="emoji">🔧</span>6. Solución de Problemas Comunes</h2>
+            
+            <div class="module-card">
+                <h3>Error de Conexión a Base de Datos</h3>
+                <div class="warning">
+                    <p><strong>Síntoma:</strong> "No se puede conectar a la base de datos"</p>
+                    <p><strong>Solución:</strong></p>
+                    <ol>
+                        <li>Verificar configuración en _Conect.php</li>
+                        <li>Comprobar que el servicio MySQL esté activo</li>
+                        <li>Validar credenciales de acceso</li>
+                        <li>Revisar permisos de usuario de base de datos</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="module-card">
+                <h3>Errores de Permisos</h3>
+                <div class="warning">
+                    <p><strong>Síntoma:</strong> "Acceso denegado" o "Permisos insuficientes"</p>
+                    <p><strong>Solución:</strong></p>
+                    <ol>
+                        <li>Verificar sesión de usuario activa</li>
+                        <li>Comprobar permisos asignados al rol</li>
+                        <li>Revisar configuración de permisos por módulo</li>
+                        <li>Validar integridad de tabla de permisos</li>
+                    </ol>
+                </div>
+            </div>
+
+            <div class="module-card">
+                <h3>Problemas de Rendimiento</h3>
+                <div class="info">
+                    <p><strong>Síntoma:</strong> Lentitud en carga de datos o timeouts</p>
+                    <p><strong>Solución:</strong></p>
+                    <ol>
+                        <li>Optimizar consultas SQL</li>
+                        <li>Revisar índices de base de datos</li>
+                        <li>Implementar paginación en listados grandes</li>
+                        <li>Considerar cache de consultas frecuentes</li>
+                    </ol>
+                </div>
+            </div>
+
+            <h3>Logs del Sistema</h3>
+            <div class="code-block">
+# Ubicaciones de logs
+contabilidad/ctrl/error.log     # Errores de controladores
+contabilidad/ctrl/error_log     # Log alternativo
+contabilidad/error_log          # Log general del módulo
+            </div>
+        </section>
+
+        <section id="reportes" class="section">
+            <h2><span class="emoji">📊</span>7. Reportes Disponibles</h2>
+            
+            <h3>Reportes Financieros</h3>
+            <ul>
+                <li><strong>Estado de Resultados:</strong> Ingresos vs gastos por período</li>
+                <li><strong>Balance General:</strong> Situación financiera de la empresa</li>
+                <li><strong>Flujo de Caja:</strong> Movimientos de efectivo</li>
+                <li><strong>Cuentas por Cobrar:</strong> Cartera de clientes</li>
+                <li><strong>Cuentas por Pagar:</strong> Obligaciones con proveedores</li>
+            </ul>
+
+            <h3>Reportes Operacionales</h3>
+            <ul>
+                <li><strong>Resumen de Turnos:</strong> Actividad por período operacional</li>
+                <li><strong>Análisis de Compras:</strong> Gastos por categoría y proveedor</li>
+                <li><strong>Seguimiento de Pagos:</strong> Estado de pagos programados</li>
+                <li><strong>Actividad de Usuarios:</strong> Log de acciones por usuario</li>
+            </ul>
+
+            <h3>Exportación de Datos</h3>
+            <div class="info">
+                <p>Los reportes pueden exportarse en los siguientes formatos:</p>
+                <ul>
+                    <li>PDF para impresión</li>
+                    <li>Excel para análisis</li>
+                    <li>CSV para integración</li>
+                    <li>JSON para APIs</li>
+                </ul>
+            </div>
+        </section>
+
+        <section id="integracion" class="section">
+            <h2><span class="emoji">🔗</span>8. Integración con Otros Sistemas</h2>
+            
+            <h3>APIs Disponibles</h3>
+            <div class="module-card">
+                <h4>Endpoints Principales</h4>
+                <div class="code-block">
+GET  /api/sobres          # Listar sobres
+POST /api/sobres          # Crear sobre
+GET  /api/sobres/{id}     # Obtener sobre específico
+PUT  /api/sobres/{id}     # Actualizar sobre
+
+GET  /api/ingresos        # Listar ingresos
+POST /api/ingresos        # Registrar ingreso
+
+GET  /api/pagos           # Listar pagos
+POST /api/pagos           # Registrar pago
+                </div>
+            </div>
+
+            <h3>Formatos de Intercambio</h3>
+            <ul>
+                <li><strong>JSON:</strong> Para comunicación con APIs</li>
+                <li><strong>XML:</strong> Para sistemas legacy</li>
+                <li><strong>CSV:</strong> Para importación/exportación masiva</li>
+                <li><strong>PDF:</strong> Para documentos oficiales</li>
+            </ul>
+
+            <h3>Sistemas Compatibles</h3>
+            <ul>
+                <li>Sistemas ERP empresariales</li>
+                <li>Plataformas de e-commerce</li>
+                <li>Sistemas bancarios (para conciliación)</li>
+                <li>Herramientas de Business Intelligence</li>
+            </ul>
+        </section>
+
+        <section id="notas" class="section">
+            <h2><span class="emoji">📝</span>9. Notas Importantes</h2>
+            
+            <div class="warning">
+                <h3>⚠️ Consideraciones de Seguridad</h3>
+                <ul>
+                    <li>Mantener actualizadas las credenciales de base de datos</li>
+                    <li>Implementar HTTPS en producción</li>
+                    <li>Realizar respaldos regulares</li>
+                    <li>Monitorear logs de seguridad</li>
+                    <li>Aplicar principio de menor privilegio</li>
+                </ul>
+            </div>
+
+            <div class="success">
+                <h3>✅ Mejores Prácticas</h3>
+                <ul>
+                    <li>Documentar todos los cambios realizados</li>
+                    <li>Probar en ambiente de desarrollo antes de producción</li>
+                    <li>Mantener código comentado y organizado</li>
+                    <li>Seguir estándares de codificación establecidos</li>
+                    <li>Realizar revisiones de código periódicas</li>
+                </ul>
+            </div>
+
+            <div class="info">
+                <h3>📞 Soporte Técnico</h3>
+                <p>Para soporte técnico adicional o consultas específicas sobre el sistema:</p>
+                <ul>
+                    <li><strong>Documentación:</strong> Consultar este manual técnico</li>
+                    <li><strong>Logs:</strong> Revisar archivos de log para diagnóstico</li>
+                    <li><strong>Comunidad:</strong> Consultar foros de CoffeeSoft</li>
+                    <li><strong>Contacto:</strong> Equipo de desarrollo CoffeeSoft</li>
+                </ul>
+            </div>
+        </section>
+
+        <footer style="text-align: center; margin-top: 50px; padding: 20px; border-top: 1px solid #ddd; color: #666;">
+            <p><strong>Manual Técnico - Sistema de Contabilidad CoffeeSoft</strong></p>
+            <p>Versión 1.0 | Última actualización: 2024</p>
+            <p>© CoffeeSoft - Todos los derechos reservados</p>
+        </footer>
+    </div>
+
+    <script>
+        // Smooth scrolling para navegación
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Highlight current section in navigation
+        window.addEventListener('scroll', function() {
+            const sections = document.querySelectorAll('.section');
+            const navLinks = document.querySelectorAll('.nav-menu a');
+            
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.clientHeight;
+                if (scrollY >= (sectionTop - 200)) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.style.backgroundColor = '#6B4E3D';
+                if (link.getAttribute('href') === '#' + current) {
+                    link.style.backgroundColor = '#8B6F47';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+table tbody td,
+table thead th {
+    min-width: 150px;
+    /* Ancho mínimo para las celdas */
+    max-width: 300px;
+    /* Ancho máximo para las celdas */
+    white-space: nowrap;
+    /* Evitar salto de línea */
+    overflow: hidden;
+    /* Ocultar contenido que excede el ancho máximo */
+    text-overflow: ellipsis;
+    /* Mostrar puntos suspensivos para contenido que excede el ancho máximo */
+    border: 1px solid #0d0d0d;
+}
