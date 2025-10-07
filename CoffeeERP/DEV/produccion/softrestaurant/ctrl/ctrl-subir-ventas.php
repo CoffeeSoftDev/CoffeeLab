@@ -469,7 +469,7 @@ foreach ($_FILES as $cont => $key) {
         'row'      => $__row,
         'thead'    => '',
         'frm_foot' => $frm_foot,
-        'ok'       => 11
+        'ok'       => $ok
     ];
 
 

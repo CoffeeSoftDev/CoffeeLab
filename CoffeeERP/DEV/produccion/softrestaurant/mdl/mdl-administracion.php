@@ -1,26 +1,24 @@
 <?php
-require_once '../../../conf/_CRUD.php';
+require_once('../../../conf/_CRUD.php');
 
 class Administracion extends CRUD
 {
-    private $bd;
+     private $bd;
 
-    public function __construct()
-    {
-        $this->bd = "rfwsmqex_gvsl_finanzas.";
+    public function __construct() {
+      $this->bd = "rfwsmqex_gvsl_finanzas.";
     }
 
-    public function lsUDN()
-    {
+    function lsUDN() {
         $query = "
-        SELECT
-        idUDN AS id,
-        UDN AS valor
+        SELECT 
+        idUDN AS id, 
+        UDN AS valor 
         FROM udn WHERE Stado = 1 AND idUDN != 10 AND idUDN != 8";
         return $this->_Read($query, null);
     }
 
-    public function get_Categoria($array)
+    function get_Categoria($array)
     {
         $query = "
             SELECT
@@ -28,7 +26,7 @@ class Administracion extends CRUD
             soft_grupoproductos.idgrupo
             FROM rfwsmqex_gvsl_finanzas.soft_grupoproductos
             WHERE idgrupo = ?
-
+        
         ";
         $ls = $this->_Read($query, $array);
         foreach ($ls as $key) {
@@ -38,20 +36,19 @@ class Administracion extends CRUD
         return $categoria;
     }
 
-    public function actualizar_registro($array)
-    {
+    function actualizar_registro($array){
         return $this->_Update([
-            'table' => "{$this->bd}soft_productos",
+            'table'  => "{$this->bd}soft_productos",
             'values' => $array['values'],
-            'where' => $array['where'],
-            'data' => $array['data'],
+            'where'  => $array['where'],
+            'data'   => $array['data']
         ]);
     }
 
-    public function updateGroup($array)
+    function updateGroup($array)
     {
         $query = '
-        UPDATE
+        UPDATE 
         rfwsmqex_gvsl_finanzas.soft_productos
         SET id_grupo_productos   = ?
         WHERE  id_Producto = ? ';
@@ -59,10 +56,9 @@ class Administracion extends CRUD
         return $this->_CUD($query, $array);
     }
 
-    public function PRODUCTOS_VENDIDOS($array)
-    {
+    function PRODUCTOS_VENDIDOS($array) {
         $sql = '';
-
+        
         $query = '
         SELECT
         idAlmacen,
@@ -75,9 +71,9 @@ class Administracion extends CRUD
         costo,
         almacen_productos.estadoProducto
         FROM
-
+        
         rfwsmqex_gvsl_produccion.listaproductos
-
+        
         INNER JOIN rfwsmqex_gvsl_produccion.almacen_productos ON listaproductos.id_productos = almacen_productos.idAlmacen
         INNER JOIN rfwsmqex_gvsl_produccion.lista_productos ON listaproductos.id_lista = lista_productos.idLista
         WHERE MONTH(foliofecha) = ?
@@ -85,15 +81,14 @@ class Administracion extends CRUD
         AND Area = ? AND id_tipo = 1
         GROUP BY NombreProducto
         order by NombreProducto asc
-
+        
         ';
-
+        
         return $this->_Read($query, $array);
 
     }
 
-    public function get_cantidad_erp($array)
-    {
+    function get_cantidad_erp($array){
         $cant = 0;
 
         $query = "
@@ -106,22 +101,24 @@ class Administracion extends CRUD
         INNER JOIN rfwsmqex_gvsl_produccion.lista_productos ON listaproductos.id_lista = lista_productos.idLista
         WHERE id_productos = ?
 
-        AND MONTH(foliofecha) = 02
+        AND MONTH(foliofecha) = 02 
         AND YEAR(foliofecha) = 2024
-
+ 
     ";
 
         $sql = $this->_Read($query, $array);
+
+
 
         foreach ($sql as $key) {
             $cant = $cant + $key['cantidad'];
         }
 
+
         return $cant;
     }
 
-    public function lsGrupo($array)
-    {
+    function lsGrupo($array){
 
         $query = "
     SELECT
@@ -134,7 +131,7 @@ class Administracion extends CRUD
         return $this->_Read($query, $array);
     }
 
-    public function lsGrupoFogaza($array)
+    function lsGrupoFogaza($array)
     {
 
         $query = "
@@ -143,18 +140,18 @@ class Administracion extends CRUD
       Clasificacion as valor
     FROM
         rfwsmqex_gvsl_costsys.clasificacion
-    WHERE id_udn = ?
-    and idClasificacion != 12
-    and idClasificacion != 7
-    and idClasificacion != 9
-    and idClasificacion != 41
-
+    WHERE id_udn = ? 
+    and idClasificacion != 12 
+    and idClasificacion != 7 
+    and idClasificacion != 9 
+    and idClasificacion != 41 
+    
     ";
 
         return $this->_Read($query, $array);
     }
 
-    public function select_list_grupo($array)
+    function select_list_grupo($array)
     {
 
         $id_grupo = 0;
@@ -176,8 +173,8 @@ class Administracion extends CRUD
         return $this->_Read($query, $array);
     }
 
-    public function select_list_grupo_sn($array)
-    {
+
+    function select_list_grupo_sn($array){
 
         $id_grupo = 0;
 
@@ -191,15 +188,15 @@ class Administracion extends CRUD
         FROM
         rfwsmqex_gvsl_finanzas.soft_grupoproductos
 
-        WHERE id_udn = ?
+        WHERE id_udn = ? 
 
         ";
 
         return $this->_Read($query, $array);
     }
 
-    public function productos_softrestaurant($array)
-    {
+
+     function productos_softrestaurant($array){
         $query = "
         SELECT
         soft_productos.id_Producto as id,
@@ -223,7 +220,11 @@ class Administracion extends CRUD
         return $this->_Read($query, $array);
     }
 
-    public function SELECT_PRODUCTOS_x_SOFT($array)
+
+
+
+
+    function SELECT_PRODUCTOS_x_SOFT($array)
     {
         $query = "
     SELECT
@@ -236,7 +237,7 @@ class Administracion extends CRUD
         soft_productos.status,
 
         soft_productos.id_costsys,
-        DATE_FORMAT(fecha,'%Y-%m-%d') as dat,
+        DATE_FORMAT(fecha,'%Y-%m-%d') as dat, 
     soft_productos.costo
     FROM
     rfwsmqex_gvsl_finanzas.soft_productos
@@ -249,10 +250,9 @@ class Administracion extends CRUD
         return $this->_Read($query, $array);
     }
 
-    public function SELECT_PRODUCTOS_x_COSTSYS($array)
-    {
+    function SELECT_PRODUCTOS_x_COSTSYS($array){
 
-        $query = "
+    $query = "
     SELECT
         idReceta,
         recetas.folio,
@@ -261,10 +261,10 @@ class Administracion extends CRUD
         precioVenta as costo,
         DATE_FORMAT(fecha,'%Y-%m-%d') as fecha,
         id_Estado,
-        id_SubClasificacion
+        id_SubClasificacion 
     FROM
         rfwsmqex_gvsl_costsys.recetas
-    INNER JOIN rfwsmqex_gvsl_costsys.clasificacion
+    INNER JOIN rfwsmqex_gvsl_costsys.clasificacion 
     ON recetas.id_Clasificacion = clasificacion.idClasificacion
 
     WHERE recetas.id_UDN = ? and id_Clasificacion = ?
@@ -274,7 +274,7 @@ class Administracion extends CRUD
         return $this->_Read($query, $array);
     }
 
-    public function _SELECT_FROM_COSTSYS_FZ($array)
+    function _SELECT_FROM_COSTSYS_FZ($array)
     {
 
         $query = "
@@ -286,20 +286,20 @@ class Administracion extends CRUD
         precioVenta as costo,
         DATE_FORMAT(fecha,'%Y-%m-%d') as fecha,
         id_Estado,
-        id_SubClasificacion
+        id_SubClasificacion 
     FROM
         rfwsmqex_gvsl_costsys.recetas
-    INNER JOIN rfwsmqex_gvsl_costsys.clasificacion
+    INNER JOIN rfwsmqex_gvsl_costsys.clasificacion 
     ON recetas.id_Clasificacion = clasificacion.idClasificacion
 
-    WHERE recetas.id_UDN = ?
+    WHERE recetas.id_UDN = ? 
     ORDER BY fecha desc
     ";
 
         return $this->_Read($query, $array);
     }
 
-    public function _SET_NOMBRE_COSTSYS($array)
+    function _SET_NOMBRE_COSTSYS($array)
     {
 
         $query = "
@@ -311,16 +311,17 @@ class Administracion extends CRUD
     homologado.descripcion
     FROM
     rfwsmqex_gvsl_produccion.almacen_productos
-    INNER JOIN rfwsmqex_gvsl_produccion.homologado ON
+    INNER JOIN rfwsmqex_gvsl_produccion.homologado ON 
     rfwsmqex_gvsl_produccion.homologado.id_Produccion = rfwsmqex_gvsl_produccion.almacen_productos.idAlmacen
     WHERE id_Costsys = ?
 
     ";
 
+
         return $this->_Read($query, $array);
     }
 
-    public function select_homologar($array)
+    function select_homologar($array)
     {
         $query = "
     SELECT
@@ -332,21 +333,19 @@ class Administracion extends CRUD
         return $this->_Read($query, $array);
     }
 
-    public function cb_producto_costsys($array)
-    {
+    function cb_producto_costsys($array){
         $query = "
     SELECT
         idReceta,nombre,precioVenta
     FROM
-        rfwsmqex_gvsl_costsys.recetas WHERE id_UDN = ?
+        rfwsmqex_gvsl_costsys.recetas WHERE id_UDN = ? 
         order by id_Subclasificacion desc
     ";
 
         return $this->_Read($query, $array);
     }
 
-    public function productos_homologados_soft($array)
-    {
+    function productos_homologados_soft($array){
         $query = "SELECT
         soft_productos.descripcion,
         soft_costsys.id_soft_productos,
@@ -362,7 +361,7 @@ class Administracion extends CRUD
         return $this->_Read($query, $array);
     }
 
-    public function consultar_grupo_erp($array)
+    function consultar_grupo_erp($array)
     {
         $nombre_grupo = 'SIN GRUPO';
         $query = "
@@ -380,13 +379,12 @@ class Administracion extends CRUD
         return $nombre_grupo;
     }
 
-    public function get_producto_nombre($array)
-    {
+    function get_producto_nombre($array) {
         $id_Producto = 0;
         $clave_producto = 0;
 
         $query =
-            "
+        "
         SELECT
         id_Producto,
         clave_producto,
@@ -403,30 +401,29 @@ class Administracion extends CRUD
         return $sql;
     }
 
-    public function getGroupName($array)
-    {
+    function getGroupName($array){
         $name = '';
-
+       
         $query = '
 
             SELECT grupoproductos
             FROM rfwsmqex_gvsl_finanzas.soft_grupoproductos
             WHERE idgrupo = ?
-
+       
        ';
 
-        $sql = $this->_Read($query, $array);
+       $sql = $this->_Read($query, $array);
 
-        foreach ($sql as $key) {
+       foreach ($sql as $key ) {
 
-            $name = $key['grupoproductos'];
-
-        }
-
-        return $name;
+        $name = $key['grupoproductos'];
+        
+       }
+        
+       return $name;
     }
 
-    public function get_producto_cp($array)
+    function get_producto_cp($array)
     {
         $query =
             "
@@ -442,7 +439,8 @@ class Administracion extends CRUD
         return $sql;
     }
 
-    public function select_grupo($array)
+
+    function select_grupo($array)
     {
 
         $id_grupo = '<i class="text-danger  icon-flag"></i> not found';
@@ -458,7 +456,7 @@ class Administracion extends CRUD
         rfwsmqex_gvsl_finanzas.soft_grupoproductos
 
         WHERE grupoproductos = ? and id_udn = ?
-
+            
         ";
 
         $sql = $this->_Read($query, $array);
@@ -469,7 +467,7 @@ class Administracion extends CRUD
         return $id_grupo;
     }
 
-    public function add_producto_soft($array)
+    function add_producto_soft($array)
     {
         $query =
             "INSERT INTO
@@ -486,7 +484,7 @@ class Administracion extends CRUD
         return $this->_CUD($query, $array);
     }
 
-    public function consultar_subcategoria_costsys($array)
+    function consultar_subcategoria_costsys($array)
     {
         $nombre_grupo = '';
 
@@ -505,7 +503,7 @@ class Administracion extends CRUD
         return $nombre_grupo;
     }
 
-    public function __get_id_area($array)
+    function __get_id_area($array)
     {
         $__getter = 0;
 
@@ -527,7 +525,8 @@ class Administracion extends CRUD
         return $__getter;
     }
 
-    public function CrearProducto($array)
+
+    function CrearProducto($array)
     {
         $query =
             "INSERT INTO
@@ -538,7 +537,7 @@ class Administracion extends CRUD
         return $this->_CUD($query, $array);
     }
 
-    public function __get_id_producto($array)
+    function __get_id_producto($array)
     {
         $__getter = 0;
 
@@ -559,21 +558,21 @@ class Administracion extends CRUD
         return $__getter;
     }
 
-    public function mod_producto_softCost($array)
-    {
+
+    function mod_producto_softCost($array){
         $query = '
-        UPDATE
+        UPDATE 
         rfwsmqex_gvsl_finanzas.soft_costsys
         SET id_costsys_recetas   = ?,
         fecha = ?
         WHERE  idhomologado = ? ';
 
-        return $this->_CUD($query, $array);
+        return   $this->_CUD($query, $array);
     }
 
-    public function crearVinculo($array)
-    {
-        $query = "INSERT INTO
+
+    function crearVinculo($array) {
+        $query ="INSERT INTO
         rfwsmqex_gvsl_produccion.homologado
         (id_Produccion, id_Costsys, descripcion)
         VALUES(?,?,?)";
@@ -581,7 +580,7 @@ class Administracion extends CRUD
         return $this->_CUD($query, $array);
     }
 
-    public function enlace_costsys($array)
+    function enlace_costsys($array)
     {
         $query = "INSERT INTO
         rfwsmqex_gvsl_finanzas.soft_costsys
@@ -591,14 +590,16 @@ class Administracion extends CRUD
         return $this->_CUD($query, $array);
     }
 
-    public function add_soft($array)
+
+    function add_soft($array)
     {
 
         return $this->_Insert([
-            'table' => "{$this->bd}soft_productos",
+            'table'  => "{$this->bd}soft_productos",
             'values' => $array['values'],
-            'data' => $array['data'],
+            'data'   => $array['data']
         ]);
     }
+
 
 }

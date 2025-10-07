@@ -15,11 +15,8 @@ switch ($_POST['opc']) {
     
         $encode = $obj->lsUDN();
 
-        // $encode = [
-
-        // ['id' => '5', 'valor' => 'SM']
-        // ];
-        break;
+    
+    break;
 
     case 'listGrupo':
         $encode = $obj->lsGrupo([$_POST['UDN']]);

@@ -1,5 +1,5 @@
 <?php 
-    if( empty($_COOKIE["IDU"]) )  require_once('../acceso/ctrl/ctrl-logout.php');
+    // if( empty($_COOKIE["IDU"]) )  require_once('../acceso/ctrl/ctrl-logout.php');
 
     require_once('layout/head.php');
     require_once('layout/script.php'); 

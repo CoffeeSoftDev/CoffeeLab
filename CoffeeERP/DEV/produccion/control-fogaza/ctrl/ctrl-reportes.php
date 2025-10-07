@@ -5,13 +5,13 @@ date_default_timezone_set('America/Mexico_City');
 setlocale(LC_TIME, 'es_MX.UTF-8');
 
 if ( empty($_POST['opc']) ) {
-exit(0);
+    exit(0);
 }
 
 require_once('../mdl/mdl-reportes.php');
 $obj  = new Reportes();
 require_once('../../../conf/_Message.php');
-$msg = new Message(); 
+$msg = new Message();
 
 require_once('../../../conf/_Utileria.php');
 $util = new Utileria;
@@ -30,13 +30,13 @@ switch ($_POST['opc']) {
          "hola"=> $folio,
     ];
     break;
-  
+
     case 'ls':
         $encode = lsProduccion($obj);
     break;
 
     case 'crear-formato':
-      
+
       $folio               = $obj   -> obtenerFolio(array(1));
       $_POST['foliofecha'] = $_POST['foliofecha'].' '.date("H:i:s");
       $_POST['new_estado'] = 1;
@@ -45,10 +45,10 @@ switch ($_POST['opc']) {
 
       $array  = $util  -> sql($_POST);
       $encode = $obj   -> CrearTicket($array);
-            
+
     break;
 
-    
+
 
     case 'terminar-formato':
 
@@ -57,7 +57,7 @@ switch ($_POST['opc']) {
       $pedidos = [416];
 
       /* DETECTAR PRODUCCION DE COSTRA */
-      $ls      = $obj->lsProduccion([$_POST['idLista']]);   
+      $ls      = $obj->lsProduccion([$_POST['idLista']]);
        foreach ($ls as $_key) {
             if (in_array($_key['id_productos'], $pedidos)) {
                 $mensj = 'Se ha dectado un pedido de '. $_key['NombreProducto'];
@@ -69,7 +69,7 @@ switch ($_POST['opc']) {
     break;
 
     case 'ipt':
-        
+
         $select = [
             'id_productos' => $_POST['id_productos'],
             'id_lista'     => $_POST['id_lista']
@@ -93,9 +93,9 @@ switch ($_POST['opc']) {
          # --- Titulo del formato
         $lsFolio = $obj->lsDataTicket([$_POST['id']]);
         foreach ($lsFolio as $key);
-       
 
-        $enlace = $util->url(); 
+
+        $enlace = $util->url();
 
         $url       = '../../../../erp_files/formato/';
 
@@ -115,7 +115,7 @@ switch ($_POST['opc']) {
         $bytesEscritos  = file_put_contents($rutaArchivoPdf, $contenido);
 
         /*-- --*/
-        
+
         $ruta = $enlace[0].'erp_files/formato/';
 
 
@@ -126,19 +126,19 @@ switch ($_POST['opc']) {
         ];
 
         $tel  = [$_COOKIE['TEL'], $_POST['wp']];
-        
+
 
         $send = $msg ->whatsapp_file(
 
             $tel,
             'Se ha creado un pedido de  '.$key['Nombre_Area'].' ',
-            
+
             $ruta,
             $nombre_archivo
-        
+
         );
 
-        
+
         // $send = $msg->whatsapp(['9621501886','9621663421'], 'Hola mundo');
         // $encode = [
         //     'ok' => $send,
@@ -158,21 +158,93 @@ switch ($_POST['opc']) {
 
             $estatus = 'eliminar';
             $ok      = $obj->quitar_lista([$existe['idListaProductos']]);
-           
+
 
         }
 
-        
-       $encode = [ 
+
+       $encode = [
         'ok' => $ok,
         'data' => $data,
         'existe' => $existe
        ];
 
     break;
-  
 
-} 
+    case 'lsProductos':
+
+        $encode = lsProductos($obj);
+    break;
+
+    case 'setEstatus':
+
+        $data   = $util -> sql($_POST, 1);
+        $ok     = $obj  -> update_estado_producto($data);
+        $encode = [ 'data' => $data ,'ok' => $ok ];
+
+    break;
+
+}
+
+
+
+#----------------------
+#
+#----------------------
+
+function lsProductos($obj){
+    # Variables
+    $__row = [];
+    $idCategoria = $_POST['grupo'];
+
+
+    $ls = $obj->listProduction([$idCategoria,$_POST['Estado']]);
+
+    if($_POST['Estado'] == 2)
+    $ls =  $obj -> lsFogazaLink([$idCategoria],'lunes');
+
+    foreach ($ls as $key) {
+
+
+        $estatus        = $key['estadoProducto'];
+        $desplazamiento = $obj->consultar_x_mes(array(9, 2024, 1, $key['idAlmacen']));
+
+        $icon = $estatus == 1 ? ' icon-toggle-on' : ' icon-toggle-off';
+
+
+        $btn = [];
+
+        $btn[] = [
+
+            'class'   => 'text-primary pointer py-0',
+            'html'    => '<i class="'.$icon.'"></i>',
+            'id'      => 'btnEstatus'.$key['idAlmacen'],
+            'estatus' => $estatus,
+
+            'onclick' => 'toggleEstatus('.$key['idAlmacen'].')'
+
+
+        ];
+
+        $__row[] = array(
+            'id'       => $key['idAlmacen'],
+            'idx'      => $key['idAlmacen'],
+            'active'   => status_day($key['dia']),
+
+            'Producto' => $key['NombreProducto'],
+            'ventas'   => $desplazamiento,
+            // 'estatus'  => '', // consultar estado de homologado
+            'a'        => $btn
+        );
+
+    }// end lista de folios
+
+
+    // Encapsular arreglos
+    return [ "thead"    => '', "row" => $__row,];
+
+}
+
 
 function pdf_pedido($obj) {
   $id     = $_POST['id'];
@@ -184,43 +256,41 @@ function pdf_pedido($obj) {
 
     <style>
 
-    body{
-        font-family: Arial, Helvetica, sans-serif;
-    }
+        body{
+             font-family: Arial, Helvetica, sans-serif;
+        }
 
-    table.tb-report {
-    border-collapse: collapse;
-    }
+        table.tb-report {
+            border-collapse: collapse;
+        }
 
+        .tb-report>th,
+        .tb-report>td {
+            padding: 5px;
+        }
 
+        .tb tbody tr>td, .tb tbody tr>th, .tb tfoot tr>td, .tb tfoot tr>th, .tb thead tr>td, .tb thead tr>th {
+            border: 1px solid #dee2e6;
+            vertical-align: middle;
 
-    .tb-report>th,
-    .tb-report>td {
-        padding: 5px;
-    }
+        }
 
-    .tb tbody tr>td, .tb tbody tr>th, .tb tfoot tr>td, .tb tfoot tr>th, .tb thead tr>td, .tb thead tr>th {
-    border: 1px solid #dee2e6;
-    vertical-align: middle;
+        .bg-primary{
+            background-color: #7d8590f7;
+            color: #fff;
+        }
 
-    }
+        .text-uppercase {
+            text-transform: uppercase !important;
+        }
 
-    .bg-primary{
-    background-color: #7d8590f7;
-    color: #fff;
-    }
+        .text-end {
+            text-align: right !important;
+        }
 
-    .text-uppercase {
-    text-transform: uppercase !important;
-    }
-
-    .text-end {
-      text-align: right !important;
-    }
-
-    .text-center {
-      text-align: center !important;
-    }
+        .text-center {
+            text-align: center !important;
+        }
 
     </style>
   ';
@@ -241,35 +311,35 @@ function pdf_pedido($obj) {
     $table .= '
     <table style="font-size:.76em; " width="100%" class="tb tb-report">
 
-    <tr>
-    <td class="col-sm-1 bg-primary fw-bold">FECHA: </td>
-    <td class="col-sm-2 text-end">' . $data['fecha'] . ' </td>
-    <td class="col-sm-6 text-center"><center> <strong> LINEA DE PRODUCCION ' . $data['titulo'] . '</strong> </center></td>
-    <td class="col-sm-1 bg-primary fw-bold"> FOLIO:  </td>
-    <td class="col-sm-2 text-right text-end text-danger fw-bold">' . $data['folio'] . '</td>
-    </tr>
+        <tr>
+        <td class="col-sm-1 bg-primary fw-bold">FECHA: </td>
+        <td class="col-sm-2 text-end">' . $data['fecha'] . ' </td>
+        <td class="col-sm-6 text-center"><center> <strong> LINEA DE PRODUCCION ' . $data['titulo'] . '</strong> </center></td>
+        <td class="col-sm-1 bg-primary fw-bold"> FOLIO:  </td>
+        <td class="col-sm-2 text-right text-end text-danger fw-bold">' . $data['folio'] . '</td>
+        </tr>
 
-    <tr>
-    <td class="col-sm-1 bg-primary fw-bold"> HORA:  </td>
-    <td class="col-sm-2 text-end">' . $data['hora'] . '</td>
-    <td class="col-sm-6"></td>
-    <td class="col-sm-1 fw-bold bg-primary ">DIA: </td>
-    <td class="col-sm-2 text-uppercase text-end">  ' . formatDAYSpanishDate($data['fecha']) . ' </td>
-    </tr>
+        <tr>
+        <td class="col-sm-1 bg-primary fw-bold"> HORA:  </td>
+        <td class="col-sm-2 text-end">' . $data['hora'] . '</td>
+        <td class="col-sm-6"></td>
+        <td class="col-sm-1 fw-bold bg-primary ">DIA: </td>
+        <td class="col-sm-2 text-uppercase text-end">  ' . formatDAYSpanishDate($data['fecha']) . ' </td>
+        </tr>
 
     </table>';
 
 
-    
 
 
 
-  # Lista de productos     
+
+  # Lista de productos
   $ls = $obj->lsProduccion(array($id));
 
   foreach ($ls as $_key) {
 
- 
+
     $totalx = $_key['sugerencia'] * $_key['costo'];
     $total_aprox += $totalx;
 
@@ -321,7 +391,7 @@ function ipt($obj,$select,$update){
         $ok      = $obj->_fn($array);
 
     }else{
-        
+
         $estatus = 'actualizar';
         $update['idListaProductos'] = $idLista;
         $array = $util->sql($update, 1);
@@ -333,14 +403,14 @@ function ipt($obj,$select,$update){
         "ok" => $ok,
         "array" => $array,
         "estatus" => $estatus,
-        'idLista' => $idLista,  
+        'idLista' => $idLista,
         // "total_producto" => $total_producto
     ];
 
 }
 
 function ls($obj){
-   
+
   $__row   = [];
  /* -- Titulo del formato -- */
   $lsFolio   = $obj -> lsFolio([$_POST['id']]);
@@ -351,10 +421,10 @@ function ls($obj){
   $ID_AREA  = $obj -> __get_IDAREA(array($key['Nombre_Area']));
 
   $total_produccion = _get_total_produccion($obj, $_POST['id']);
-  
+
   $objs = ticket_head(
     [
-    
+
     'fecha'  => $key['fecha2'],
     'hora'   => $key['hora'],
     'titulo' => $key['Nombre_Area'].' - '.$_COOKIE['TEL'],
@@ -364,7 +434,7 @@ function ls($obj){
     'total'  => $total_produccion,
 
     ]
-  ); 
+  );
 
 
   $ls      = $obj ->lsProductosCostsys([6,$ID_AREA]);
@@ -378,28 +448,28 @@ function ls($obj){
     if( $SubClasificacion != 'DESCONTINUADO' ){
 
     /* -- --*/
-    
+
     $id_almacen   = 0;
     $sugerencia   = '<span class="text-danger"> Revisar sugerencia </span>';
     $dias_merma   =  0 ;
-    
+
     $dia_consulta   = '0';
     $estado_link    =  0;
     $estadoProducto = '';
 
     $link         = $obj ->_PRODUCTOS_FOGAZA_LINK_COSTSYS_ORDER([$_key['id']],'lunes');
-  
+
     foreach($link as $_list){
 
       $estado_link     = 1;
       $id_almacen      = $_list['idAlmacen'];
       $estadoProducto  = $_list['estadoProducto'];
-      
+
       $nombre_producto = $_list['NombreProducto'];
       $sugerencia      = ($_list['sugerencia'] == null) ? '' : $_list['sugerencia'];
       $dias_merma      = $_list['diasMerma'];
       $dia_consulta    = $_list['dia'];
-    
+
     }
 
     /*-- Orden de produccion activa --*/
@@ -418,17 +488,17 @@ function ls($obj){
     // $cuatro = desgloze_4_dias_atras($obj,$id_almacen,$date,$dias_merma);
 
 
-    // /*Inputs & totales */ 
+    // /*Inputs & totales */
     $total  = '';
     $precio = '';
     $orden  = '';
 
     if($estado_link != 0){
-      
+
       $orden  = _input_group([$id_almacen,'txtSugerencia', $data_pedido[4],''] );
-      
+
     }
-    
+
     $total  = _input([$id_almacen,'txtTotalCtrl',$total_producto ,'']);
     $precio = _input([$id_almacen,'txtPrecioCtrl',$PrecioProducto,'actualizar_precio']);
 
@@ -440,7 +510,7 @@ function ls($obj){
       'dia'        => status_day($dia_consulta),
       'nombre'     => $_key['nombre'],
       "sugerencia" => $sugerencia,
-      
+
       // "semana"            => $semana,
       // "c0"                => $cuatro[0],
       // "c1"                => $cuatro[1],
@@ -449,7 +519,7 @@ function ls($obj){
       "Orden"             => $orden,
       "precio"            => $precio,
       "total"             => $total,
-      
+
       // 'stado'  => $_key['id'],
       "opc"    => $bg
     );
@@ -458,15 +528,15 @@ function ls($obj){
 
   endforeach;
 
-    // Encapsular arreglos 
-    
+    // Encapsular arreglos
+
     return  [
           'frm_head' => $objs,
           "thead"    => '',
           "row"      => $__row,
           "a"        => $ID_AREA
       ];
-    
+
 
 }
 
@@ -475,13 +545,12 @@ function lsProduccion($obj){
     $__row = [];
     /* -- Titulo del formato -- */
     $lsFolio = $obj->lsFolio([$_POST['id']]);
-    foreach ($lsFolio as $key)
-        ;
+    foreach ($lsFolio as $key) ;
     $date = $key['fecha'];
-    #Identificador de la catetoria del producto --
+
+    #Identificador de la catetoria del producto
 
     $ID_AREA = $obj->__get_IDAREA(array($key['Nombre_Area']));
-
     $total_produccion = _get_total_produccion($obj, $_POST['id']);
 
     $objs = ticket_head(
@@ -498,7 +567,7 @@ function lsProduccion($obj){
         ]
     );
 
-    
+
 
         $link = $obj->lsFogazaLink([$key['id_grupo']], 'lunes');
 
@@ -508,6 +577,8 @@ function lsProduccion($obj){
 
 
         foreach ($link as $_list) :
+
+
 
             $estado_link    = 1;
             $id_almacen     = $_list['idAlmacen'];
@@ -529,13 +600,15 @@ function lsProduccion($obj){
         /* Consultar info del costsys */
         foreach ($lsReceta as $receta );
 
+           $SubClasificacion = $obj->NombreSubcategoria([$receta['id_SubClasificacion']]);
+
         /* Calculo de estadistica para producción */
 
         $total_producto = $data_pedido[4] * $receta['costo'];
         $PrecioProducto = $receta['costo'];
 
-            
-        // /*Inputs & totales */ 
+
+        // /*Inputs & totales */
         $total  = '';
         $precio = '';
         $orden  = '';
@@ -551,17 +624,16 @@ function lsProduccion($obj){
 
 
 
-        if ($dia_consulta)
-        
+                if ($estadoProducto)
         $__row[] = array(
 
             'id'         => $id_almacen,
             'dia'        => status_day($dia_consulta),
-            'nombre'     => $nombre_producto.'<span class= "text-muted fw-bold" style="font-size:.76em;" > 
+            'nombre'     => $nombre_producto.'<span class= "text-muted fw-bold" style="font-size:.76em;" >
             ( '. $receta['nombre'].' ) </span>  ',
             "sugerencia" => $sugerencia,
-            // 'id_costsys' => $_list['id_Costsys'].' / '.$id_almacen,
-// 
+            // 'id_costsys' => $_list['id_Costsys'].' / '.$SubClasificacion,
+//
 //                 // "semana"            => $semana,
 //                 // "c0"                => $cuatro[0],
 //                 // "c1"                => $cuatro[1],
@@ -598,7 +670,7 @@ function lsProduccion($obj){
     //         $estado_link = 0;
     //         $estadoProducto = '';
 
-    //         
+    //
 
     //         foreach ($link as $_list) {
 
@@ -613,28 +685,28 @@ function lsProduccion($obj){
 
     //         }
 
-   
-   
+
+
 
 
     //         // $semana = una_semana_atras($obj,$id_almacen,$date,$dias_merma);
     //         // $cuatro = desgloze_4_dias_atras($obj,$id_almacen,$date,$dias_merma);
 
 
-   
 
 
 
-  
 
 
-    
+
+
+
 
     //     }
 
     // endforeach;
 
-    // Encapsular arreglos 
+    // Encapsular arreglos
 
     return [
         'frm_head'    => $objs,
@@ -673,8 +745,8 @@ function simple_tabla_php($row){
             $align = 'text-start';
         }else if($position == 1){
            $align = 'text-center';
-        } 
-       
+        }
+
 
 
       $tbody .= "<td class='{$align}'> " . $value . "</td>";
@@ -767,21 +839,21 @@ function desgloze_4_dias_atras($obj,$id_Producto,$date,$diasmerma){
 
 function list_($obj,$th){
     $th     = ['Folio','Cliente','Fecha','Estado',''];
-      
-    
-    
+
+
+
     # Declarar variables
     $fi      = $_POST['fi'];
     $ff      = $_POST['ff'];
     $arreglo = [$fi,$ff];
     $__row   = [];
-    
+
     # Sustituir por consulta a la base de datos
     $list    = $obj->list_($arreglo);
     $total_productos = count($list);
 
     foreach ($list as $_key) {
-        
+
         $__row[] = array(
             'id'     => $_key['idLista'],
             'nombre' => $_key['nombredestino'],
@@ -809,8 +881,8 @@ function ticket_head($data){
       <div style="margin-bottom:15px;" class="col-sm-12   ">
 
       <table style="font-size: .87em; " class="table table-bordered  table-sm">
-   
-   
+
+
       <tr>
            <td class="col-sm-1 bg-default"> <strong> FECHA :  </strong></td>
       <td class="col-sm-3 text-endx"> '.$data['fecha'].' - '.$data['hora'].'</td>
@@ -837,14 +909,14 @@ function ticket_head($data){
 
       <td  class="text-right" colspan="4"> TOTAL DE PRODUCCIÓN:   </td>
 
-      <td class="text-right"> 
+      <td class="text-right">
       <div class="input-group">
       <span class="input-group-text fw-bold" id="basic-addon2"> $ </span>
-     
-      <input 
-        id="TotalProduccionCtrl" 
+
+      <input
+        id="TotalProduccionCtrl"
         style="font-size:1.4em; "
-        class="form-control form-control-sm text-end fw-bold text-primary" 
+        class="form-control form-control-sm text-end fw-bold text-primary"
         value="'.$data['total'].'"  disabled >
 
       </div>
@@ -852,7 +924,7 @@ function ticket_head($data){
       </tr>
 
       </table>
-   
+
       </div>
 
    ';
@@ -876,17 +948,17 @@ function formatDAYSpanishDate($fecha = null){
 }
 
 function _input_group($data){
-    // onkeyup="'.$data[3].'('.$data[0].')" 
+    // onkeyup="'.$data[3].'('.$data[0].')"
 
     return '
-    
+
     <div class="input-group">
         <button onclick="QuitarLista('.$data[0].')" class="btn btn-sm btn-outline-secondary" type="button"><i class="icon-trash-empty"></i></button>
-        <input type="number" value="' . $data[2] . '" id="'.$data[0].'" 
-               name="sugerencia"  
-               class="form-control form-control-sm text-end" 
+        <input type="number" value="' . $data[2] . '" id="'.$data[0].'"
+               name="sugerencia"
+               class="form-control form-control-sm text-end"
                placeholder="Ingresa un valor"
-        > 
+        >
     </div>
     ';
 }
@@ -915,10 +987,10 @@ function _get_total_produccion($obj, $id_folio){
 }
 #----------------------
 # Complementos
-#---------------------- 
+#----------------------
 function _input($data){
 // onkeyup="'.$data[3].'('.$data[0].')"
-    return '    
+    return '
     <div class="input-group">
       <span class="input-group-text" id="basic-addon2"> $ </span>
       <input type="number" id="'.$data[1].''.$data[0].'" value="' . $data[2] . '"  class="form-control form-control-sm text-end" disabled>
@@ -931,7 +1003,7 @@ function DynamicRow($ls) {
     foreach ($ls as $fila) {
 
         foreach ($fila as $key => $valor) {
-            
+
             $fila[$key] = $valor;
         }
 
@@ -948,11 +1020,11 @@ function DynamicRowBTN($ls,$btn) {
     $_btn  = [];
 
         foreach ($fila as $key => $valor) {
-            
+
             $fila[$key] = $valor;
         }
-        
-        $_btn        = $btn; 
+
+        $_btn        = $btn;
         $fila['btn'] = $_btn;
 
         $__row[] = $fila;
@@ -967,13 +1039,13 @@ function evaluar2($val){
 function obtenerDiaSemana($fecha) {
   // Crear un objeto DateTime con la fecha proporcionada
     $fecha_objeto = new DateTime($fecha);
-    
+
     // Crear un formateador de fecha con el idioma español
     $formateador = new IntlDateFormatter('es_ES', IntlDateFormatter::FULL, IntlDateFormatter::NONE);
-    
+
     // Formatear la fecha para obtener el día de la semana en español
     $dia_semana_espanol = $formateador->format($fecha_objeto);
-    
+
     return $dia_semana_espanol;
 }
 
@@ -997,7 +1069,7 @@ function formatSpanishDate($fecha = null) {
 
 function turno($opc){
   $lbl_status = '';
-  
+
   switch($opc){
 
     case 1:
@@ -1046,7 +1118,7 @@ function status_receta($opc){
       $lbl_status = '<i class="text-danger ">no activo</i> ';
 
       break;
-  }  
+  }
 
   return $lbl_status;
 }
@@ -1055,4 +1127,4 @@ function status_receta($opc){
 # Package JSON
 #----------------------
  echo json_encode($encode);
-?>    
+?>

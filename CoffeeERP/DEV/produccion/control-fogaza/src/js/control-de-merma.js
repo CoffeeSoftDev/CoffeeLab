@@ -164,6 +164,17 @@ class controlMerma extends modulo_uno {
 
     }
 
+
+
+
+
+
+
+
+
+
+
+
     createModulo(){
 
         

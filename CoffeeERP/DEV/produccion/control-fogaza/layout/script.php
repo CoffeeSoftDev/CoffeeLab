@@ -23,11 +23,19 @@
 <!--PERSONALIZADOS-->
 <script src="../../src/js/navbar.js"></script>
 <script src="../../src/js/sidebar.js"></script>
+
 <!-- EXTERNOS -->
 <script src="https://15-92.com/ERP3/src/js/CoffeSoft.js?t=<?php echo time(); ?>"></script>
 <script src="https://plugins.erp-varoch.com/ERP/JS/complementos.js?t=<?php echo time(); ?>"></script>
 <script src="https://plugins.erp-varoch.com/ERP/JS/plugin-table.js?t=<?php echo time(); ?>"></script>
 <script src="https://plugins.erp-varoch.com/ERP/JS/plugin-forms.js?t=<?php echo time(); ?>"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<!-- <script src="https://15-92.com/ERP3/src/js/complementos.js?t=<?php echo time(); ?>"></script>
+<script src="https://15-92.com/ERP3/src/js/plugin-table.js?t=<?php echo time(); ?>"></script>
+<script src="https://15-92.com/ERP3/src/js/plugin-forms.js?t=<?php echo time(); ?>"></script> -->
 
  
 <!-- COMENTADOS POR UNA RAZÓN -->

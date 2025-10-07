@@ -2,6 +2,8 @@ link_reporte = "ctrl/ctrl-reportes.php";
 
 /* -- Init Components --*/
 
+let obj = new Templates(link_reporte,'');
+
 
 let collector = [];
 let idFolio   = 0;
@@ -14,10 +16,138 @@ $(function () {
 });
 
 
+function lsProducts(){
+    let components = $('<div>', { class: 'col-12 decorative-box', id: 'contentProducts' });
+
+    let filterBar  = [
+        {
+            opc  : 'select',
+            id   : 'grupo',
+            lbl  : 'Grupo',
+            class: 'col-sm-4',
+            data: [
+                { id: 1, valor: 'FRANCES' },
+                { id: 2, valor: 'PASTELERIA' },
+                { id: 4, valor: 'BIZCOCHO' }
+            ],
+            onchange:'showListProducts()'
+        },
+        {
+            opc: 'select',
+            id: 'Estado',
+            lbl: 'Estado',
+            class: 'col-sm-4',
+            data: [
+                {id:2, valor:'-- Mostrar todos --'},
+                { id: 1, valor: 'Activo' },
+                { id: 0, valor: 'Inactivo' }
+            ],
+            onchange: 'showListProducts()'
+
+        }
+
+    ];
+
+    obj.createModal({
+  
+
+        bootbox: {
+             
+            title  : 'Activar/Desactivar productos',
+            size   : 'large',
+            message: '<div id="filterCategory" class="col-12"></div><div id="contentProducts" class="block"></div>'
+
+        }, 
+
+        data: { opc:'lsProductos',grupo: 1, Estado: 2 },
+        
+        success: (data) => { 
+
+            $('#filterCategory').content_json_form({data:filterBar ,type:''});
+        
+            $('#contentProducts').rpt_json_table2({
+                data  : data,
+                f_size: 12,
+                center: [1,2],
+                id    : 'tbProducts',
+                class : 'table table-bordered table-sm text-uppercase'
+            });
+
+            simple_data_table('#tbProducts', 12);
+
+
+        }
+   
+
+    });
+}
+
+function showListProducts(){
+    obj.createTable({
+
+        parent   : 'contentProducts',
+        idFilterBar: 'jsonForm',
+        data     : { opc: 'lsProductos' },
+        conf     : { datatable: true, },
+
+        attr: {
+            color_th: 'bg-primary-1',
+            center: [1,2],
+            id    : 'tbProducts',
+            class : 'table table-bordered table-sm text-uppercase'
+        },
+
+       success:(data)=>{
+
+           simple_data_table('#tbProducts', 12);
+       }
+
+
+
+    });
+}
+
+function toggleEstatus(id) {
+    
+    // Obtiene el icono dentro del botón
+    let button = document.getElementById('btnEstatus'+id);
+    let icon = button.querySelector('i');
+    let estatus = button.getAttribute('estatus');
+
+
+
+
+    // Alterna las clases del icono entre "icon-toggle-on" y "icon-toggle-off"
+    if (icon.classList.contains('icon-toggle-on')) {
+
+        icon.classList.remove('icon-toggle-on');
+        icon.classList.add('icon-toggle-off');
+    } else {
+
+        icon.classList.remove('icon-toggle-off');
+        icon.classList.add('icon-toggle-on');
+    }
+
+    let nuevoEstatus = estatus === '1' ? '0' : '1';
+
+    fn_ajax({ opc: 'setEstatus', estadoProducto: nuevoEstatus, idAlmacen: id }, link_reporte).then((data) => {
+
+     
+        
+        button.setAttribute('estatus', nuevoEstatus);
+
+    });
+
+
+
+}
+
+
+
 function CancelarFolio() {
 
     alert({
-        title: "¿ Deseas cancelar el formato de pedidos ?",
+        title: "¿Deseas cancelar el formato de pedidos ?",
         icon: "question",
         
     }).then((rtx) => {

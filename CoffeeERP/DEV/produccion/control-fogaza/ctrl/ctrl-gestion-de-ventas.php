@@ -179,7 +179,8 @@ function lsMermas_Cancelados($obj){
 
 }
 
-function ticketMermas($obj){
+function ticketMermas($obj)
+{
 
     $__row = [];
     $total_general = 0;
@@ -279,20 +280,18 @@ function ticketMermas($obj){
 function headers($data){
     return '
     
-        <div style ="font-size:.8em;" class="row m-0 mb-2">
-            <div class="col-4" >
-                <p class="fw-bold m-0" id="folio"><span class="text-primary">' . formatSpanishDate($data['fecha']) . '</span></p>
+    <div style ="font-size:.8em;" class="row m-0 mb-2">
+        <div class="col-4" >
+        <p class="fw-bold m-0" id="folio"><span class="text-primary">' . formatSpanishDate($data['fecha']) . '</span></p>
 
-            </div>
-            <div class="col-4 vertical-center">
-                <p class="fw-bold text-uppercase m-0 fs-5" id="format_title">'. $data['titulo'].'</p>
-                <p class="text-uppercase m-0" id="udn"></p>
-            </div>
-        
+        </div>
+        <div class="col-4 vertical-center">
+            <p class="fw-bold text-uppercase m-0 fs-5" id="format_title">'. $data['titulo'].'</p>
+            <p class="text-uppercase m-0" id="udn"></p>
+        </div>
         <div class="col-4 text-end ">
             <p class="fw-bold m-0" id="folio">Folio: # <span class="text-primary">'.$data['folio'].'</span></p>
-        </div>
-        ';
+        </div>';
 
 }
 
@@ -301,48 +300,63 @@ function headers($data){
 # Historial de ventas
 #----------------------
 function lsDestajo($obj){
+    $util = new Utileria;
     # Declarar variables
-    $lsAreas = $obj->lsAreas();
-    $folio   = $obj-> getFolio([$_POST['date']]);
+     $lsAreas = $obj->lsAreas();
+     $folio   = $obj-> getFolio([$_POST['date']]);
     
-    $data_employed_by_area = [];
+      $random = str_pad(mt_rand(0, 999), 3, '0', STR_PAD_LEFT);
+      $set_employed = [];
 
-    if(!$folio){
-        
-        
-        $status_created = [];
+
+    if(!$folio):
+        // Crear un nuevo folio.
+        $obj->createFolio(['00'.$random,$_POST['date'].' '. date("H:i:s")]);
+        $folio = $obj->getFolio([$_POST['date']]);
+
+
+        // add trabajadores a hoja de destajo.
         foreach($lsAreas as $area):
-            $data_employed_by_area[] = [
+            
+            $lsColaborador = $obj ->listColaborador(array($area['id']));
 
-                'fol'    =>  $folio[0]['idPago'],
-                'idArea' =>  $area['id']
-            ];
-            // $status_created[] =  $obj -> listColaborador([$area['id']]);
-            // foreach ($lsColaboradores as $colaborador) {
-                // $status_created = $util -> sql([
-                //     'id_Colaborador' => $colaborador['idEmpleado'],
-                //     'id_Pago'        => $folio,
-                //     'pagodestajo'    => 0
-                // ]);
-            //     $status_created[]    = $obj -> createdDestajo($data_destajo);
-            // }
-        endforeach;
-    }
+            foreach ($lsColaborador as $colaborador) {
+                $data = $util -> sql(
+                    [
+                        'id_Pago'        => $folio[0]['idPago'],
+                        'id_Colaborador' => $colaborador['idEmpleado'],
+                        'pagodestajo'    => 0
+                    ]
+                );
+
+                $success = $obj -> setDestajo($data);
+                $set_employed[] = $success;
+            }
+
+
+
+        endforeach;     
+
+
+   
+    endif;
 
     # lista de areas : 
     $head = frmHead([
-        'title' => 'DESTAJO FOGAZA',
+        'title' => ' - DESTAJO FOGAZA -',
         'folio' => $folio[0]['idPago'],
-        'fecha' => $_POST['date']
+        'fecha' => $_POST['date'],
+        
     ]);
     
    
+    
 
     // Consultar ventas por área:   
     $lsVentas = lsVentas($obj,$lsAreas, $head);
 
     // Consultar control de mermas:
-    $lsControlMerma  = lsControlMermas($obj);
+    $lsControlMerma = lsControlMermas($obj);
 
     // Consultar pago de colaborador:
     $pagoColaborador = lsPagosColaborador($obj, $lsAreas);
@@ -350,14 +364,13 @@ function lsDestajo($obj){
 
     # encapsular datos :
 
-    // return [
-    //    'folios'           => $data_employed_by_area,
-    //    'ventasArea'      => $lsVentas,
-    //    'pagoColaborador' => $pagoColaborador,
-    //    'controlMermas'   => $lsControlMerma,
-    //     'status_created' => $status_created
-
-    // ];
+    return [
+       'folio'           => $folio[0],
+       'ventasArea'      => $lsVentas,
+       'pagoColaborador' => $pagoColaborador,
+       'controlMermas'   => $lsControlMerma,
+       'emplyed'=>$set_employed
+    ];
 
 }
 
@@ -401,9 +414,8 @@ function lsControlMermas($obj){
     
     
     return [
-
-        'thead'          => '',
-        'row'            => $__row,
+        'thead' => '',
+        'row' => $__row,
     ];
 }
 
@@ -490,8 +502,8 @@ function lsPagosColaborador($obj,$ls){
 
             'id'               => $key['id'],
             'Colaborador'      => $key['valor'],
-            'Destajo'          => 'Total'.count($lsColaborador),
-            'Dias festivos'    => $key['id'],
+            'Destajo'          => '',
+            'Dias festivos'    => '',
             'Fonacot'          => '',
             'Infonavit'        => '',
             'Perdida material' => '',

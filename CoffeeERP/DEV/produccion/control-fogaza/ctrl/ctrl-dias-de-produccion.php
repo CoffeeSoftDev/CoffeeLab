@@ -81,7 +81,7 @@ function ls($obj, $util){
 
     //   $desplazamiento = $obj->lsRangeDate(array('2024-01-01', '2024-05-26', 1, $key['id']));
 
-        $desplazamiento = $obj->consultar_x_mes(array(5, 2024, 1, $key['id']));
+        $desplazamiento = $obj->consultar_x_mes(array(9, 2024, 1, $key['id']));
 
 
 

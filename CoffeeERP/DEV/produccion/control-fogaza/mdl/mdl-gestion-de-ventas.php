@@ -9,8 +9,8 @@ class Gestiondeventas extends CRUD{
     
 
     public function __construct() {
-        $this->bd = "rfwsmqex_gvsl_produccion2.";
-        $this->erp = "rfwsmqex_gvsl_produccion2.";
+        $this->bd = "rfwsmqex_gvsl_produccion.";
+        $this->erp = "rfwsmqex_gvsl_produccion.";
     }
     function lsUDN(){
         $query ="SELECT idUDN AS id, UDN AS valor FROM udn WHERE Stado = 1";
@@ -54,24 +54,6 @@ class Gestiondeventas extends CRUD{
         return $total_area;
     }
 
-    function setDestajo($array){
-
-        return $this->_Insert([
-            'table'  => "{$this->bd}destajo",
-            'values' => $array['values'],
-            'data'   => $array['data']
-        ]);
-    }
-
-    function createdDestajo($array){
-
-        return $this->_Insert([
-            'table'  => "{$this->bd}lista_productos",
-            'values' => $array['values'],
-            'data'   => $array['data']
-        ],true);
-    }
-
     function listColaborador($array){
         $sql = "
         SELECT 
@@ -79,13 +61,13 @@ class Gestiondeventas extends CRUD{
             Nombres 
         FROM 
         rfwsmqex_gvsl_rrhh.empleados,
-        {$this->erp}colaborador 
+        {$this->bd}colaborador 
         WHERE 
-        {$this->erp}colaborador.id_ColaboradorRH = rfwsmqex_gvsl_rrhh.empleados.idEmpleado 
+        {$this->bd}colaborador.id_ColaboradorRH = rfwsmqex_gvsl_rrhh.empleados.idEmpleado 
         AND Estado = 1 
         AND id_area = ?";
 
-        $ps = $this->_Read($sql, $array);
+        $ps = $this->_Read($sql, $array, "1");
         
         return $ps;
     }
@@ -301,9 +283,11 @@ class Gestiondeventas extends CRUD{
         return $this->_Read($query, $array);
     }
 
-    function getPago($array){
+    function getPago($array)
+    {
 
-        $query = "SELECT idDestajo FROM {$this->bd}destajo  WHERE  id_Pago = ? AND id_Colaborador = ? ";
+        $query = "SELECT idDestajo FROM {$this->bd}destajo 
+        WHERE  id_Pago = ? AND id_Colaborador = ? ";
         return $this->_Read($query, $array);
     }
 
@@ -349,6 +333,7 @@ class Gestiondeventas extends CRUD{
         return $merma;
     }
 
+  
     function merma_dia($array){
         $merma = 0;
         
@@ -386,10 +371,14 @@ class Gestiondeventas extends CRUD{
         ]);
     }
 
-    // Colaborador.
+    function setDestajo($array){
 
-
-
+        return $this->_Insert([
+            'table'  => "{$this->bd}destajo",
+            'values' => $array['values'],
+            'data'   => $array['data']
+        ]);
+    }
 
 
 
@@ -397,4 +386,126 @@ class Gestiondeventas extends CRUD{
 
 
 }
+
+class Destajo extends CRUD{
+
+    private $bd;
+    private $erp;
+
+    
+    public function __construct() {
+        $this->bd = "rfwsmqex_gvsl_produccion.";
+        $this->erp = "rfwsmqex_gvsl_produccion.";
+    }
+
+    function getFolio($array){
+
+        $query = "SELECT * FROM {$this->bd}formatopago 
+        WHERE DATE_FORMAT(FechaPago, '%Y-%m-%d' )= ?";
+        return $this->_Read($query, $array);
+    }
+
+    function lsAreas() {
+        $query = "SELECT idArea AS id, Nombre_Area AS valor 
+        FROM {$this->bd}almacen_area WHERE estado_area = 1";
+        return $this->_Read($query, null);
+    }
+
+    
+    function listColaborador($array){
+        $sql = "
+        SELECT 
+            colaborador.idEmpleado,
+            Nombres 
+        FROM 
+        rfwsmqex_gvsl_rrhh.empleados,
+        {$this->bd}colaborador 
+        WHERE 
+        {$this->bd}colaborador.id_ColaboradorRH = rfwsmqex_gvsl_rrhh.empleados.idEmpleado 
+        -- AND Estado = 1 
+        AND id_area = ?";
+
+        $ps = $this->_Read($sql, $array, "1");
+        
+        return $ps;
+    }
+
+    function RegistroPagos($array){
+
+        $key = null;
+
+        $sql = "
+            SELECT
+                SUM(pagodestajo) AS destajo,
+                SUM(DiasExtras) AS dias,
+                SUM(Fonacot) AS fonacot,
+                SUM(Infonavit) AS infonavit,
+                SUM(perdidaMaterial) AS perdidaMaterial,
+                SUM(prestamoPersonal) AS prestamoPersonal
+            FROM
+                {$this->bd}destajo
+            INNER JOIN {$this->bd}formatopago ON destajo.id_Pago = formatopago.idPago
+            WHERE
+                destajo.id_Colaborador = ?
+            AND DATE_FORMAT(FechaPago, '%Y-%m-%d') BETWEEN ? AND ?";
+
+        $ps = $this->_Read($sql, $array);
+        foreach ($ps as $key);
+        return $key;
+
+    }
+
+     function listProduction($array){
+        $merma = 0;
+        $sql = "
+        SELECT
+            almacen_area.Nombre_Area,
+            SUM(cantidad*Costo) as cantidad
+        FROM
+            {$this->bd}almacen_area
+            INNER JOIN {$this->bd}almacen_productos ON almacen_productos.Area = almacen_area.idArea
+            INNER JOIN {$this->bd}listaproductos ON listaproductos.id_productos = almacen_productos.idAlmacen
+            INNER JOIN {$this->bd}lista_productos ON listaproductos.id_lista = lista_productos.idLista
+        WHERE
+        DATE_FORMAT(foliofecha,'%Y-%m-%d') BETWEEN ? and ?
+        and id_tipo = ? and idArea = ? ";
+
+        $ps = $this->_Read($sql, $array);
+        foreach ($ps as $key) {
+            $merma = $key['cantidad'];
+        }
+        return $merma;
+    }
+
+    
+    function consultarProduccionGlobal($fi, $ff) {
+        $sql = "
+            SELECT
+                idArea,
+                id_tipo,
+                SUM(cantidad * Costo) AS total
+            FROM
+                {$this->bd}almacen_area
+                INNER JOIN {$this->bd}almacen_productos ON almacen_productos.Area = almacen_area.idArea
+                INNER JOIN {$this->bd}listaproductos ON listaproductos.id_productos = almacen_productos.idAlmacen
+                INNER JOIN {$this->bd}lista_productos ON listaproductos.id_lista = lista_productos.idLista
+            WHERE
+                DATE_FORMAT(foliofecha, '%Y-%m-%d') BETWEEN ? AND ?
+            GROUP BY idArea, id_tipo
+        ";
+
+        $rows = $this->_Read($sql, [$fi, $ff]);
+
+        $result = [];
+        foreach ($rows as $row) {
+            $result[$row['idArea']][$row['id_tipo']] = $row['total'];
+        }
+
+        return $result; // resultado indexado por idArea y id_tipo
+    }
+
+
+
+}
+
 ?>

@@ -73,19 +73,17 @@ function busqueda() {
     },
     (datos) => {
       fn_ajax(datos, ctrl, "#tbDatos").then((data) => {
-        
         $("#tbDatos").JsonTablePro({
-
-          data  : data,
-          id    : "tb-busqueda",
-          th    : "bg-primary",
+          data: data,
+          id: "tb-busqueda",
+          th: "bg-primary",
           f_size: 12,
-          grupo : "bg-aliceblue",
-          right : [4, 5, 6, 7],
+          grupo: "bg-aliceblue",
+          right: [4, 5, 6, 7],
           center: [1],
-
         });
 
+        // simple_data_table_no("#simple-table", 120);
       });
     }
   );

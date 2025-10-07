@@ -32,7 +32,7 @@ switch ($_POST['opc']) {
 
             ($_POST['Reporte'] == 1) ? $th[] = 'Prop Gerente' : $th[] = 'Prod. Real';
 
-            
+            ;
             $th[] = 'Prod. panadero ';
             $th[] = '%';
             // $th[] = 'Propuesta gerente ';

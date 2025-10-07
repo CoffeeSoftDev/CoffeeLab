@@ -32,6 +32,15 @@
     </div>
 
 
+    <div class="col-12 col-lg-2 mt-4">
+
+        <a class="btn btn-outline-secondary w-100 " onclick="lsProducts()">
+            Productos
+        </a>
+
+    </div>
+
+
     <div class="col-12 col-md-3 col-lg-2 mb-2 ">
         <button type="button"   id="CancelarBtn" class="btn btn-outline-danger col-12 mt-4 d-none" onclick="CancelarFolio()"> Cancelar </button>
     </div>

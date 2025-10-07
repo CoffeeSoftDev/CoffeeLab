@@ -41,6 +41,7 @@
 </div>
 
 <script src='src/js/gestion-de-ventas.js?t=<?php echo time(); ?>'></script>
+<script src='src/js/destajo-formato.js?t=<?php echo time(); ?>'></script>
 <script src='src/js/gestion-de-ventas-destajo.js?t=<?php echo time(); ?>'></script>
 <!-- externo -->
         </div>

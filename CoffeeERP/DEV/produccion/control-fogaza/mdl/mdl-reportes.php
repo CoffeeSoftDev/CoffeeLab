@@ -4,19 +4,16 @@ require_once ('../../../conf/_CRUD.php');
 class Reportes extends CRUD
 {
     private $bd;
-    public function __construct()
-    {
-        $this->bd = "rfwsmqex_gvsl_produccion2.";
+    public function __construct(){
+        $this->bd = "rfwsmqex_gvsl_produccion.";
     }
 
-    function lsUDN()
-    {
+    function lsUDN() {
         $query = "SELECT idUDN AS id, UDN AS valor FROM {$this->bd}udn WHERE Stado = 1";
         return $this->_Read($query, null);
     }
 
-    function CrearTicket($array)
-    {
+    function CrearTicket($array) {
 
         return $this->_Insert([
             'table' => "{$this->bd}lista_productos",
@@ -43,14 +40,12 @@ class Reportes extends CRUD
         FROM
         {$this->bd}lista_productos
         INNER JOIN {$this->bd}almacen_area ON lista_productos.id_grupo = almacen_area.idArea
-        WHERE idLista = ? 
-    ";
+        WHERE idLista = ? ";
 
         return $this->_Read($query, $array);
     }
 
-    function CancelarFolio($array)
-    {
+    function CancelarFolio($array) {
 
         return $this->_Update([
             'table' => "{$this->bd}lista_productos",
@@ -71,8 +66,7 @@ class Reportes extends CRUD
     }
 
 
-    function lsProductosCostsys($array)
-    {
+    function lsProductosCostsys($array){
 
         $query = "
         SELECT
@@ -118,16 +112,14 @@ class Reportes extends CRUD
         return $id;
     }
 
-    function NombreSubcategoria($array)
-    {
+    function NombreSubcategoria($array){
         $name = '';
         $query = '
         SELECT
         subclasificacion.idSubClasificacion,
         subclasificacion.nombre
         FROM rfwsmqex_gvsl_costsys.subclasificacion
-        WHERE idSubClasificacion = ?
-    ';
+        WHERE idSubClasificacion = ? ';
 
         $sql = $this->_Read($query, $array);
         foreach ($sql as $key) {
@@ -136,8 +128,7 @@ class Reportes extends CRUD
         return $name;
     }
 
-    function _PRODUCTOS_FOGAZA_LINK_COSTSYS_ORDER($array, $dia)
-    {
+    function _PRODUCTOS_FOGAZA_LINK_COSTSYS_ORDER($array, $dia){
         $query = "
         SELECT
             almacen_productos.idAlmacen,
@@ -160,9 +151,21 @@ class Reportes extends CRUD
 
     }
 
+    function update_estado_producto($array) {
 
-    function lsFogazaLink($array, $dia)
-    {
+        return $this->_Update([
+            'table'  => "{$this->bd}almacen_productos",
+            'values' => $array['values'],
+            'where'  => $array['where'],
+            'data'   => $array['data']
+        ]);
+
+    }
+
+
+
+
+    function lsFogazaLink($array, $dia){
         $query = "
         
       SELECT        
@@ -183,6 +186,36 @@ class Reportes extends CRUD
         
         INNER JOIN {$this->bd}homologado ON homologado.id_Produccion = almacen_productos.idAlmacen
         WHERE Area = ? 
+        ORDER BY NombreProducto asc
+        
+        ";
+
+        return $this->_Read($query, $array);
+
+    }
+
+
+    function listProduction($array){
+        $query = "
+        
+         SELECT        
+            almacen_productos.idAlmacen,
+            almacen_productos.NombreProducto,
+            almacen_productos.Area,
+
+            NotFoundReceta,
+            sugerencia,
+            diasMerma,
+            
+            lunes as dia,
+            estadoProducto,
+            id_Costsys
+        FROM
+        {$this->bd}almacen_productos
+        
+        
+        INNER JOIN {$this->bd}homologado ON homologado.id_Produccion = almacen_productos.idAlmacen
+        WHERE Area = ? and estadoProducto = ?
         ORDER BY NombreProducto asc
         
         ";
@@ -484,6 +517,38 @@ class Reportes extends CRUD
     }
 
     // Quitar producto de la lista .
+    function consultar_x_mes($array){
+
+        $TotalProduccion = 0;
+        $listPrecios = '';
+        $query =
+        "SELECT
+        costo,
+        cantidad,
+        DATE_FORMAT(foliofecha,'%Y-%m-%d') as fecha,
+        -- SUM(listaproductos.cantidad) as total,
+        id_lista
+        FROM
+        rfwsmqex_gvsl_produccion.listaproductos
+        INNER JOIN rfwsmqex_gvsl_produccion.lista_productos ON listaproductos.id_lista = lista_productos.idLista
+        INNER JOIN rfwsmqex_gvsl_produccion.almacen_productos ON listaproductos.id_productos = almacen_productos.idAlmacen
+        WHERE
+        MONTH(foliofecha) = ?
+        AND  YEAR(foliofecha)  = ?
+        AND  id_tipo           = ? 
+        AND  idAlmacen         = ?
+
+        -- GROUP BY idAlmacen
+        ";
+        $sql = $this->_Read($query, $array);
+
+        foreach ($sql as $key) {
+        $listPrecios += $key['cantidad'];
+        // $listPrecios .= ', (  '.$key['cantidad'].' / '. $key['fecha'].' )';
+        }
+
+        return $listPrecios;
+    }
 
     function getIdListaProductos($array){
 

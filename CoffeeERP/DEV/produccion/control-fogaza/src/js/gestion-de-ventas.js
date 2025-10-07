@@ -1,15 +1,14 @@
 window.link = window.link || "ctrl/ctrl-gestion-de-ventas.php";
-ctrl = "ctrl/ctrl-destajo.php";
 
 let obj     = {};
-let destajo = {};
+let destajo,merma;
 
 collector   = {};
 
 /* Init components */
 $(function () {
 
-  $("#content-data").simple_json_tab({ data: json_tab });
+    $("#content-data").simple_json_tab({ data: json_tab });
 
     obj = new Modulo_busqueda(link, "content-destajo-grupos");
     // destajo = new Modulo_dos(link, "");
@@ -21,21 +20,22 @@ $(function () {
     lsFolios();
 
     // Interface destajo:
-    destajo = new Destajo(ctrl, "tab-destajo");
+    destajo = new FormatoDestajo(link, "tab-destajo");
     destajo.initComponents();
+    destajo.filterBarDestajo();
+
+    merma = new Merma();
+    merma.render();
 
 
-    
-  
 });
 
 
 let json_tab = [
-
     {
         tab: "Historial",
         id: "tab-historial",
-
+        active: true,            // indica q pestaña se activara por defecto
         contenedor: [
             {
                 id: "content-folios",
@@ -48,33 +48,32 @@ let json_tab = [
             },
         ]
     },
-
     {
         tab   : "Destajo",
         id    : "tab-destajo",
-        fn    : 'destajo.listDestajo()',
-        active: true,                      // indica q pestaña se activara por defecto
-
-
+        fn: 'destajo.listDestajo()',
         contenedor: [
-
             {
                 id: "filterBarDestajo",
-                class: "col-12  mb-2",
-
+                class: "col-12 mb-3",
             },
-
             {
                 id: "contentDataGrupos",
-                class: "col-12 ",
-
-            },
-          
-
-
+                class: "",
+            }
         ],
+    },
+  {
+    tab: "Concentrado de destajo",
+    id: "tab-concentrado",
+    fn: 'concentrado.ls()',
 
+  },
 
+    {
+        tab: "Merma",
+        id: "tab-merma",
+        // fn: 'merma.ls()',
 
     },
 
@@ -85,7 +84,6 @@ let json_tab = [
 /*  --    Modulo busqueda     --*/
 
 function barraBusqueda(){
-
     obj.json_filter_bar = [
         {
             opc : 'input-calendar',
@@ -108,21 +106,18 @@ function barraBusqueda(){
             text: 'Busqueda',
             class:'col-4',
             fn: 'lsFolios()'
-
         }
-    
     ];
-
     obj.filterBar('content-filter-folio');
 }
 
 function mdl(id_content){
-   
+
    let div = $('<div>',{
     class : 'row'
    });
 
-   
+
    let opts_bar = {
       class: 'col-12',
       id: 'content-filter-folio',
@@ -130,17 +125,17 @@ function mdl(id_content){
 
 
    let bar = $('<div>', opts_bar);
-   
+
    div.append(bar);
 
-    /*--   Crear contenedor para la tabla  --*/    
-   
+    /*--   Crear contenedor para la tabla  --*/
+
    var opts_table = {
         class: 'col-12 mt-3',
         id: 'content-table-folio',
    };
 
-   let table = $('<div>', opts_table); 
+   let table = $('<div>', opts_table);
 
     div.append(table);
 
@@ -158,8 +153,8 @@ function lsFolios() {
   };
 
   fn_ajax(dtx, link, "#content-table-folio").then((data) => {
-    
-    
+
+
     // if(data.row.length == 0){
 
         $("#content-table-folio").rpt_json_table2({
@@ -170,20 +165,19 @@ function lsFolios() {
           f_size  : '12',
           id: "tbHistory",
         });
-    
+
     // }else{
 
 
       $("#content-visor").html('');
-    
+
     // }
 
       simple_data_table_no("#tbHistory", 10);
   });
 }
 
-
-/*  -- Modulo ver ticket -- */ 
+/*  -- Modulo ver ticket -- */
 function lsTicket(id) {
     dtx = {
         opc: "ticketMermas",
@@ -193,7 +187,7 @@ function lsTicket(id) {
     fn_ajax(dtx, link, "#content-visor").then((data) => {
 
         $("#content-visor").rpt_json_table2({
-          
+
             data       : data,
             f_size     : '14',
             right      : [2, 3, 4, 5, 6],
@@ -204,7 +198,7 @@ function lsTicket(id) {
         //  simple_data_table_no("#table_pedidos", 100);
 
 
-        
+
     });
 }
 
@@ -235,23 +229,15 @@ function verTicket(id) {
 }
 
 function eventoInput(idTable) {
-  
     $("#" + idTable + " input[type='text']").on("input", function () {
-  
-    let name = $(this).attr("name");
-    var tr   = $(this).closest("tr");
 
+    let name     = $(this).attr("name");
+    var tr       = $(this).closest("tr");
     let cantidad = $(this).val();
     let precio   = tr.find('td').eq(4).text();
     let total    = precio * cantidad;
-
     tr.find('td').eq(5).text(evaluar(total));
     tr.find('td').eq(5).addClass('bg-warning-1');
-
-    
-
-        
-
 
     // Creamos un paquete para enviar a php
     let dtx = {
@@ -259,13 +245,11 @@ function eventoInput(idTable) {
       [name]          : $(this).val(),
       idListaProductos: $(this).attr("id"),
     };
-
     simple_send_ajax(dtx, link, "").then((data) => {
         let totalGral = totalColumna(idTable, 5);
         $('#txtTotal').html(totalGral);
-
     });
-  
+
 
   });
 }
@@ -282,10 +266,10 @@ function totalColumna(idTable, col) {
         if(valor){
 
             let valorReal = parseFloat(valor.replace(/\$/g, "").replace(/,/g, "")); // Utilizar parseFloat para convertir a número decimal y reemplazar las comas por puntos si es necesario
-            
-            if (!isNaN(valorReal)) 
+
+            if (!isNaN(valorReal))
                 total += valorReal;
-            
+
         }
 
     });
@@ -295,7 +279,7 @@ function totalColumna(idTable, col) {
 }
 
 
-/* -- Operaciones de ticket -- */ 
+/* -- Operaciones de ticket -- */
 
 function CancelarFolio(id) {
   alert({
@@ -360,14 +344,14 @@ function cerrarTicket(idFolio) {
 /* --  Complementos   -- */
 function range_picker_now(id) {
 
-  
+
     rangepicker(
     "#" + id,
     true,
-    
+
     moment(),
     moment(),
-    
+
     {
       Hoy: [moment(), moment()],
       Ayer: [moment().subtract(1, "days"), moment().subtract(1, "days")],
@@ -446,7 +430,7 @@ function simple_date_picker(id) {
 }
 
 function range_date_picker(id) {
-    
+
     var start = moment().subtract(1, 'days');
     var end   = moment();
 

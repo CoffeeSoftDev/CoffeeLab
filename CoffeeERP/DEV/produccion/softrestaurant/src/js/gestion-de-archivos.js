@@ -8,7 +8,6 @@ udn = [];
 $(function () {
 
   initComponents(link_soft).then((data) => {
-      console.log(slash());
     udn = data.udn;
     filtro_busqueda();
     dias_pendientes_soft();

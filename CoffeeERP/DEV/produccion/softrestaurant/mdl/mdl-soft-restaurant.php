@@ -372,7 +372,7 @@ public function __construct() {
     }
 
     function desgloze_paquete2($array){
-       $query =
+    $query =
         "
         SELECT
         soft_paquetes.descripcion as desc_paq,
