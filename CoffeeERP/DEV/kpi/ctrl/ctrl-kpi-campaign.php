@@ -566,6 +566,213 @@ class ctrl extends mdl {
             'message' => $message
         ];
     }
+
+    // Historial Anual - Reportes
+
+    function lsReporteCPC() {
+        $__row = [];
+        $udn = $_POST['udn'] ?? null;
+        $mes = $_POST['mes'] ?? date('n');
+        $anio = $_POST['anio'] ?? date('Y');
+
+        $ls = $this->getReporteCPC([$udn, $mes, $anio]);
+
+        $totalInversion = 0;
+        $totalClics = 0;
+
+        foreach ($ls as $key) {
+            $inversion = floatval($key['inversion_total']);
+            $clics = intval($key['clics_cpc']);
+            
+            $totalInversion += $inversion;
+            $totalClics += $clics;
+
+            $__row[] = [
+                'id' => $key['id'],
+                'Mes' => $key['mes_nombre'],
+                'Campaña' => $key['campaign_name'],
+                'Anuncio' => $key['ad_name'],
+                'Plataforma' => $key['social_network'],
+                'Inversión Total' => [
+                    'html' => '$' . number_format($inversion, 2),
+                    'class' => 'text-end'
+                ],
+                'Clics CPC' => [
+                    'html' => number_format($clics),
+                    'class' => 'text-center'
+                ]
+            ];
+        }
+
+        // Agregar fila de totales
+        if (!empty($__row)) {
+            $__row[] = [
+                'id' => 'total',
+                'Mes' => '',
+                'Campaña' => '',
+                'Anuncio' => '',
+                'Plataforma' => '<strong>TOTAL</strong>',
+                'Inversión Total' => [
+                    'html' => '<strong>$' . number_format($totalInversion, 2) . '</strong>',
+                    'class' => 'text-end bg-light'
+                ],
+                'Clics CPC' => [
+                    'html' => '<strong>' . number_format($totalClics) . '</strong>',
+                    'class' => 'text-center bg-light'
+                ]
+            ];
+        }
+
+        return [
+            'row' => $__row,
+            'ls' => $ls
+        ];
+    }
+
+    function lsReporteCAC() {
+        $__row = [];
+        $udn = $_POST['udn'] ?? null;
+        $mes = $_POST['mes'] ?? date('n');
+        $anio = $_POST['anio'] ?? date('Y');
+
+        $ls = $this->getReporteCAC([$udn, $mes, $anio]);
+
+        $totalInversion = 0;
+        $totalClientes = 0;
+
+        foreach ($ls as $key) {
+            $inversion = floatval($key['inversion_total']);
+            $clientes = intval($key['clientes_cac']);
+            
+            $totalInversion += $inversion;
+            $totalClientes += $clientes;
+
+            $__row[] = [
+                'id' => $key['id'],
+                'Mes' => $key['mes_nombre'],
+                'Campaña' => $key['campaign_name'],
+                'Anuncio' => $key['ad_name'],
+                'Plataforma' => $key['social_network'],
+                'Inversión Total' => [
+                    'html' => '$' . number_format($inversion, 2),
+                    'class' => 'text-end'
+                ],
+                'Clientes CAC' => [
+                    'html' => number_format($clientes),
+                    'class' => 'text-center'
+                ]
+            ];
+        }
+
+        // Agregar fila de totales
+        if (!empty($__row)) {
+            $__row[] = [
+                'id' => 'total',
+                'Mes' => '',
+                'Campaña' => '',
+                'Anuncio' => '',
+                'Plataforma' => '<strong>TOTAL</strong>',
+                'Inversión Total' => [
+                    'html' => '<strong>$' . number_format($totalInversion, 2) . '</strong>',
+                    'class' => 'text-end bg-light'
+                ],
+                'Clientes CAC' => [
+                    'html' => '<strong>' . number_format($totalClientes) . '</strong>',
+                    'class' => 'text-center bg-light'
+                ]
+            ];
+        }
+
+        return [
+            'row' => $__row,
+            'ls' => $ls
+        ];
+    }
+
+    // Resumen de Campaña
+
+    function lsResumenCampana() {
+        $__row = [];
+        $udn = $_POST['udn'] ?? null;
+        $mes = $_POST['mes'] ?? date('n');
+        $anio = $_POST['anio'] ?? date('Y');
+        $redSocial = $_POST['red_social'] ?? null;
+
+        $ls = $this->getResumenCampana([$udn, $mes, $anio, $redSocial]);
+
+        $totalInversion = 0;
+        $totalClics = 0;
+        $totalCPC = 0;
+        $contador = 0;
+
+        foreach ($ls as $key) {
+            $inversion = floatval($key['inversion']);
+            $clics = intval($key['clic']);
+            $cpc = floatval($key['cpc']);
+            
+            $totalInversion += $inversion;
+            $totalClics += $clics;
+            $totalCPC += $cpc;
+            $contador++;
+
+            // Calcular duración
+            $fechaInicio = new DateTime($key['start_date']);
+            $fechaFin = new DateTime($key['end_date']);
+            $duracion = $fechaInicio->diff($fechaFin)->days + 1;
+
+            $__row[] = [
+                'id' => $key['id'],
+                'Campaña' => $key['campaign_name'],
+                'Anuncio' => $key['ad_name'],
+                'Duración' => $fechaInicio->format('d/m/Y') . ' - ' . $fechaFin->format('d/m/Y') . ' DÍAS: ' . $duracion,
+                'Tipo' => $key['type_name'] ?? '-',
+                'Clasificación' => $key['classification_name'] ?? '-',
+                'Inversión' => [
+                    'html' => '$' . number_format($inversion, 2),
+                    'class' => 'text-end'
+                ],
+                'Clic' => [
+                    'html' => number_format($clics),
+                    'class' => 'text-center'
+                ],
+                'CPC' => [
+                    'html' => '$' . number_format($cpc, 2),
+                    'class' => 'text-end'
+                ]
+            ];
+        }
+
+        // Agregar fila de totales y promedios
+        if (!empty($__row)) {
+            $promedioCPC = $contador > 0 ? $totalCPC / $contador : 0;
+            
+            $__row[] = [
+                'id' => 'total',
+                'Campaña' => '<strong>TOTALES/PROMEDIOS</strong>',
+                'Anuncio' => '',
+                'Duración' => '',
+                'Tipo' => '',
+                'Clasificación' => '',
+                'Inversión' => [
+                    'html' => '<strong>$' . number_format($totalInversion, 2) . '</strong>',
+                    'class' => 'text-end bg-light'
+                ],
+                'Clic' => [
+                    'html' => '<strong>' . number_format($totalClics) . '</strong>',
+                    'class' => 'text-center bg-light'
+                ],
+                'CPC' => [
+                    'html' => '<strong>$' . number_format($promedioCPC, 2) . '</strong>',
+                    'class' => 'text-end bg-light'
+                ]
+            ];
+        }
+
+        return [
+            'row' => $__row,
+            'ls' => $ls
+        ];
+    }
 }
 
 // Complements
