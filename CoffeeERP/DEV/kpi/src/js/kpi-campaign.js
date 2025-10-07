@@ -16,6 +16,7 @@ $(async () => {
     ads = new Ads(api_campaign, "root");
 
     campaign.init();
+    ads.render();
 });
 
 class Campaign extends Templates {
@@ -71,6 +72,7 @@ class Campaign extends Templates {
                 {
                     id: "anuncios",
                     tab: "Anuncios",
+                    active: true,
                     onClick: () => this.renderAnuncios()
                 },
                 {
@@ -87,7 +89,7 @@ class Campaign extends Templates {
                     id: "administrador",
                     tab: "Administrador",
                     onClick: () => campaignTypes.render(),
-                    active: true,
+                    
                 }
             ]
         });
@@ -861,7 +863,7 @@ class Ads extends Templates {
                             <label class="form-label small">Tipo de anuncio</label>
                             <select class="form-select form-select-sm ad-type" data-field="type_id">
                                 <option value="">Publicación</option>
-                                ${typesList.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
+                                ${typesList.map(t => `<option value="${t.id}">${t.valor}</option>`).join('')}
                             </select>
                         </div>
 

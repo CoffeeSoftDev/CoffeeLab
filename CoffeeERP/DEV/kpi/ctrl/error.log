@@ -1,3 +1,391 @@
+[ 2025-10-07 08:50:31 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT idUDN as id, UDN as valor, Abreviatura FROM rfwsmqex_gvsl_finanzas.udn   WHERE Stado = 1  ORDER BY UDN ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.udn' doesn't exist
+
+
+[ 2025-10-07 07:22:02 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 07:22:01 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaigns.social_network,
+                campaign_ad_results.total_spent as inversion_total,
+                campaign_ad_results.total_clicks as clics_cpc,
+                MONTHNAME(campaign_ads.start_date) as mes_nombre
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaign_ads.start_date ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 07:21:59 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 07:21:58 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 07:05:57 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 07:05:55 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 07:05:10 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 07:05:09 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 07:03:35 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 07:03:35 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 07:03:33 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 07:03:32 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 07:02:48 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 07:02:37 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 07:02:33 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 07:02:32 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 07:02:28 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 07:02:21 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 07:01:16 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 06:58:28 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT * FROM rfwsmqex_kpi.campaign_ad_results   WHERE ad_id = ?  ORDER BY date_recorded DESC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 06:45:08 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT * FROM rfwsmqex_kpi.campaign_ad_results   WHERE ad_id = ?  ORDER BY date_recorded DESC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 06:43:35 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT * FROM rfwsmqex_kpi.campaign_ad_results   WHERE ad_id = ?  ORDER BY date_recorded DESC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 06:43:29 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT * FROM rfwsmqex_kpi.campaign_ad_results   WHERE ad_id = ?  ORDER BY date_recorded DESC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 06:43:21 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  INSERT INTO rfwsmqex_kpi.campaign_ad_results (total_spent,total_clicks,total_results,ad_id,id,date_creation,date_recorded,cost_per_result) VALUES (?,?,?,?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-07 06:42:54 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT * FROM rfwsmqex_kpi.campaign_ad_results   WHERE ad_id = ?  ORDER BY date_recorded DESC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
 <<<<<<< HEAD
 [ 2025-10-07 06:23:25 ]
 [ UNIX_USR ] :: nt authority\system

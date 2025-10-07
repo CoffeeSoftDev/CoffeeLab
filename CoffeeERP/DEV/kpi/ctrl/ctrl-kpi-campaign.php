@@ -304,27 +304,26 @@ class ctrl extends mdl {
             ];
 
             $a[] = [
-                'class' => 'btn btn-sm btn-success',
-                'html' => '<i class="icon-chart-bar"></i>',
+                'class' => 'btn btn-sm bg-orange-500 hover:bg-orange-700 text-white',
+                'html' => '<i class="icon-dollar"></i>',
                 'onclick' => 'ads.showResults(' . $key['id'] . ')'
             ];
 
             $imageHtml = !empty($key['image']) 
-                ? '<img src="' . $key['image'] . '" class="w-12 h-12 py-2 object-cover rounded" />' 
-                : '<div class="w-12 h-12 bg-gray-300 rounded flex items-center justify-center"><i class="icon-image text-gray-500"></i></div>';
+                ? '<div class="flex justify-center items-center p-2"><img src="' . $key['image'] . '" class="w-16 h-16 object-cover rounded-lg shadow-sm" /></div>' 
+                : '<div class="flex justify-center items-center p-2"><div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300"><i class=" icon-picture text-gray-400 text-xl"></i></div></div>';
 
             $__row[] = [
-                'id' => $key['id'],
-                'Imagen' => ['html' => $imageHtml, 'class' => 'text-center'],
-                'Título' => $key['title'],
-                'Subtítulo' => $key['subtitle'],
-                'Campaña' => $key['campaign_name'],
-                'Anuncio' => $key['ad_name'],
+                'id'            => $key['id'],
+                'Imagen'        => ['html' => $imageHtml, 'class' => 'text-center'],
+           
+                'Campaña'       => $key['campaign_name'],
+                'Anuncio'       => $key['ad_name'],
                 'Clasificación' => $key['classification_name'],
-                'Tipo' => $key['type_name'],
-                'Fecha Inicio' => formatSpanishDate($key['start_date']),
-                'Fecha Final' => formatSpanishDate($key['end_date']),
-                'a' => $a
+                'Tipo'          => $key['type_name'],
+                'Fecha Inicio'  => formatSpanishDate($key['start_date']),
+                'Fecha Final'   => formatSpanishDate($key['end_date']),
+                'a'             => $a
             ];
         }
 
@@ -700,7 +699,7 @@ class ctrl extends mdl {
         $anio = $_POST['anio'] ?? date('Y');
         $redSocial = $_POST['red_social'] ?? null;
 
-        $ls = $this->getResumenCampana([$udn, $mes, $anio, $redSocial]);
+        $ls = $this->getResumenByCampana([$udn, $mes, $anio, $redSocial]);
 
         $totalInversion = 0;
         $totalClics = 0;

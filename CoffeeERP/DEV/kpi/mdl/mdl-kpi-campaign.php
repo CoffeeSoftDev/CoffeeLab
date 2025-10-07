@@ -17,7 +17,7 @@ class mdl extends CRUD {
     function listCampaignTypes($array) {
         return $this->_Select([
             'table' => "{$this->bd}campaign_types",
-            'values' => "id, name, udn_id, description, active, DATE_FORMAT(date_creation, '%d/%m/%Y') as date_creation",
+            'values' => "id, name as valor,name, udn_id, description, active, DATE_FORMAT(date_creation, '%d/%m/%Y') as date_creation",
             'where' => 'active = ? AND udn_id = ?',
             'order' => ['DESC' => 'id'],
             'data' => $array
@@ -120,7 +120,7 @@ class mdl extends CRUD {
 
     function lsUDN() {
         return $this->_Select([
-            'table' => "rfwsmqex_gvsl.udn",
+            'table' => "rfwsmqex_gvsl_finanzas.udn",
             'values' => "idUDN as id, UDN as valor, Abreviatura",
             'where' => 'Stado = 1',
             'order' => ['ASC' => 'UDN']
@@ -238,10 +238,10 @@ class mdl extends CRUD {
             'data' => $array['data']
         ]);
     }
-}
-    // Reportes Historial Anual
 
-    function getReporteCPC($array) {
+      // Reportes Historial Anual
+
+      function getReporteCPC($array) {
         $leftjoin = [
             $this->bd . 'campaigns' => 'campaign_ads.campaign_id = campaigns.id',
             $this->bd . 'campaign_ad_results' => 'campaign_ads.id = campaign_ad_results.ad_id',
@@ -325,7 +325,7 @@ class mdl extends CRUD {
 
     // Resumen de Campaña
 
-    function getResumenCampana($array) {
+    function getResumenByCampana($array) {
         $leftjoin = [
             $this->bd . 'campaigns' => 'campaign_ads.campaign_id = campaigns.id',
             $this->bd . 'campaign_ad_results' => 'campaign_ads.id = campaign_ad_results.ad_id',
@@ -373,3 +373,5 @@ class mdl extends CRUD {
             'data' => $params
         ]);
     }
+}
+  
