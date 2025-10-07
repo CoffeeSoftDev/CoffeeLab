@@ -19,12 +19,11 @@ const api = "../pedidos/ctrl/ctrl-admin.php";
 
 $(async () => {
 
-    const data = await useFetch({ url: api, data: { opc: "init" } });
-    cat  = data.category;
-
-    app      = new App(api, "root");
-    category = new Category(api, "root");
-    client  = new Client(api, "root");
+    const data     = await useFetch({ url: api, data: { opc: "init" } });
+          cat      = data.category;
+          app      = new App(api, "root");
+          category = new Category(api, "root");
+          client   = new Client(api, "root");
     app.render();
 
 });
