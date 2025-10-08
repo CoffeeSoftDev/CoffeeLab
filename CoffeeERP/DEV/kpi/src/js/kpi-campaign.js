@@ -16,6 +16,7 @@ $(async () => {
     ads = new Ads(api_campaign, "root");
 
     campaign.init();
+    ads.render();
 });
 
 class Campaign extends Templates {
@@ -66,11 +67,12 @@ class Campaign extends Templates {
                     tab: "Dashboard",
                     class: 'mb-1',
                     onClick: () => this.renderDashboard(),
-                    
+
                 },
                 {
                     id: "anuncios",
                     tab: "Anuncios",
+                    active: true,
                     onClick: () => this.renderAnuncios()
                 },
                 {
@@ -87,7 +89,7 @@ class Campaign extends Templates {
                     id: "administrador",
                     tab: "Administrador",
                     onClick: () => campaignTypes.render(),
-                    active: true,
+                    
                 }
             ]
         });
@@ -114,29 +116,220 @@ class Campaign extends Templates {
     renderResumen() {
         const container = $("#container-resumen");
         container.html(`
-            <div class="p-6">
-                <div class="bg-[#1F2A37] rounded-lg p-6 text-center">
-                    <i class="icon-file-text text-6xl text-purple-400 mb-4"></i>
-                    <h3 class="text-xl font-semibold text-white mb-2">Resumen de Campaña</h3>
-                    <p class="text-gray-400">Consulta el rendimiento detallado de cada campaña</p>
-                    <p class="text-sm text-gray-500 mt-4">En desarrollo...</p>
-                </div>
+            <div id="resumen-header" class="px-4 pt-3 pb-3">
+                <h2 class="text-2xl font-semibold">📈 Resumen de Campaña</h2>
+                <p class="text-gray-400">Reporte desglosado de datos por campaña.</p>
             </div>
+            <div id="filterbar-resumen" class="mb-2 px-4"></div>
+            <div id="tabla-resumen" class="px-4"></div>
         `);
+
+        this.filterBarResumen();
+        this.lsResumenCampana();
+    }
+
+    filterBarResumen() {
+        const currentYear = new Date().getFullYear();
+        const currentMonth = new Date().getMonth() + 1;
+
+        this.createfilterBar({
+            parent: "filterbar-resumen",
+            data: [
+                {
+                    opc: "select",
+                    id: "udn",
+                    lbl: "Unidad de Negocio",
+                    class: "col-12 col-md-3",
+                    data: udnList,
+                    onchange: 'campaign.lsResumenCampana()'
+                },
+                {
+                    opc: "select",
+                    id: "mes",
+                    lbl: "Mes",
+                    class: "col-12 col-md-2",
+                    data: [
+                        { id: 1, valor: "Enero" },
+                        { id: 2, valor: "Febrero" },
+                        { id: 3, valor: "Marzo" },
+                        { id: 4, valor: "Abril" },
+                        { id: 5, valor: "Mayo" },
+                        { id: 6, valor: "Junio" },
+                        { id: 7, valor: "Julio" },
+                        { id: 8, valor: "Agosto" },
+                        { id: 9, valor: "Septiembre" },
+                        { id: 10, valor: "Octubre" },
+                        { id: 11, valor: "Noviembre" },
+                        { id: 12, valor: "Diciembre" }
+                    ],
+                    valor: currentMonth,
+                    onchange: 'campaign.lsResumenCampana()'
+                },
+                {
+                    opc: "select",
+                    id: "anio",
+                    lbl: "Año",
+                    class: "col-12 col-md-2",
+                    data: Array.from({ length: 5 }, (_, i) => {
+                        const year = currentYear - i;
+                        return { id: year, valor: year.toString() };
+                    }),
+                    valor: currentYear,
+                    onchange: 'campaign.lsResumenCampana()'
+                },
+                {
+                    opc: "select",
+                    id: "red_social",
+                    lbl: "Red Social",
+                    class: "col-12 col-md-3",
+                    data: [
+                        { id: "", valor: "Todas las redes" },
+                        ...socialNetworksList
+                    ],
+                    onchange: 'campaign.lsResumenCampana()'
+                },
+                {
+                    opc: "button",
+                    class: "col-12 col-md-2",
+                    id: "btnBuscarResumen",
+                    text: "Buscar",
+                    onClick: () => this.lsResumenCampana(),
+                },
+            ],
+        });
+    }
+
+    lsResumenCampana() {
+        this.createTable({
+            parent: "tabla-resumen",
+            idFilterBar: "filterbar-resumen",
+            data: { opc: "lsResumenCampana" },
+            coffeesoft: true,
+            conf: { datatable: true, pag: 15 },
+            attr: {
+                id: "tbResumen",
+                theme: 'corporativo',
+                title: "📈 Resumen de Campaña",
+                subtitle: "Reporte desglosado de los datos por campaña",
+                center: [2, 5, 6, 7, 8],
+                right: [5, 6, 7, 8]
+            },
+        });
     }
 
     renderHistorial() {
         const container = $("#container-historial");
         container.html(`
-            <div class="p-6">
-                <div class="bg-[#1F2A37] rounded-lg p-6 text-center">
-                    <i class="icon-calendar text-6xl text-orange-400 mb-4"></i>
-                    <h3 class="text-xl font-semibold text-white mb-2">Historial Anual</h3>
-                    <p class="text-gray-400">Revisa el histórico de campañas por año</p>
-                    <p class="text-sm text-gray-500 mt-4">En desarrollo...</p>
-                </div>
+            <div id="historial-header" class="px-4 pt-3 pb-3">
+                <h2 class="text-2xl font-semibold">📊 Historial Anual</h2>
+                <p class="text-gray-400">Reportes CPC y CAC por período.</p>
             </div>
+            <div id="filterbar-historial" class="mb-2 px-4"></div>
+            <div id="tabla-historial" class="px-4"></div>
         `);
+
+        this.filterBarHistorial();
+        this.lsHistorialReports();
+    }
+
+    filterBarHistorial() {
+        const currentYear = new Date().getFullYear();
+        const currentMonth = new Date().getMonth() + 1;
+
+        this.createfilterBar({
+            parent: "filterbar-historial",
+            data: [
+                {
+                    opc: "select",
+                    id: "udn",
+                    lbl: "Unidad de Negocio",
+                    class: "col-12 col-md-2",
+                    data: udnList,
+                    onchange: 'campaign.lsHistorialReports()'
+                },
+                {
+                    opc: "select",
+                    id: "mes",
+                    lbl: "Mes",
+                    class: "col-12 col-md-2",
+                    data: [
+                        { id: 1, valor: "Enero" },
+                        { id: 2, valor: "Febrero" },
+                        { id: 3, valor: "Marzo" },
+                        { id: 4, valor: "Abril" },
+                        { id: 5, valor: "Mayo" },
+                        { id: 6, valor: "Junio" },
+                        { id: 7, valor: "Julio" },
+                        { id: 8, valor: "Agosto" },
+                        { id: 9, valor: "Septiembre" },
+                        { id: 10, valor: "Octubre" },
+                        { id: 11, valor: "Noviembre" },
+                        { id: 12, valor: "Diciembre" }
+                    ],
+                    valor: currentMonth,
+                    onchange: 'campaign.lsHistorialReports()'
+                },
+                {
+                    opc: "select",
+                    id: "anio",
+                    lbl: "Año",
+                    class: "col-12 col-md-2",
+                    data: Array.from({ length: 5 }, (_, i) => {
+                        const year = currentYear - i;
+                        return { id: year, valor: year.toString() };
+                    }),
+                    valor: currentYear,
+                    onchange: 'campaign.lsHistorialReports()'
+                },
+                {
+                    opc: "select",
+                    id: "tipo_reporte",
+                    lbl: "Tipo de Reporte",
+                    class: "col-12 col-md-3",
+                    data: [
+                        { id: "CPC", valor: "Reporte CPC" },
+                        { id: "CAC", valor: "Reporte CAC" }
+                    ],
+                    valor: "CPC",
+                    onchange: 'campaign.lsHistorialReports()'
+                },
+                {
+                    opc: "button",
+                    class: "col-12 col-md-2",
+                    id: "btnBuscarHistorial",
+                    text: "Buscar",
+                    onClick: () => this.lsHistorialReports(),
+                },
+            ],
+        });
+    }
+
+    lsHistorialReports() {
+        const tipoReporte = $('#filterbar-historial #tipo_reporte').val() || 'CPC';
+
+        let tableConfig = {
+            parent: "tabla-historial",
+            idFilterBar: "filterbar-historial",
+            data: { opc: tipoReporte === 'CPC' ? "lsReporteCPC" : "lsReporteCAC" },
+            coffeesoft: true,
+            conf: { datatable: true, pag: 15 },
+            attr: {
+                id: "tbHistorial",
+                theme: 'corporativo',
+                center: [0, 4, 5],
+                right: [4, 5]
+            },
+        };
+
+        if (tipoReporte === 'CPC') {
+            tableConfig.attr.title = "📊 Anuncios por CPC";
+            tableConfig.attr.subtitle = "Detalle de cada anuncio y su inversión total";
+        } else {
+            tableConfig.attr.title = "📊 Anuncios por CAC";
+            tableConfig.attr.subtitle = "Detalle de cada anuncio, inversión y clientes adquiridos";
+        }
+
+        this.createTable(tableConfig);
     }
 }
 
@@ -163,7 +356,7 @@ class CampaignTypes extends Templates {
             parent: "admin-tabs",
             id: "tabsAdmin",
             content: { class: "" },
-           
+
             type: 'short',
             json: [
                 {
@@ -575,7 +768,7 @@ class Ads extends Templates {
         const currentDate = new Date();
         const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
         const fifteenthDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 15);
-        
+
         const formatDate = (date) => {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -670,7 +863,7 @@ class Ads extends Templates {
                             <label class="form-label small">Tipo de anuncio</label>
                             <select class="form-select form-select-sm ad-type" data-field="type_id">
                                 <option value="">Publicación</option>
-                                ${typesList.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
+                                ${typesList.map(t => `<option value="${t.id}">${t.valor}</option>`).join('')}
                             </select>
                         </div>
 
@@ -712,7 +905,7 @@ class Ads extends Templates {
             const currentDate = new Date();
             const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
             const fifteenthDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 15);
-            
+
             const formatDate = (date) => {
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -729,16 +922,16 @@ class Ads extends Templates {
 
     initAdCardEvents() {
         // Click en área de imagen
-        $('.ad-image-upload').off('click').on('click', function() {
+        $('.ad-image-upload').off('click').on('click', function () {
             $(this).find('.ad-image-input').click();
         });
 
         // Cambio de imagen
-        $('.ad-image-input').off('change').on('change', function(e) {
+        $('.ad-image-input').off('change').on('change', function (e) {
             const file = e.target.files[0];
             if (file) {
                 const reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     const $upload = $(this).closest('.ad-image-upload');
                     $upload.html(`
                         <img src="${e.target.result}" class="img-fluid rounded" style="max-height: 150px;">
@@ -751,7 +944,7 @@ class Ads extends Templates {
         });
 
         // Botón eliminar anuncio
-        $('.btn-delete-ad').off('click').on('click', function() {
+        $('.btn-delete-ad').off('click').on('click', function () {
             if ($('.ad-card').length > 1) {
                 $(this).closest('.ad-card').remove();
             } else {
@@ -760,10 +953,10 @@ class Ads extends Templates {
         });
 
         // Botón actualizar anuncio (validación individual)
-        $('.btn-update-ad').off('click').on('click', function() {
+        $('.btn-update-ad').off('click').on('click', function () {
             const $card = $(this).closest('.ad-card');
             const adName = $card.find('.ad-name').val();
-            
+
             if (!adName) {
                 alert({ icon: "warning", text: "El nombre del anuncio es requerido" });
                 return;
@@ -781,7 +974,7 @@ class Ads extends Templates {
             ads: []
         };
 
-        $('.ad-card').each(function() {
+        $('.ad-card').each(function () {
             const adData = {
                 ad_name: $(this).find('.ad-name').val(),
                 start_date: $(this).find('.ad-start-date').val(),

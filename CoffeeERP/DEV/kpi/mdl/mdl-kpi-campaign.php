@@ -17,7 +17,7 @@ class mdl extends CRUD {
     function listCampaignTypes($array) {
         return $this->_Select([
             'table' => "{$this->bd}campaign_types",
-            'values' => "id, name, udn_id, description, active, DATE_FORMAT(date_creation, '%d/%m/%Y') as date_creation",
+            'values' => "id, name as valor,name, udn_id, description, active, DATE_FORMAT(date_creation, '%d/%m/%Y') as date_creation",
             'where' => 'active = ? AND udn_id = ?',
             'order' => ['DESC' => 'id'],
             'data' => $array
@@ -120,7 +120,7 @@ class mdl extends CRUD {
 
     function lsUDN() {
         return $this->_Select([
-            'table' => "rfwsmqex_gvsl.udn",
+            'table' => "rfwsmqex_gvsl_finanzas.udn",
             'values' => "idUDN as id, UDN as valor, Abreviatura",
             'where' => 'Stado = 1',
             'order' => ['ASC' => 'UDN']
@@ -238,4 +238,140 @@ class mdl extends CRUD {
             'data' => $array['data']
         ]);
     }
+
+      // Reportes Historial Anual
+
+      function getReporteCPC($array) {
+        $leftjoin = [
+            $this->bd . 'campaigns' => 'campaign_ads.campaign_id = campaigns.id',
+            $this->bd . 'campaign_ad_results' => 'campaign_ads.id = campaign_ad_results.ad_id',
+            $this->bd . 'campaign_types' => 'campaign_ads.type_id = campaign_types.id'
+        ];
+
+        $whereClause = "campaign_ads.active = 1";
+        $params = [];
+
+        if (!empty($array[0])) {
+            $whereClause .= " AND campaigns.udn_id = ?";
+            $params[] = $array[0];
+        }
+        if (!empty($array[1])) {
+            $whereClause .= " AND MONTH(campaign_ads.start_date) = ?";
+            $params[] = $array[1];
+        }
+        if (!empty($array[2])) {
+            $whereClause .= " AND YEAR(campaign_ads.start_date) = ?";
+            $params[] = $array[2];
+        }
+
+        return $this->_Select([
+            'table' => "{$this->bd}campaign_ads",
+            'values' => "
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaigns.social_network,
+                campaign_ad_results.total_spent as inversion_total,
+                campaign_ad_results.total_clicks as clics_cpc,
+                MONTHNAME(campaign_ads.start_date) as mes_nombre
+            ",
+            'leftjoin' => $leftjoin,
+            'where' => $whereClause,
+            'order' => ['ASC' => 'campaign_ads.start_date'],
+            'data' => $params
+        ]);
+    }
+
+    function getReporteCAC($array) {
+        $leftjoin = [
+            $this->bd . 'campaigns' => 'campaign_ads.campaign_id = campaigns.id',
+            $this->bd . 'campaign_ad_results' => 'campaign_ads.id = campaign_ad_results.ad_id',
+            $this->bd . 'campaign_types' => 'campaign_ads.type_id = campaign_types.id'
+        ];
+
+        $whereClause = "campaign_ads.active = 1";
+        $params = [];
+
+        if (!empty($array[0])) {
+            $whereClause .= " AND campaigns.udn_id = ?";
+            $params[] = $array[0];
+        }
+        if (!empty($array[1])) {
+            $whereClause .= " AND MONTH(campaign_ads.start_date) = ?";
+            $params[] = $array[1];
+        }
+        if (!empty($array[2])) {
+            $whereClause .= " AND YEAR(campaign_ads.start_date) = ?";
+            $params[] = $array[2];
+        }
+
+        return $this->_Select([
+            'table' => "{$this->bd}campaign_ads",
+            'values' => "
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaigns.social_network,
+                campaign_ad_results.total_spent as inversion_total,
+                campaign_ad_results.total_results as clientes_cac,
+                MONTHNAME(campaign_ads.start_date) as mes_nombre
+            ",
+            'leftjoin' => $leftjoin,
+            'where' => $whereClause,
+            'order' => ['ASC' => 'campaign_ads.start_date'],
+            'data' => $params
+        ]);
+    }
+
+    // Resumen de Campaña
+
+    function getResumenByCampana($array) {
+        $leftjoin = [
+            $this->bd . 'campaigns' => 'campaign_ads.campaign_id = campaigns.id',
+            $this->bd . 'campaign_ad_results' => 'campaign_ads.id = campaign_ad_results.ad_id',
+            $this->bd . 'campaign_types' => 'campaign_ads.type_id = campaign_types.id',
+            $this->bd . 'campaign_classification' => 'campaign_ads.classification_id = campaign_classification.id'
+        ];
+
+        $whereClause = "campaign_ads.active = 1";
+        $params = [];
+
+        if (!empty($array[0])) {
+            $whereClause .= " AND campaigns.udn_id = ?";
+            $params[] = $array[0];
+        }
+        if (!empty($array[1])) {
+            $whereClause .= " AND MONTH(campaign_ads.start_date) = ?";
+            $params[] = $array[1];
+        }
+        if (!empty($array[2])) {
+            $whereClause .= " AND YEAR(campaign_ads.start_date) = ?";
+            $params[] = $array[2];
+        }
+        if (!empty($array[3])) {
+            $whereClause .= " AND campaigns.social_network = ?";
+            $params[] = $array[3];
+        }
+
+        return $this->_Select([
+            'table' => "{$this->bd}campaign_ads",
+            'values' => "
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+            ",
+            'leftjoin' => $leftjoin,
+            'where' => $whereClause,
+            'order' => ['ASC' => 'campaigns.name, campaign_ads.ad_name'],
+            'data' => $params
+        ]);
+    }
 }
+  
