@@ -263,13 +263,13 @@ class Pedidos extends MPedidos{
             $discount    = $orderData['discount'] ?? 0;
             $total       = $orderData['total_pay'] ?? 0;
             $saldo       = $total - $discount - $totalPagado;
+            $products =[];
             
             // Obtener productos del pedido (si existen tablas relacionadas)
             $products = $this->getOrderById([$orderId]);
-            
             // Validar que products sea un array válido
-            if (!is_array($products)) {
-                $products = [];
+            if ($products === null) {
+                $products = ['data' => ''];
             }
             
             $data = [

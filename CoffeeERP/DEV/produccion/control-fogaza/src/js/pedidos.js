@@ -191,7 +191,7 @@ class App extends Templates {
                 title: `
                 <div class="flex items-center gap-2  text-lg font-semibold">
                     <i class="icon-dollar text-blue-400 text-xl"></i>
-                   TERMINAR TICKET DE VENTA
+                   CERRAR TICKET DE VENTA
                 </div>`,
                 id: "registerPaymentModal",
                 size: "medium"
@@ -199,56 +199,87 @@ class App extends Templates {
             data: { opc: 'endTicket', Total: numero, idFolio: $("#NoFolio").val() },
             json: [
                 {
-                    opc: "div",
-                    id: "Amount",
+                    opc  : "div",
+                    id   : "Amount",
                     class: "col-12",
                     html: `
-                    <div id="dueAmount" class="p-4 rounded-xl  text-center border border-gray-700">
-                        <p class="text-sm opacity-80">Monto a pagar</p>
-                        <p id="SaldoEvent" class="text-3xl font-bold mt-1">
-                            $${numero}
-                        </p>
+                        <div class="rounded-xl p-4 mb-2 border border-gray-600">
+                            <div class="flex justify-between items-center mb-2 ">
+                                <span class="text-sm">Precio original:</span>
+                                <span class="font-medium">$<span id="originalPrice">${numero.toFixed(2)}</span></span>
+                            </div>
+                            <div class="flex justify-between items-center mb-2 text-red-400">
+                                <span class="text-sm font-semibold">Descuento:</span>
+                                <span class="font-medium">-$<span id="discountAmount">0.00</span></span>
+                            </div>
+                            <div class="flex justify-between items-center pt-2 mt-2 border-t border-gray-200 ">
+                                <span class="text-base font-semibold">Total a pagar:</span>
+                                <span class="text-lg font-bold">$<span id="finalPrice">${numero.toFixed(2)}</span></span>
+                            </div>
+                        </div>
+                        <div id="dueAmount" class="p-4 rounded-xl text-center border border-gray-700 mt-3 hidden">
+                            <p class="text-sm opacity-80">Monto a pagar</p>
+                            <p id="SaldoEvent" class="text-3xl font-bold mt-1">
+                                $${numero}
+                            </p>
+                        </div> `
+                },
+
+                {
+                    opc        : "input-group",
+                    lbl        : "Descuento",
+                    id         : "descuento",
+                    tipo       : "cifra",
+                    icon       : "icon-percent",
+                    class      : "col-12 py-2",
+                    placeholder: "0.00",
+                    required   : false,
+                    onkeyup    : "calculateWithDiscount()"
+                },
+
+
+
+                {
+                    opc: "div",
+                    id: "paymentToggle",
+                    class: "col-12 mb-2",
+                    html: `
+                    <div class="flex items-center justify-between p-3 rounded-lg border border-gray-700">
+
+                        <div class="flex items-center gap-2">
+                            <i id="iconPaymentFields" class="icon-eye text-gray-400 transition-colors duration-200"></i>
+                            <label id="labelPaymentFields" class="text-sm">Mostrar campos de pago detallados</label>
+                        </div>
+                        <label class="inline-flex items-center cursor-pointer relative">
+                            <input type="checkbox" id="togglePaymentFields" class="sr-only peer" onchange="toggleFields(this.checked)">
+                            <div class="w-11 h-6 bg-gray-700 peer-checked:bg-blue-600 rounded-full transition-colors duration-300"></div>
+                            <div class="absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
+                        </label>
                     </div> `
                 },
 
-                {
-                    opc: "div",
-                    id: "anticipoSwitch",
-                    class: "col-12 mb-2",
-                    html: `
-                    <div   class = "flex items-center justify-between  p-3 rounded-lg border border-gray-700 ">
-                        <div   class = "flex items-center gap-2">
-                        <i     id    = "iconAnticipo" class  = "icon-minus-square text-gray-400 transition-colors duration-200"></i>
-                        <label id    = "labelAnticipo" class = "text-sm">Dejar abono</label>
-                        </div>
-                        <label class = "inline-flex items-center cursor-pointer relative">
-                        <input type  = "checkbox" id = "toggleAnticipo" class = "sr-only peer" onchange = "normal.toggleExtraFields()">
-                        <div   class = "w-11 h-6 bg-gray-700 peer-checked:bg-blue-600 rounded-full transition-colors duration-300"></div>
-                        <div   class = "absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform duration-300 peer-checked:translate-x-5"></div>
-                        </label>
-                    </div>`
-                },
+            
 
                 {
-                    opc        : 'input-group',
-                    lbl        : 'Efectivo',
-                    id         : 'efectivo',
-                    tipo       : 'cifra',
-                    icon       : 'icon-dollar',
-                    class      : 'col-sm-12 col-12 py-2',
+                    opc: 'input-group',
+                    lbl: 'Efectivo',
+                    id: 'efectivo',
+                    tipo: 'cifra',
+                    icon: 'icon-dollar',
+                    class: 'col-sm-12 col-12 mb-2',
                     placeholder: '0.00',
-                    required   : false,
-                    onkeyup    : 'CalculoDiferencia()'
+                    required: false,
+                    onkeyup: 'CalculoDiferencia()'
                 },
                 {
-                    opc        : 'input-group',
-                    lbl        : 'Transferencia',
-                    id         : 'tdc',
-                    tipo       : 'cifra',
-                    icon       : 'icon-dollar',
-                    class      : 'col-sm-12 col-12 py-2',
-                    onkeyup    : 'CalculoDiferencia()',
-                    required   : false,
+                    opc: 'input-group',
+                    lbl: 'Transferencia',
+                    id: 'tdc',
+                    tipo: 'cifra',
+                    icon: 'icon-dollar',
+                    class: 'col-sm-12 col-12 mb-2',
+                    onkeyup: 'CalculoDiferencia()',
+                    required: false,
                     placeholder: '0.00',
                 },
                 {
@@ -263,6 +294,8 @@ class App extends Templates {
                     required   : false,
                     disabled   : true
                 },
+
+              
 
                 {
                     opc  : 'btn-submit',
@@ -283,9 +316,14 @@ class App extends Templates {
                 // }
             }
         });
-        $("#btnSuccess").addClass("text-white");
-        $("#btnExit").addClass("text-white");
+
+        // toogle.
+        toggleFields()
+     
+      
     }
+
+  
 
     modalPaymentMethod() {
         let numero = parseFloat($('#total').text().replace('$', ''));
@@ -814,7 +852,7 @@ class App extends Templates {
             { opc: 'input-group', lbl: 'Nombre de pedido', id: 'name', class: 'col-12 mb-2', icon: 'icon-birthday', required: false },
             { opc: 'input-group', lbl: 'No Personas', placeholder: 'Indica el número de personas', id: 'portion', class: 'col-12 mb-2', tipo: 'cifra', icon: 'icon-user-1', required: false },
             { opc: 'input-group', lbl: 'Precio', id: 'costo', class: 'col-6 mb-2', placeholder: '0.00', required: false, icon: 'icon-dollar', tipo: 'cifra' },
-            { opc: 'input-group', lbl: 'Importe base',placeholder:'0.00' ,id: 'importeBase', class: 'col-6 mb-2', tipo: 'cifra', icon: 'icon-dollar', required: false },
+            { opc: 'input-group', lbl: 'Importe base', placeholder: '0.00', id: 'importeBase', class: 'col-6 mb-2', tipo: 'cifra', icon: 'icon-dollar', required: false },
             { opc: 'input-group', lbl: 'Importe Oblea', placeholder: '0.00', id: 'importeOblea', class: 'col-6 mb-2', tipo: 'cifra', icon: 'icon-dollar', required: false },
             { opc: 'input', lbl: 'Leyenda', id: 'leyenda', class: 'col-6 mb-2' },
             { opc: 'input', lbl: 'Relleno', id: 'relleno', class: 'col-6 mb-2', required: false },
@@ -1000,10 +1038,10 @@ class App extends Templates {
 
 
             if (opts.type == 'catalog') {
-                var img       = "https://15-92.com/ERP3/src/img/default_flower.png";
+                var img = "https://15-92.com/ERP3/src/img/default_flower.png";
                 var grid_item = $('<div>', { class: ` ${opts.color} grid-item  `, onClick: element.onclick });
-                var link      = (element.attr.src) ? element.attr.src : img;
-                var imagen    = $('<img>', { src: link, class: 'col-12' });
+                var link = (element.attr.src) ? element.attr.src : img;
+                var imagen = $('<img>', { src: link, class: 'col-12' });
 
                 // add image.
                 var details = $('<div>', { class: 'col-12 div1 pointer' }).append(imagen);
@@ -1188,12 +1226,12 @@ class App extends Templates {
         let title = idCard.querySelectorAll("label")[0];
         let costo = event.currentTarget.getAttribute('costo');
         let idPedido = idCard.getAttribute('id');
-        let nombre = $("#"+idPedido+" .fw-semibold").text();
+        let nombre = $("#" + idPedido + " .fw-semibold").text();
 
-// ' + title.textContent + '  
+        // ' + title.textContent + '  
         const modal = bootbox.dialog({
             closeButton: true,
-            title: ' PASTEL BASE :   <span class="text-blue-800"> '+nombre+'  </span>',
+            title: ' PASTEL BASE :   <span class="text-blue-800"> ' + nombre + '  </span>',
             message: `<div><form id="containerForm" novalidate></form></div>`
         });
 
@@ -1413,7 +1451,7 @@ class App extends Templates {
         });
 
         this.onShowPedidos({
-            positions: [ 4, 5, 6, 7,8, 9,11]
+            positions: [4, 5, 6, 7, 8, 9, 11]
         });
 
     }
@@ -1441,7 +1479,7 @@ class App extends Templates {
         let defaults = {
             parent: 'formAddItems',
             hide: true,         // Indica si ocultar o mostrar los divs
-            positions: [ 4, 5, 6, 7,8, 9,11]
+            positions: [4, 5, 6, 7, 8, 9, 11]
         };
 
         let opts = Object.assign(defaults, options);
@@ -2250,7 +2288,7 @@ function toggleInputs(options) {
 
 
     let defaults = {
-        parent: 'modalPayment',
+        parent: 'modalRegisterPayment',
         hide: true
     };
 
@@ -2288,17 +2326,195 @@ function toggleInputs(options) {
 
 }
 
+function toggleFields(checked) {
+    const fields = ['efectivo', 'tdc', 'diferencia'];
+
+    fields.forEach(id => {
+        const parent = document.getElementById(id)?.closest('.col-sm-12, .col-12, .col-12 py-2, .col-12 mb-2');
+        if (parent) {
+            parent.style.display = checked ? 'block' : 'none';
+        }
+    });
+
+    const icon = document.getElementById("iconPaymentFields");
+    const label = document.getElementById("labelPaymentFields");
+
+    if (checked) {
+        icon?.classList.replace("icon-eye", "icon-eye-off");
+        label && (label.textContent = "Ocultar campos de pago detallados");
+    } else {
+        icon?.classList.replace("icon-eye-off", "icon-eye");
+        label && (label.textContent = "Mostrar campos de pago detallados");
+    }
+}
+
+
 function CalculoDiferencia() {
+    const efectivoInput = document.getElementById('efectivo');
+    const tdcInput = document.getElementById('tdc');
 
     let efectivo = parseFloat($("#efectivo").val());
     let tdc = parseFloat($("#tdc").val());
+
+    // Validar que no sean números negativos
+    if (efectivo < 0) {
+        efectivo = 0;
+        if (efectivoInput) efectivoInput.value = '0.00';
+    }
+    if (tdc < 0) {
+        tdc = 0;
+        if (tdcInput) tdcInput.value = '0.00';
+    }
+
     efectivo = isNaN(efectivo) ? 0 : efectivo;
     tdc = isNaN(tdc) ? 0 : tdc;
+
+    // Usar el precio final (con descuento) - SIEMPRE usar finalPrice
+    const finalPriceElement = document.getElementById('finalPrice');
+    if (!finalPriceElement) {
+        console.error('No se encontró el elemento finalPrice');
+        return;
+    }
+
+    let total = parseFloat(finalPriceElement.textContent) || 0;
     let pago = efectivo + tdc;
 
-    let total = $('#costo').val() - pago;
-    $('#diferencia').val(total);
+    // Validar que el pago no exceda el total (evitar diferencia negativa)
+    if (pago > total) {
+        // Ajustar el último campo modificado
+        const exceso = pago - total;
+        if (document.activeElement === tdcInput) {
+            tdc = Math.max(0, tdc - exceso);
+            if (tdcInput) tdcInput.value = tdc.toFixed(2);
+        } else {
+            efectivo = Math.max(0, efectivo - exceso);
+            if (efectivoInput) efectivoInput.value = efectivo.toFixed(2);
+        }
+        pago = efectivo + tdc;
+    }
 
+    let diferencia = total - pago;
+
+    // Asegurar que la diferencia nunca sea negativa
+    diferencia = Math.max(0, diferencia);
+
+    $('#diferencia').val(diferencia.toFixed(2));
+
+    // Cambiar color del campo diferencia según el valor
+    const diferenciaInput = document.getElementById('diferencia');
+    if (diferenciaInput) {
+        if (diferencia > 0) {
+            // Falta dinero - color rojo
+            diferenciaInput.style.color = '#ef4444';
+        } else {
+            // Pago exacto - color verde
+            diferenciaInput.style.color = '#22c55e';
+        }
+    }
+}
+
+function togglePaymentFieldsVisibility(show) {
+    const paymentFieldsRow = document.getElementById('paymentFieldsRow');
+    const iconPaymentFields = document.getElementById('iconPaymentFields');
+    const labelPaymentFields = document.getElementById('labelPaymentFields');
+
+    if (!paymentFieldsRow) return;
+
+    if (show) {
+        // Mostrar campos con display block (sin animación para simplicidad)
+        paymentFieldsRow.style.display = 'block';
+
+        // Cambiar icono y texto
+        iconPaymentFields.className = 'icon-eye-off text-blue-400 transition-colors duration-200';
+        labelPaymentFields.textContent = 'Ocultar campos de pago';
+
+    } else {
+        // Ocultar campos
+        paymentFieldsRow.style.display = 'none';
+
+        // Resetear valores cuando se ocultan
+        const efectivoInput = document.getElementById('efectivo');
+        const tdcInput = document.getElementById('tdc');
+        const diferenciaInput = document.getElementById('diferencia');
+        const finalPriceElement = document.getElementById('finalPrice');
+
+        if (efectivoInput) efectivoInput.value = '';
+        if (tdcInput) tdcInput.value = '';
+        if (diferenciaInput && finalPriceElement) {
+            diferenciaInput.value = finalPriceElement.textContent;
+        }
+
+        // Cambiar icono y texto
+        iconPaymentFields.className = 'icon-eye text-gray-400 transition-colors duration-200';
+        labelPaymentFields.textContent = 'Mostrar campos de pago detallados';
+    }
+}
+
+function calculateWithDiscount() {
+    const originalPriceElement = document.getElementById('originalPrice');
+    const discountInput = document.getElementById('descuento');
+    const discountAmountElement = document.getElementById('discountAmount');
+    const finalPriceElement = document.getElementById('finalPrice');
+
+    if (!originalPriceElement || !discountInput || !discountAmountElement || !finalPriceElement) {
+        return;
+    }
+
+    const originalPrice = parseFloat(originalPriceElement.textContent) || 0;
+    let discount = parseFloat(discountInput.value) || 0;
+
+    // Validar que el descuento no sea negativo
+    if (discount < 0) {
+        discount = 0;
+        discountInput.value = '0.00';
+        showDiscountError('El descuento no puede ser negativo');
+        return;
+    }
+
+    // Validar que el descuento no sea mayor al precio original
+    if (discount > originalPrice) {
+        discount = originalPrice;
+        discountInput.value = originalPrice.toFixed(2);
+        showDiscountError('El descuento no puede ser mayor al precio del pedido');
+    } else {
+        clearDiscountError();
+    }
+
+    // Calcular precio final
+    const finalPrice = originalPrice - discount;
+
+    // Actualizar elementos en la interfaz
+    discountAmountElement.textContent = discount.toFixed(2);
+    finalPriceElement.textContent = finalPrice.toFixed(2);
+
+    // Actualizar el campo diferencia si está visible
+    const diferenciaInput = document.getElementById('diferencia');
+    if (diferenciaInput) {
+        diferenciaInput.value = finalPrice.toFixed(2);
+    }
+
+    // Recalcular diferencia si hay pagos ingresados
+    CalculoDiferencia();
+}
+
+function showDiscountError(message) {
+    let errorElement = document.getElementById('discountError');
+    if (!errorElement) {
+        errorElement = document.createElement('div');
+        errorElement.id = 'discountError';
+        errorElement.className = 'text-red-500 text-sm mt-1';
+        document.getElementById('descuento').parentNode.appendChild(errorElement);
+    }
+    errorElement.textContent = message;
+    document.getElementById('descuento').classList.add('border-red-500');
+}
+
+function clearDiscountError() {
+    const errorElement = document.getElementById('discountError');
+    if (errorElement) {
+        errorElement.remove();
+    }
+    document.getElementById('descuento').classList.remove('border-red-500');
 }
 
 function formatPrice(amount, locale = 'es-MX', currency = 'MXN') {

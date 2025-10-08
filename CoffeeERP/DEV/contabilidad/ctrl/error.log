@@ -1,3 +1,10 @@
+[ 2025-10-08 17:32:53 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idRetiro AS id,ROUND(SF,2) AS sFinal,Fecha_Rembolso AS fecha FROM rfwsmqex_gvsl_finanzas2.retiros   WHERE id_UDN = ?  ORDER BY idRetiro DESC LIMIT 1
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas2.retiros' doesn't exist
+
+
 [ 2025-10-05 22:46:23 ]
 [ UNIX_USR ] :: nt authority\system
 [ WINDOWS_USR ] :: DESKTOP-O7AOGR9$

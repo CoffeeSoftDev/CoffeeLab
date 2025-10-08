@@ -1049,7 +1049,7 @@ class CatalogProduct extends Pos {
             },
 
             onExit: () => {
-                app.init();
+                app.render();
             },
 
             onClear: () => {
@@ -1688,7 +1688,7 @@ class CatalogProduct extends Pos {
             success: (response) => {
                 if (response.status == 200) {
                     alert({ icon: "success", text: response.message, btn1: true, btn1Text: "Ok" });
-                    app.init();
+                    app.render();
                 } else {
                     alert({ icon: "error", text: response.message, btn1: true, btn1Text: "Ok" });
                 }

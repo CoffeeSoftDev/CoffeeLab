@@ -91,8 +91,8 @@ class ctrl extends Pedidos{
             $costsys      = $this->getPriceByCostsys([$key['idAlmacen']]);
             $orderImage   = $this->getOrderImages([$key['id']]);
 
-            $photoCostsys = $costsys[0]['foto'] ? $costsys[0]['foto'] : '';
-            $image        = $orderImage[0]['path'] ? $orderImage[0]['path'] : $photoCostsys;
+            $photoCostsys = (isset($costsys[0]['foto']) && $costsys[0]['foto']) ? $costsys[0]['foto'] : '';
+            $image        = (isset($orderImage[0]['path']) && $orderImage[0]['path']) ? $orderImage[0]['path'] : $photoCostsys;
 
             $importeBase  = isset($getInfo[0]['importeBase']) ? floatval($getInfo[0]['importeBase']) : 0;
             $importeOblea = isset($getInfo[0]['importeOblea']) ? floatval($getInfo[0]['importeOblea']) : 0;
@@ -116,27 +116,36 @@ class ctrl extends Pedidos{
 
 
         $lsFolio = $this->getFolio([$idFolio]);
+        
+        // Verificar que $lsFolio no sea null o vacío
+        if (empty($lsFolio)) {
+            return [
+                'error' => true,
+                'message' => 'No se encontró información del folio',
+                'thead' => '',
+                'row' => [],
+                'frm_foot' => '',
+                'head' => []
+            ];
+        }
 
         $head = [
             'data' => [
-
-                'folio'       => $lsFolio['folio'],
-                'pedido'      => formatSpanishDate($lsFolio['fechapedido']),
-                'cliente'     => $lsFolio['Name_Cliente'],
-                'telefono'    => $lsFolio['Telefono'],
-                'cumple'      => formatSpanishDate($lsFolio['fechaCumple']),
-                'anticipo'    => evaluar($lsFolio['anticipo']),
-                'observacion' => $lsFolio['observacion'],
-                'estatus'     => $lsFolio['estatus'],
-                'horapedido'  => $lsFolio['horapedido'],
+                'folio'       => isset($lsFolio['folio']) ? $lsFolio['folio'] : '',
+                'pedido'      => isset($lsFolio['fechapedido']) ? formatSpanishDate($lsFolio['fechapedido']) : '',
+                'cliente'     => isset($lsFolio['Name_Cliente']) ? $lsFolio['Name_Cliente'] : '',
+                'telefono'    => isset($lsFolio['Telefono']) ? $lsFolio['Telefono'] : '',
+                'cumple'      => isset($lsFolio['fechaCumple']) ? formatSpanishDate($lsFolio['fechaCumple']) : '',
+                'anticipo'    => isset($lsFolio['anticipo']) ? evaluar($lsFolio['anticipo']) : '0.00',
+                'observacion' => isset($lsFolio['observacion']) ? $lsFolio['observacion'] : '',
+                'estatus'     => isset($lsFolio['estatus']) ? $lsFolio['estatus'] : 0,
+                'horapedido'  => isset($lsFolio['horapedido']) ? $lsFolio['horapedido'] : '',
             ],
-
             'type' => 'details'
         ];
 
-        //
-
-        $foot = $this::ticket_foot([ 'id'  => $id, 'total' => $total ,'obs' => $lsFolio['observacion'] ]);
+        $observacion = isset($lsFolio['observacion']) ? $lsFolio['observacion'] : '';
+        $foot = $this::ticket_foot([ 'id'  => $idFolio, 'total' => $total ,'obs' => $observacion ]);
 
         // Encapsular arreglos
         return [ "thead" => '', "row" => $__row,'frm_foot' => $foot ,'head' => $head];
@@ -193,6 +202,20 @@ class ctrl extends Pedidos{
             ]);
 
             $pedido  = $this->getIdPedidoByFol([$_POST['idFolio'], $_POST['id_producto']]);
+            
+            // Verificar que el pedido exista
+            if (empty($pedido) || !isset($pedido[0]['idListaProductos'])) {
+                return [
+                    'error' => true,
+                    'message' => 'No se pudo obtener información del pedido',
+                    'get' => null,
+                    'files' => [],
+                    'data_pedido' => null,
+                    'success' => false,
+                    'tipo' => $_POST['tipo']
+                ];
+            }
+            
             $ruta    = "erp_files/pedidos/pasteleria/";
             $carpeta = '../../../../' . $ruta;
 
@@ -274,7 +297,7 @@ class ctrl extends Pedidos{
         $image         = '';
 
         $listPedido    = $this->getPedidoByIdList([$_POST['idFolio'], $_POST['id']]);
-        $personalizado = !empty($listPedido[0]['personalizado']) ? 1 : 0;
+        $personalizado = (!empty($listPedido) && isset($listPedido[0]['personalizado']) && !empty($listPedido[0]['personalizado'])) ? 1 : 0;
 
 
          // add Personalizado.
@@ -415,9 +438,9 @@ class ctrl extends Pedidos{
 
         return [
             'ok' => $ok,
-            'successclient' => $success_client,
+            'successclient' => $success_client ?? null,
             'lsFolio' => $lsFolio,
-            'idFolio' => $newFolio[0]['idLista']
+            'idFolio' => (isset($newFolio[0]['idLista'])) ? $newFolio[0]['idLista'] : null
         ];
 
     }
@@ -428,25 +451,36 @@ class ctrl extends Pedidos{
         $personalizado = $this -> getInfoPersonalizado([$_POST['id_producto']]);
         $orderImages   = $this -> getOrderImages([$_POST['id_producto']]);
 
+        // Verificar que los datos existan
+        if (empty($pedido) || empty($pedido[0])) {
+            return [
+                'error' => true,
+                'message' => 'No se encontró información del pedido',
+                'producto' => null,
+                'personalizado' => null,
+                'data' => null,
+                'orderImages' => []
+            ];
+        }
+
         $data = [
-            'costo'         => $pedido[0]['costo'],
-            'importeBase'   => $personalizado[0]['importeBase'],
-            'importeOblea'  => $personalizado[0]['importeOblea'],
-            'relleno'       => $personalizado[0]['relleno'],
-            'leyenda'       => $personalizado[0]['leyenda'],
-            'personalizado' => $pedido[0]['personalizado'],
-            'observaciones' => $personalizado[0]['observaciones'],
-            'name'          => $pedido[0]['name'],
-            'portion'       => $pedido[0]['portion'],
-            'saborPan'      => $personalizado[0]['saborPan'],
+            'costo'         => isset($pedido[0]['costo']) ? $pedido[0]['costo'] : 0,
+            'importeBase'   => isset($personalizado[0]['importeBase']) ? $personalizado[0]['importeBase'] : 0,
+            'importeOblea'  => isset($personalizado[0]['importeOblea']) ? $personalizado[0]['importeOblea'] : 0,
+            'relleno'       => isset($personalizado[0]['relleno']) ? $personalizado[0]['relleno'] : '',
+            'leyenda'       => isset($personalizado[0]['leyenda']) ? $personalizado[0]['leyenda'] : '',
+            'personalizado' => isset($pedido[0]['personalizado']) ? $pedido[0]['personalizado'] : 0,
+            'observaciones' => isset($personalizado[0]['observaciones']) ? $personalizado[0]['observaciones'] : '',
+            'name'          => isset($pedido[0]['name']) ? $pedido[0]['name'] : '',
+            'portion'       => isset($pedido[0]['portion']) ? $pedido[0]['portion'] : '',
+            'saborPan'      => isset($personalizado[0]['saborPan']) ? $personalizado[0]['saborPan'] : '',
         ];
 
         return [
-            'producto'      => $pedido[0],
-            'personalizado' => $personalizado[0],
+            'producto'      => isset($pedido[0]) ? $pedido[0] : null,
+            'personalizado' => isset($personalizado[0]) ? $personalizado[0] : null,
             'data'          => $data,
-            'orderImages'   => $orderImages
-
+            'orderImages'   => $orderImages ? $orderImages : []
         ];
     }
 
@@ -576,7 +610,7 @@ class ctrl extends Pedidos{
 
     function getImageTagFromCostsys($costsys) {
 
-        $src = !empty($costsys[0]['foto']) ? 'https://erp-varoch.com/' . $costsys[0]['foto'] : '';
+        $src = (!empty($costsys) && isset($costsys[0]['foto']) && !empty($costsys[0]['foto'])) ? 'https://erp-varoch.com/' . $costsys[0]['foto'] : '';
 
         if (!empty($src)) {
             return '<img src="' . $src . '" alt="Imagen Producto" class="w-10 h-10 bg-[#233876] rounded-lg" />';

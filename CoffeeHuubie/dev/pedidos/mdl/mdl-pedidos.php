@@ -464,7 +464,29 @@ class MPedidos extends CRUD {
         ]);
     }
 
-        public function getOrderById($array) {
+    public function getOrderById($array) {
+        // $sql = "
+        //     SELECT
+        //         order_package.id as id,
+        //         order_products.`name` as name,
+        //         order_products.price,
+        //         order_package.quantity,
+        //         order_package.order_details,
+        //         order_products.description,
+        //         order_package.dedication,
+        //         order_products.image,
+        //         order_package.custom_id,
+        //         order_custom.name as custom_name,
+        //         order_custom.price as custom_price,
+        //         order_custom.price_real as custom_price_real,
+        //         order_custom.portion_qty as custom_portion_qty
+        //     FROM
+        //         {$this->bd}order_package
+        //     INNER JOIN {$this->bd}order_products ON order_package.product_id = order_products.id
+        //     LEFT JOIN {$this->bd}order_custom ON order_package.custom_id = order_custom.id
+        //     WHERE pedidos_id = ?
+        // ";
+
          $sql = "
             SELECT
                 order_package.id,
@@ -493,70 +515,64 @@ class MPedidos extends CRUD {
             WHERE
                 order_package.pedidos_id = ?
         ";
-
+        
         $products = $this->_Read($sql, $array);
-
-        // Validar que products sea un array válido
-        if (!is_array($products) || empty($products)) {
-            return [];
-        }
-
+        
         foreach ($products as &$product) {
             $product['images'] = $this->getOrderImages([$product['id']]);
-
+            
             if (!empty($product['custom_id'])) {
                 $product['is_custom'] = true;
-
+                
+                // Obtener productos personalizados (modificadores)
+                $product['customer_products'] = $this->getCustomProduct([$product['custom_id']]);
+                
                 if (!empty($product['custom_price_real'])) {
                     $product['price'] = $product['custom_price_real'];
                 } else if (!empty($product['custom_price'])) {
                     $product['price'] = $product['custom_price'];
                 }
-
+                
                 if (!empty($product['custom_name'])) {
                     $product['name'] = $product['custom_name'];
                 }
             } else {
                 $product['is_custom'] = false;
+                $product['customer_products'] = [];
             }
         }
         unset($product);
-
+        
         return $products;
     }
 
-    // public function getOrderById($array) {
-    //     $sql = "
-    //         SELECT
-    //             order_package.id,
-    //             -- 🔹 Si existe un producto normal, toma su nombre; si no, toma el del personalizado
-    //             COALESCE(order_products.name, order_custom.name) AS name,
+    function getCustomProduct($array) {
+        $query = "
+        SELECT
+                ocp.id,
+                ocp.price AS custom_price,
+                ocp.quantity,
+                ocp.details,
+                omp.`name`,
+                omp.price,
+                omp.description,
+                order_modifier.`name` as modifier_name,
+                order_modifier.isExtra
+                FROM
+                {$this->bd}order_custom_products AS ocp
+                INNER JOIN {$this->bd}order_modifier_products AS omp ON ocp.modifier_id = omp.id
+                INNER JOIN {$this->bd}order_modifier ON omp.modifier_id = order_modifier.id
+            WHERE
+                ocp.custom_id = ?
+            ORDER BY
+                ocp.id ASC
+        ";
+        
+        $result = $this->_Read($query, $array);
+        return is_array($result) ? $result : [];
+    }
 
-    //             -- 🔹 Igual para el precio
-    //             COALESCE(order_products.price, order_custom.price_real) AS price,
 
-    //             -- 🔹 Cantidad siempre viene de order_package
-    //             order_package.quantity,
-
-    //             order_package.order_details,
-    //             order_package.dedication,
-    //             order_package.product_id,
-    //             order_package.custom_id,
-
-    //             -- 🔹 Descripción e imagen, solo si existe en el producto o en el personalizado
-    //             COALESCE(order_products.description, order_custom.description) AS description,
-    //             COALESCE(order_products.image, order_custom.image) AS image
-
-    //         FROM
-    //             {$this->bd}order_package
-    //         LEFT JOIN {$this->bd}order_products ON order_package.product_id = order_products.id
-    //         LEFT JOIN {$this->bd}order_custom   ON order_package.custom_id  = order_custom.id
-    //         WHERE
-    //             order_package.pedidos_id = ?
-    //     ";
-
-    //     return $this->_Read($sql, $array);
-    // }
 
 
     public function getOrderPackageByID($array) {
