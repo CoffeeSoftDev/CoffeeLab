@@ -763,7 +763,7 @@ class Pos extends Templates {
 
         data.forEach((item, index) => {
 
-        
+
             const card = $("<div>", {
                 class: `flex justify-between items-center ${bgCard} border ${borderColor} rounded-xl p-3 shadow-sm`
             });
@@ -1224,6 +1224,7 @@ class CatalogProduct extends Pos {
         });
 
         let product = request.data;
+        const isCustom = product.custom_id && product.custom_id !== null && product.custom_id !== '';
 
         const modal = bootbox.dialog({
             closeButton: true,
@@ -1231,33 +1232,30 @@ class CatalogProduct extends Pos {
             message: `<div><form id="formEditProducto" novalidate></form></div>`
         });
 
-        this.createForm({
-            id: 'formEditProductoInternal',
-            parent: 'formEditProducto',
-            autovalidation: false,
-            autofill: product,
-            data: { opc: 'editProduct', id: id },
-            json: [
-                {
-                    opc: "input",
-                    id: "dedication",
-                    lbl: "dedicatoria",
-                    class: "col-12  mb-3",
-                },
-                {
-                    opc: "textarea",
-                    id: "order_details",
-                    lbl: "Observaciones",
-                    class: "col-12 mb-3",
-                    height: 32,
-                    disabled: true
-                },
-                {
-                    opc: "div",
-                    id: "image",
-                    lbl: "Imagenes de referencia del producto",
-                    class: "col-12 ",
-                    html: `
+        const formFields = [
+            {
+                opc: "input",
+                id: "dedication",
+                lbl: "dedicatoria",
+                class: "col-12  mb-3",
+            },
+            {
+                opc: "textarea",
+                id: "order_details",
+                lbl: "Observaciones",
+                class: "col-12 mb-3",
+                height: 32,
+                disabled: true
+            }
+        ];
+
+        if (isCustom) {
+            formFields.push({
+                opc: "div",
+                id: "image",
+                lbl: "Imagenes de referencia del producto",
+                class: "col-12 ",
+                html: `
                     <div class="col-12 mt-2 mb-2">
                         <div class="w-full p-2 border-2 border-dashed border-gray-500 rounded-xl text-center">
                             <input
@@ -1280,52 +1278,65 @@ class CatalogProduct extends Pos {
                         </div>
                     </div>
                 `
-                },
-                {
-                    opc: "button",
-                    id: "btnEditProducto",
-                    class: "col-12 ",
-                    className: "w-full p-2",
-                    text: "Actualizar Producto",
-                    onClick: () => {
+            });
+        }
 
-                        const form = document.getElementById('formEditProducto');
-                        const formData = new FormData(form);
+        formFields.push({
+            opc: "button",
+            id: "btnEditProducto",
+            class: "col-12 ",
+            className: "w-full p-2",
+            text: "Actualizar Producto",
+            onClick: () => {
 
-                        formData.append('opc', 'editProduct');
-                        formData.append('id', id);
-                        formData.append('idFolio', idFolio);
+                const form = document.getElementById('formEditProducto');
+                const formData = new FormData(form);
 
-                        const files = document.getElementById('archivos').files;
-                        for (let i = 0; i < files.length; i++) {
-                            formData.append('archivos[]', files[i]);
-                        }
+                formData.append('opc', 'editProduct');
+                formData.append('id', id);
+                formData.append('idFolio', idFolio);
 
-                        fetch(this._link, {
-                            method: 'POST',
-                            body: formData
-                        })
-                            .then(response => response.json())
-                            .then(response => {
-
-                                if (response.status === 200) {
-
-                                    this.showOrder(response.list);
-
-                                    modal.modal('hide');
-                                    alert({ icon: "success", text: response.message });
-
-                                } else {
-
-                                    alert({ icon: "info", title: "Oops!...", text: response.message, btn1: true, btn1Text: "Ok" });
-                                }
-                            });
+                if (isCustom) {
+                    const files = document.getElementById('archivos').files;
+                    for (let i = 0; i < files.length; i++) {
+                        formData.append('archivos[]', files[i]);
                     }
                 }
-            ]
+
+                fetch(this._link, {
+                    method: 'POST',
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(response => {
+
+                        if (response.status === 200) {
+
+                            this.showOrder(response.list);
+
+                            modal.modal('hide');
+                            alert({ icon: "success", text: response.message });
+
+                        } else {
+
+                            alert({ icon: "info", title: "Oops!...", text: response.message, btn1: true, btn1Text: "Ok" });
+                        }
+                    });
+            }
         });
 
-        this.renderImages(request.images, 'previewImagenes')
+        this.createForm({
+            id: 'formEditProductoInternal',
+            parent: 'formEditProducto',
+            autovalidation: false,
+            autofill: product,
+            data: { opc: 'editProduct', id: id },
+            json: formFields
+        });
+
+        if (isCustom) {
+            this.renderImages(request.images, 'previewImagenes');
+        }
     }
 
     async quantityProduct(packageId, newQuantity) {
