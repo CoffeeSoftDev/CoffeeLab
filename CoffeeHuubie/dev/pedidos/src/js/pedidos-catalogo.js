@@ -251,8 +251,6 @@ class Pos extends Templates {
         });
     }
 
-
-
     createOrderPanel(options) {
         const opts = Object.assign({
             parent: "orderPanel", // ID donde se monta
