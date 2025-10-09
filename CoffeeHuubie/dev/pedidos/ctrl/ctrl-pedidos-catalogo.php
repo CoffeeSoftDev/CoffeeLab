@@ -108,25 +108,23 @@ class ctrl extends MPedidos{
     }
 
     function getProduct() {
-
-
             $status = 500;
             $message = 'Error al obtener los datos';
-            $getProduct = $this -> getOrderPackageByID([$_POST['id']]);
+            $images = [];
+            $getProduct = $this->getOrderPackageByID([$_POST['id']]);
 
-
-            // // if ($getProduct) {
-            // //     $status = 200;
-            // //     $message = 'Datos obtenidos correctamente.';
-            // // }
+            if ($getProduct) {
+                $status = 200;
+                $message = 'Datos obtenidos correctamente.';
+                $images = $this->getOrderImages([$getProduct['id']]);
+            }
 
             return [
                 'status'  => $status,
                 'message' => $message,
                 'data'    => $getProduct,
-                'images'  => $this->getOrderImages([$getProduct['id']]),
+                'images'  => $images,
             ];
-
     }
 
      function getProductDetails() {

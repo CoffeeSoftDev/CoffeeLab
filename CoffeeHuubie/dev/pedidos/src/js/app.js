@@ -11,12 +11,12 @@ $(async () => {
     let dataModifiers = await useFetch({ url: api, data: { opc: "getModifiers" } });
     categories = dataModifiers.data || [];
 
-    const req     = await useFetch({ url: api, data: { opc: "init" } });
-          estado  = req.status;
-          clients = req.clients || [];
-          app     = new App(api, 'root');
-          custom  = new CustomOrder(api_custom, 'root');
-          normal  = new CatalogProduct(api_catalogo, 'root');
+    const req = await useFetch({ url: api, data: { opc: "init" } });
+    estado = req.status;
+    clients = req.clients || [];
+    app = new App(api, 'root');
+    custom = new CustomOrder(api_custom, 'root');
+    normal = new CatalogProduct(api_catalogo, 'root');
 
     app.render();
     app.actualizarFechaHora();
@@ -989,14 +989,14 @@ class App extends Templates {
                         ${this.detailsCard(orderData)}
                     </div>
                 </div>
-                
+
                 <div id="productDisplayArea" class="w-full lg:w-2/3 lg:pl-3">
                     ${this.listProducts(products)}
                 </div>
             `);
 
             $(window).on('resize.orderDetails', () => {
-                this.layoutManager.applyLayout();
+                // this.layoutManager.applyLayout();
             });
         }, 100);
 
@@ -1012,7 +1012,7 @@ class App extends Templates {
             .order-details-enhanced-modal .modal-body {
                 padding: 0 !important;
             }
-            
+
             @media (max-width: 768px) {
                 .order-details-enhanced-modal .modal-dialog {
                     width: 98vw !important;
@@ -1035,13 +1035,13 @@ class App extends Templates {
 
     infoOrder(orderData) {
         return `
-            <div class="bg-[#2C3E50] rounded-lg p-6">
-                <h3 class="text-white font-semibold text-lg mb-6 flex items-center">
+            <div class="bg-[#2C3E50] rounded-lg p-3">
+                <h3 class="text-white font-semibold text-lg mb-3 flex items-center">
                     <i class="icon-info text-blue-400 mr-3"></i>
                     Información del Pedido
                 </h3>
-                
-                <div class="space-y-5">
+
+                <div class="space-y-2">
                     <div class="flex items-start">
                         <i class="icon-doc-text-1 text-gray-400 text-xl mr-4 mt-1"></i>
                         <div>
@@ -1049,7 +1049,7 @@ class App extends Templates {
                             <p class="text-white font-semibold text-lg">${orderData.folio || 'N/A'}</p>
                         </div>
                     </div>
-                    
+
                     <div class="flex items-start">
                         <i class="icon-user text-gray-400 text-xl mr-4 mt-1"></i>
                         <div>
@@ -1057,7 +1057,7 @@ class App extends Templates {
                             <p class="text-white font-semibold">${orderData.name || 'N/A'}</p>
                         </div>
                     </div>
-                    
+
                     <div class="flex items-start">
                         <i class="icon-calendar text-gray-400 text-xl mr-4 mt-1"></i>
                         <div>
@@ -1065,7 +1065,7 @@ class App extends Templates {
                             <p class="text-white font-semibold">${orderData.formatted_date_order || orderData.date_order || 'N/A'}</p>
                         </div>
                     </div>
-                    
+
                     <div class="flex items-start">
                         <i class="icon-clock text-gray-400 text-xl mr-4 mt-1"></i>
                         <div>
@@ -1084,28 +1084,28 @@ class App extends Templates {
         const balance = parseFloat(orderData.balance || 0);
 
         return `
-            <div class="bg-[#2C3E50] rounded-lg p-4">
-                <h3 class="text-white font-semibold text-lg mb-6 flex items-center">
-                    <i class="icon-dollar-sign text-green-400 mr-3"></i>
-                     PAGOS
+            <div class="bg-[#2C3E50] rounded-lg p-3">
+                <h3 class="text-white font-semibold text-lg mb-3 flex items-center">
+                    <i class="icon-dollar text-green-400 mr-3"></i>
+                     Resumen de pago
                 </h3>
-                
-                <div class="space-y-4">
+
+                <div class="space-y-3">
                     <div class="flex items-center justify-between">
                         <span class="text-gray-400">Total:</span>
-                        <span class="text-white font-bold text-2xl">$${totalPay.toFixed(2)}</span>
+                        <span class="text-white font-bold text-sm">$${totalPay.toFixed(2)}</span>
                     </div>
-                    
+
                     <div class="flex items-center justify-between">
                         <span class="text-gray-400">Pagado:</span>
-                        <span class="text-green-400 font-bold text-2xl">$${totalPaid.toFixed(2)}</span>
+                        <span class="text-green-400 font-bold text-sm">$${totalPaid.toFixed(2)}</span>
                     </div>
-                    
+
                     <div class="border-t border-gray-600"></div>
-                    
+
                     <div class="flex items-center justify-between">
                         <span class="text-gray-400">Saldo:</span>
-                        <span class="text-red-400 font-bold text-2xl">$${balance.toFixed(2)}</span>
+                        <span class="text-red-400 font-bold text-sm">$${balance.toFixed(2)}</span>
                     </div>
                 </div>
             </div>
@@ -1133,17 +1133,17 @@ class App extends Templates {
                             <i class="icon-basket mr-2 text-blue-400"></i>
                             Productos del Pedido
                         </h3>
-                        <span class="text-gray-300 font-medium">Total: ${totalItems} productos</span>
+                        <span class="text-gray-300 font-medium"> ${totalItems} productos</span>
                     </div>
                 </div>
                 <div id="productsContainer" class="space-y-4 overflow-y-auto flex-1">
                     ${products.map(product => {
-                        if (product.is_custom || (product.customer_products && product.customer_products.length > 0)) {
-                            return this.cardCustom(product);
-                        } else {
-                            return this.cardNormal(product);
-                        }
-                    }).join('')}
+            if (product.is_custom || (product.customer_products && product.customer_products.length > 0)) {
+                return this.cardCustom(product);
+            } else {
+                return this.cardNormal(product);
+            }
+        }).join('')}
                 </div>
             </div>
         `;
@@ -1161,26 +1161,26 @@ class App extends Templates {
                 </div>
 
                 <div class="flex items-start gap-6 pr-32">
-                    <div class="w-32 h-32 rounded-2xl overflow-hidden bg-[#D8B4E2] flex-shrink-0">
+                    <div class="w-24 h-24 rounded-lg overflow-hidden bg-[#D8B4E2] flex-shrink-0">
                         ${this.renderProductImage(product)}
                     </div>
 
                     <div class="flex-1">
                         <h4 class="text-white font-bold text-lg mb-2 uppercase">${product.name || 'Producto sin nombre'}</h4>
-                        <p class="text-blue-400 font-semibold text-sm mb-4">$${parseFloat(product.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} c/u</p>
-                        
+                        <p class="text-blue-400 font-semibold text-xs mb-4">$${parseFloat(product.price || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} c/u</p>
+
                         ${(hasDedication || hasDetails) ? `
                         <div class="flex gap-12">
                             ${hasDedication ? `
                             <div class="flex-1">
                                 <span class="text-gray-400 text-sm font-medium">Dedicatoria:</span>
-                                <p class="text-white text-base">${product.dedication}</p>
+                                <p class="text-white text-xs">${product.dedication}</p>
                             </div>
                             ` : ''}
                             ${hasDetails ? `
                             <div class="flex-1">
                                 <span class="text-gray-400 text-sm font-medium">Observaciones:</span>
-                                <p class="text-white text-base">${product.order_details}</p>
+                                <p class="text-white text-xs">${product.order_details}</p>
                             </div>
                             ` : ''}
                         </div>
@@ -1209,9 +1209,9 @@ class App extends Templates {
         return `
         <div class="bg-[#2C3E50] rounded-lg p-3 relative">
             <div class=" mb-6">
-                <h4 class="text-white font-bold text-lg uppercase">${product.name || 'Pastel Personalizado'}</h4>
-                <span class="inline-flex items-center px-4 py-2 mt-2 rounded-full text-sm font-bold bg-purple-400 text-white lowercase">
-                    personalizado
+                <h4 class="text-white font-bold text-sm uppercase">${product.name || 'Pastel Personalizado'}</h4>
+                <span class="inline-flex items-center px-3 py-2 mt-2 rounded-2xl text-[10px] font-bold bg-purple-500 text-purple-100 lowercase">
+                    Personalizado
                 </span>
             </div>
 
@@ -1220,13 +1220,13 @@ class App extends Templates {
             </div>
 
             ${hasImages ? `
-            <div class="flex gap-3 mb-6">
+            <div class="flex gap-3 pb-4 border-b border-gray-700">
                 ${product.images.slice(0, 3).map(img => {
-            const thumbUrl = img.path.startsWith('http') ? img.path : `https://huubie.com.mx/${img.path}`;
+            const thumbUrl = img.path.startsWith('http') ? img.path : `${img.path}`;
             return `
-                        <div class="w-32 h-32 rounded-lg overflow-hidden bg-gray-700">
-                            <img src="${thumbUrl}" 
-                                 alt="${img.original_name || 'Imagen'}" 
+                        <div class="w-24 h-24 rounded-lg overflow-hidden bg-gray-700">
+                            <img src="${thumbUrl}"
+                                 alt="${img.original_name || 'Imagen'}"
                                  class="object-cover w-full h-full">
                         </div>
                     `;
@@ -1235,7 +1235,7 @@ class App extends Templates {
             ` : ''}
 
             ${(hasDedication || hasDetails) ? `
-            <div class="flex gap-12 mb-6 pr-32">
+            <div class="flex gap-12 mb-6 pr-32 pt-4">
                 ${hasDedication ? `
                 <div class="flex-1">
                     <span class="text-gray-400 text-sm font-medium">Dedicatoria:</span>
@@ -1273,7 +1273,7 @@ class App extends Templates {
             const imageUrl = product.image.startsWith('http') ?
                 product.image : `https://huubie.com.mx/${product.image}`;
             return `
-                <img src="${imageUrl}" alt="${product.name}" 
+                <img src="${imageUrl}" alt="${product.name}"
                      class="object-cover w-full h-full"
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="w-full h-full items-center justify-center hidden">
@@ -1289,6 +1289,7 @@ class App extends Templates {
         }
     }
 
+
     renderPersonalizationGrid(customizations) {
         console.log(customizations)
         const grouped = {};
@@ -1300,9 +1301,9 @@ class App extends Templates {
             grouped[category].push(item);
         });
 
-        const entries     = Object.entries(grouped);
-        const half        = Math.ceil(entries.length / 2);
-        const leftColumn  = entries.slice(0, half);
+        const entries = Object.entries(grouped);
+        const half = Math.ceil(entries.length / 2);
+        const leftColumn = entries.slice(0, half);
         const rightColumn = entries.slice(half);
 
         return `
@@ -1317,7 +1318,7 @@ class App extends Templates {
                         `).join('')}
                     `).join('')}
                 </div>
-                
+
                 <div class="space-y-3">
                     ${rightColumn.map(([category, items]) => `
                         ${items.map(item => `
@@ -1334,8 +1335,6 @@ class App extends Templates {
             </div>
         `;
     }
-
-    // 
 
 
     // Components.
@@ -1401,7 +1400,7 @@ class App extends Templates {
         $(`#${opts.parent}`).html(html);
     }
 
- 
+
     updateTotal(total, totalPaid) {
         const val = parseFloat($("#advanced_pay").val()) || 0;
         const t = typeof total === 'number' ? total : (this.totalPay || 0);
@@ -1426,7 +1425,7 @@ class Order extends Templates {
         this.PROJECT_NAME = "Pedidos";
     }
 
-  
+
 
     // Payments.
 

@@ -120,7 +120,7 @@ class mdl extends CRUD {
 
     function lsUDN() {
         return $this->_Select([
-            'table' => "rfwsmqex_gvsl_finanzas.udn",
+            'table' => "udn",
             'values' => "idUDN as id, UDN as valor, Abreviatura",
             'where' => 'Stado = 1',
             'order' => ['ASC' => 'UDN']

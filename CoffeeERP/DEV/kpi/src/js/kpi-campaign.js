@@ -3,17 +3,17 @@ let campaign, campaignTypes, campaignClassification, ads;
 let udnList, campaignsList, typesList, classificationsList, socialNetworksList;
 
 $(async () => {
-    const data = await useFetch({ url: api_campaign, data: { opc: "init" } });
-    udnList = data.udn;
-    campaignsList = data.campaigns;
-    typesList = data.types;
-    classificationsList = data.classifications;
-    socialNetworksList = data.socialNetworks;
+    const data                = await useFetch({ url: api_campaign, data: { opc: "init" } });
+          udnList             = data.udn;
+          campaignsList       = data.campaigns;
+          typesList           = data.types;
+          classificationsList = data.classifications;
+          socialNetworksList  = data.socialNetworks;
 
-    campaign = new Campaign(api_campaign, "root");
-    campaignTypes = new CampaignTypes(api_campaign, "root");
+    campaign               = new Campaign(api_campaign, "root");
+    campaignTypes          = new CampaignTypes(api_campaign, "root");
     campaignClassification = new CampaignClassification(api_campaign, "root");
-    ads = new Ads(api_campaign, "root");
+    ads                    = new Ads(api_campaign, "root");
 
     campaign.init();
     ads.render();
@@ -361,14 +361,14 @@ class CampaignTypes extends Templates {
             json: [
                 {
                     id: "tipos",
-                    tab: "Tipos de Campaña",
+                    tab: "Tipos de anuncios",
                     class: 'mb-1',
                     onClick: () => this.lsCampaignTypes(),
                     active: true,
                 },
                 {
                     id: "clasificacion",
-                    tab: "Clasificación de Campaña",
+                    tab: "Clasificación de anuncios",
                     onClick: () => campaignClassification.lsCampaignClassification()
                 }
             ]
@@ -385,7 +385,7 @@ class CampaignTypes extends Templates {
                 {
                     opc: "select",
                     id: "udn",
-                    lbl: "UDN",
+                    lbl: "Unidad de Negocio",
                     class: "col-12 col-md-3",
                     data: udnList,
                     onchange: 'campaignTypes.lsCampaignTypes()'
@@ -765,8 +765,9 @@ class Ads extends Templates {
     }
 
     showCampaignForm() {
-        const currentDate = new Date();
-        const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+
+        const currentDate  = new Date();
+        const firstDay     = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
         const fifteenthDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 15);
 
         const formatDate = (date) => {
@@ -804,7 +805,7 @@ class Ads extends Templates {
         return `
             <div class="campaign-form-container">
                 <!-- Barra superior de campaña -->
-                <div class="row mb-4 p-3 bg-light rounded">
+                <div class="row mb-4 p-3 mx-1 bg-light border rounded">
                     <div class="col-md-4 mb-2">
                         <label class="form-label">Estrategia</label>
                         <input type="text" id="campaign_strategy" class="form-control" placeholder="Mensajes">
@@ -1220,18 +1221,18 @@ class Ads extends Templates {
                 text: "name",
                 value: "id"
             },
-            {
-                opc: "input",
-                id: "title",
-                lbl: "Título",
-                class: "col-12 mb-3"
-            },
-            {
-                opc: "input",
-                id: "subtitle",
-                lbl: "Subtítulo",
-                class: "col-12 mb-3"
-            },
+            // {
+            //     opc: "input",
+            //     id: "title",
+            //     lbl: "Título",
+            //     class: "col-12 mb-3"
+            // },
+            // {
+            //     opc: "input",
+            //     id: "subtitle",
+            //     lbl: "Subtítulo",
+            //     class: "col-12 mb-3"
+            // },
             {
                 opc: "textarea",
                 id: "description",

@@ -160,9 +160,9 @@ class ctrl extends mdl {
     // Campaign Classification
 
     function lsCampaignClassification() {
-        $__row = [];
+        $__row  = [];
         $active = $_POST['active'];
-        $udn = $_POST['udn'];
+        $udn    = $_POST['udn'];
 
         $ls = $this->listCampaignClassification([$active, $udn]);
 
@@ -317,12 +317,12 @@ class ctrl extends mdl {
                 'id'            => $key['id'],
                 'Imagen'        => ['html' => $imageHtml, 'class' => 'text-center'],
            
-                'Campaña'       => $key['campaign_name'],
-                'Anuncio'       => $key['ad_name'],
-                'Clasificación' => $key['classification_name'],
-                'Tipo'          => $key['type_name'],
-                'Fecha Inicio'  => formatSpanishDate($key['start_date']),
-                'Fecha Final'   => formatSpanishDate($key['end_date']),
+                'Campaña'                  => $key['campaign_name'],
+                'Anuncio'                  => $key['ad_name'],
+                'Tipo de anuncio'          => $key['type_name'],
+                'Clasificación de anuncio' => $key['classification_name'],
+                'Fecha Inicio'             => formatSpanishDate($key['start_date']),
+                'Fecha Final'              => formatSpanishDate($key['end_date']),
                 'a'             => $a
             ];
         }

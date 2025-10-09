@@ -579,8 +579,8 @@ class MPedidos extends CRUD {
         $sql = "
             SELECT
                 order_package.id,
-                order_products.`name` as name,
-                order_products.price,
+                COALESCE(order_products.`name`, 'Producto personalizado') as name,
+                COALESCE(order_products.price, order_package.price) as price,
                 order_package.quantity,
                 order_package.dedication,
                 order_package.order_details,
@@ -588,7 +588,7 @@ class MPedidos extends CRUD {
                 order_products.image
             FROM
                 {$this->bd}order_package
-            INNER JOIN {$this->bd}order_products ON order_package.product_id = order_products.id
+            LEFT JOIN {$this->bd}order_products ON order_package.product_id = order_products.id
             WHERE order_package.id = ?
         ";
 

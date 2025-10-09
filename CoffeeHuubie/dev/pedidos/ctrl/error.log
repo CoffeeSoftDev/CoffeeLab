@@ -1,3 +1,37 @@
+[ 2025-10-08 21:10:42 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  
+            SELECT
+                order_package.id,
+                -- 🔹 Si existe un producto normal, toma su nombre; si no, toma el del personalizado
+                COALESCE(order_products.name, order_custom.name) AS name,
+
+                -- 🔹 Igual para el precio
+                COALESCE(order_products.price, order_custom.price_real) AS price,
+
+                -- 🔹 Cantidad siempre viene de order_package
+                order_package.quantity,
+
+                order_package.order_details,
+                order_package.dedication,
+                order_package.product_id,
+                order_package.custom_id,
+
+                -- 🔹 Descripción e imagen, solo si existe en el producto o en el personalizado
+                COALESCE(order_products.description, order_custom.description) AS description,
+                COALESCE(order_products.image, order_custom.image) AS image
+
+            FROM
+                fayxzvov_coffee.order_package
+            LEFT JOIN fayxzvov_coffee.order_products ON order_package.product_id = order_products.id
+            LEFT JOIN fayxzvov_coffee.order_custom   ON order_package.custom_id  = order_custom.id
+            WHERE
+                order_package.pedidos_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'order_custom.description' in 'field list'
+
+
 [ 2025-10-08 14:37:54 ]
 [ UNIX_USR ] :: nt authority\system
 [ WINDOWS_USR ] :: DESKTOP-FHJB2CN$

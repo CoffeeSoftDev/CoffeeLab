@@ -196,6 +196,7 @@ class App extends Templates {
                 id: "registerPaymentModal",
                 size: "medium"
             },
+            autovalidation: true,
             data: { opc: 'endTicket', Total: numero, idFolio: $("#NoFolio").val() },
             json: [
                 {

@@ -614,7 +614,8 @@ class Pos extends Templates {
                 $("<button>", {
                     class: "text-blue-400 hover:text-blue-600",
                     html: `<i class="icon-pencil"></i>`,
-                    click: () => {
+                    click: (e) => {
+                        e.stopPropagation();
                         if (typeof opts.onEdit === "function") opts.onEdit(item.id);
                     }
                 }),
@@ -763,33 +764,80 @@ class Pos extends Templates {
         }
 
         data.forEach((item, index) => {
+
+        
             const card = $("<div>", {
                 class: `flex justify-between items-center ${bgCard} border ${borderColor} rounded-xl p-3 shadow-sm`
             });
 
-            const info = $("<div>", { class: "flex-1 space-y-1" }).append(
+            const infoElements = [
                 $("<p>", { class: `${textColor} font-medium text-sm`, text: item.name }),
                 $("<p>", { class: `${subColor} font-semibold text-sm`, text: formatPrice(item.price) }),
-                item.custom_id ? $("<p>", { class: "text-purple-400 text-xs font-semibold", text: "🎂 Pedido personalizado" }) : null,
+                item.custom_id ? $("<span>", { class: "inline-flex items-center text-xs font-bold text-purple-400", text: "Personalizado" }) : null,
                 item.dedication ? $("<p>", { class: `${mutedColor} text-xs italic`, text: `Dedicatoria: ${item.dedication}` }) : null,
                 item.order_details ? $("<p>", { class: `${mutedColor} text-xs`, text: `Detalles: ${item.order_details}` }) : null,
                 item.images && item.images.length > 0
                     ? $("<p>", {
-                        class: `text-green-400 text-xs`,
-                        text: `📷 Pedido con ${item.images.length} foto${item.images.length > 1 ? 's' : ''} adjunta${item.images.length > 1 ? 's' : ''}`
+                        class: `text-gray-400 text-xs`,
+                        html: `<i class="icon-camera"></i> Pedido con ${item.images.length} foto${item.images.length > 1 ? 's' : ''} adjunta${item.images.length > 1 ? 's' : ''}`
                     })
                     : null
-            );
+            ];
+
+            // if (item.custom_id && item.customer_products && item.customer_products.length > 0) {
+            //     infoElements.push($("<div>", { class: `border-t ${borderColor} mt-2 pt-2` }));
+
+            //     item.customer_products.forEach((customProduct, idx) => {
+            //         const productInfo = $("<div>", { class: "mb-2" });
+
+            //         productInfo.append(
+            //             $("<p>", {
+            //                 class: `${textColor} text-xs font-semibold`,
+            //                 text: `${customProduct.modifier_name || 'Modificador'}: ${customProduct.name}`
+            //             })
+            //         );
+
+            //         if (customProduct.quantity) {
+            //             productInfo.append(
+            //                 $("<p>", {
+            //                     class: `${mutedColor} text-[10px]`,
+            //                     text: `Cantidad: ${customProduct.quantity}`
+            //                 })
+            //             );
+            //         }
+
+            //         if (customProduct.custom_price) {
+            //             productInfo.append(
+            //                 $("<p>", {
+            //                     class: `${subColor} text-[10px] font-semibold`,
+            //                     text: `Precio: ${formatPrice(customProduct.custom_price)}`
+            //                 })
+            //             );
+            //         }
+
+            //         if (customProduct.details) {
+            //             productInfo.append(
+            //                 $("<p>", {
+            //                     class: `${mutedColor} text-[10px] italic`,
+            //                     text: customProduct.details
+            //                 })
+            //             );
+            //         }
+
+            //         infoElements.push(productInfo);
+            //     });
+            // }
+
+            const info = $("<div>", { class: "flex-1 space-y-1" }).append(...infoElements.filter(el => el !== null));
 
             const actions = $("<div>", { class: "flex flex-col items-end gap-2" });
             const quantityRow = $("<div>", { class: "flex items-center gap-2" });
 
-            quantityRow.append(
+            const buttons = [
                 $("<button>", {
                     class: "bg-gray-700 text-white rounded px-2",
                     html: "−",
                     click: () => {
-                        console.log('item-card', item)
                         if (item.quantity > 1) {
                             item.quantity--;
                             opts.onQuanty(item.id, 0, item.quantity);
@@ -811,16 +859,27 @@ class Pos extends Templates {
                         opts.data = data;
                         this.orderPanelComponent(opts);
                     }
-                }),
+                })
+            ];
+
+            if (item.custom_id) {
+                buttons.push(
+                    $("<button>", {
+                        class: "text-purple-400 hover:text-purple-600",
+                        html: `<i class="icon-birthday"></i>`,
+                        click: () => {
+                            opts.onBuildCake(item.id);
+                        }
+                    })
+                );
+            }
+
+            buttons.push(
                 $("<button>", {
                     class: "text-blue-400 hover:text-blue-600",
                     html: `<i class="icon-pencil"></i>`,
                     click: () => {
-                        if (item.custom_id && typeof opts.onBuildCake === "function") {
-                            opts.onBuildCake(item.id);
-                        } else {
-                            opts.onEdit(item.id);
-                        }
+                        opts.onEdit(item.id);
                     }
                 }),
                 $("<button>", {
@@ -835,11 +894,13 @@ class Pos extends Templates {
                 })
             );
 
+            quantityRow.append(...buttons);
+
             const lineTotal = (item.price || 0) * (item.quantity || 0);
             totalAcc += lineTotal;
 
             const totalEl = $("<p>", {
-                class: `${mutedColor} text-sm`,
+                class: `${mutedColor} text-sm `,
                 text: `Total: ${formatPrice(lineTotal)}`
             });
 
@@ -897,12 +958,11 @@ class Pos extends Templates {
     }
 
 }
-
 class CatalogProduct extends Pos {
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "CatalogProduct";
-        this.name_client  = '';
+        this.name_client = '';
     }
 
     init() {
@@ -997,10 +1057,8 @@ class CatalogProduct extends Pos {
 
     async initPos() {
 
-        const pos = await useFetch({ url: this._link,data: { opc: "init", id: idFolio } });
+        const pos = await useFetch({ url: this._link, data: { opc: "init", id: idFolio } });
         this.name_client = pos.order.name ?? '';
-        console.log('pos', pos)
-        // tabs product.
 
         this.createProductTabs({
             data: pos.modifier,
@@ -1018,7 +1076,7 @@ class CatalogProduct extends Pos {
             }
         });
 
-      
+
         this.showOrder(pos.list)
     }
 
@@ -1044,7 +1102,6 @@ class CatalogProduct extends Pos {
                 this.quantityProduct(id, newQuantity);
             },
             onPrint: () => {
-                console.log("print");
                 this.printOrder(idFolio);
             },
 
@@ -1054,6 +1111,26 @@ class CatalogProduct extends Pos {
 
             onClear: () => {
                 this.confirmClearOrder(idFolio);
+            },
+
+            onBuildCake: (productId) => {
+                // Handle Build Cake functionality for custom products
+                console.log('🎂 Build Cake button clicked for product ID:', productId);
+
+                // Verify integration with existing system
+                if (typeof custom !== 'undefined' && custom && typeof custom.render === 'function') {
+                    console.log('✅ Custom order system available, launching cake builder...');
+                    custom.render();
+                } else {
+                    console.warn('⚠️ Custom order functionality not available');
+                    alert({
+                        icon: "info",
+                        title: "Funcionalidad no disponible",
+                        text: "La funcionalidad de personalización de pasteles no está disponible en este momento.",
+                        btn1: true,
+                        btn1Text: "Ok"
+                    });
+                }
             },
         });
 
@@ -1123,6 +1200,9 @@ class CatalogProduct extends Pos {
 
                         this.renderCart({
                             data: response.list,
+                            onEdit: (id) => {
+                                this.editProduct(id);
+                            },
                             onRemove: (id) => {
                                 this.removeProduct(id);
                             }
@@ -1171,7 +1251,7 @@ class CatalogProduct extends Pos {
                     id: "order_details",
                     lbl: "Observaciones",
                     class: "col-12 mb-3",
-                    height:32,
+                    height: 32,
                     disabled: true
                 },
                 {
@@ -1211,7 +1291,7 @@ class CatalogProduct extends Pos {
                     text: "Actualizar Producto",
                     onClick: () => {
 
-                        const form     = document.getElementById('formEditProducto');
+                        const form = document.getElementById('formEditProducto');
                         const formData = new FormData(form);
 
                         formData.append('opc', 'editProduct');
@@ -1280,8 +1360,8 @@ class CatalogProduct extends Pos {
                 const reader = new FileReader();
                 reader.onload = (e) => {
 
-                    const img     = document.createElement("img");
-                          img.src = e.target.result;
+                    const img = document.createElement("img");
+                    img.src = e.target.result;
 
                     img.classList.add("w-28", "h-28", "object-cover", "rounded");
                     previewContainer.appendChild(img);
@@ -1303,9 +1383,9 @@ class CatalogProduct extends Pos {
 
         imageList.forEach(imgData => {
 
-            const img     = document.createElement("img");
-                  img.src = urlBase + imgData.path;
-                  img.alt = imgData.original_name || "Imagen del producto";
+            const img = document.createElement("img");
+            img.src = urlBase + imgData.path;
+            img.alt = imgData.original_name || "Imagen del producto";
 
             img.classList.add("w-32", "h-32", "object-cover", "rounded", "border");
             previewContainer.appendChild(img);
@@ -1346,25 +1426,25 @@ class CatalogProduct extends Pos {
         const defaults = {
             parent: "container", // contenedor donde se insertará
             data: {
-                head    : { data: {} },
-                row     : [],
+                head: { data: {} },
+                row: [],
                 products: []
             }
         };
 
-        const opts        = Object.assign({}, defaults, options);
-        const parent      = opts.parent;
-        const data        = opts.data.head.data || {};
-        const products    = opts.data.products || [];
+        const opts = Object.assign({}, defaults, options);
+        const parent = opts.parent;
+        const data = opts.data.head.data || {};
+        const products = opts.data.products || [];
 
-        const cliente     = data.cliente || "[cliente]";
-        const fecha       = data.pedido || "[fecha]";
-        const hora        = data.horapedido || "[hora]";
+        const cliente = data.cliente || "[cliente]";
+        const fecha = data.pedido || "[fecha]";
+        const hora = data.horapedido || "[hora]";
         const observacion = data.observacion || "[nota]";
-        const costo       = data.total || 0;
-        const anticipo    = data.anticipo || 0;
-        const restante    = costo - anticipo;
-        const container   = $("<div>", { id: "containerTicks", class: "bg-white text-gray-800 rounded-lg mb-4 font-mono p-4" });
+        const costo = data.total || 0;
+        const anticipo = data.anticipo || 0;
+        const restante = costo - anticipo;
+        const container = $("<div>", { id: "containerTicks", class: "bg-white text-gray-800 rounded-lg mb-4 font-mono p-4" });
 
         // Header
         container.append(`
@@ -1605,14 +1685,14 @@ class CatalogProduct extends Pos {
     }
 
 
-     // payment.
+    // payment.
     async addPayment(id) {
-        let saldo, saldoOriginal, total, total_paid,saldo_restante;
+        let saldo, saldoOriginal, total, total_paid, saldo_restante;
         const req = await useFetch({ url: this._link, data: { opc: "getPayment", id: idFolio } });
         const response = req.order;
 
         if (req.total_paid) {
-          
+
 
             saldo = formatPrice(response.total_pay);
             saldoOriginal = response.total_pay;
@@ -1621,12 +1701,12 @@ class CatalogProduct extends Pos {
             saldo_restante = total - total_paid;
 
         } else {
-            const totalText     = $('#total').text();
-                  saldo         = totalText;
-                  saldoOriginal = totalText.replace(/[^0-9.-]+/g, "");
-                  total         = parseFloat(saldoOriginal);
-                  total_paid    = 0;
-                  saldo_restante = total - total_paid;
+            const totalText = $('#total').text();
+            saldo = totalText;
+            saldoOriginal = totalText.replace(/[^0-9.-]+/g, "");
+            total = parseFloat(saldoOriginal);
+            total_paid = 0;
+            saldo_restante = total - total_paid;
         }
 
         this.createModalForm({
@@ -1640,7 +1720,7 @@ class CatalogProduct extends Pos {
                 id: "registerPaymentModal",
                 size: "medium"
             },
-            data: { opc: 'addPayment', total: total , saldo: saldo_restante, id: idFolio },
+            data: { opc: 'addPayment', total: total, saldo: saldo_restante, id: idFolio },
             json: [
                 this.cardPay(total, total_paid),
                 {
