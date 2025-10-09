@@ -956,6 +956,7 @@ class Pos extends Templates {
     }
 
 }
+
 class CatalogProduct extends Pos {
     constructor(link, div_modulo) {
         super(link, div_modulo);

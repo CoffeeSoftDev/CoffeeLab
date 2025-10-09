@@ -575,7 +575,7 @@ class MPedidos extends CRUD {
 
 
 
-    public function getOrderPackageByID($array) {
+    function getOrderPackageByID($array) {
         $sql = "
             SELECT
                 order_package.id,
@@ -585,6 +585,7 @@ class MPedidos extends CRUD {
                 order_package.dedication,
                 order_package.order_details,
                 order_products.description,
+                order_package.custom_id,
                 order_products.image
             FROM
                 {$this->bd}order_package

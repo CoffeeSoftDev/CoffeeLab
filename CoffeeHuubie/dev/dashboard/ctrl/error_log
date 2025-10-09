@@ -1,0 +1,239 @@
+[02-Oct-2025 22:23:38 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "mdl" not found in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 11
+[02-Oct-2025 22:23:48 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "mdl" not found in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 11
+[02-Oct-2025 22:24:00 America/Mexico_City] PHP Fatal error:  Uncaught Error: Class "mdl" not found in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php:11
+Stack trace:
+#0 {main}
+  thrown in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 11
+[02-Oct-2025 22:24:18 America/Mexico_City] PHP Warning:  Undefined variable $sub in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 14
+[02-Oct-2025 22:24:18 America/Mexico_City] PHP Warning:  Undefined array key 0 in /home/fayxzvov/public_html/dev/dashboard/mdl/mdl-reservaciones.php on line 27
+[02-Oct-2025 22:24:48 America/Mexico_City] PHP Warning:  Undefined array key "" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 14
+[02-Oct-2025 22:24:48 America/Mexico_City] PHP Warning:  Undefined array key 0 in /home/fayxzvov/public_html/dev/dashboard/mdl/mdl-reservaciones.php on line 27
+[02-Oct-2025 22:37:44 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:37:44 America/Mexico_City] PHP Warning:  Undefined array key "mes" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 29
+[02-Oct-2025 22:37:44 America/Mexico_City] PHP Warning:  Undefined array key "anio" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 30
+[02-Oct-2025 22:37:44 America/Mexico_City] PHP Fatal error:  Uncaught Error: Call to undefined method ctrl::getAdvancedPay() in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php:50
+Stack trace:
+#0 /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php(201): ctrl->apiVentas()
+#1 {main}
+  thrown in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 50
+[02-Oct-2025 22:37:56 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:37:56 America/Mexico_City] PHP Warning:  Undefined array key "mes" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 29
+[02-Oct-2025 22:37:56 America/Mexico_City] PHP Warning:  Undefined array key "anio" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 30
+[02-Oct-2025 22:37:56 America/Mexico_City] PHP Fatal error:  Uncaught Error: Call to undefined method ctrl::getAdvancedPay() in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php:50
+Stack trace:
+#0 /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php(201): ctrl->apiVentas()
+#1 {main}
+  thrown in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 50
+[02-Oct-2025 22:38:59 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:38:59 America/Mexico_City] PHP Fatal error:  Uncaught TypeError: mktime(): Argument #4 ($month) must be of type ?int, string given in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php:35
+Stack trace:
+#0 /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php(35): mktime(0, 0, 0, 'undefined', 1, 'undefined')
+#1 /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php(201): ctrl->apiVentas()
+#2 {main}
+  thrown in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 35
+[02-Oct-2025 22:39:45 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:39:45 America/Mexico_City] PHP Fatal error:  Uncaught Error: Call to undefined method ctrl::getAdvancedPay() in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php:50
+Stack trace:
+#0 /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php(201): ctrl->apiVentas()
+#1 {main}
+  thrown in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 50
+[02-Oct-2025 22:50:59 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:50:59 America/Mexico_City] PHP Fatal error:  Uncaught Error: Call to undefined method ctrl::getAdvancedPay() in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php:50
+Stack trace:
+#0 /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php(200): ctrl->apiVentas()
+#1 {main}
+  thrown in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 50
+[02-Oct-2025 22:51:01 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:51:01 America/Mexico_City] PHP Fatal error:  Uncaught Error: Call to undefined method ctrl::getAdvancedPay() in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php:50
+Stack trace:
+#0 /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php(200): ctrl->apiVentas()
+#1 {main}
+  thrown in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 50
+[02-Oct-2025 22:51:22 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:51:22 America/Mexico_City] PHP Fatal error:  Uncaught Error: Call to undefined method ctrl::getAdvancedPay() in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php:50
+Stack trace:
+#0 /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php(200): ctrl->apiVentas()
+#1 {main}
+  thrown in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 50
+[02-Oct-2025 22:51:31 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:51:31 America/Mexico_City] PHP Fatal error:  Uncaught Error: Call to undefined method ctrl::getAdvancedPay() in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php:50
+Stack trace:
+#0 /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php(200): ctrl->apiVentas()
+#1 {main}
+  thrown in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 50
+[02-Oct-2025 22:51:37 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:51:37 America/Mexico_City] PHP Fatal error:  Uncaught Error: Call to undefined method ctrl::getAdvancedPay() in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php:50
+Stack trace:
+#0 /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php(200): ctrl->apiVentas()
+#1 {main}
+  thrown in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 50
+[02-Oct-2025 22:52:04 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:52:04 America/Mexico_City] PHP Fatal error:  Uncaught Error: Call to undefined method ctrl::getAdvancedPay() in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php:50
+Stack trace:
+#0 /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php(200): ctrl->apiVentas()
+#1 {main}
+  thrown in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 50
+[02-Oct-2025 22:52:16 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:52:34 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:52:47 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:53:56 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:53:56 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:53:56 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:53:56 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:53:56 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:53:56 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:53:56 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:53:56 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:53:56 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:00 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:54:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:28 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:54:28 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:28 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:28 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:28 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:28 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:28 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:28 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:28 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:53 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:54:53 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:53 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:53 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:53 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:53 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:53 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:53 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:53 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:53 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:54:53 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:57:56 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:58:05 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:58:22 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:58:38 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:58:41 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:58:50 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:58:56 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:59:00 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:59:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:59:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:59:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:59:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:59:23 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:59:25 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 22:59:25 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:59:25 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:59:25 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:59:25 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:59:25 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:59:25 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:59:25 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:59:25 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:59:25 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:59:25 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:59:25 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 22:59:25 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:02:02 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:02:06 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:02:13 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:02:14 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:03:05 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:03:06 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:03:10 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:03:12 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:04:54 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:04:55 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:05:01 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:05:03 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:05:44 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:05:50 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:05:55 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:05:59 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:07:46 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:07:47 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:07:50 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:07:52 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:07:53 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:07:53 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:07:53 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:07:53 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:08:13 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:08:15 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:08:16 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:08:47 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:08:49 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:08:50 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:09:04 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:09:21 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:09:27 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:09:30 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:09:30 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:09:30 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:09:30 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:09:30 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:09:33 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:09:33 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:09:33 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:09:33 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:09:33 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:09:33 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:09:33 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:09:36 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:09:40 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:09:40 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:09:40 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:09:40 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:09:40 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:09:46 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:09:46 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:09:46 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:09:46 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:09:46 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:09:55 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:10:00 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:10:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:10:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:10:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:10:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:10:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:10:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:10:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:10:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:10:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:10:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:10:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:10:00 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:11:01 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:11:10 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[02-Oct-2025 23:11:10 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:11:10 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:11:10 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:11:10 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:11:10 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:11:10 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:11:10 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:11:10 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:11:10 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:11:10 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:11:10 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[02-Oct-2025 23:11:10 America/Mexico_City] PHP Deprecated:  Function strftime() is deprecated in /home/fayxzvov/public_html/dev/conf/_Utileria.php on line 369
+[03-Oct-2025 00:13:56 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[03-Oct-2025 09:13:23 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[03-Oct-2025 09:13:27 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[03-Oct-2025 09:13:30 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[03-Oct-2025 09:13:32 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[03-Oct-2025 09:13:36 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
+[03-Oct-2025 16:34:20 America/Mexico_City] PHP Warning:  Undefined array key "status" in /home/fayxzvov/public_html/dev/dashboard/ctrl/ctrl-reservaciones.php on line 28
