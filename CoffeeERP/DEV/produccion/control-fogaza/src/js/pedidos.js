@@ -309,12 +309,13 @@ class App extends Templates {
 
             ],
             success: (response) => {
-                // if (response.status == 200) {
-                //     alert({ icon: "success", text: response.message, btn1: true, btn1Text: "Ok" });
-                //     app.init();
-                // } else {
-                //     alert({ icon: "error", text: response.message, btn1: true, btn1Text: "Ok" });
-                // }
+                if (response.status == 200) {
+                    this.initialState();
+                    alert({ icon: "success", text: "¡El pedido se ha creado correctamente!", timer: 1000 });
+
+                } else {
+                    alert({ icon: "error", text: response.message, btn1: true, btn1Text: "Ok" });
+                }
             }
         });
 
