@@ -2,26 +2,22 @@
 session_start();
 if (empty($_POST['opc'])) exit(0);
 
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
 
-header("Access-Control-Allow-Origin: *"); // Permite solicitudes de cualquier origen
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS"); // Métodos permitidos
-header("Access-Control-Allow-Headers: Content-Type"); // Encabezados permitidos
-
-require_once '../mdl/mdl-reservaciones.php';
+require_once '../mdl/mdl-pedidos.php';
 
 class ctrl extends mdl{
 
     function init(){
-        $_SESSION['SUB'] = 4;
-        $Sucursal = $this -> getSucursalByID([4]);
+        $sub = $_SESSION['SUB'] ?? $_SESSION['subsidiaries_id'] ?? 4;
+        $Sucursal = $this->getSucursalByID([$sub]);
         return [
-            'statusw' => $Sucursal,
+            'status' => $Sucursal,
             'SESSION' => $_SESSION,
         ];
     }
-
-    
-    // api eventos.
 
     function apiVentas() {
 
@@ -38,15 +34,14 @@ class ctrl extends mdl{
             $anio = date('Y');
         }
 
-        // 📅 Calcular fecha inicial y final.
         $fi        = sprintf("%04d-%02d-01", $anio, $mes);
         $ultimoDia = date("t", mktime(0, 0, 0, $mes, 1, $anio));
         $ff        = sprintf("%04d-%02d-%02d", $anio, $mes, $ultimoDia);
 
-        $sub      = $_SESSION['SUB'];
-        $Sucursal = $this -> getSucursalByID([$sub]);
+        $sub      = $_SESSION['SUB'] ?? $_SESSION['subsidiaries_id'] ?? 1;
+        $Sucursal = $this->getSucursalByID([$sub]);
 
-        $ls       = $this -> getEvents([
+        $ls       = $this->getOrders([
             'subsidiaries_id' => $Sucursal['idSucursal'],
             'fi'              => $fi,
             'ff'              => $ff,
@@ -54,26 +49,25 @@ class ctrl extends mdl{
         ]);
 
         foreach ($ls as $key) {
-            $advanceExtra  = $this->getAdvancedPay([$key['id']])['totalPay'] ?? 0;
-            $discount      = $key['discount'] ?? 0;
-            $total         = $key['total_pay'];
-            $saldo         = $total - $discount - $advanceExtra;
+            $pagos    = $this->getOrderPayments([$key['id']])['totalPay'] ?? 0;
+            $discount = $key['discount'] ?? 0;
+            $total    = $key['total_pay'];
+            $saldo    = $total - $discount - $pagos;
 
             $__row[] = [
-                'id'              => $key['id'],
-                'folio'           => formatSucursal($Sucursal['name'], $Sucursal['sucursal'], $key['id']),
-                'date_creation'   => formatSpanishDate($key['date_creation'], 'normal'),
-                'client_name'     => $key['name_client'],
-                'event_name'      => $key['name_event'],
-                'advancePay'      => $advanceExtra,
-                'discount'        => $discount,
-                'total'           => $total,
-                'saldo'           => $saldo,
-                'date_event'      => formatSpanishDate($key['date_start'], 'normal'),
-                'location'        => $key['location'],
-                'hours_start'     => $key['hours_start'],
-                'status'          => $key['idStatus'],
-                'opc'             => 0
+                'id'            => $key['id'],
+                'folio'         => formatFolio($Sucursal['name'], $Sucursal['sucursal'], $key['id']),
+                'date_creation' => formatSpanishDate($key['date_creation'], 'normal'),
+                'date_order'    => formatSpanishDate($key['date_order'], 'normal'),
+                'time_order'    => $key['time_order'],
+                'location'      => $key['location'],
+                'pagos'         => $pagos,
+                'discount'      => $discount,
+                'total'         => $total,
+                'saldo'         => $saldo,
+                'status'        => $key['status_id'],
+                'status_name'   => $key['status_name'],
+                'opc'           => 0
             ];
         }
 
@@ -151,12 +145,7 @@ class ctrl extends mdl{
         ];
     }
 
-
-     
-
-
 }
-
 
 // Complements.
 function dropdown($id, $status) {
@@ -164,23 +153,21 @@ function dropdown($id, $status) {
     $instancia = 'app';
 
     $options = [
-        ['Ver', 'icon-eye', "{$instancia}.viewReservation({$id})"],
-        ['Editar', 'icon-pencil', "{$instancia}.editReservation({$id})"],
+        ['Ver', 'icon-eye', "{$instancia}.viewOrder({$id})"],
+        ['Editar', 'icon-pencil', "{$instancia}.editOrder({$id})"],
         ['Historial', 'icon-history', "{$instancia}.history({$id})"],
-        ['Cancelar', 'icon-block-1', "{$instancia}.cancelReservation({$id})"],
+        ['Cancelar', 'icon-block-1', "{$instancia}.cancelOrder({$id})"],
     ];
 
-    if ($status == 2) { // Cancelado
+    if ($status == 4) {
         $options = [
-            ['Ver', 'icon-eye', "{$instancia}.viewReservation({$id})"],
+            ['Ver', 'icon-eye', "{$instancia}.viewOrder({$id})"],
             ['Historial', 'icon-history', "{$instancia}.history({$id})"],
-
         ];
-    } elseif ($status == 3) { // Pagado
+    } elseif ($status == 3) {
         $options = [
-            ['Ver', 'icon-eye', "{$instancia}.viewReservation({$id})"],
+            ['Ver', 'icon-eye', "{$instancia}.viewOrder({$id})"],
             ['Historial', 'icon-history', "{$instancia}.history({$id})"],
-
         ];
     }
 
@@ -193,10 +180,10 @@ function dropdown($id, $status) {
 
 function status($idEstado) {
     $estados = [
-        1 => ['bg' => '#EBD9FF', 'text' => '#6B3FA0', 'label' => 'Reservación'], // Lila
-        2 => ['bg' => '#B9FCD3', 'text' => '#032B1A', 'label' => 'Si llego'],         // Verde
-        3 => ['bg' => '#E5E7EB', 'text' => '#374151', 'label' => 'No llego'],      // Gris
-        4 => ['bg' => '#572A34', 'text' => '#E05562', 'label' => 'Cancelado'],      // Gris
+        1 => ['bg' => '#EBD9FF', 'text' => '#6B3FA0', 'label' => 'Cotización'],
+        2 => ['bg' => '#B9FCD3', 'text' => '#032B1A', 'label' => 'Pendiente'],
+        3 => ['bg' => '#E5E7EB', 'text' => '#374151', 'label' => 'Pagado'],
+        4 => ['bg' => '#572A34', 'text' => '#E05562', 'label' => 'Cancelado'],
     ];
 
     if (isset($estados[$idEstado])) {
@@ -207,34 +194,17 @@ function status($idEstado) {
     return '';
 }
 
-function formatSucursal($compania, $sucursal, $numero = null){
-
+function formatFolio($compania, $sucursal, $numero = null){
     $letraCompania = strtoupper(substr(trim($compania), 0, 1));
     $letraSucursal = strtoupper(substr(trim($sucursal), 0, 1));
-
     $number = $numero ?? rand(1, 99);
-
     $formattedNumber = str_pad($number, 2, '0', STR_PAD_LEFT);
-
-    return 'R-'.$letraCompania . $letraSucursal .'-'. $formattedNumber;
+    return 'P-'.$letraCompania . $letraSucursal .'-'. $formattedNumber;
 }
-
-function formatDateTime($date, $time) {
-    if (!empty($date) && !empty($time)) {
-        $datetime = DateTime::createFromFormat('Y-m-d H:i', "$date $time");
-        return $datetime ? $datetime->format('Y-m-d H:i:s') : null;
-    }
-    return null;
-}
-
-
 
 $obj    = new ctrl();
 $fn     = $_POST['opc'];
-
-$encode = [];
 $encode = $obj->$fn();
 echo json_encode($encode);
-
 
 ?>

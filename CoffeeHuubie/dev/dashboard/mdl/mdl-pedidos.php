@@ -9,11 +9,9 @@ class mdl extends CRUD {
 
     public function __construct() {
         $this->util = new Utileria;
-        // $this->bd   = "{$_SESSION['DB']}.";
         $this->bd   = 'fayxzvov_coffee.';
     }
 
-      // LISTAS
     function getSucursalByID($array){
         $query = "SELECT
             fayxzvov_alpha.subsidiaries.id AS idSucursal,
@@ -27,68 +25,59 @@ class mdl extends CRUD {
         return $this->_Read($query, $array)[0];
     }
 
-    function getEvents($array){
+    function getOrders($array){
         $values = [
-            'evt_events.id as id',
-            'name_event',
-            'name_client',
-            "DATE_FORMAT(date_creation,'%Y-%m-%d') AS date_creation",
-            'date_start',
-            "DATE_FORMAT(date_start,'%H:%i hrs') as hours_start",
-            'date_end',
-            'total_pay',
-            'notes',
-            'status_process.status',
-            'location',
-            'advanced_pay',
-            'phone',
-            'discount',
-            'email',
-            'status_process_id AS idStatus',
+            '`order`.id as id',
+            '`order`.date_creation',
+            '`order`.date_birthday',
+            '`order`.status',
+            '`order`.location',
+            '`order`.total_pay',
+            '`order`.discount',
+            '`order`.note',
+            '`order`.date_order',
+            '`order`.time_order',
+            'status_process.status as status_name',
+            'status_process.id AS status_id',
         ];
 
         $innerjoin = [
-            $this->bd.'status_process' => 'evt_events.status_process_id = status_process.id',
+            $this->bd.'status_process' => '`order`.status = status_process.id',
         ];
 
-        $where = ['subsidiaries_id = ? AND date_creation BETWEEN ? AND ? '];
-
-        // FILTROS POR ESTADO
+        $where = ['`order`.subsidiaries_id = ? AND `order`.date_creation BETWEEN ? AND ? '];
 
         if ( $array['status'] == '0') unset($array['status']);
-        else $where[] = 'status_process_id = ?';
-
+        else $where[] = '`order`.status = ?';
 
         return $this->_Select([
-            'table'     => "{$this->bd}evt_events",
+            'table'     => "{$this->bd}`order`",
             'values'    => $values,
             'innerjoin' => $innerjoin,
             'where'     => $where,
-            'order'     => ['ASC' => 'status_process.id','DESC' => 'evt_events.date_creation'],
+            'order'     => ['DESC' => '`order`.date_creation'],
             'data'      => array_values($array),
-
         ]);
-
     }
 
-    function getAdvancedPay($array)
+    function getOrderPayments($array)
     {
          $query = "
             SELECT
-                SUM(pay) as totalPay
+                COALESCE(SUM(pay), 0) as totalPay
             FROM
-            {$this->bd}evt_payments
-            INNER JOIN {$this->bd}method_pay ON evt_payments.method_pay_id = method_pay.id
-            WHERE evt_events_id = ?
+            {$this->bd}order_payments
+            WHERE order_id = ?
          ";
-        return $this->_Read($query, $array)[0];
+        $result = $this->_Read($query, $array);
+        return $result[0] ?? ['totalPay' => 0];
     }
 
     function getTotalPedidosMes($array)
     {
         $query = "
             SELECT COUNT(*) as total_pedidos
-            FROM {$this->bd}evt_events
+            FROM {$this->bd}`order`
             WHERE subsidiaries_id = ?
               AND date_creation BETWEEN ? AND ?
         ";
@@ -106,12 +95,12 @@ class mdl extends CRUD {
     {
         $query = "
             SELECT 
-                COALESCE(SUM(evt_payments.pay), 0) as dinero_entrante
-            FROM {$this->bd}evt_events
-            LEFT JOIN {$this->bd}evt_payments 
-                ON evt_events.id = evt_payments.evt_events_id
-            WHERE evt_events.subsidiaries_id = ?
-              AND evt_payments.date_creation BETWEEN ? AND ?
+                COALESCE(SUM(order_payments.pay), 0) as dinero_entrante
+            FROM {$this->bd}`order`
+            LEFT JOIN {$this->bd}order_payments 
+                ON `order`.id = order_payments.order_id
+            WHERE `order`.subsidiaries_id = ?
+              AND order_payments.date_pay BETWEEN ? AND ?
         ";
         
         $result = $this->_Read($query, $array);
@@ -128,11 +117,11 @@ class mdl extends CRUD {
         $query = "
             SELECT 
                 COUNT(*) as cantidad_cerradas,
-                COALESCE(SUM(evt_events.total_pay), 0) as monto_total_ventas
-            FROM {$this->bd}evt_events
+                COALESCE(SUM(`order`.total_pay), 0) as monto_total_ventas
+            FROM {$this->bd}`order`
             WHERE subsidiaries_id = ?
               AND date_creation BETWEEN ? AND ?
-              AND status_process_id = 3
+              AND status = 3
         ";
         
         $result = $this->_Read($query, $array);
@@ -152,11 +141,11 @@ class mdl extends CRUD {
         $query = "
             SELECT 
                 COUNT(*) as cantidad_canceladas,
-                COALESCE(SUM(evt_events.total_pay), 0) as monto_perdido
-            FROM {$this->bd}evt_events
+                COALESCE(SUM(`order`.total_pay), 0) as monto_perdido
+            FROM {$this->bd}`order`
             WHERE subsidiaries_id = ?
               AND date_creation BETWEEN ? AND ?
-              AND status_process_id = 4
+              AND status = 4
         ";
         
         $result = $this->_Read($query, $array);
@@ -175,16 +164,16 @@ class mdl extends CRUD {
     {
         $query = "
             SELECT 
-                status_process_id,
+                `order`.status as status_process_id,
                 status_process.status as nombre_estado,
                 COUNT(*) as cantidad
-            FROM {$this->bd}evt_events
+            FROM {$this->bd}`order`
             INNER JOIN {$this->bd}status_process 
-                ON evt_events.status_process_id = status_process.id
-            WHERE evt_events.subsidiaries_id = ?
-              AND evt_events.date_creation BETWEEN ? AND ?
-            GROUP BY status_process_id, status_process.status
-            ORDER BY status_process_id ASC
+                ON `order`.status = status_process.id
+            WHERE `order`.subsidiaries_id = ?
+              AND `order`.date_creation BETWEEN ? AND ?
+            GROUP BY `order`.status, status_process.status
+            ORDER BY `order`.status ASC
         ";
         
         $result = $this->_Read($query, $array);
@@ -195,7 +184,6 @@ class mdl extends CRUD {
         
         return $result;
     }
-
 
 }
 ?>

@@ -1,42 +1,51 @@
-
-let api_pedidos = "https://huubie.com.mx/dev/dashboard/ctrl/ctrl-reservaciones.php";
-let app, main, pos;
-let modifier, products;
-let idFolio;
-let orders;
+let api_pedidos = "ctrl/ctrl-pedidos-simple.php";
+let app, main;
+let SUBSIDIARIES_ID = 1; // Cambia este valor por tu ID de sucursal
 
 $(async () => {
+    
+    // Verificar que useFetch esté disponible
+    if (typeof useFetch === 'undefined') {
+        console.error('useFetch no está definido. Verifica que plugins.js se haya cargado correctamente.');
+        alert('Error: No se pudo cargar el framework CoffeeSoft');
+        return;
+    }
+    
+    try {
+        const data = await useFetch({ 
+            url: api_pedidos, 
+            data: { 
+                opc: "init",
+                subsidiaries_id: SUBSIDIARIES_ID 
+            } 
+        });
+        
+        app = new App(api_pedidos, 'root');
+        app.render();
 
-    const data = await useFetch({ url: api_pedidos, data: { opc: "init" } });
-    // instancias.
-    app = new App(api_pedidos, 'root');
-    orders = app; // Variable global para acceder desde el botón
-    app.render();
-
-    main = new MainApp(api_pedidos, 'root');
-    main.navBar({ theme: 'dark' });
+        main = new MainApp(api_pedidos, 'root');
+        main.navBar({ theme: 'dark' });
+        
+    } catch (error) {
+        console.error('Error inicializando dashboard:', error);
+        alert('Error al cargar el dashboard. Revisa la consola para más detalles.');
+    }
 
 });
-
-
 
 class App extends Templates {
 
     constructor(link, divModule) {
         super(link, divModule);
-        this.PROJECT_NAME = "Orders";
+        this.PROJECT_NAME = "Pedidos";
     }
 
     render() {
-        // this.layout();
-        // interface.
         this.layoutDashboard();
-        this.renderDashboard()
-
+        this.renderDashboard();
     }
 
     createFilterBar() {
-        // Obtener el mes actual (0-11) y sumar 1 para que sea 1-12
         const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
 
         this.createfilterBar({
@@ -70,32 +79,24 @@ class App extends Templates {
                     id: "btnBuscar",
                     text: "Buscar",
                     onClick: () => { this.renderDashboard() }
-
                 }
             ],
         });
 
-        // seleccionar Mes actual 
         $(`#mes`).val(currentMonth);
     }
 
     layoutDashboard() {
         this.dashboardComponent({
             parent: "root",
-            title: "📊  · Dashboard de Eventos",
+            title: "📊 Dashboard de Pedidos",
             subtitle: "Resumen mensual · Cotizaciones · Pagados · Cancelados",
             json: [
-                { type: "grafico", id: "ventasMes", title: "Cuantos eventos se han hecho en el mes", },
-                { type: "grafico", id: "eventMonth", title: "Cuantos eventos se realizaron este mes por sucursal" },
-                { type: "grafico", id: "containerPayChart", title: "Cuanto dinero entro este mes de anticipo ( los que no se cerraron )" },
-                { type: "grafico", id: "containerPayChartClosed", title: "Cuanto dinero entro este mes de anticipo ( de los que se cerraron )" },
-                { type: "grafico", id: "containerTotalPay", title: "Cuanto se vendio en total este mes ( entrada de dinero ) " },
-                { type: "grafico", id: "containerSales", title: "Cuanto dinero se pudo haber ganado ( pero se cancelo ) " },
-                { type: "grafico", id: "ContainerTop", title: "TOP 10 Clientes " },
+                { type: "grafico", id: "ventasMes", title: "Pedidos realizados en el mes" },
+                { type: "grafico", id: "estadisticasMes", title: "Estadísticas del mes" },
             ]
         });
         this.createFilterBar();
-
     }
 
     async renderDashboard() {
@@ -105,7 +106,12 @@ class App extends Templates {
 
             const data = await useFetch({
                 url: this._link,
-                data: { opc: "apiVentas", mes: mes, anio: anio }
+                data: { 
+                    opc: "apiVentas", 
+                    mes: mes, 
+                    anio: anio,
+                    subsidiaries_id: SUBSIDIARIES_ID 
+                }
             });
 
             if (data.cards) {
@@ -117,8 +123,8 @@ class App extends Templates {
 
             this.barChart({
                 parent: 'ventasMes',
-                data: this.jsonBarEventos()
-            })
+                data: this.jsonBarPedidos(data.cards)
+            });
 
         } catch (error) {
             console.error("Error cargando dashboard:", error);
@@ -130,19 +136,8 @@ class App extends Templates {
         }
     }
 
-    getDefaultCards() {
-        return {
-            total_pedidos: 0,
-            dinero_entrante: 0,
-            ventas_cerradas: { cantidad: 0, monto: 0 },
-            cancelaciones: { cantidad: 0, monto: 0 },
-            desglose: { cotizaciones: 0, pagados: 0, cancelados: 0 }
-        };
-    }
-
-    // Graficos.
     showCardsDashboard(data) {
-        console.log(data)
+        console.log(data);
         this.cardsDashboard({
             parent: 'cardDashboard',
             theme: 'dark',
@@ -187,81 +182,41 @@ class App extends Templates {
         });
     }
 
-    graficoEventosPorSucursal() {
-        this.linearChart({
-            parent: "eventMonth",
-            id: "graficoEventosSucursal",
-            data: this.jsonEventosPorSucursal(),
-        });
-    }
-
-    chartEstatus() {
-        this.payChart({
-            parent: "containerPayChart",
-            id: "chartEstatus",
-            data: this.jsonEstatus()
-        });
-    }
-
-    chartPaymentClosed() {
-        this.payChart({
-            parent: "containerPayChartClosed",
-            id: "chartPaymentClosed",
-            data: this.jsonPaymentClosed()
-        });
-    }
-
-
-
-    // Components.
-
-
-    jsonBarEventos() {
+    getDefaultCards() {
         return {
-            labels: ['Centro', 'Norte', 'Sur'],
+            total_pedidos: 0,
+            dinero_entrante: 0,
+            ventas_cerradas: { cantidad: 0, monto: 0 },
+            cancelaciones: { cantidad: 0, monto: 0 },
+            desglose: { cotizaciones: 0, pagados: 0, cancelados: 0 }
+        };
+    }
+
+    jsonBarPedidos(data) {
+        return {
+            labels: ['Cotizaciones', 'Pagados', 'Cancelados'],
             datasets: [
                 {
-                    label: 'Total',
-                    data: [7, 5, 3],
-                    backgroundColor: '#3B82F6',
-                    borderColor: '#3B82F6',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Cotizaciones',
-                    data: [2, 1, 1],
-                    backgroundColor: '#EC4899',
-                    borderColor: '#EC4899',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Pagados',
-                    data: [4, 3, 1],
-                    backgroundColor: '#10B981',
-                    borderColor: '#10B981',
-                    borderWidth: 1
-                },
-                {
-                    label: 'Cancelados',
-                    data: [1, 1, 1],
-                    backgroundColor: '#F97316',
-                    borderColor: '#F97316',
+                    label: 'Cantidad de Pedidos',
+                    data: [
+                        data.desglose.cotizaciones,
+                        data.desglose.pagados,
+                        data.desglose.cancelados
+                    ],
+                    backgroundColor: ['#EC4899', '#10B981', '#F97316'],
+                    borderColor: ['#EC4899', '#10B981', '#F97316'],
                     borderWidth: 1
                 }
             ]
         };
     }
 
-
-
-
-
 }
 
 class MainApp extends Templates {
     constructor(link, divModule) {
         super(link, divModule);
-        this.PROJECT_NAME = "Order";
+        this.PROJECT_NAME = "Pedidos";
     }
 
     init() {
@@ -271,12 +226,12 @@ class MainApp extends Templates {
     navBar(options) {
         const defaults = {
             id: "navBar",
-            theme: "light", // "light" | "dark" (Huubie)
+            theme: "light",
             class: "h-[56px] px-4 shadow-md",
             logoFull: "https://erp-varoch.com/ERP24/src/img/logos/logo_row_wh.png",
             logoMini: "https://erp-varoch.com/ERP24/src/img/logos/logo_icon_wh.png",
             user: {
-                name: "Sergio Osorio",
+                name: "Usuario",
                 photo: "https://huubie.com.mx/alpha/src/img/perfil/fotoUser26_20250803_120920.png",
                 onProfile: () => redireccion('perfil/perfil.php'),
                 onLogout: () => cerrar_sesion()
@@ -296,10 +251,9 @@ class MainApp extends Templates {
 
         const opts = Object.assign({}, defaults, options);
 
-        // ===== THEME: Huubie Dark =====
         const isDark = String(opts.theme).toLowerCase() === "dark";
         const colors = {
-            navbar: isDark ? "bg-[#1F2A37] text-white" : "bg-[#0A2B4B] text-white", // Huubie dark / Light azul prof.
+            navbar: isDark ? "bg-[#1F2A37] text-white" : "bg-[#0A2B4B] text-white",
             dropdownBg: isDark ? "bg-[#1F2A37] text-white" : "bg-white text-gray-800",
             hoverText: isDark ? "hover:text-blue-300" : "hover:text-blue-200",
             userHover: isDark ? "" : "hover:bg-blue-100",
@@ -308,7 +262,6 @@ class MainApp extends Templates {
             chipBg: isDark ? "bg-gray-700" : "bg-gray-100"
         };
 
-        // NAVBAR
         const header = $("<header>", {
             id: opts.id,
             class: `${colors.navbar} ${opts.class} flex justify-between items-center w-full fixed top-0 left-0 z-40`
@@ -341,7 +294,6 @@ class MainApp extends Templates {
             }
         });
 
-        // USER (click para abrir menú)
         const user = $("<div>", {
             class: "flex items-center gap-2 ml-4 cursor-pointer relative",
             id: "userDropdown"
@@ -379,7 +331,6 @@ class MainApp extends Templates {
         header.append(left, right);
         $("body").prepend(header);
 
-        // APPS LAUNCHER (Huubie dark)
         const launcher = $("<div>", {
             id: "appsLauncher",
             class: `hidden fixed top-16 right-4 w-[320px] ${colors.dropdownBg} rounded-lg ${colors.border} shadow p-4 z-50`
@@ -405,7 +356,6 @@ class MainApp extends Templates {
 
         $("body").append(launcher);
 
-        // Eventos de toggle/cierre (user & launcher)
         $("#userDropdown").on("click", function (e) {
             e.stopPropagation();
             $("#userMenu").toggleClass("hidden");
@@ -421,7 +371,4 @@ class MainApp extends Templates {
             }
         });
     }
-
-
-
 }
