@@ -50,7 +50,7 @@ class OrderCustomController extends OrderCustom {
         unset($_POST['orderId']);
 
         $insert = $this->createCustomOrder($this->util->sql($_POST));
-
+        $max = '';
         if ($insert) {
             $status  = 200;
             $message = 'Pedido personalizado agregado correctamente';

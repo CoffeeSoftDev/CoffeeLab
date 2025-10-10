@@ -11,12 +11,12 @@ $(async () => {
     let dataModifiers = await useFetch({ url: api, data: { opc: "getModifiers" } });
     categories = dataModifiers.data || [];
 
-    const req = await useFetch({ url: api, data: { opc: "init" } });
-    estado = req.status;
-    clients = req.clients || [];
-    app = new App(api, 'root');
-    custom = new CustomOrder(api_custom, 'root');
-    normal = new CatalogProduct(api_catalogo, 'root');
+    const req     = await useFetch({ url: api, data: { opc: "init" } });
+          estado  = req.status;
+          clients = req.clients || [];
+          app     = new App(api, 'root');
+          custom  = new CustomOrder(api_custom, 'root');
+          normal  = new CatalogProduct(api_catalogo, 'root');
 
     app.render();
     app.actualizarFechaHora();
@@ -355,6 +355,26 @@ class App extends Templates {
             let value = $(this).val().replace(/\D/g, "");
             if (value.length > 10) value = value.slice(0, 10);
             $(this).val(value);
+        });
+
+        $('#formPedido #name').autocomplete({
+            source: clients.map(client => ({
+                label: client.name,   // lo que se muestra en el dropdown
+                phone: client.phone,  // extra
+                email: client.email   // extra
+            })),
+            select: function (event, ui) {
+                $('#formPedido #phone').val(ui.item.phone);
+                $('#formPedido #email').val(ui.item.email);
+            }
+        });
+
+        // 🔄 Si borra el nombre, limpiar teléfono y correo
+        $('#formPedido #name').on("input", function () {
+            if ($(this).val().trim() === "") {
+                $('#formPedido #phone').val("");
+                $('#formPedido #email').val("");
+            }
         });
     }
 
