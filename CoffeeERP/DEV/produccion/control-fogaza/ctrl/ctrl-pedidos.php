@@ -634,19 +634,38 @@ class ctrl extends Pedidos{
 
 
     // Operations.
-    function endTicket(){
-
+    function endTicket() {
+        $tdc      = isset($_POST['tdc'])      && is_numeric($_POST['tdc'])      ? floatval($_POST['tdc'])      : 0;
+        $efectivo = isset($_POST['efectivo']) && is_numeric($_POST['efectivo']) ? floatval($_POST['efectivo']) : 0;
+    
         $data = $this -> util -> sql([
-            'efectivo' => $_POST['efectivo'],
-            'tdc'      => $_POST['tdc'],
-            'anticipo' => ($_POST['tdc'] + $_POST['efectivo']),
+            'efectivo' => $efectivo,
+            'tdc'      => $tdc,
+            'anticipo' => ($tdc + $efectivo),
             'Total'    => $_POST['Total'],
+            'discount' => $_POST['descuento'],
             'Status'   => 2,
+            'foliofecha' => date('Y-m-d H:i:s'),
             'idLista'  => $_POST['idFolio']
-        ],1);
-
-        return $this->setTickets( $data );
+        ], 1);
+    
+        $res = $this->setTickets($data);
+    
+        if ($res) {
+            return [
+                'status'  => 200,
+                'message' => "Ticket finalizado correctamente 🧾",
+                'data'    => $data
+            ];
+        } else {
+            return [
+                'status'  => 500,
+                'message' => "Error al finalizar el ticket",
+                'data'    => []
+            ];
+        }
     }
+    
 
     function cancelTicket(){
         return $this->update_ticket([

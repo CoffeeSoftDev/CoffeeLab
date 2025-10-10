@@ -199,6 +199,21 @@ class ctrl extends listPedidos{
 
         foreach ($ls as $key) {
 
+            $discount    = $key['discount'] ?? 0;
+            $totalPagado = $key['efectivo'] ?? 0 + $key['tdc'] ?? 0;
+            $saldo       = $key['Total'] - $discount - $totalPagado;
+            $hasDiscount   = $discount > 0;
+            $totalGral     = $key['Total'] - $discount;
+
+            $htmlTotal = $hasDiscount
+            ? "<div class='text-end'>
+                    <p title='Con descuento aplicado' class='text-green-600 cursor-pointer font-semibold'>" . evaluar($totalGral) . "</p>
+                    <p class='line-through text-gray-500 text-[10px]'>" . evaluar( $key['Total']) . "</p>
+                    <p class='text-gray-500 text-[10px]'><i class='icon-tag'></i> Descuento: " . evaluar($discount) . "</p>
+                </div>"
+            : evaluar($key['Total']);
+
+
             // 🎯 Acciones
             $a = [
                 [
@@ -223,7 +238,9 @@ class ctrl extends listPedidos{
                 $lineas[] = evaluar($key['tdc']) . ' en transferencia';
                 $totalAnticipos += (float)$key['tdc'];
             }
-            $lineas[] = isset($key['Name_Cliente']) ? $key['Name_Cliente'] : 'Sin cliente';
+
+
+            // $lineas[] = isset($key['Name_Cliente']) ? $key['Name_Cliente'] : 'Sin cliente';
 
             $htmlAnticipo = '';
             foreach ($lineas as $line) {
@@ -240,7 +257,11 @@ class ctrl extends listPedidos{
                 'Creación' => formatDates($key['foliofecha']),
                 'Cliente'  => isset($key['Name_Cliente']) ? $key['Name_Cliente'] : 'Sin cliente',
                 'Abono'    => ['html' => $htmlAnticipo],
-                'Total'    => isset($key['Total']) ? evaluar($key['Total']) : '0.00',
+                'Total'    => $htmlTotal,
+                'Saldo' => [
+                    'html' => evaluar($saldo),
+                    'class' => "text-[#E05562] text-end  px-2"
+                ],
                 'Entrega'  => isset($key['fechapedido']) ? formatDates($key['fechapedido']) : '',
                 'Estado'   => setEstatus(['estatus' => isset($key['Status']) ? $key['Status'] : null]),
                 'Canal'    => isset($key['whatsapp']) ? tipoPedido($key['whatsapp']) : '',

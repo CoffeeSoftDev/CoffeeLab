@@ -449,6 +449,7 @@ class Pedidos extends CRUD{
                 lunes as dia,
                 estadoProducto,
                 id_Costsys,
+               
                 price
             FROM
                 {$this->bd}almacen_productos
@@ -507,6 +508,7 @@ class listPedidos extends Pedidos {
                 efectivo,
                 tdc,
                 anticipo,
+                discount,
                 whatsapp
             FROM
                 {$this->bd}pedidofolio
