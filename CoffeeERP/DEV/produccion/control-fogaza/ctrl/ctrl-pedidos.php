@@ -701,17 +701,18 @@ function diasFaltantes($fechaFutura) {
 
  function addSelectGroup($data){
 
-        $txt .= '<div class="input-group w-100">';
+        $txt = '<div class="input-group w-100">';
         $txt .= '
         <select style="font-size:12px;"
         class="form-control input-sm p-1 fw-semibold js-example-basic-single " id="cb_producto' . $data['id'] . '">
         <option value="0"  > -- Clasificar -- </option>';
 
+        $precioVenta = 0;
 
         foreach ($data['ls'] as $row) {
             if ($row['id'] == $data['idClasificacion']) {
             $txt         .= '<option value="' . $row['id'] . '" selected>' . $row['valor'].'  </option>';
-            $precioVenta  = $row['precioVenta'];
+            $precioVenta  = isset($row['precioVenta']) ? $row['precioVenta'] : 0;
             } else {
             $txt .= '<option value="' . $row['id'] . '" >
             ' . $row['valor'] . '</option>';

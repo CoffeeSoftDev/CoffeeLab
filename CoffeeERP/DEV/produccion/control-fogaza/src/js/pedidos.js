@@ -200,8 +200,8 @@ class App extends Templates {
             data: { opc: 'endTicket', Total: numero, idFolio: $("#NoFolio").val() },
             json: [
                 {
-                    opc  : "div",
-                    id   : "Amount",
+                    opc: "div",
+                    id: "Amount",
                     class: "col-12",
                     html: `
                         <div class="rounded-xl p-4 mb-2 border border-gray-600">
@@ -227,15 +227,15 @@ class App extends Templates {
                 },
 
                 {
-                    opc        : "input-group",
-                    lbl        : "Descuento",
-                    id         : "descuento",
-                    tipo       : "cifra",
-                    icon       : "icon-percent",
-                    class      : "col-12 py-2",
+                    opc: "input-group",
+                    lbl: "Descuento",
+                    id: "descuento",
+                    tipo: "cifra",
+                    icon: "icon-percent",
+                    class: "col-12 py-2",
                     placeholder: "0.00",
-                    required   : false,
-                    onkeyup    : "calculateWithDiscount()"
+                    required: false,
+                    onkeyup: "calculateWithDiscount()"
                 },
 
 
@@ -259,7 +259,7 @@ class App extends Templates {
                     </div> `
                 },
 
-            
+
 
                 {
                     opc: 'input-group',
@@ -284,26 +284,26 @@ class App extends Templates {
                     placeholder: '0.00',
                 },
                 {
-                    opc        : 'input-group',
-                    lbl        : 'Diferencia',
-                    tipo       : 'cifra',
-                    id         : 'diferencia',
-                    icon       : 'icon-dollar',
-                    value      : numero,
-                    class      : 'col-sm-12 col-12 py-2',
+                    opc: 'input-group',
+                    lbl: 'Diferencia',
+                    tipo: 'cifra',
+                    id: 'diferencia',
+                    icon: 'icon-dollar',
+                    value: numero,
+                    class: 'col-sm-12 col-12 py-2',
                     placeholder: '0.00',
-                    required   : false,
-                    disabled   : true
+                    required: false,
+                    disabled: true
                 },
 
-              
+
 
                 {
-                    opc  : 'btn-submit',
-                    tipo : 'cifra',
-                    id   : 'btnTerminarTicket',
+                    opc: 'btn-submit',
+                    tipo: 'cifra',
+                    id: 'btnTerminarTicket',
                     color: 'outline-primary',
-                    text : 'Terminar pedido',
+                    text: 'Terminar pedido',
                     class: 'col-12 py-3'
                 },
 
@@ -321,11 +321,11 @@ class App extends Templates {
 
         // toogle.
         toggleFields()
-     
-      
+
+
     }
 
-  
+
 
     modalPaymentMethod() {
         let numero = parseFloat($('#total').text().replace('$', ''));
@@ -1225,15 +1225,18 @@ class App extends Templates {
     // Pedidos
     addProduct() {
         let idCard = event.currentTarget;
-        let title = idCard.querySelectorAll("label")[0];
-        let costo = event.currentTarget.getAttribute('costo');
+        let costo = idCard.getAttribute('costo') || '0';
         let idPedido = idCard.getAttribute('id');
-        let nombre = $("#" + idPedido + " .fw-semibold").text();
+        let nombre = idCard.querySelector('.fw-semibold')?.textContent.trim() || 'Sin nombre';
+
+        console.log(idCard)
 
         // ' + title.textContent + '  
         const modal = bootbox.dialog({
             closeButton: true,
-            title: ' PASTEL BASE :   <span class="text-blue-800"> ' + nombre + '  </span>',
+            title: ` PASTEL BASE :   <span class="text-blue-800"> ${nombre}</span> 
+            Precio: ${costo}
+            `,
             message: `<div><form id="containerForm" novalidate></form></div>`
         });
 
@@ -1243,6 +1246,7 @@ class App extends Templates {
             autovalidation: false,
             data: [],
             json: [
+             
                 { opc: 'radio', name: 'tipo', value: 1, text: 'Normal', onchange: 'pos.onShowPedidos()', class: 'col-sm-6 col-12 mb3-3', checked: true },
                 { opc: 'radio', name: 'tipo', value: 2, text: 'Personalizado', onchange: 'pos.onShowPedidos({ hide:false })', class: 'col-sm-6 col-12 mb-3' },
                 ...pos.jsonCake(),
@@ -1289,6 +1293,8 @@ class App extends Templates {
 
                         formData.append('opc', 'addItem');
                         formData.append('id_producto', idPedido);
+                        formData.append('nombre_producto', nombre);
+                        formData.append('costo_producto', costo);
                         formData.append('idFolio', $('#NoFolio').val());
 
                         const files = document.getElementById('archivos').files;
@@ -1315,12 +1321,13 @@ class App extends Templates {
         });
 
         //Agregar nombre del pedido.
-        document.getElementById('name').value = title.textContent.trim();
+        // document.getElementById('name').value = title.textContent.trim();
         document.getElementById('costo').value = costo;
 
         this.onShowPedidos({
             positions: [4, 5, 6, 7, 8, 9, 11]
         });
+
     }
 
     addProducts() {
@@ -1340,7 +1347,9 @@ class App extends Templates {
 
         // add formulario.
         $('#addItems').content_json_form({
+
             type: '',
+
             data: [
                 {
                     opc: 'radio',

@@ -43,6 +43,10 @@ class ctrl extends listPedidos{
 
         $ls = $this->list_ticket([$_POST['fi'],$_POST['ff']]);
 
+        if (!is_array($ls)) {
+            $ls = [];
+        }
+
         foreach ($ls as $key) {
         //     // Variables de negocio
         //     // $anticipoEfectivo  = floatval($key['efectivo'] ?? 0);
@@ -197,13 +201,17 @@ class ctrl extends listPedidos{
             'tipo' => $tipo
         ]);
 
+        if (!is_array($ls)) {
+            $ls = [];
+        }
+
         foreach ($ls as $key) {
 
             $discount    = $key['discount'] ?? 0;
             $totalPagado = $key['efectivo'] ?? 0 + $key['tdc'] ?? 0;
             $saldo       = $key['Total'] - $discount - $totalPagado;
-            $hasDiscount   = $discount > 0;
-            $totalGral     = $key['Total'] - $discount;
+            $hasDiscount = $discount > 0;
+            $totalGral   = $key['Total'] - $discount;
 
             $htmlTotal = $hasDiscount
             ? "<div class='text-end'>
@@ -295,6 +303,10 @@ class ctrl extends listPedidos{
             'tipo' => $tipo
         ]);
 
+        if (!is_array($ls)) {
+            $ls = [];
+        }
+
         foreach ($ls as $key) {
 
             $a = [
@@ -362,6 +374,10 @@ class ctrl extends listPedidos{
          // actualizar estado de los pedidos
         $ls = $this->list_ticket([$_POST['fi'],$_POST['ff']]);
 
+        if (!is_array($ls)) {
+            $ls = [];
+        }
+
         foreach ($ls as $folio):
 
             $data  = $this -> util -> sql( [
@@ -401,6 +417,10 @@ class ctrl extends listPedidos{
             'ff'   => $ff,
             'tipo' => $tipo
         ]);
+
+        if (!is_array($ls)) {
+            $ls = [];
+        }
 
         foreach ($ls as $folio):
 
@@ -552,9 +572,17 @@ class ctrl extends listPedidos{
         $lsPedidos = $this->list_pedidos([$_POST['fi'], $_POST['ff']]);
         $enlace = $this->util->url();
 
+        if (!is_array($lsPedidos)) {
+            $lsPedidos = [];
+        }
+
         foreach ($lsPedidos as $_key) {
 
             $ls = $this->listProducts([$_key['id']]);
+
+            if (!is_array($ls)) {
+                $ls = [];
+            }
 
          foreach ($ls as $key) {
                 $costumerProduct = $this->getCustomerProduct([$key['id']]);
@@ -793,8 +821,16 @@ class ctrl extends listPedidos{
 
         $values = [];
 
+        if (!is_array($lsPedidos)) {
+            $lsPedidos = [];
+        }
+
         foreach ($lsPedidos as $_key) {
             $ls = $this->listProducts([$_key['id']]);
+
+            if (!is_array($ls)) {
+                $ls = [];
+            }
 
             $values['key'] = $_key['id'];
 
