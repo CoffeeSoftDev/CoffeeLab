@@ -81,7 +81,10 @@ class Pedidos extends MPedidos{
                 'Creación' => formatSpanishDate($order['date_creation']),
 
                 'Cliente' => [
-                    'html' => "<p class='text-gray-300'>{$order['name_client']}</p><p class='text-gray-500'>{$order['location']}</p>"
+                    'html' => "
+                        <p class='text-gray-300'>{$order['name_client']}</p>
+                        <p class='text-gray-500'><i class='icon-phone'></i> {$order['phone']}</p>
+                    "
                 ],
                 'Abono' => [
                     'html' =>  evaluar($totalPagado),

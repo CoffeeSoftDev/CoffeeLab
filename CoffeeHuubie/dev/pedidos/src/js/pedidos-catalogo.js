@@ -962,6 +962,7 @@ class CatalogProduct extends Pos {
         super(link, div_modulo);
         this.PROJECT_NAME = "CatalogProduct";
         this.name_client = '';
+        this.layoutEdit = false;
     }
 
     init() {
@@ -994,6 +995,11 @@ class CatalogProduct extends Pos {
     }
 
     formCreateOrder() {
+
+        const isEditMode = this.layoutEdit;
+
+        console.log('editMode',isEditMode)
+
         this.tabLayout({
             parent: "container" + this.PROJECT_NAME,
             id: "tabsPedido",
@@ -1003,20 +1009,18 @@ class CatalogProduct extends Pos {
             json: [
                 {
                     id: "pedido",
-                    tab: "Crear orden de pedido",
-
-                    active: true,
-
+                    tab: isEditMode ? "Información del pedido" : "Crear orden de pedido",
+                    active: !isEditMode
                 },
                 {
                     id: "package",
                     tab: "Catálogo de productos",
-
+                    active: isEditMode
                 }
             ]
         });
 
-        app.addOrder();
+            app.addOrder();
     }
 
     // System Pos.
@@ -1341,7 +1345,6 @@ class CatalogProduct extends Pos {
     }
 
     async quantityProduct(packageId, newQuantity) {
-
         const response = await useFetch({
             url: this._link,
             data: {
@@ -1351,12 +1354,7 @@ class CatalogProduct extends Pos {
                 pedidos_id: idFolio
             }
         });
-
-        console.log('quantity', response)
-
-        // Actualizar el panel de órdenes con la nueva lista
         this.showOrder(response.list)
-
     }
 
     // aux method.

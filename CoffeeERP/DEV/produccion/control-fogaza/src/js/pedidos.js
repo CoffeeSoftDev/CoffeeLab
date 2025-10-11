@@ -381,6 +381,7 @@ class App extends Templates {
                 },
                 {
                     opc: 'input-group',
+                    opc: 'input-group',
                     lbl: 'Transferencia',
                     id: 'tdc',
                     tipo: 'cifra',
@@ -1231,12 +1232,21 @@ class App extends Templates {
 
         console.log(idCard)
 
-        // ' + title.textContent + '  
         const modal = bootbox.dialog({
             closeButton: true,
-            title: ` PASTEL BASE :   <span class="text-blue-800"> ${nombre}</span> 
-            Precio: ${costo}
+            title: `
+                <div class="flex items-center gap-3">
+                  
+                    <div>
+                        <h2 class="text-lg font-bold mb-2"> Agregar producto</h2>
+                        <p class="text-sm text-gray-700">
+                            <i class="icon-doc-text-1"></i> Pastel base: ${nombre} | 
+                            Precio: ${formatPrice(costo) }
+                        </p>
+                    </div>
+                </div>
             `,
+        
             message: `<div><form id="containerForm" novalidate></form></div>`
         });
 

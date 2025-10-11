@@ -127,7 +127,7 @@ class ctrl extends MPedidos{
             ];
     }
 
-     function getProductDetails() {
+    function getProductDetails() {
         $id = $_POST['id'];
         $status = 404;
         $message = 'Producto no encontrado';
@@ -158,10 +158,11 @@ class ctrl extends MPedidos{
         $create = $this->createProduct($this->util->sql($_POST));
 
         if ($create) {
-
             $status  = 200;
             $message = 'Producto agregado correctamente';
-
+            
+            // Actualizar el total de la orden
+            $this->updateTotalOrder($_POST['pedidos_id']);
         }
 
         $orderProducts = $this->getOrderById([$_POST['pedidos_id']]);
@@ -274,6 +275,9 @@ class ctrl extends MPedidos{
             if ($update) {
                 $status = 200;
                 $message = 'Cantidad actualizada correctamente';
+                
+                // Actualizar el total de la orden
+                $this->updateTotalOrder($pedidos_id);
             }
         }
 
@@ -283,7 +287,6 @@ class ctrl extends MPedidos{
         }
 
         return [
-             $values,
             'status' => $status,
             'message' => $message,
             'list' => $orderProducts
@@ -294,6 +297,7 @@ class ctrl extends MPedidos{
 
         $status = 500;
         $message = 'No se pudo eliminar el producto del pedido';
+        $pedidos_id = $_POST['pedidos_id'] ?? null;
 
         $values = $this->util->sql([
             'id' => $_POST['id']
@@ -301,27 +305,27 @@ class ctrl extends MPedidos{
 
         $delete = $this->deleteProduct($values);
 
-        if ($delete) {
+        if ($delete && $pedidos_id) {
             $status = 200;
             $message = 'Producto eliminado del pedido correctamente';
-
-            // $productos = $this->getPedidoDetailByID([$_POST['pedidos_id']]);
+            
+            // Actualizar el total de la orden
+            $this->updateTotalOrder($pedidos_id);
         }
 
         return [
             'status'  => $status,
-            'message' => $message,
-            'POST'    => $delete
+            'message' => $message
         ];
     }
 
     function deleteAllProducts() {
         $status  = 500;
         $message = 'No se pudo eliminar el producto';
-
+        $pedidos_id = $_POST['pedidos_id'];
 
         $values = $this->util->sql([
-            'pedidos_id' => $_POST['pedidos_id']
+            'pedidos_id' => $pedidos_id
         ], 1);
 
         $delete = $this->deleteProduct($values);
@@ -329,9 +333,12 @@ class ctrl extends MPedidos{
         if ($delete) {
             $status  = 200;
             $message = 'Se eliminaron todos los productos del pedido correctamente.';
+            
+            // Actualizar el total de la orden (será 0 si no hay productos)
+            $this->updateTotalOrder($pedidos_id);
         }
 
-        $orderProducts = $this->getOrderById([$_POST['pedidos_id']]);
+        $orderProducts = $this->getOrderById([$pedidos_id]);
         if (!is_array($orderProducts)) {
             $orderProducts = [];
         }
@@ -392,7 +399,7 @@ class ctrl extends MPedidos{
         ];
 
         $values = $this->util->sql($post, 1);
-        $insert = $this->registerPayment($values);
+        $insert = $this->updateOrder($values);
 
         // // Registrar método de pago solo si hay abono
         
@@ -471,8 +478,29 @@ class ctrl extends MPedidos{
 
     }
 
-
-
+    // Helper function to update order total
+    private function updateTotalOrder($pedidos_id) {
+        $orderProducts = $this->getOrderById([$pedidos_id]);
+        
+        if (is_array($orderProducts)) {
+            $total = 0;
+            foreach ($orderProducts as $product) {
+                $price = floatval($product['price'] ?? 0);
+                $qty = intval($product['quantity'] ?? 0);
+                $total += $price * $qty;
+            }
+            
+            // Actualizar el total_pay en la orden
+            $this->updateOrder($this->util->sql([
+                'total_pay' => $total,
+                'id' => $pedidos_id
+            ], 1));
+            
+            return $total;
+        }
+        
+        return 0;
+    }
 
 }
 
