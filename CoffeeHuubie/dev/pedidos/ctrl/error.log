@@ -1,3 +1,10 @@
+[ 2025-10-11 10:13:49 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order_custom (name,price,price_real,portion_qty,date_created) VALUES (?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect datetime value: '2025-10-11T15:13:49.114Z' for column 'date_created' at row 1
+
+
 [ 2025-10-09 15:44:13 ]
 [ UNIX_USR ] :: nt authority\system
 [ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
