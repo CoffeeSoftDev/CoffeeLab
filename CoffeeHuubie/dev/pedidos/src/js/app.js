@@ -11,12 +11,12 @@ $(async () => {
     let dataModifiers = await useFetch({ url: api, data: { opc: "getModifiers" } });
     categories = dataModifiers.data || [];
 
-    const req     = await useFetch({ url: api, data: { opc: "init" } });
-          estado  = req.status;
-          clients = req.clients || [];
-          app     = new App(api, 'root');
-          custom  = new CustomOrder(api_custom, 'root');
-          normal  = new CatalogProduct(api_catalogo, 'root');
+    const req = await useFetch({ url: api, data: { opc: "init" } });
+    estado = req.status;
+    clients = req.clients || [];
+    app = new App(api, 'root');
+    custom = new CustomOrder(api_custom, 'root');
+    normal = new CatalogProduct(api_catalogo, 'root');
 
     app.render();
     app.actualizarFechaHora();
@@ -184,6 +184,7 @@ class App extends Templates {
     }
 
     addOrder() {
+        normal.layoutEdit = false;
         $("#container-pedido").html(`<form id="formCreatePedido" novalidate></form>`);
 
         this.createForm({
@@ -282,7 +283,9 @@ class App extends Templates {
 
     async editOrder(id) {
         idFolio = id;
+        normal.layoutEdit = true;
         normal.render();
+
         $("#container-pedido").html(`<form id="formEditPedido" novalidate></form>`);
 
 
@@ -385,8 +388,8 @@ class App extends Templates {
         this.swalQuestion({
             opts: {
                 title: `¿Esta seguro?`,
-                html: `¿Deseas cancelar la reservación con folio <strong>${folio}</strong>?
-                Esta acción actualizará el estado a "Cancelado" en la tabla [reservaciones].`,
+                html: `¿Deseas cancelar el pedido con folio <strong>${folio}</strong>?
+                Esta acción actualizará el estado a "Cancelado".`,
             },
             data: { opc: "cancelOrder", status: 4, id: id },
             methods: {
