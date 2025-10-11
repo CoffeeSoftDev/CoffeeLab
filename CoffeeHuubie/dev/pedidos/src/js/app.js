@@ -409,8 +409,9 @@ class App extends Templates {
     async printOrder(id) {
 
         const pos = await useFetch({
-            url: api_catalogo,
-            data: { opc: "getOrder", id: id }
+            url: api,
+            // data: { opc: "getOrder", id: id }
+            data: { opc: "getOrderDetails", id: id }
         });
 
         const modal = bootbox.dialog({
