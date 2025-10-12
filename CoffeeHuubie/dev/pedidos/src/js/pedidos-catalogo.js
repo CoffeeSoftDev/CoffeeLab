@@ -998,7 +998,7 @@ class CatalogProduct extends Pos {
 
         const isEditMode = this.layoutEdit;
 
-        console.log('editMode',isEditMode)
+        console.log('editMode', isEditMode)
 
         this.tabLayout({
             parent: "container" + this.PROJECT_NAME,
@@ -1020,7 +1020,7 @@ class CatalogProduct extends Pos {
             ]
         });
 
-            app.addOrder();
+        app.addOrder();
     }
 
     // System Pos.
@@ -1406,7 +1406,9 @@ class CatalogProduct extends Pos {
 
         const pos = await useFetch({
             url: this._link,
-            data: { opc: "getOrder", id: idFolio }
+            // data: { opc: "getOrder", id: idFolio }
+            data: { opc: "getOrderDetails", id: idFolio }
+
         });
 
         const modal = bootbox.dialog({
@@ -1415,18 +1417,57 @@ class CatalogProduct extends Pos {
                         <i class="icon-print text-blue-400 text-xl"></i>
                         Imprimir
                     </div>`,
-            message: `<div id="containerPrintOrder"></div>`
+            message: `
+                <div class="p-4">
+                    <div class="flex justify-start mb-4">
+                        <button id="btnPrintTicketModal" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-md flex items-center justify-center gap-2" style="width: 25%;">
+                            <i class="icon-print"></i> Imprimir Ticket
+                        </button>
+                    </div>
+                    <div id="containerPrintOrder"></div>
+                </div>
+            `
         });
 
 
         this.ticketPasteleria({
             parent: 'containerPrintOrder',
             data: {
-                head: pos.order,
-                products: pos.products,
+                head: pos.order[0],
+                products: pos.data.products,
                 paymentMethods: pos.paymentMethods
             }
-        })
+        });
+
+        // Evento para imprimir solo el ticket
+        $(document).off('click', '#btnPrintTicketModal').on('click', '#btnPrintTicketModal', function () {
+            const ticketContent = document.getElementById('ticketPasteleria');
+            if (ticketContent) {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <title>Ticket - Pedido</title>
+                        <script src="https://cdn.tailwindcss.com"></script>
+                        <style>
+                            @media print {
+                                body { margin: 0; padding: 20px; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        ${ticketContent.outerHTML}
+                    </body>
+                    </html>
+                `);
+                printWindow.document.close();
+                setTimeout(() => {
+                    printWindow.print();
+                    printWindow.close();
+                }, 250);
+            }
+        });
 
     }
 
@@ -1552,16 +1593,33 @@ class CatalogProduct extends Pos {
 
         const total = parseFloat(data.total_pay || 0);
         const anticipo = parseFloat(data.anticipo || 0);
-        const restante = total - anticipo;
 
         function formatPrice(value) {
             return `$${parseFloat(value || 0).toFixed(2)}`;
         }
 
+        const layout = $("<div>", {
+            id: 'layoutPrintTicket',
+            class: 'p-2'
+        });
+
+        const btnPrint = $("<button>", {
+            id: "btnPrintTicket",
+            class: "bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-md mb-3 w-1/4 flex items-center justify-center gap-2 no-print",
+            html: '<i class="icon-print"></i> Imprimir ',
+            click: () => window.print()
+        });
+
+        layout.append(btnPrint)
+
+
+
         const container = $("<div>", {
             id: opts.id,
             class: opts.class
         });
+
+
 
 
 
@@ -1618,13 +1676,24 @@ class CatalogProduct extends Pos {
                 const price = parseFloat(product.price || 0);
                 const subtotal = quantity * price;
 
+                let descriptionHtml = `<div class="capitalize">${product.name}${product.custom_id ? ' (Personalizado)' : ''}</div>`;
+
+                if (product.customer_products && Array.isArray(product.customer_products) && product.customer_products.length > 0) {
+                    product.customer_products.forEach(cp => {
+                        descriptionHtml += `<div class="text-[10px] italic font-bold text-gray-600 ml-1">${cp.modifier_name}: ${cp.name} x ${cp.quantity || 1}</div>`;
+                    });
+                }
+
+                if (product.dedication) {
+                    descriptionHtml += `<div class="text-[8px] italic font-semibold text-gray-700 ml-1">* ${product.dedication}</div>`;
+                }
+
                 return `
-                <div class="flex justify-between py-1">
+                <div class="flex justify-between py-1 pb-2">
                     <div class="w-1/6">${quantity}</div>
-                    <div class="w-3/6 capitalize truncate">${product.name}</div>
+                    <div class="w-3/6">${descriptionHtml}</div>
                     <div class="w-2/6 text-right">${formatPrice(subtotal)}</div>
                 </div>
-                ${product.dedication ? `<div class="pl-4 italic text-[10px] text-gray-600">* ${product.dedication}</div>` : ""}
             `;
             }).join("");
 
@@ -1689,7 +1758,9 @@ class CatalogProduct extends Pos {
         container.append(totales);
         container.append(footer);
 
-        $(`#${opts.parent}`).html(container);
+        layout.append(container)
+
+        $(`#${opts.parent}`).html(layout);
     }
 
 

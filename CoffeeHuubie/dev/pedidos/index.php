@@ -71,7 +71,26 @@
     <script src="<?=PATH_MENU?>src/js/navbar.js"></script>
     <script src="<?=PATH_MENU?>src/js/sidebar.js"></script>
 
- 
+    <!-- Estilos para impresión -->
+    <style>
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            
+            /* Ocultar elementos del modal al imprimir */
+            .bootbox-close-button,
+            .modal-header .close {
+                display: none !important;
+            }
+            
+            /* Ajustar el contenedor del ticket */
+            #ticketPasteleria {
+                box-shadow: none !important;
+                border: none !important;
+            }
+        }
+    </style>
     
 
 </head>

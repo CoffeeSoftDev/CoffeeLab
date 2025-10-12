@@ -242,7 +242,7 @@ class Pedidos extends MPedidos{
         ];
     }
 
-   function getOrderDetails() {
+    function getOrderDetails() {
 
         $status  = 500;
         $message = 'Error al obtener detalles del pedido';
@@ -370,18 +370,6 @@ class Pedidos extends MPedidos{
         ];
     }
 
-    function logHistory($eventId, $message) {
-        // $this->addHistories($this->util->sql([
-        //     'title'         => 'Abono',
-        //     'evt_events_id' => $eventId,
-        //     'comment'       => $message,
-        //     'action'        => $message,
-        //     'date_action'   => date('Y-m-d H:i:s'),
-        //     'type'          => 'payment',
-        //     'usr_users_id'  => $_SESSION['USR']
-        // ]));
-    }
-
     function initHistoryPay(){
           // Obtener sucursal para el folio
         $SUB      = $_SESSION['SUB'] ?? 4;
@@ -406,35 +394,6 @@ class Pedidos extends MPedidos{
                 'restante' => $ls[0]['total_pay'] - $ls[0]['total_paid'],
             ]
         ];
-    }
-
-    function getHistory(){
-
-        $Order = $this -> getOrderID([ $_POST['id'] ]);
-        $payment     = $this -> getListPayment([$_POST['id']]);
-
-        $totalPagado = 0;
-        foreach ($payment as $key) {
-            $totalPagado += $key['pay'];
-        }
-
-        $info = [
-
-            'pagado'   => $totalPagado,
-            'total'    => $Order[0]['total_pay'],
-            'discount' => $Order[0]['discount'],
-            'restante' => $Order[0]['total_pay'] - $totalPagado,
-
-        ];
-
-        return [
-
-           'pagado'   => $totalPagado,
-            'total'    => $Order[0]['total_pay'],
-            'discount' => $Order[0]['discount'],
-            'restante' => $Order[0]['total_pay'] - $totalPagado,
-        ];
-
     }
 
     function deletePay() {
@@ -517,6 +476,21 @@ class Pedidos extends MPedidos{
         ];
     }
 
+    // History
+
+    function getHistory(){
+        
+        $lsHistories = $this -> getHistoryEventByID([ $_POST['id'] ]);
+
+        
+        return [ 
+       
+            'history' => $lsHistories 
+        ];
+      
+    }
+
+
    
    
     // Estos son los modificadores
@@ -560,11 +534,27 @@ class Pedidos extends MPedidos{
         ];
     }
 
+    function logHistory($eventId, $message) {
+        // $this->addHistories($this->util->sql([
+        //     'title'         => 'Abono',
+        //     'evt_events_id' => $eventId,
+        //     'comment'       => $message,
+        //     'action'        => $message,
+        //     'date_action'   => date('Y-m-d H:i:s'),
+        //     'type'          => 'payment',
+        //     'usr_users_id'  => $_SESSION['USR']
+        // ]));
+    }
+
+   
+
+   
+
 
 
 }
 
-//
+   //
 
 
 // Complements.
@@ -577,19 +567,27 @@ function dropdownOrder($id, $status) {
         ['Editar', 'icon-pencil', "{$instancia}.editOrder({$id})"],
         ['Cancelar', 'icon-block-1', "{$instancia}.cancelOrder({$id})"],
         ['Pagar', 'icon-money', "{$instancia}.historyPay({$id})"],
+        ['Historial', 'icon-history', "{$instancia}.showHistory({$id})"],
+
         ['Imprimir', 'icon-print', "{$instancia}.printOrder({$id})"],
     ];
 
     if ($status == 2) { // Pendiente
         $options = [
             ['Ver', 'icon-eye', "{$instancia}.showOrder({$id})"],
+            ['Editar', 'icon-pencil', "{$instancia}.editOrder({$id})"],
             ['Pagar', 'icon-money', "{$instancia}.historyPay({$id})"],
             ['Imprimir', 'icon-print', "{$instancia}.printOrder({$id})"],
-            ['Editar', 'icon-pencil', "{$instancia}.editOrder({$id})"],
+            ['Historial', 'icon-history', "{$instancia}.showHistory({$id})"],
+
         ];
     } elseif ($status == 3) { // Pagado
         $options = [
             ['Ver', 'icon-eye', "{$instancia}.showOrder({$id})"],
+            ['Historial', 'icon-history', "{$instancia}.showHistory({$id})"],
+            ['Imprimir', 'icon-print', "{$instancia}.printOrder({$id})"],
+
+
         ];
     }
 
@@ -615,20 +613,6 @@ function status($idEstado){
     }
 }
 
-function dropdownEvent($id, $status, $hasSubEvent = 0) {
-    $actions = [];
-
-    $actions[] = btnDropdown("Ver", "eye", "app.edit({$id})");
-
-    if ($status == 1) {
-        $actions[] = btnDropdown("Editar", "edit", "app.edit({$id})");
-        if (!$hasSubEvent) {
-            $actions[] = btnDropdown("Eliminar", "trash", "app.remove({$id})");
-        }
-    }
-
-    return dropdownBtn($actions);
-}
 
 function formatSucursal($compania, $sucursal, $numero = null){
 

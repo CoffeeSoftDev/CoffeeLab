@@ -2406,6 +2406,98 @@ class Components extends Complements {
         });
     }
 
+    createTimelineChat(options) {
+        let defaults = {
+            parent: "",
+            id: "historial",
+            data: [],
+            success: () => { console.log('addLine') },
+            input_id: "iptHistorial",
+            class: "p-3 bg-gray-900 text-white rounded-lg h-[500px] overflow-y-auto",
+            user_photo: "https://w7.pngwing.com/pngs/81/570/png-transparent-profile-logo-computer-icons-user-user-blue-heroes-logo-thumbnail.png",
+            icons: {
+                payment: "💵",
+                comment: "💬",
+                event: "📅",
+                default: "🔹"
+            }
+        };
+
+        let opts = Object.assign(defaults, options);
+
+        $('#' + opts.parent).empty();
+
+        let historialContainer = $('<div>', { class: opts.class + " flex flex-col h-full", id: opts.id });
+
+        // 📜 **Contenedor de línea de tiempo**
+        let timeline = $('<div>', { class: "relative flex flex-col gap-4 flex-grow overflow-y-auto p-3" });
+
+        // 📜 **Generar los elementos del historial**
+        opts.data.forEach((item, index) => {
+            let entry = $('<div>', { class: "flex items-start gap-3 relative" });
+
+            // 🔵 **Seleccionar el icono basado en el `type`**
+            let iconType = opts.icons[item.type] || opts.icons.default;
+
+            // 🔵 **Columna de iconos y líneas**
+            let iconContainer = $('<div>', { class: "flex flex-col items-center relative" }).append(
+                // Icono del evento
+                $('<div>', {
+                    class: "w-8 h-8 flex items-center justify-center bg-gray-700 text-white rounded-full",
+                    html: iconType
+                }),
+                // 📏 Línea de tiempo (solo si no es el último elemento)
+                index !== opts.data.length - 1
+                    ? $('<div>', { class: "w-[2px] min-h-[28px] bg-gray-600 flex-1 mt-2" })
+                    : ""
+            );
+            // 📝 **Fila con título y fecha alineados**
+            let titleRow = $('<div>', { class: "flex justify-between items-center w-full" }).append(
+                $('<span>', { class: "font-semibold text-gray-200", text: item.valor }), // Título
+                $('<small>', { class: "text-gray-400 text-xs", text: item.date }) // Fecha
+            );
+
+            // 👤 **Nombre del responsable**
+            let authorRow = $('<div>', { class: "text-gray-400 text-xs mt-1 italic" }).text(`Realizado por: ${item.author || 'Desconocido'}`);
+
+            // 💬 **Mensaje o descripción del evento**
+            let details = $('<div>', { class: "text-sm bg-gray-800 p-2 rounded-md shadow-md w-full" })
+                .append(titleRow)
+                .append(authorRow);
+
+
+            if (item.message) {
+                let messageBox = $('<div>', { class: " text-gray-300 text-xs p-2 rounded-md mt-1", text: item.message });
+                details.append(messageBox);
+            }
+
+            entry.append(iconContainer, details);
+            timeline.append(entry);
+        });
+
+        historialContainer.append(timeline);
+
+        // 📝 **Barra de entrada de mensaje (oscura)**
+        let messageBar = $('<div>', { class: "bg-gray-800 rounded-lg flex items-center p-2 border-t border-gray-700 mt-auto" }).append(
+            $('<input>', {
+                id: opts.input_id,
+                class: "w-full px-3 py-2 border-none outline-none bg-gray-700 text-white placeholder-gray-400 text-sm",
+                placeholder: "Escribe aquí..."
+            }),
+            $('<button>', {
+                class: "bg-blue-700 hover:bg-blue-600 text-white p-2 rounded-sm ml-2 flex items-center justify-center transition",
+                click: opts.success
+            }).append(
+                $('<i>', { class: "icon-direction-outline" }) // Icono de envío
+            )
+        );
+
+        historialContainer.append(messageBar);
+
+        // Renderizar el componente
+        $('#' + opts.parent).empty().append(historialContainer);
+    }
+
 
 
     

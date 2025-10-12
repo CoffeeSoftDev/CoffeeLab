@@ -427,8 +427,8 @@ class App extends Templates {
         normal.ticketPasteleria({
             parent: 'containerPrintOrder',
             data: {
-                head: pos.order,
-                products: pos.products,
+                head: pos.order[0],
+                products: pos.data.products,
                 paymentMethods: [
                     { method_pay: "Tarjeta", pay: 200 },
                     { method_pay: "Efectivo", pay: 100 }
@@ -956,6 +956,56 @@ class App extends Templates {
 
         $('#order-details-info').html(html);
     }
+
+    // History.
+    async showHistory(id) {
+        let data = await useFetch({ url: this._link, data: { opc: 'getHistory', id: id } });
+        
+        bootbox.dialog({
+            title: ``,
+            size: "large",
+            id: 'modalAdvance',
+            closeButton: true,
+            message: `<div id="containerChat"></div>`,
+        });
+        this.createTimelineChat({
+            parent: 'containerChat',
+            data: [],
+            success: () => {
+                this.addHistory(id);
+            }
+        });
+    
+    }
+
+    async addHistory(id) {
+        useFetch({
+            url: this._link,
+            data: {
+                opc: 'addHistory',
+                evt_events_id: id,
+                comment: $('#iptHistorial').val(),
+                action: $('#iptHistorial').val(),
+                title: 'comentario',
+                type: 'comment'
+            },
+
+            success: (data) => {
+                $('#iptHistorial').val('');
+
+                this.createTimeLine2({
+                    parent: 'containerChat',
+                    data: data.history,
+                    success: () => {
+                        this.addHistory();
+                    }
+                });
+            }
+        });
+    }
+
+
+
 
     // Show Order.
 
