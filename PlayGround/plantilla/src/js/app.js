@@ -5,6 +5,8 @@ let api = "https://erp-varoch.com/DEV/capital-humano/ctrl/ctrl-rotacion-de-perso
 let api2 = "https://huubie.com.mx/dev/pedidos/ctrl/ctrl-pedidos-catalogo.php";
 let data,idFolio;
 
+// hello
+
 $(async () => {
     // instancias.
     app = new App(api2, 'root');
