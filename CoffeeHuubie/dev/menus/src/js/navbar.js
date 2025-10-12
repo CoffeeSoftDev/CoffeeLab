@@ -6,8 +6,8 @@ class Navbar {
 
     render(options) {
         const defaults = {
-            logo: "/alpha/src/img/logo/logo.svg",
-            imgPerfil: "/alpha/src/img/df-user.png",
+            logo: "/dev/src/img/logo/logo.svg",
+            imgPerfil: "/dev/src/img/df-user.png",
             company: "Compañia",
             username: "Usuario",
             parent: "body",

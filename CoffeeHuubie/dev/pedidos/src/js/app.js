@@ -171,7 +171,8 @@ class App extends Templates {
             parent: `container${this.PROJECT_NAME}`,
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
             data: { opc: "listOrders", fi: rangePicker.fi, ff: rangePicker.ff },
-            conf: { datatable: true, pag: 10 },
+            conf: {
+                datatable: true, pag: 10, fn_datatable: 'simple_data_table_filter', },
             coffeesoft: true,
 
             attr: {
@@ -959,49 +960,85 @@ class App extends Templates {
 
     // History.
     async showHistory(id) {
-        let data = await useFetch({ url: this._link, data: { opc: 'getHistory', id: id } });
+        const data = await useFetch({ url: this._link, data: { opc: 'getHistory', id: id } });
         
         bootbox.dialog({
-            title: ``,
+            title: `
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-purple-600 rounded flex items-center justify-center">
+                        <i class="icon-clock text-white text-sm"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-semibold text-white">Historial del Pedido</h2>
+                        <p class="text-sm text-gray-400">Actividad y comentarios</p>
+                    </div>
+                </div>
+            `,
             size: "large",
-            id: 'modalAdvance',
+            id: 'modalHistory',
             closeButton: true,
-            message: `<div id="containerChat"></div>`,
+            message: `<div id="containerHistory"></div>`,
         });
+
         this.createTimelineChat({
-            parent: 'containerChat',
-            data: [],
+            parent  : 'containerHistory',
+            data    : data.history || [],
+            input_id: 'iptHistorial',
             success: () => {
                 this.addHistory(id);
             }
         });
-    
     }
 
     async addHistory(id) {
-        useFetch({
+        const comment = $('#iptHistorial').val().trim();
+        
+        if (!comment) {
+            alert({
+                icon: "warning",
+                text: "Por favor escribe un comentario",
+                timer: 1500
+            });
+            return;
+        }
+
+        const response = await useFetch({
             url: this._link,
             data: {
                 opc: 'addHistory',
-                evt_events_id: id,
-                comment: $('#iptHistorial').val(),
-                action: $('#iptHistorial').val(),
-                title: 'comentario',
+                order_id: id,
+                comment: comment,
+                action: comment,
+                title: 'Comentario',
                 type: 'comment'
-            },
-
-            success: (data) => {
-                $('#iptHistorial').val('');
-
-                this.createTimeLine2({
-                    parent: 'containerChat',
-                    data: data.history,
-                    success: () => {
-                        this.addHistory();
-                    }
-                });
             }
         });
+
+        if (response.status === 200) {
+            $('#iptHistorial').val('');
+            
+            this.createTimelineChat({
+                parent  : 'containerHistory',
+                data    : response.history || [],
+                input_id: 'iptHistorial',
+                success: () => {
+                    this.addHistory(id);
+                }
+            });
+
+            alert({
+                icon: "success",
+                text: "Comentario agregado",
+                timer: 1000
+            });
+
+            
+        } else {
+            alert({
+                icon: "error",
+                text: response.message || "Error al agregar comentario"
+            });
+        }
     }
 
 

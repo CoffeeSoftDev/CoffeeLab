@@ -1,3 +1,52 @@
+[ 2025-10-12 14:42:54 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order_histories (id,comment,action,title,type,date_action,order_id) VALUES (?,?,?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '32' for key 'order_histories.PRIMARY'
+
+
+[ 2025-10-12 14:42:40 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order_histories (id,comment,action,title,type,date_action,order_id) VALUES (?,?,?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '32' for key 'order_histories.PRIMARY'
+
+
+[ 2025-10-12 14:41:55 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order_histories (id,comment,action,title,type,date_action,usr_users_id,order_id) VALUES (?,?,?,?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '32' for key 'order_histories.PRIMARY'
+
+
+[ 2025-10-12 14:41:49 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order_histories (id,comment,action,title,type,date_action,order_id) VALUES (?,?,?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '32' for key 'order_histories.PRIMARY'
+
+
+[ 2025-10-12 14:39:22 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order_histories (id,comment,action,title,type,date_action,usr_users_id,order_id) VALUES (?,?,?,?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '32' for key 'order_histories.PRIMARY'
+
+
+[ 2025-10-12 14:37:30 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order_histories (id,comment,action,title,type,date_action,usr_users_id,order_id) VALUES (?,?,?,?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '32' for key 'order_histories.PRIMARY'
+
+
+[ 2025-10-12 14:31:41 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order_histories (id,comment,action,title,type,date_action,usr_users_id,order_id) VALUES (?,?,?,?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[23000]: Integrity constraint violation: 1062 Duplicate entry '32' for key 'order_histories.PRIMARY'
+
+
 [ 2025-10-11 10:13:49 ]
 [ UNIX_USR ] :: nt authority\system
 [ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
