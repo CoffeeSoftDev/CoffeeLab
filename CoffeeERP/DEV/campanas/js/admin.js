@@ -11,6 +11,7 @@ class Admin extends Templates {
     }
 
     layout() {
+
         this.primaryLayout({
             parent: `container-admin`,
             id: this.PROJECT_NAME,
@@ -20,17 +21,11 @@ class Admin extends Templates {
             }
         });
 
-        $(`#filterBar${this.PROJECT_NAME}`).html(`
-            <div class="px-2 pt-2 pb-2">
-                <h2 class="text-2xl font-semibold text-white">⚙️ Administrador de Catálogos</h2>
-                <p class="text-gray-400">Gestiona tipos y clasificaciones de anuncios</p>
-            </div>
-        `);
+      
 
         this.tabLayout({
             parent: `container${this.PROJECT_NAME}`,
             id: `tabsAdmin`,
-            theme: "dark",
             class: '',
             type: "short",
             json: [
@@ -87,7 +82,7 @@ class Admin extends Templates {
             conf: { datatable: true, pag: 10 },
             attr: {
                 id: "tbTypes",
-                theme: 'dark',
+                theme: 'corporativo',
                 center: [2]
             },
             success: (data) => {
@@ -235,7 +230,7 @@ class Admin extends Templates {
             conf: { datatable: true, pag: 10 },
             attr: {
                 id: "tbClassifications",
-                theme: 'dark',
+                theme: 'corporativo',
                 center: [2]
             },
             success: (data) => {

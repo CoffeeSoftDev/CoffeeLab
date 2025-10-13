@@ -26,11 +26,11 @@
             <div class="bg-[#DBDBDC] main-container" id="root"></div>
 
             <!-- Module Scripts -->
-            <script src="js/campaign.js"></script>
-            <script src="js/dashboard.js"></script>
-            <script src="js/summary.js"></script>
-            <script src="js/history.js"></script>
-            <script src="js/admin.js"></script>
+            <script src="js/campaign.js?t=<?php echo time(); ?>"></script>
+            <script src="js/dashboard.js?t=<?php echo time(); ?>"></script>
+            <script src="js/summary.js?t=<?php echo time(); ?>"></script>
+            <script src="js/history.js?t=<?php echo time(); ?>"></script>
+            <script src="js/admin.js?t=<?php echo time(); ?>"></script>
         </div>
     </main>
 </body>
