@@ -89,7 +89,7 @@
 
 
     <!-- Init -->
-    <script src="<?=PATH_DASHBOARD?>src/js/app.js?t=<?php echo time(); ?>"></script>
+    <script src="<?=PATH_DASHBOARD?>order-dashboard.js?t=<?php echo time(); ?>"></script>
     
   
 

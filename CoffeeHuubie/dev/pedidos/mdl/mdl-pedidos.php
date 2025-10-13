@@ -678,10 +678,88 @@ class MPedidos extends CRUD {
         ]);
     }
 
+    // Dashboard Metrics Methods
 
+    function getOrdersByMonth($params) {
+        return $this->_Select([
+            'table' => "{$this->bd}pedidos_orders",
+            'values' => "id, date_creation, total_pay, status",
+            'where' => "MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?",
+            'data' => $params
+        ]);
+    }
 
+    function getCompletedSales($params) {
+        $query = "
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM {$this->bd}pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        ";
+        
+        $result = $this->_Read($query, $params);
+        return $result[0] ?? ['count' => 0, 'amount' => 0];
+    }
 
+    function getPendingSales($params) {
+        $query = "
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM {$this->bd}order_payments WHERE order_id = {$this->bd}pedidos_orders.id), 0
+                )), 0) as amount
+            FROM {$this->bd}pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        ";
+        
+        $result = $this->_Read($query, $params);
+        return $result[0] ?? ['count' => 0, 'amount' => 0];
+    }
 
+    function getOrdersChartData($params) {
+        $query = "
+            SELECT 
+                WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
+                COUNT(*) as orders_count
+            FROM {$this->bd}pedidos_orders 
+            WHERE MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+            GROUP BY week_of_month
+            ORDER BY week_of_month
+        ";
+        
+        $result = $this->_Read($query, $params);
+        
+        // Format data for Chart.js
+        $labels = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5'];
+        $data = [0, 0, 0, 0, 0];
+        
+        foreach ($result as $row) {
+            $weekIndex = intval($row['week_of_month']) - 1;
+            if ($weekIndex >= 0 && $weekIndex < 5) {
+                $data[$weekIndex] = intval($row['orders_count']);
+            }
+        }
+        
+        return [
+            'labels' => array_slice($labels, 0, count(array_filter($data)) ?: 4),
+            'datasets' => [
+                [
+                    'data' => array_slice($data, 0, count(array_filter($data)) ?: 4),
+                    'borderColor' => '#3B82F6',
+                    'backgroundColor' => 'transparent'
+                ]
+            ]
+        ];
+    }
 
 }
 ?>

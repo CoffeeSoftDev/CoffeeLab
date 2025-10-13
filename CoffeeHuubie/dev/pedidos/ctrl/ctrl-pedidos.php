@@ -546,11 +546,72 @@ class Pedidos extends MPedidos{
         // ]));
     }
 
-   
+    // Dashboard Metrics
+    function getDashboardMetrics() {
+        $status = 500;
+        $message = 'Error al obtener métricas del dashboard';
+        $data = null;
 
-   
+        try {
+            $month = $_POST['month'] ?? date('n');
+            $year = $_POST['year'] ?? date('Y');
+            $subsidiariesId = $_SESSION['SUB'] ?? 1;
 
+            // Get total orders for the month
+            $totalOrders = $this->getOrdersByMonth([$month, $year, $subsidiariesId]);
+            
+            // Get completed sales (status = 3)
+            $completedSales = $this->getCompletedSales([$month, $year, $subsidiariesId]);
+            
+            // Get pending sales (status = 1 or 2)
+            $pendingSales = $this->getPendingSales([$month, $year, $subsidiariesId]);
+            
+            // Get chart data for the month
+            $chartData = $this->getOrdersChartData([$month, $year, $subsidiariesId]);
 
+            // Get previous month data for trends
+            $prevMonth = $month == 1 ? 12 : $month - 1;
+            $prevYear = $month == 1 ? $year - 1 : $year;
+            
+            $prevTotalOrders = $this->getOrdersByMonth([$prevMonth, $prevYear, $subsidiariesId]);
+            $prevCompletedSales = $this->getCompletedSales([$prevMonth, $prevYear, $subsidiariesId]);
+            $prevPendingSales = $this->getPendingSales([$prevMonth, $prevYear, $subsidiariesId]);
+
+            $data = [
+                'totalOrders' => count($totalOrders),
+                'completedSales' => [
+                    'count' => $completedSales['count'] ?? 0,
+                    'amount' => $completedSales['amount'] ?? 0
+                ],
+                'pendingSales' => [
+                    'count' => $pendingSales['count'] ?? 0,
+                    'amount' => $pendingSales['amount'] ?? 0
+                ],
+                'chartData' => $chartData,
+                'previousTotalOrders' => count($prevTotalOrders),
+                'previousCompletedSales' => [
+                    'count' => $prevCompletedSales['count'] ?? 0,
+                    'amount' => $prevCompletedSales['amount'] ?? 0
+                ],
+                'previousPendingSales' => [
+                    'count' => $prevPendingSales['count'] ?? 0,
+                    'amount' => $prevPendingSales['amount'] ?? 0
+                ]
+            ];
+
+            $status = 200;
+            $message = 'Métricas obtenidas correctamente';
+
+        } catch (Exception $e) {
+            $message = 'Error interno del servidor: ' . $e->getMessage();
+        }
+
+        return [
+            'status' => $status,
+            'message' => $message,
+            'data' => $data
+        ];
+    }
 
 }
 
