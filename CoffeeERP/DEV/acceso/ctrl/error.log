@@ -1,3 +1,248 @@
+[ 2025-10-13 08:12:03 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  SELECT FullName AS nombres,APaterno AS apaterno,Telefono_Movil AS telefono,Area_Empleado AS area,Puesto_Empleado AS puesto FROM usuarios  INNER JOIN rfwsmqex_gvsl_rrhh.empleados ON usr_empleado = idEmpleado  WHERE idUser = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.usuarios' doesn't exist
+
+
+[ 2025-10-13 08:12:03 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  SELECT
+                    usuarios.idUser,
+                    usuarios.usser,
+                    usuarios.usr_perfil,
+                    usuarios.usr_udn,
+                    usuarios.user_photo,
+                    usuarios.activacion,
+                    directorios.dir_ruta,
+                    modulos.mod_ruta,
+                    directorios.dir_submodulo,
+                    submodulos.sub_ruta AS submodulo 
+                FROM
+                    usuarios
+                    INNER JOIN permisos ON usuarios.usr_perfil = permisos.id_Perfil
+                    INNER JOIN directorios ON permisos.id_Directorio = directorios.idDirectorio
+                    INNER JOIN modulos ON directorios.dir_modulo = modulos.idModulo 
+                    LEFT JOIN rfwsmqex_gvsl_rrhh.empleados ON usr_empleado = idEmpleado
+                    LEFT JOIN submodulos ON submodulos.idSubmodulo = directorios.dir_submodulo
+                WHERE
+                    (
+                        usuarios.usser = ? OR 
+                        Telefono_Movil = ? OR 
+                        Email = ? 
+                    )
+                    AND ( 
+                        usuarios.keey = MD5(?) 
+                        OR usuarios.keey2 = MD5(?)
+                    )
+                    AND usuarios.usr_estado = 1 
+                    AND directorios.dir_estado = 1 
+                    AND directorios.dir_visible = 1 
+                ORDER BY
+                    mod_orden,
+                    sub_orden,
+                    dir_orden ASC 
+                    LIMIT 1
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.usuarios' doesn't exist
+
+
+[ 2025-10-13 08:10:57 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  SELECT FullName AS nombres,APaterno AS apaterno,Telefono_Movil AS telefono,Area_Empleado AS area,Puesto_Empleado AS puesto FROM usuarios  INNER JOIN rfwsmqex_gvsl_rrhh.empleados ON usr_empleado = idEmpleado  WHERE idUser = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.usuarios' doesn't exist
+
+
+[ 2025-10-13 08:10:57 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  SELECT
+                    usuarios.idUser,
+                    usuarios.usser,
+                    usuarios.usr_perfil,
+                    usuarios.usr_udn,
+                    usuarios.user_photo,
+                    usuarios.activacion,
+                    directorios.dir_ruta,
+                    modulos.mod_ruta,
+                    directorios.dir_submodulo,
+                    submodulos.sub_ruta AS submodulo 
+                FROM
+                    usuarios
+                    INNER JOIN permisos ON usuarios.usr_perfil = permisos.id_Perfil
+                    INNER JOIN directorios ON permisos.id_Directorio = directorios.idDirectorio
+                    INNER JOIN modulos ON directorios.dir_modulo = modulos.idModulo 
+                    LEFT JOIN rfwsmqex_gvsl_rrhh.empleados ON usr_empleado = idEmpleado
+                    LEFT JOIN submodulos ON submodulos.idSubmodulo = directorios.dir_submodulo
+                WHERE
+                    (
+                        usuarios.usser = ? OR 
+                        Telefono_Movil = ? OR 
+                        Email = ? 
+                    )
+                    AND ( 
+                        usuarios.keey = MD5(?) 
+                        OR usuarios.keey2 = MD5(?)
+                    )
+                    AND usuarios.usr_estado = 1 
+                    AND directorios.dir_estado = 1 
+                    AND directorios.dir_visible = 1 
+                ORDER BY
+                    mod_orden,
+                    sub_orden,
+                    dir_orden ASC 
+                    LIMIT 1
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.usuarios' doesn't exist
+
+
+[ 2025-10-13 08:09:29 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  SELECT FullName AS nombres,APaterno AS apaterno,Telefono_Movil AS telefono,Area_Empleado AS area,Puesto_Empleado AS puesto FROM usuarios  INNER JOIN rfwsmqex_gvsl_rrhh.empleados ON usr_empleado = idEmpleado  WHERE idUser = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.usuarios' doesn't exist
+
+
+[ 2025-10-13 08:09:29 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  SELECT
+                    usuarios.idUser,
+                    usuarios.usser,
+                    usuarios.usr_perfil,
+                    usuarios.usr_udn,
+                    usuarios.user_photo,
+                    usuarios.activacion,
+                    directorios.dir_ruta,
+                    modulos.mod_ruta,
+                    directorios.dir_submodulo,
+                    submodulos.sub_ruta AS submodulo 
+                FROM
+                    usuarios
+                    INNER JOIN permisos ON usuarios.usr_perfil = permisos.id_Perfil
+                    INNER JOIN directorios ON permisos.id_Directorio = directorios.idDirectorio
+                    INNER JOIN modulos ON directorios.dir_modulo = modulos.idModulo 
+                    LEFT JOIN rfwsmqex_gvsl_rrhh.empleados ON usr_empleado = idEmpleado
+                    LEFT JOIN submodulos ON submodulos.idSubmodulo = directorios.dir_submodulo
+                WHERE
+                    (
+                        usuarios.usser = ? OR 
+                        Telefono_Movil = ? OR 
+                        Email = ? 
+                    )
+                    AND ( 
+                        usuarios.keey = MD5(?) 
+                        OR usuarios.keey2 = MD5(?)
+                    )
+                    AND usuarios.usr_estado = 1 
+                    AND directorios.dir_estado = 1 
+                    AND directorios.dir_visible = 1 
+                ORDER BY
+                    mod_orden,
+                    sub_orden,
+                    dir_orden ASC 
+                    LIMIT 1
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.usuarios' doesn't exist
+
+
+[ 2025-10-13 07:51:27 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  SELECT FullName AS nombres,APaterno AS apaterno,Telefono_Movil AS telefono,Area_Empleado AS area,Puesto_Empleado AS puesto FROM usuarios  INNER JOIN rfwsmqex_gvsl_rrhh.empleados ON usr_empleado = idEmpleado  WHERE idUser = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.usuarios' doesn't exist
+
+
+[ 2025-10-13 07:51:27 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  SELECT
+                    usuarios.idUser,
+                    usuarios.usser,
+                    usuarios.usr_perfil,
+                    usuarios.usr_udn,
+                    usuarios.user_photo,
+                    usuarios.activacion,
+                    directorios.dir_ruta,
+                    modulos.mod_ruta,
+                    directorios.dir_submodulo,
+                    submodulos.sub_ruta AS submodulo 
+                FROM
+                    usuarios
+                    INNER JOIN permisos ON usuarios.usr_perfil = permisos.id_Perfil
+                    INNER JOIN directorios ON permisos.id_Directorio = directorios.idDirectorio
+                    INNER JOIN modulos ON directorios.dir_modulo = modulos.idModulo 
+                    LEFT JOIN rfwsmqex_gvsl_rrhh.empleados ON usr_empleado = idEmpleado
+                    LEFT JOIN submodulos ON submodulos.idSubmodulo = directorios.dir_submodulo
+                WHERE
+                    (
+                        usuarios.usser = ? OR 
+                        Telefono_Movil = ? OR 
+                        Email = ? 
+                    )
+                    AND ( 
+                        usuarios.keey = MD5(?) 
+                        OR usuarios.keey2 = MD5(?)
+                    )
+                    AND usuarios.usr_estado = 1 
+                    AND directorios.dir_estado = 1 
+                    AND directorios.dir_visible = 1 
+                ORDER BY
+                    mod_orden,
+                    sub_orden,
+                    dir_orden ASC 
+                    LIMIT 1
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.usuarios' doesn't exist
+
+
+[ 2025-10-13 07:51:08 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  SELECT FullName AS nombres,APaterno AS apaterno,Telefono_Movil AS telefono,Area_Empleado AS area,Puesto_Empleado AS puesto FROM usuarios  INNER JOIN rfwsmqex_gvsl_rrhh.empleados ON usr_empleado = idEmpleado  WHERE idUser = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.usuarios' doesn't exist
+
+
+[ 2025-10-13 07:51:08 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  SELECT
+                    usuarios.idUser,
+                    usuarios.usser,
+                    usuarios.usr_perfil,
+                    usuarios.usr_udn,
+                    usuarios.user_photo,
+                    usuarios.activacion,
+                    directorios.dir_ruta,
+                    modulos.mod_ruta,
+                    directorios.dir_submodulo,
+                    submodulos.sub_ruta AS submodulo 
+                FROM
+                    usuarios
+                    INNER JOIN permisos ON usuarios.usr_perfil = permisos.id_Perfil
+                    INNER JOIN directorios ON permisos.id_Directorio = directorios.idDirectorio
+                    INNER JOIN modulos ON directorios.dir_modulo = modulos.idModulo 
+                    LEFT JOIN rfwsmqex_gvsl_rrhh.empleados ON usr_empleado = idEmpleado
+                    LEFT JOIN submodulos ON submodulos.idSubmodulo = directorios.dir_submodulo
+                WHERE
+                    (
+                        usuarios.usser = ? OR 
+                        Telefono_Movil = ? OR 
+                        Email = ? 
+                    )
+                    AND ( 
+                        usuarios.keey = MD5(?) 
+                        OR usuarios.keey2 = MD5(?)
+                    )
+                    AND usuarios.usr_estado = 1 
+                    AND directorios.dir_estado = 1 
+                    AND directorios.dir_visible = 1 
+                ORDER BY
+                    mod_orden,
+                    sub_orden,
+                    dir_orden ASC 
+                    LIMIT 1
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.usuarios' doesn't exist
+
+
 [ 2025-10-05 19:02:13 ]
 [ UNIX_USR ] :: nt authority\system
 [ WINDOWS_USR ] :: DESKTOP-O7AOGR9$

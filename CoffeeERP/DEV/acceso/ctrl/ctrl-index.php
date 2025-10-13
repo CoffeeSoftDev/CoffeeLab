@@ -16,7 +16,7 @@ case 'index':
 
     $sqlUser = $obj->consulta_user([$user,$user,$user,$pass,$pass]);
 
-    // if ( is_array($sqlUser) && !empty($sqlUser) ) {
+    if ( is_array($sqlUser) && !empty($sqlUser) ) {
         $idUser       = $sqlUser['idUser'];
         $userReal     = $sqlUser['usser'];
         $udn          = isset($sqlUser['usr_udn']) ? $sqlUser['usr_udn'] : '8';
@@ -60,11 +60,12 @@ case 'index':
             ]
         ];
 
-    // } else {
-    //     $encode = [
-    //         "success"      => false,
-    //     ];
-    // }
+    } else {
+        $encode = [
+            "success"      => false,
+            "message"      => "Usuario o contraseña incorrectos"
+        ];
+    }
 break;
 case 'forgot':
     $encode = false;
