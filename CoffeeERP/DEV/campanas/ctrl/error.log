@@ -1,3 +1,36 @@
+[ 2025-10-13 10:24:44 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  SELECT id, nombre as valor FROM rfwsmqex_kpi.clasificacion_anuncio   WHERE active = 1  ORDER BY nombre ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.clasificacion_anuncio' doesn't exist
+
+
+[ 2025-10-13 10:24:43 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  SELECT id, nombre as valor FROM rfwsmqex_kpi.tipo_anuncio   WHERE active = 1  ORDER BY nombre ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.tipo_anuncio' doesn't exist
+
+
+[ 2025-10-13 10:24:43 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  SELECT id, nombre as valor, color FROM rfwsmqex_kpi.red_social   WHERE active = 1  ORDER BY nombre ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.red_social' doesn't exist
+
+
+[ 2025-10-13 10:24:43 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_kpi.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.udn' doesn't exist
+
+
 [ 2025-10-13 08:23:26 ]
 [ UNIX_USR ] :: nt authority\system
 [ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
