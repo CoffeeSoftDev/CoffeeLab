@@ -479,15 +479,41 @@ class Pedidos extends MPedidos{
     // History
 
     function getHistory(){
-        
-        $lsHistories = $this -> getHistoryEventByID([ $_POST['id'] ]);
+        $status  = 200;
+        $message = 'Historial obtenido correctamente';
+        $history = $this->listHistories([$_POST['id']]);
 
-        
-        return [ 
-       
-            'history' => $lsHistories 
+        return [
+            'status'  => $status,
+            'message' => $message,
+            'history' => $history
         ];
+    }
+
+    function addHistory(){
+        $status  = 500;
+        $message = 'Error al agregar el comentario';
+
+        $_POST['date_action']   = date('Y-m-d H:i:s');
+        // $_POST['usr_users_id']  = $_SESSION['ID'];
       
+
+        $data = $this->util->sql($_POST);
+        $add  = $this->addHistories($data);
+
+        if ($add) {
+            $status  = 200;
+            $message = 'Comentario agregado correctamente';
+        }
+
+        $history = $this->listHistories([$_POST['order_id']]);
+
+        return [
+            'status'  => $status,
+            'message' => $message,
+            'history' => $history,
+            'data'    => $data
+        ];
     }
 
 

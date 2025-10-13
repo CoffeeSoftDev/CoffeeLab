@@ -299,11 +299,32 @@ class MPedidos extends CRUD {
 
 
 
-    // add Histories.
+    // Histories.
+
+    function listHistories($array) {
+        $query = "
+            SELECT
+                order_histories.id as id,
+                order_histories.title as valor,
+                order_histories.action as message,
+                DATE_FORMAT(order_histories.date_action, '%d/%m/%Y %h:%i %p') as date,
+                order_histories.comment,
+                order_histories.type,
+                fullname AS author
+            FROM
+                {$this->bd}order_histories
+            LEFT JOIN fayxzvov_alpha.usr_users ON order_histories.usr_users_id = fayxzvov_alpha.usr_users.id
+            WHERE
+                order_histories.order_id = ?
+            ORDER BY
+                order_histories.date_action DESC
+        ";
+        return $this->_Read($query, $array);
+    }
 
     function addHistories($array){
         return $this->_Insert([
-            'table'  => "{$this->bd}evt_histories",
+            'table'  => "{$this->bd}order_histories",
             'values' => $array['values'],
             'data'   => $array['data'],
         ]);

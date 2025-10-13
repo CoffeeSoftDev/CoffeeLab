@@ -27,6 +27,7 @@ class Access extends MAccess {
             $idSub       = $sql['sucursal'];
             $social_name = $sql['company'];
 
+            $_SESSION['ID']            = $idUser;
             $_SESSION['USR']           = $idUser;
             $_SESSION['ROL']           = $idRol;
             $_SESSION['SUB']           = $idSub;

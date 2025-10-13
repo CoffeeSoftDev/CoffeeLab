@@ -40,7 +40,7 @@ class Sidebar {
                     return `<li class="submenu text-gray-400">
                         <button class="submenucito w-full text-left flex items-center justify-between text-base font-medium px-3 py-2 rounded-lg hover:bg-gray-700 hover:text-white transition">
                             <span class="flex items-center gap-2">
-                               <img src="https://huubie.com.mx/dev/src/img/ventas-menu.svg" alt="icono" class="w-5 h-5" />
+                               <img src="/dev/src/img/ventas-menu.svg" alt="icono" class="w-5 h-5" />
                                 ${item.text}
                             </span>
                             <svg class="h-5 w-5 text-gray-400 group-hover:text-white transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
