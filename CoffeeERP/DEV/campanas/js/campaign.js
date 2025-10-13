@@ -108,7 +108,7 @@ class App extends Templates {
 
         const leftSection = $("<div>").append(
             $("<h2>", {
-                class: "text-2xl font-semibold text-white",
+                class: "text-2xl font-semibold ",
                 text: opts.title
             }),
             $("<p>", {
