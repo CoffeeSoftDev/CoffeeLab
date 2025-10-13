@@ -21,6 +21,23 @@ Quiero que generes un **Controlador PHP** siguiendo esta estructura:
  class ctrl extends mdl {}
 ```
 
+### Nomenclatura Permitida para Controladores (CTRL)
+
+**✅ Nombres PERMITIDOS para funciones del controlador:**
+- `init()` - Para inicializar datos/filtros
+- `ls()` - Para listar registros en tablas
+- `add[Entidad]()` - Para agregar nuevos registros
+- `edit[Entidad]()` - Para editar registros existentes
+- `get[Entidad]()` - Para obtener un registro específico
+- `status[Entidad]()` - Para cambiar estados
+- `cancel[Entidad]()` - Para cancelar registros
+- `delete[Entidad]()` - Para eliminar registros
+
+**❌ Nombres PROHIBIDOS (reservados para modelo):**
+- `list[Entidad]()`, `create[Entidad]()`, `update[Entidad]()`, `get[Entidad]ById()`, `ls[Entidad]()`
+
+**CRÍTICO:** Los nombres de funciones del controlador NO pueden ser iguales a los del modelo para evitar conflictos.
+
 Implementar los métodos siguientes dentro de la clase `ctrl`:
 
 ## 1. **init()**
@@ -52,9 +69,11 @@ function init() {
     }
 ```
 
-## 2. **ls[Entidad]()**
+## 2. **ls() / ls[Entidad]()**
 
 Este método debe implementarse siempre que el frontend tenga una tabla con barra de filtros (`filterBar`) y posiblemente un calendario.
+
+**IMPORTANTE:** En el controlador usar `ls()` genérico, mientras que en el modelo usar `list[Entidad]()` específico.
 
 - Usa ls() como nombre del método del controlador.
 

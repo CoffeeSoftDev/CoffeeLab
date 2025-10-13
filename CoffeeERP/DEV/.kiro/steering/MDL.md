@@ -46,6 +46,22 @@ Debe respetarse el formato de CoffeeSoft
 - Los nombres de las funciones deben:
   - Estar en inglés.
   - Usar notación `camelCase`.
+  - **CRÍTICO:** NO pueden ser iguales a las funciones del controlador (ctrl)
+
+### Nomenclatura Permitida para Modelos (MDL)
+
+**✅ Nombres PERMITIDOS para funciones del modelo:**
+- `list[Entidad]()` - Para listar registros
+- `create[Entidad]()` - Para crear registros  
+- `update[Entidad]()` - Para actualizar registros
+- `get[Entidad]ById()` - Para obtener un registro por ID
+- `delete[Entidad]ById()` - Para eliminar registros
+- `ls[Entidad]()` - Para consultas de filtros/selects
+- `exists[Entidad]ByName()` - Para validar existencia
+- `getMax[Entidad]Id()` - Para obtener último ID
+
+**❌ Nombres PROHIBIDOS (reservados para controlador):**
+- `ls()`, `add()`, `edit()`, `get()`, `init()`, `status[Entidad]()`
 
 
 ### 3. Uso de Métodos CRUD Heredados

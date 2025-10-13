@@ -43,6 +43,10 @@ debe llevar la siguiente nomenclatura
   - Estar en inglés.
   - Usar notación `camelCase`.
 
+**IMPORTANTE:** Asegúrate de que las funciones del backend sigan la nomenclatura correcta:
+- **Controlador (ctrl):** `ls()`, `add[Entidad]()`, `edit[Entidad]()`, `get[Entidad]()`
+- **Modelo (mdl):** `list[Entidad]()`, `create[Entidad]()`, `update[Entidad]()`, `get[Entidad]ById()`
+
 
 ## La clase debe implementar los siguientes métodos:
 

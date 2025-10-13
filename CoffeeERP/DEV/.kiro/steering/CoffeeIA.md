@@ -66,7 +66,8 @@ nombre_proyecto/
 │   │   └── [nombre_proyecto].js   # Opcional: JS duplicado o test
 │   │
 │   └── components/                # Componentes visuales reutilizables
-│       └── [nombre_componente].js # Basados en jQuery + TailwindCSS
+│       └── [nombre-componente].js # Basados en jQuery + TailwindCSS
+│                                  # AUTOMÁTICO: Se crea aquí cada nuevo componente
 
 ```
 
@@ -101,7 +102,12 @@ Detección de intención:
 
 Reglas de generación:
 
-- Si creas un nuevo componente quiero que sigas las directrices de new component.md para generarlo como método jQuery con patrón configurable, y si tiene eventos CRUD, pregunta al usuario si desea generar automáticamente el controlador y modelo correspondiente.
+- **IMPORTANTE:** Si creas un nuevo componente, SIEMPRE sigue las reglas de **new-component.md**:
+  - Genera el componente como método jQuery con patrón configurable por `options`
+  - Usa exclusivamente **jQuery** y **TailwindCSS**
+  - Estructura: `defaults` → `Object.assign()` → lógica → construcción HTML → eventos → inserción DOM
+  - Si tiene eventos CRUD, pregunta al usuario si desea generar automáticamente el controlador y modelo
+  - **OBLIGATORIO:** Una vez terminado el componente, crea automáticamente el archivo en `src/js/components/[nombre-componente].js`
 - **SIEMPRE** Respeta las reglas de MDL.md, CTRL.md y FRONT JS.md
 - **SIEMPRE** Consulta DOC COFFEESOFT.md para usar los componentes correctos (createForm, createTable, swalQuestion, etc.)
 - **SIEMPRE** Usa markdown para generar código
@@ -119,9 +125,10 @@ Reglas de generación:
 4. Los `pivotes` son inmutables; únicamente se les añade el sufijo correspondiente al proyecto.
 5. Los nuevos componentes deben implementarse como `métodos` y no como funciones independientes.
 6. Respeta la lógica y la arquitectura de los componentes establecidos.
-7. **IMPORTANTE:** Los nombres de las funciones del modelo (mdl) NO deben ser iguales a los del controlador (ctrl). Usa prefijos diferenciadores:
-   - **Controlador:** `ls()`, `add()`, `edit()`, `get()`
-   - **Modelo:** `list[Entidad]()`, `create[Entidad]()`, `update[Entidad]()`, `get[Entidad]ById()`
+7. **CRÍTICO - Nomenclatura de Funciones:** Los nombres de las funciones del modelo (mdl) NO pueden ser iguales a los del controlador (ctrl). Esta regla es OBLIGATORIA para evitar conflictos:
+   - **Controlador:** `ls()`, `add()`, `edit()`, `get()`, `init()`, `status[Entidad]()`
+   - **Modelo:** `list[Entidad]()`, `create[Entidad]()`, `update[Entidad]()`, `get[Entidad]ById()`, `ls[Entidad]()`, `exists[Entidad]ByName()`
+   - **Nunca usar:** Mismo nombre en ambos archivos (ej: NO usar `getUsers()` en ctrl Y mdl)
 8. La carpetas se llaman js , mdl , ctrl
 9. RESPETA LAS REGLAS DE MDL.md, CTRL.md y FRONT JS.md
 10. Solo agrega comentario cuando sea necesario
@@ -130,6 +137,42 @@ Reglas de generación:
 #### Antes de comenzar.
 
 - **Importante** Consulta MDL.md, CTRL.md y FRONT JS.md para entender la arquitectura MVC
+
+### new-component
+
+#### Flujo para Nuevos Componentes
+
+Cuando se detecte la intención de crear un componente:
+
+1. **Análisis del Código Base:**
+
+   - Si el usuario pega código existente (React, Next.js, etc.), pregunta: "¿Deseas crear componente normal o guiar paso a paso?"
+   - Analiza la estructura y funcionalidad requerida
+
+2. **Generación del Componente:**
+
+   - **OBLIGATORIO:** Sigue estrictamente las reglas de **new-component.md**
+   - Formato: `nombreComponente(options)` como método jQuery
+   - Estructura: `defaults` → `Object.assign()` → lógica → HTML → eventos → DOM
+   - Usa exclusivamente **jQuery + TailwindCSS**
+   - Todo elemento visible debe provenir de `json: []`
+   - Datos al backend via `data: {}`
+
+3. **Consulta de Datos:**
+
+   - Si requiere `json`, implementa consulta obligatoria al backend con `fetch()`
+   - Eventos por tipo: `onDelete`, `onAdd`, `onUpdate`
+
+4. **Creación de Archivos:**
+
+   - **AUTOMÁTICO:** Crea el archivo en `src/js/components/[nombre-componente].js`
+   - Si tiene eventos CRUD, pregunta si generar `ctrl` y `mdl` automáticamente
+   - Muestra ejemplo de uso: `this.[nombreComponente]()`
+
+5. **Estructura MVC (si aplica):**
+   - Controlador con métodos correspondientes a eventos
+   - Modelo siguiendo reglas de **MDL.md**
+   - Adherencia a pivotes y templates estándar
 
 ### new-project
 
@@ -213,9 +256,16 @@ Esto permite identificar cuándo crear múltiples clases en lugar de una sola, y
 
 Es un conjunto de código y lógica reutilizable que funciona como pieza fundamental en el desarrollo de sistemas.
 
-Los componentes tienen la característica de vivir en CoffeeSoft en la clase de Components.
-Puedes usar de referencia `new-component.md`
-Los componentes SON METODOS DE UNA CLASE
+**Características de los Componentes:**
+
+- Viven en CoffeeSoft en la clase de Components
+- SON MÉTODOS DE UNA CLASE (no funciones independientes)
+- Siguen el patrón configurable por `options`
+- Se crean automáticamente en `src/js/components/[nombre-componente].js`
+- Usan exclusivamente **jQuery + TailwindCSS**
+- Estructura obligatoria: `defaults` → `Object.assign()` → lógica → HTML → eventos → DOM
+
+**Referencia:** Siempre consultar `new-component.md` para la estructura correcta
 
 ### CoffeeSoft
 
@@ -233,7 +283,7 @@ Incluye una biblioteca de componentes reutilizables, herramientas para gestión 
 **IMPORTANTE:** No generar comentarios automáticamente en métodos o clases a menos que sea estrictamente necesario para la funcionalidad.
 
 - **NO** agregar comentarios descriptivos en funciones simples
-- **NO** agregar comentarios explicativos en métodos CRUD básicos  
+- **NO** agregar comentarios explicativos en métodos CRUD básicos
 - **NO** agregar comentarios de documentación automática
 - **SÍ** agregar comentarios solo cuando:
   - La lógica sea compleja y requiera explicación
@@ -241,6 +291,7 @@ Incluye una biblioteca de componentes reutilizables, herramientas para gestión 
   - El usuario lo solicite explícitamente
 
 **Ejemplo de lo que NO hacer:**
+
 ```php
 // Método para obtener lista de usuarios
 function getUsers() {
@@ -250,6 +301,7 @@ function getUsers() {
 ```
 
 **Ejemplo correcto:**
+
 ```php
 function getUsers() {
     return $this->_Select([...]);
