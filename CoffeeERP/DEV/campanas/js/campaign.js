@@ -5,17 +5,17 @@ let udn, red_social, tipo_anuncio, clasificacion;
 
 $(async () => {
     const data = await useFetch({ url: api, data: { opc: "init" } });
-    udn = data.udn;
-    red_social = data.red_social;
-    tipo_anuncio = data.tipo_anuncio;
+    udn           = data.udn;
+    red_social    = data.red_social;
+    tipo_anuncio  = data.tipo_anuncio;
     clasificacion = data.clasificacion;
 
     app = new App(api, "root");
     // campaign = new Campaign(api, "root");
-    // dashboard = new CampaignDashboard(api, "root");
+    dashboard = new CampaignDashboard(api, "root");
     // summary = new CampaignSummary(api, "root");
     // history = new AnnualHistory(api, "root");
-    // admin = new Admin(api, "root");
+    admin = new Admin(api, "root");
 
     app.render();
 });
@@ -29,6 +29,7 @@ class App extends Templates {
     render() {
         this.layout();
         dashboard.render();
+        admin.render();
     }
 
     layout() {
@@ -52,7 +53,7 @@ class App extends Templates {
         this.tabLayout({
             parent: `containerCampaigns`,
             id: `tabs${this.PROJECT_NAME}`,
-            theme: "dark",
+            theme: "light",
             class: '',
             type: "short",
             json: [
@@ -60,7 +61,7 @@ class App extends Templates {
                     id: "dashboard",
                     tab: "Dashboard",
                     class: "mb-1",
-                    active: true,
+                   
                     onClick: () => dashboard.render()
                 },
                 {
@@ -81,6 +82,7 @@ class App extends Templates {
                 {
                     id: "admin",
                     tab: "Administrador",
+                     active: true,
                     onClick: () => admin.render()
                 },
             ]
@@ -108,7 +110,7 @@ class App extends Templates {
 
         const leftSection = $("<div>").append(
             $("<h2>", {
-                class: "text-2xl font-semibold text-white",
+                class: "text-2xl font-semibold ",
                 text: opts.title
             }),
             $("<p>", {
