@@ -233,12 +233,17 @@
     - _Requirements: 5.2, 5.3, 5.4, 5.5_
 
 - [ ] 11. Implement history models (mdl-history.php)
-  - [ ] 11.1 Create CPC history data access methods
+
+
+  - [x] 11.1 Create CPC history data access methods
+
+
     - Create getCPCHistory() method with filters (año, udn_id, red_social_id)
     - Group by month (1-12)
     - Calculate monthly: inversión total, total clics, CPC promedio
     - Use formula: (inversión / resultado) * 1000
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
+
 
   - [ ] 11.2 Create CAC history data access methods
     - Create getCACHistory() method with filters (año, udn_id, red_social_id)
