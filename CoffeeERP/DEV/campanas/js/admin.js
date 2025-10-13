@@ -16,7 +16,7 @@ class Admin extends Templates {
             parent: `container-admin`,
             id: this.PROJECT_NAME,
             card: {
-                filterBar: { class: 'w-full border-b pb-2', id: `filterBar${this.PROJECT_NAME}` },
+                filterBar: { class: 'w-full  pb-2', id: `filterBar${this.PROJECT_NAME}` },
                 container: { class: 'w-full my-2 h-full', id: `container${this.PROJECT_NAME}` }
             }
         });

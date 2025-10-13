@@ -1,3 +1,39 @@
+[ 2025-10-13 13:23:37 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
+[ 2025-10-13 13:22:55 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
+[ 2025-10-13 12:32:29 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
 [ 2025-10-13 12:12:36 ]
 [ UNIX_USR ] :: nt authority\system
 [ WINDOWS_USR ] :: DESKTOP-FHJB2CN$

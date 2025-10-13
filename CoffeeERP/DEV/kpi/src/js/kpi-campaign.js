@@ -10,13 +10,13 @@ $(async () => {
           classificationsList = data.classifications;
           socialNetworksList  = data.socialNetworks;
 
-    campaign               = new Campaign(api_campaign, "root");
-    campaignTypes          = new CampaignTypes(api_campaign, "root");
-    campaignClassification = new CampaignClassification(api_campaign, "root");
-    ads                    = new Ads(api_campaign, "root");
+    // campaign               = new Campaign(api_campaign, "root");
+    // campaignTypes          = new CampaignTypes(api_campaign, "root");
+    // campaignClassification = new CampaignClassification(api_campaign, "root");
+    // ads                    = new Ads(api_campaign, "root");
 
-    campaign.init();
-    ads.render();
+    // campaign.init();
+    // ads.render();
 });
 
 class Campaign extends Templates {
