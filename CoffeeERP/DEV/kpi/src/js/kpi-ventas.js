@@ -1,5 +1,5 @@
 let api = 'ctrl/ctrl-ingresos.php';
-let app, sales, salesDashboard,  monthlySales;
+let app, sales, salesDashboard, monthlySales, cumulativeAverages;
 
 let udn, lsudn, clasificacion;
 
@@ -15,9 +15,10 @@ $(async () => {
     app = new App(api, "root");
 
 
-    salesDashboard = new SalesDashboard(api, "root");
-    sales          = new Sales(api, "root");
-    monthlySales   = new ComparativaMensual(api, "root");
+    salesDashboard     = new SalesDashboard(api, "root");
+    sales              = new Sales(api, "root");
+    monthlySales       = new MonthlySales(api, "root");
+    cumulativeAverages = new CumulativeAverages(api, "root");
     
     
     app.render();
@@ -33,17 +34,18 @@ class App extends Templates {
 
 
     render() {
-        this.layoutVentas();
+        this.layout();
         
         // init instancias.
 
-        salesDashboard.render();
         sales.render();
+        salesDashboard.render();
         monthlySales.render();
+        cumulativeAverages.render();
 
     }
 
-    layoutVentas() {
+    layout() {
         this.primaryLayout({
             parent: "root",
             id: this.PROJECT_NAME,
@@ -224,25 +226,7 @@ class SalesDashboard extends Templates {
 
     }
 
-    layoutDashboard() {
-        this.primaryLayout({
-            parent: `container-dashboard`,
-            id: 'dashboard',
-            card: {
-                filterBar: { class: 'w-full  rounded', id: `container-filterBar` },
-                container: { class: 'w-full   h-full mt-3  ', id: `containerDashboard` }
-            }
-        });
-        $("#container-filterBar").prepend(`
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-[#103B60]">Dashboard de Ventas</h1>
-                    <p class="text-sm text-gray-600 mt-1 "></p>
-                </div>
-            </div>
-            <div class="w-full mt-2" id="filterBarDashboard"></div>
-        `);
-    }
+
 
     filterBarDashboard() {
         this.createfilterBar({
@@ -543,7 +527,7 @@ class SalesDashboard extends Templates {
             <!-- Header -->
             <div class="p-6 border-b border-gray-200 ">
                 <div class=" mx-auto">
-                    <h1 class="text-2xl font-semibold text-blue-900">${opts.title}</h1>
+                    <h1 class="text-2xl font-bold text-[#103B60]">${opts.title}</h1>
                     <p class="text-sm text-gray-600">${opts.subtitle}</p>
                 </div>
             </div>
@@ -1036,7 +1020,7 @@ class Sales extends Templates {
     }
 }
 
-class ComparativaMensual extends Templates {
+class MonthlySales extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "ComparativaMensual";
@@ -1134,16 +1118,16 @@ class ComparativaMensual extends Templates {
     }
 }
 
-class PromediosAcumulados extends Templates {
+class CumulativeAverages extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "promediosAcumulados";
     }
 
-    init() {
+    render() {
         this.layout();
         this.filterBar();
-        // this.ls();
+        this.ls();
     }
 
     layout() {
