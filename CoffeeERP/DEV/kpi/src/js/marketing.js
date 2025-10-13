@@ -1,5 +1,5 @@
-let api = "ctrl/ctrl-ingresos.php";
-let api_marketing = "ctrl/ctrl-marketing.php";
+let api                = "ctrl/ctrl-ingresos.php";
+let api_marketing      = "ctrl/ctrl-marketing.php";
 let api_redes_sociales = 'ctrl/ctrl-kpi-redes.php';
 let soft, ingresos, comparativa, diario, acumulados;
 let app, dashboard;
