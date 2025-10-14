@@ -309,10 +309,10 @@ class Campaign extends Templates {
             <div class="px-2 pt-2 pb-2 flex justify-between items-center">
                 <div>
                     <h2 class="text-2xl font-semibold text-white">📢 Anuncios de la Campaña</h2>
-                    <p class="text-gray-400">Gestiona los anuncios de esta campaña</p>
+                    <p class="text-gray-400">Gestión y seguimiento de anuncios publicitarios</p>
                 </div>
-                <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded" onclick="campaign.addAnnouncement(${campaña_id})">
-                    <i class="icon-plus mr-2"></i>Nuevo Anuncio
+                <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded" onclick="campaign.addMultipleAnnouncements(${campaña_id})">
+                    <i class="icon-plus mr-2"></i>Agregar Anuncios
                 </button>
             </div>
             <div id="container-table-announcements"></div>
@@ -332,9 +332,157 @@ class Campaign extends Templates {
             attr: {
                 id: "tbAnnouncements",
                 theme: 'dark',
-                right: [6, 8]
+                center: [0, 3, 4]
             },
         });
+    }
+
+    addMultipleAnnouncements(campaña_id) {
+        const modalContent = `
+            <div class="bg-[#1F2A37] p-6 rounded-lg">
+                <h3 class="text-xl font-bold text-white mb-4">Agregar Anuncios a la Campaña</h3>
+                <p class="text-gray-400 mb-6">Puedes agregar uno o varios anuncios a esta campaña</p>
+                
+                <div id="announcements-container" class="space-y-4">
+                    <div class="announcement-form border border-gray-700 rounded-lg p-4 bg-[#111827]" data-index="0">
+                        <h4 class="text-white font-semibold mb-3">Anuncio 1</h4>
+                        ${this.getAnnouncementFormHTML(0)}
+                    </div>
+                </div>
+                
+                <div class="mt-4 flex gap-2">
+                    <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" onclick="campaign.addAnnouncementForm()">
+                        <i class="icon-plus mr-2"></i>Agregar Otro Anuncio
+                    </button>
+                    <button type="button" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded" onclick="campaign.saveAllAnnouncements(${campaña_id})">
+                        <i class="icon-check mr-2"></i>Guardar Todos
+                    </button>
+                    <button type="button" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded" onclick="bootbox.hideAll()">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        `;
+
+        bootbox.dialog({
+            message: modalContent,
+            size: 'extra-large',
+            closeButton: true
+        });
+    }
+
+    getAnnouncementFormHTML(index) {
+        return `
+            <div class="grid grid-cols-2 gap-4">
+                <div class="col-span-2">
+                    <label class="text-gray-300 text-sm">Nombre del Anuncio</label>
+                    <input type="text" class="form-control bg-[#1F2A37] text-white border-gray-600" id="nombre_${index}" placeholder="Ej: Anuncio Carnes Premium">
+                </div>
+                <div>
+                    <label class="text-gray-300 text-sm">Fecha Inicio</label>
+                    <input type="date" class="form-control bg-[#1F2A37] text-white border-gray-600" id="fecha_inicio_${index}">
+                </div>
+                <div>
+                    <label class="text-gray-300 text-sm">Fecha Fin</label>
+                    <input type="date" class="form-control bg-[#1F2A37] text-white border-gray-600" id="fecha_fin_${index}">
+                </div>
+                <div>
+                    <label class="text-gray-300 text-sm">Tipo de Anuncio</label>
+                    <select class="form-control bg-[#1F2A37] text-white border-gray-600" id="tipo_id_${index}">
+                        ${tipo_anuncio.map(t => `<option value="${t.id}">${t.valor}</option>`).join('')}
+                    </select>
+                </div>
+                <div>
+                    <label class="text-gray-300 text-sm">Clasificación</label>
+                    <select class="form-control bg-[#1F2A37] text-white border-gray-600" id="clasificacion_id_${index}">
+                        ${clasificacion.map(c => `<option value="${c.id}">${c.valor}</option>`).join('')}
+                    </select>
+                </div>
+                <div class="col-span-2">
+                    <label class="text-gray-300 text-sm">Imagen</label>
+                    <div class="border-2 border-dashed border-gray-600 rounded-lg p-4 text-center">
+                        <i class="icon-upload text-gray-400 text-2xl"></i>
+                        <p class="text-gray-400 text-sm mt-2">Arrastra o selecciona una imagen</p>
+                        <input type="file" class="hidden" id="imagen_${index}" accept="image/*">
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    addAnnouncementForm() {
+        const container = $('#announcements-container');
+        const currentCount = container.find('.announcement-form').length;
+        const newIndex = currentCount;
+
+        const newForm = `
+            <div class="announcement-form border border-gray-700 rounded-lg p-4 bg-[#111827]" data-index="${newIndex}">
+                <div class="flex justify-between items-center mb-3">
+                    <h4 class="text-white font-semibold">Anuncio ${newIndex + 1}</h4>
+                    <button type="button" class="text-red-400 hover:text-red-300" onclick="$(this).closest('.announcement-form').remove()">
+                        <i class="icon-trash"></i>
+                    </button>
+                </div>
+                ${this.getAnnouncementFormHTML(newIndex)}
+            </div>
+        `;
+
+        container.append(newForm);
+    }
+
+    async saveAllAnnouncements(campaña_id) {
+        const forms = $('.announcement-form');
+        const announcements = [];
+
+        forms.each(function() {
+            const index = $(this).data('index');
+            const announcement = {
+                nombre: $(`#nombre_${index}`).val(),
+                fecha_inicio: $(`#fecha_inicio_${index}`).val(),
+                fecha_fin: $(`#fecha_fin_${index}`).val(),
+                tipo_id: $(`#tipo_id_${index}`).val(),
+                clasificacion_id: $(`#clasificacion_id_${index}`).val(),
+                campaña_id: campaña_id
+            };
+
+            if (announcement.nombre && announcement.fecha_inicio && announcement.fecha_fin) {
+                announcements.push(announcement);
+            }
+        });
+
+        if (announcements.length === 0) {
+            alert({
+                icon: "warning",
+                text: "Debes completar al menos un anuncio",
+                btn1: true,
+                btn1Text: "Ok"
+            });
+            return;
+        }
+
+        let successCount = 0;
+        for (const announcement of announcements) {
+            const response = await useFetch({
+                url: this._link,
+                data: { opc: 'addAnnouncement', ...announcement }
+            });
+
+            if (response.status === 200) {
+                successCount++;
+            }
+        }
+
+        bootbox.hideAll();
+        
+        alert({
+            icon: "success",
+            title: "Anuncios Guardados",
+            text: `Se guardaron ${successCount} de ${announcements.length} anuncios correctamente`,
+            btn1: true,
+            btn1Text: "Aceptar"
+        });
+
+        this.viewAnnouncements(campaña_id);
     }
 
     addAnnouncement(campaña_id) {
