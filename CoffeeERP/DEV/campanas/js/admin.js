@@ -7,7 +7,13 @@ class Admin extends Templates {
 
     render() {
         this.layout();
+        this.renderTypes();
         this.lsTypes();
+
+        // clasifications.
+        this.renderClasification()
+        this.lsClassifications();
+     
     }
 
     layout() {
@@ -34,12 +40,10 @@ class Admin extends Templates {
                     tab: "Tipos de Anuncios",
                     class: "mb-1",
                     active: true,
-                    onClick: () => this.lsTypes()
                 },
                 {
                     id: "classifications",
                     tab: "Clasificaciones",
-                    onClick: () => this.lsClassifications()
                 },
             ]
         });
@@ -47,7 +51,8 @@ class Admin extends Templates {
 
     // Tipos de Anuncios
 
-    lsTypes() {
+    renderTypes(){
+
         const container = $("#container-types");
         container.html('<div id="filterbar-types" class="mb-2"></div><div id="table-types"></div>');
 
@@ -66,7 +71,8 @@ class Admin extends Templates {
                 },
                 {
                     opc: "button",
-                    class: "col-12 col-md-3",
+                    class: "col-12 col-md-2",
+                    className: 'w-full',
                     id: "btnNewType",
                     text: "Nuevo Tipo",
                     onClick: () => this.addType(),
@@ -74,6 +80,13 @@ class Admin extends Templates {
             ],
         });
 
+
+
+
+    }
+
+    lsTypes() {
+       
         this.createTable({
             parent: "table-types",
             idFilterBar: "filterbar-types",
@@ -86,7 +99,7 @@ class Admin extends Templates {
                 center: [2]
             },
             success: (data) => {
-                this._link = this.apiAdmin;
+               
             }
         });
     }
@@ -194,8 +207,7 @@ class Admin extends Templates {
     }
 
     // Clasificaciones
-
-    lsClassifications() {
+    renderClasification(){
         const container = $("#container-classifications");
         container.html('<div id="filterbar-classifications" class="mb-2"></div><div id="table-classifications"></div>');
 
@@ -214,13 +226,18 @@ class Admin extends Templates {
                 },
                 {
                     opc: "button",
-                    class: "col-12 col-md-3",
+                    class: "col-12 col-md-2",
+                    className: 'w-full',
                     id: "btnNewClassification",
                     text: "Nueva Clasificación",
                     onClick: () => this.addClassification(),
                 },
             ],
         });
+    }
+
+    lsClassifications() {
+       
 
         this.createTable({
             parent: "table-classifications",

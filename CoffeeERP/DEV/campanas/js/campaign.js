@@ -1,4 +1,5 @@
 let api = 'ctrl/ctrl-campaign.php';
+let api_admin = 'ctrl/ctrl-admin.php';
 let app, campaign, dashboard, summary, history, admin;
 
 let udn, red_social, tipo_anuncio, clasificacion;
@@ -15,7 +16,7 @@ $(async () => {
     dashboard = new CampaignDashboard(api, "root");
     // summary = new CampaignSummary(api, "root");
     // history = new AnnualHistory(api, "root");
-    admin = new Admin(api, "root");
+    admin = new Admin(api_admin, "root");
 
     app.render();
 });
@@ -83,7 +84,7 @@ class App extends Templates {
                     id: "admin",
                     tab: "Administrador",
                      active: true,
-                    onClick: () => admin.render()
+                    onClick: () => admin.lsTypes()
                 },
             ]
         });

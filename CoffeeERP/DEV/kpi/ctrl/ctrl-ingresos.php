@@ -422,14 +422,14 @@ class ctrl extends mdl {
     public function apiPromediosDiarios() {
         $response = [];
 
-        $anio         = isset($_POST['anio']) ? (int) $_POST['anio'] : date('Y');
-        $anioAnterior = $anio - 1;
-        $mes          = isset($_POST['mes']) ? (int) $_POST['mes'] : date('m');
+        $anio         = isset($_POST['anio1']) ? (int) $_POST['anio1'] : date('Y');
+        $anioAnterior = $_POST['anio2'];
+        $mes          = isset($_POST['mes1']) ? (int) $_POST['mes1'] : date('m');
         $udn          = isset($_POST['udn']) ? (int) $_POST['udn'] : 1;
 
         $meses = [
             'actual'   => ['year' => $anio,        'mes' => $mes],
-            'anterior' => ['year' => $anioAnterior,'mes' => $mes]
+            'anterior' => ['year' => $anioAnterior,'mes' => $_POST['mes2']]
         ];
 
         if ($udn == 1) {
@@ -462,8 +462,8 @@ class ctrl extends mdl {
             $datos = [
                 'id'         => $clave,
                 'concepto'   => $concepto,
-                'actual'     => ['valor' => 0, 'formato' => 0],
                 'anterior'   => ['valor' => 0, 'formato' => 0],
+                'actual'     => ['valor' => 0, 'formato' => 0],
                 'diferencia' => 0
             ];
 
@@ -493,13 +493,16 @@ class ctrl extends mdl {
             'status'    => 200,
             'data'      => $response,
             'dashboard' => $this->apiDashBoard($response, $udn),
-            'barras'  => $this->comparativaChequePromedio(),
-            'linear'  => $this->apiLinearPromediosDiario($anio, $mes, $udn),
-            'barDays'    =>$this->apiIngresosComparativoSemana(),
-            'topDays' => $this->apiTopDiasMes(),
-            'topWeek' => $this->apiTopDiasSemanaPromedio($anio, $mes, $udn)
+            'barras'    => $this->comparativaChequePromedio(),
+            'linear'    => $this->apiLinearPromediosDiario($anio, $mes, $udn),
+            'barDays'   => $this->apiIngresosComparativoSemana(),
+            'topDays'   => $this->apiTopDiasMes(),
+            'topWeek'   => $this->apiTopDiasSemanaPromedio($anio, $mes, $udn)
         ];
     }
+
+
+
 
     public function apiLinearPromediosDiario($anio = null, $mes = null, $udn = null) {
         $anio = $anio ?? (isset($_POST['anio']) ? (int) $_POST['anio'] : date('Y'));
@@ -605,12 +608,12 @@ class ctrl extends mdl {
 
     function comparativaChequePromedio() {
 
-        $mesActual = $_POST['mes'];
-        $anioA     = $_POST['anio'];
-        $anioB     = $anioA - 1;
+        $mesActual = $_POST['mes1'];
+        $yearNow   = $_POST['anio1'];
+        $yearOld   = $_POST['anio2'];
 
-        $dataA = $this->getComparativaChequePromedio([$mesActual, $anioA,$_POST['udn']]);
-        $dataB = $this->getComparativaChequePromedio([$mesActual, $anioB,$_POST['udn']]);
+        $dataA = $this->getComparativaChequePromedio([$_POST['mes2'], $yearOld,$_POST['udn']]);
+        $dataB = $this->getComparativaChequePromedio([$_POST['mes1'], $yearNow,$_POST['udn']]);
 
         $dataset = [
             'labels' => ['A&B', 'Alimentos', 'Bebidas'],
@@ -627,8 +630,17 @@ class ctrl extends mdl {
         ];
 
 
-        return $dataset;
+        return [
+            'dataset' => $dataset,
+            'anioA' => $yearOld,
+            'anioB' => $yearNow,
+        ];
+
+
+       
     }
+
+
 
     public function apiResumenIngresosPorDia($anio = null, $mes = null, $udn = null) {
         $rows = [];
@@ -691,32 +703,39 @@ class ctrl extends mdl {
         ];
     }
 
-    public function apiIngresosComparativoSemana() {
-        $anio = isset($_POST['anio']) ? (int) $_POST['anio'] : date('Y');
-        $anioB = $anio - 1;
-        $mes  = isset($_POST['mes']) ? (int) $_POST['mes'] : date('m');
-        $udn  = isset($_POST['udn']) ? (int) $_POST['udn'] : 1;
+    public function apiIngresosComparativoSemana($anio1 = null, $mes1 = null, $anio2 = null, $mes2 = null, $udn = null) {
+        $anio1 = $anio1 ?? (isset($_POST['anio1']) ? (int) $_POST['anio1'] : date('Y'));
+        $mes1  = $mes1  ?? (isset($_POST['mes1'])  ? (int) $_POST['mes1']  : date('m'));
+        $anio2 = $anio2 ?? (isset($_POST['anio2']) ? (int) $_POST['anio2'] : (date('Y') - 1));
+        $mes2  = $mes2  ?? (isset($_POST['mes2'])  ? (int) $_POST['mes2']  : date('m'));
+        $udn   = $udn   ?? (isset($_POST['udn'])   ? (int) $_POST['udn']   : 1);
 
-        // Año actual
-        $apiA = $this->apiResumenIngresosPorDia($anio, $mes, $udn);
+        // Período 1
+        $apiA = $this->apiResumenIngresosPorDia($anio1, $mes1, $udn);
         $totalesA = [];
+        $conteosA = [];
         foreach ($apiA['data'] as $row) {
             $dia = $row['dia'];
             if (!isset($totalesA[$dia])) {
                 $totalesA[$dia] = 0;
+                $conteosA[$dia] = 0;
             }
             $totalesA[$dia] += $row['total'];
+            $conteosA[$dia]++;
         }
 
-        // Año anterior
-        $apiB = $this->apiResumenIngresosPorDia($anioB, $mes, $udn);
+        // Período 2
+        $apiB = $this->apiResumenIngresosPorDia($anio2, $mes2, $udn);
         $totalesB = [];
+        $conteosB = [];
         foreach ($apiB['data'] as $row) {
             $dia = $row['dia'];
             if (!isset($totalesB[$dia])) {
                 $totalesB[$dia] = 0;
+                $conteosB[$dia] = 0;
             }
             $totalesB[$dia] += $row['total'];
+            $conteosB[$dia]++;
         }
 
         // Etiquetas en orden fijo
@@ -725,17 +744,23 @@ class ctrl extends mdl {
         $dataB  = [];
 
         foreach ($labels as $dia) {
-            $dataA[] = $totalesA[$dia] ?? 0;
-            $dataB[] = $totalesB[$dia] ?? 0;
+            $promedioA = isset($conteosA[$dia]) && $conteosA[$dia] > 0 
+                ? $totalesA[$dia] / $conteosA[$dia] 
+                : 0;
+            $promedioB = isset($conteosB[$dia]) && $conteosB[$dia] > 0 
+                ? $totalesB[$dia] / $conteosB[$dia] 
+                : 0;
+                
+            $dataA[] = round($promedioA, 2);
+            $dataB[] = round($promedioB, 2);
         }
 
         return [
-
-                'labels' => $labels,
-                'dataA'  => $dataA,
-                'dataB'  => $dataB,
-                'yearA'  => $anio,
-                'yearB'  => $anioB
+            'labels' => $labels,
+            'dataA'  => $dataA,
+            'dataB'  => $dataB,
+            'yearA'  => $anio2,
+            'yearB'  => $anio1
 
         ];
     }

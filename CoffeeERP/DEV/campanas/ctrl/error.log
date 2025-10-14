@@ -1,3 +1,279 @@
+[ 2025-10-13 23:11:21 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
+[ 2025-10-13 23:11:06 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
+[ 2025-10-13 23:09:29 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
+[ 2025-10-13 23:08:44 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
+[ 2025-10-13 23:08:30 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
+[ 2025-10-13 23:07:51 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
+[ 2025-10-13 23:07:07 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
+[ 2025-10-13 23:06:56 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
+[ 2025-10-13 23:06:02 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
+[ 2025-10-13 23:05:31 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
+[ 2025-10-13 23:05:06 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
+[ 2025-10-13 23:04:14 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
+[ 2025-10-13 23:03:40 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
+[ 2025-10-13 23:03:23 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
+[ 2025-10-13 23:03:09 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
+[ 2025-10-13 23:02:37 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_marketing.udn' doesn't exist
+
+
+[ 2025-10-13 22:41:50 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                id,
+                nombre as valor,
+                active
+             FROM rfwsmqex_marketing.clasificacion_anuncio   WHERE active = ?  ORDER BY nombre ASC 
+[ ERROR READ] :: SQLSTATE[42000]: Syntax error or access violation: 1049 Unknown database 'rfwsmqex_marketing'
+
+
+[ 2025-10-13 22:41:50 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                id,
+                nombre as valor,
+                active
+             FROM rfwsmqex_marketing.tipo_anuncio   WHERE active = ?  ORDER BY nombre ASC 
+[ ERROR READ] :: SQLSTATE[42000]: Syntax error or access violation: 1049 Unknown database 'rfwsmqex_marketing'
+
+
+[ 2025-10-13 22:41:49 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                id,
+                nombre as valor,
+                active
+             FROM rfwsmqex_marketing.tipo_anuncio   WHERE active = ?  ORDER BY nombre ASC 
+[ ERROR READ] :: SQLSTATE[42000]: Syntax error or access violation: 1049 Unknown database 'rfwsmqex_marketing'
+
+
+[ 2025-10-13 22:41:47 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT 
+                id,
+                nombre as valor,
+                active
+             FROM rfwsmqex_marketing.tipo_anuncio   WHERE active = ?  ORDER BY nombre ASC 
+[ ERROR READ] :: SQLSTATE[42000]: Syntax error or access violation: 1049 Unknown database 'rfwsmqex_marketing'
+
+
+[ 2025-10-13 22:41:43 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT id, nombre as valor FROM rfwsmqex_marketing.tipo_anuncio   WHERE active = 1  ORDER BY nombre ASC 
+[ ERROR READ] :: SQLSTATE[42000]: Syntax error or access violation: 1049 Unknown database 'rfwsmqex_marketing'
+
+
+[ 2025-10-13 22:41:43 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT id, nombre as valor FROM rfwsmqex_marketing.clasificacion_anuncio   WHERE active = 1  ORDER BY nombre ASC 
+[ ERROR READ] :: SQLSTATE[42000]: Syntax error or access violation: 1049 Unknown database 'rfwsmqex_marketing'
+
+
+[ 2025-10-13 22:41:43 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT id, nombre as valor FROM rfwsmqex_marketing.tipo_anuncio   WHERE active = 1  ORDER BY nombre ASC 
+[ ERROR READ] :: SQLSTATE[42000]: Syntax error or access violation: 1049 Unknown database 'rfwsmqex_marketing'
+
+
+[ 2025-10-13 22:41:43 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT id, nombre as valor, color FROM rfwsmqex_marketing.red_social   WHERE active = 1  ORDER BY nombre ASC 
+[ ERROR READ] :: SQLSTATE[42000]: Syntax error or access violation: 1049 Unknown database 'rfwsmqex_marketing'
+
+
+[ 2025-10-13 22:41:43 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  
+            SELECT id, nombre as valor 
+            FROM rfwsmqex_marketing.udn 
+            WHERE active = 1 
+            ORDER BY nombre ASC
+        
+[ ERROR READ] :: SQLSTATE[42000]: Syntax error or access violation: 1049 Unknown database 'rfwsmqex_marketing'
+
+
 [ 2025-10-13 12:12:36 ]
 [ UNIX_USR ] :: nt authority\system
 [ WINDOWS_USR ] :: DESKTOP-FHJB2CN$

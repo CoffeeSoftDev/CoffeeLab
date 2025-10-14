@@ -9,18 +9,18 @@ $(async () => {
     const data = await useFetch({ url: api, data: { opc: "init" } });
     udn = data.udn;
     lsudn = data.lsudn;
-    clasification = data.clasification;
+    clasificacion = data.clasification;
 
     // ** Instancias **
     app = new App(api, "root");
 
 
-    salesDashboard     = new SalesDashboard(api, "root");
-    sales              = new Sales(api, "root");
-    monthlySales       = new MonthlySales(api, "root");
+    salesDashboard = new SalesDashboard(api, "root");
+    sales = new Sales(api, "root");
+    monthlySales = new MonthlySales(api, "root");
     cumulativeAverages = new CumulativeAverages(api, "root");
-    
-    
+
+
     app.render();
 
 
@@ -35,7 +35,7 @@ class App extends Templates {
 
     render() {
         this.layout();
-        
+
         // init instancias.
 
         sales.render();
@@ -171,13 +171,12 @@ class SalesDashboard extends Templates {
         this.layout();
     }
 
-    async layout() {
-
+    layout() {
         this.dashboardComponent({
             parent: "container-dashboard",
             id: "dashboardComponent",
             title: "📊 Dashboard de Ventas",
-            subtitle: "Análisis mensual de productos vendidos y con margen",
+            subtitle: "Análisis comparativo de ventas entre dos períodos",
             json: [
                 { type: "grafico", id: "containerChequePro" },
                 { type: "grafico", id: "barProductMargen", title: "" },
@@ -185,35 +184,45 @@ class SalesDashboard extends Templates {
                 { type: "grafico", id: "Tendencia", title: "Tendencia de Ventas" },
             ]
         });
-
         this.filterBarDashboard();
+    }
 
+    async renderDashboard() {
 
         let udn = $('#filterBarDashboard #udn').val();
-        let month = $('#filterBarDashboard #mes').val();
-        let year = $('#filterBarDashboard #anio').val();
+        let periodo1 = $('#filterBarDashboard #periodo1').val();
+        let [anio1, mes1] = periodo1.split('-');
+        let periodo2 = $('#filterBarDashboard #periodo2').val();
+        let [anio2, mes2] = periodo2.split('-');
+
         let mkt = await useFetch({
             url: api,
             data: {
                 opc: "apiPromediosDiarios",
                 udn: udn,
-                mes: month,
-                anio: year,
+                anio1: anio1,
+                mes1: mes1,
+                anio2: anio2,
+                mes2: mes2,
             },
         });
 
         this.showCards(mkt.dashboard);
 
-        this.chequeComparativo({ data: mkt.barras });
+        // Graficos.
 
-        this.lineChartPromediosDiario({ data: mkt.linear });
+        this.chequeComparativo({
+            data: mkt.barras.dataset,
+            anioA: mkt.barras.anioA,
+            anioB: mkt.barras.anioB,
 
-        this.barChart({
-            parent: 'ventasDiasSemana',
-            title: 'Ventas por Día de Semana',
-            ...mkt.barDays
+        });
 
-        })
+
+        this.comparativaIngresosDiarios({ data: mkt.linear });
+
+        this.ventasPorDiaSemana(mkt.barDays);
+
 
         this.topDiasSemana({
             parent: "Tendencia",
@@ -227,7 +236,6 @@ class SalesDashboard extends Templates {
     }
 
 
-
     filterBarDashboard() {
         this.createfilterBar({
             parent: `filterBarDashboard`,
@@ -236,38 +244,59 @@ class SalesDashboard extends Templates {
                     opc: "select",
                     id: "udn",
                     lbl: "UDN",
-                    class: "col-sm-3",
+                    class: "col-sm-4",
                     data: lsudn,
                     onchange: `salesDashboard.renderDashboard()`,
                 },
                 {
-                    opc: "select",
-                    id: "mes",
-                    lbl: "Mes",
-                    class: "col-sm-3",
-                    data: moment.months().map((m, i) => ({ id: i + 1, valor: m })),
-                    onchange: `salesDashboard.renderDashboard()`,
+                    opc: "div",
+                    id: "containerPeriodo1",
+                    lbl: "Consultar con:",
+                    class: "col-lg-3 col-sm-4",
+                    html: `
+                        <input 
+                            type="month" 
+                            id="periodo1" 
+                            class="form-control"
+                            style="width: 100%; min-width: 100%; display: block;"
+                            onchange="salesDashboard.renderDashboard()"
+                        />
+                    `
                 },
                 {
-                    opc: "select",
-                    id: "anio",
-                    lbl: "Año",
-                    class: "col-sm-3",
-                    data: Array.from({ length: 5 }, (_, i) => {
-                        const year = moment().year() - i;
-                        return { id: year, valor: year.toString() };
-                    }),
-                    onchange: `salesDashboard.renderDashboard()`,
+                    opc: "div",
+                    id: "containerPeriodo2",
+                    lbl: "Comparar con:",
+                    class: "col-lg-3 col-sm-4 ",
+                    html: `
+                        <input 
+                            type="month" 
+                            id="periodo2" 
+                            class="form-control"
+                            onchange="salesDashboard.renderDashboard()"
+                        />
+                    `
                 },
             ],
         });
-        const currentMonth = moment().month() + 1; // Mes actual (1-12)
+
+        const currentYear = moment().year();
+        const currentMonth = moment().month() + 1;
+        const lastYear = currentYear - 1;
+
+        const periodo1 = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+        const periodo2 = `${lastYear}-${String(currentMonth).padStart(2, '0')}`;
+
+        $('#containerPeriodo1').removeClass('col-lg-3 col-sm-4');
+        $('#containerPeriodo2').removeClass('col-lg-3 col-sm-4');
+
         setTimeout(() => {
-            // $(`#filterBarDashboard #mes`).val(currentMonth).trigger("change");
+            $(`#filterBarDashboard #periodo1`).val(periodo1).trigger("change");
+            $(`#filterBarDashboard #periodo2`).val(periodo2).trigger("change");
         }, 100);
     }
 
-    // graphigs.
+
     showCards(data) {
         // KPIs visuales
         this.infoCard({
@@ -313,47 +342,48 @@ class SalesDashboard extends Templates {
         });
     }
 
-    lineChartPromediosDiario(options) {
-        let nombreMes = $('#filterBarDashboard #mes option:selected').text();
-        this.linearChart({
-            parent: "barProductMargen",
-            id: "chartLine",
-            title: `📈 Ventas de ${nombreMes} por Categoría`,
-            data: options.data // ← ya contiene labels y datasets reales
-        });
-
-    }
-
+    // graphigs.
 
     chequeComparativo(options) {
         const defaults = {
             parent: "containerChequePro",
             id: "chart",
-            title: "",
-            class: " p-4 ",
+            title: "Comparativa por Categorías",
+            class: "border p-4 rounded-xl",
             data: {},
             json: [],
+            anioA: new Date().getFullYear(),
+            anioB: new Date().getFullYear() - 1,
             onShow: () => { },
         };
         const opts = Object.assign({}, defaults, options);
+
+        const periodo1 = $('#filterBarDashboard #periodo1').val();
+        const [anio1, mesNum1] = periodo1.split('-');
+        const mes1 = moment().month(parseInt(mesNum1) - 1).format('MMMM');
+
+        const periodo2 = $('#filterBarDashboard #periodo2').val();
+        const [anio2, mesNum2] = periodo2.split('-');
+        const mes2 = moment().month(parseInt(mesNum2) - 1).format('MMMM');
+
         const container = $("<div>", { class: opts.class });
         const title = $("<h2>", {
-            class: "text-lg font-bold mb-3",
-            text: opts.title
+            class: "text-lg font-bold mb-2",
+            text: `Comparativa: ${mes1} ${anio1} vs ${mes2} ${anio2}`
+        });
+        const canvasWrapper = $("<div>", {
+            class: "w-full",
+            css: { height: "300px" }
         });
         const canvas = $("<canvas>", {
             id: opts.id,
-            class: "w-full h-[320px]"
+            class: "w-full h-full"
         });
-        container.append(title, canvas);
+        canvasWrapper.append(canvas);
+        container.append(title, canvasWrapper);
+
         $('#' + opts.parent).html(container);
-        const anioA = new Date().getFullYear();
-        const anioB = anioA - 1;
-        const dCheque = {
-            labels: ["A&B", "Alimentos", "Bebidas"],
-            A: [673.18, 613.0, 54.6],
-            B: [640.25, 590.5, 49.75]
-        };
+
         const ctx = document.getElementById(opts.id).getContext("2d");
         if (window._chq) window._chq.destroy();
         window._chq = new Chart(ctx, {
@@ -362,12 +392,12 @@ class SalesDashboard extends Templates {
                 labels: opts.data.labels,
                 datasets: [
                     {
-                        label: `Año ${anioA}`,
+                        label: `${mes1} ${anio1}`,
                         data: opts.data.A,
                         backgroundColor: "#103B60"
                     },
                     {
-                        label: `Año ${anioB}`,
+                        label: `${mes2} ${anio2}`,
                         data: opts.data.B,
                         backgroundColor: "#8CC63F"
                     }
@@ -375,6 +405,7 @@ class SalesDashboard extends Templates {
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 animation: {
                     onComplete: function () {
                         const chart = this;
@@ -413,96 +444,34 @@ class SalesDashboard extends Templates {
         });
     }
 
-    comparativaCategorias(options) {
-        const defaults = {
-            parent: "containerVentas",
-            id: "chartCategorias",
-            title: "Comparativa de Categorías",
-            class: "bg-white p-4 ",
-            data: {},
-            json: {
-                labels: ["Bebidas", "Snacks", "Frutas"],
-                A: [5000, 3200, 1800],
-                B: [4700, 3000, 1600]
-            },
-            anioA: new Date().getFullYear(),
-            anioB: new Date().getFullYear() - 1,
-            onShow: () => { }
-        };
-        const opts = Object.assign({}, defaults, options);
-        const rows = opts.json.labels.length;
-        const canvasHeight = Math.max(rows * 26 + 50, 300);
-        const container = $("<div>", {
-            class: opts.class
+    comparativaIngresosDiarios(options) {
+        let periodo1 = $('#filterBarDashboard #periodo1').val();
+        let [anio1, mesNum1] = periodo1.split('-');
+        let mes1 = moment().month(parseInt(mesNum1) - 1).format('MMMM');
+
+        let periodo2 = $('#filterBarDashboard #periodo2').val();
+        let [anio2, mesNum2] = periodo2.split('-');
+        let mes2 = moment().month(parseInt(mesNum2) - 1).format('MMMM');
+
+        this.linearChart({
+            parent: "barProductMargen",
+            id: "chartLine",
+            title: `📈 Comparativa: ${mes1} ${anio1} vs ${mes2} ${anio2}`,
+            data: options.data
         });
-        const title = $("<h3>", {
-            class: "text-sm font-semibold text-[#103B60] mb-2",
-            text: opts.title
-        });
-        // 🔁 Nuevo wrapper para canvas con altura controlada
-        const canvasWrapper = $("<div>", {
-            class: "relative w-full",
-            css: {
-                height: `${canvasHeight}px`
-            }
-        });
-        const canvas = $("<canvas>", {
-            id: opts.id,
-            class: "w-full"
-        });
-        canvasWrapper.append(canvas);
-        container.append(title, canvasWrapper);
-        $(`#${opts.parent}`).html(container);
-        if (window._cat) window._cat.destroy();
-        window._cat = new Chart(document.getElementById(opts.id).getContext("2d"), {
-            type: "bar",
-            data: {
-                labels: opts.json.labels,
-                datasets: [
-                    {
-                        label: `Año ${opts.anioA}`,
-                        data: opts.json.A,
-                        backgroundColor: "#103B60"
-                    },
-                    {
-                        label: `Año ${opts.anioB}`,
-                        data: opts.json.B,
-                        backgroundColor: "#8CC63F"
-                    }
-                ]
-            },
-            options: {
-                maintainAspectRatio: false,
-                responsive: true,
-                indexAxis: "y",
-                plugins: {
-                    legend: { position: "bottom" },
-                    tooltip: {
-                        callbacks: {
-                            label: (ctx) => `${ctx.dataset.label}: ${formatPrice(ctx.parsed.x)}`
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        ticks: {
-                            callback: (v) => formatPrice(v),
-                            font: { size: 11 }
-                        },
-                        grid: { display: true }
-                    },
-                    y: {
-                        ticks: {
-                            autoSkip: false,
-                            font: { size: 11 }
-                        },
-                        grid: { display: false }
-                    }
-                }
-            }
-        });
-        if (typeof opts.onShow === "function") opts.onShow();
+
     }
+
+    ventasPorDiaSemana(data) {
+        this.barChart({
+            parent: 'ventasDiasSemana',
+            title: 'Ventas por Día de Semana',
+            ...data
+
+        })
+    }
+
+
 
     // components.
     dashboardComponent(options) {
@@ -542,14 +511,14 @@ class SalesDashboard extends Templates {
             </section>
 
             <!-- Content -->
-            <section id="content-${opts.id}" class=" mx-auto px-4 py-6 grid gap-6 lg:grid-cols-2"></section>
+            <section id="content-${opts.id}" class="mx-auto px-4 py-6 grid gap-6 grid-cols-1 md:grid-cols-2"></section>
         </div>`);
 
         // Renderizar contenedores desde JSON
         opts.json.forEach(item => {
             let block = $("<div>", {
                 id: item.id,
-                class: "bg-white p-4 rounded-xl shadow-md border border-gray-200 min-h-[200px]"
+                class: "bg-white p-2 rounded-xl shadow-md border border-gray-200 min-h-[200px] w-full"
             });
 
             if (item.title) {
@@ -656,7 +625,7 @@ class SalesDashboard extends Templates {
             parent: "containerLineChart",
             id: "linearChart",
             title: "",
-            class: " rounded-xl",
+            class: "border p-4 rounded-xl",
             data: {},   // <- puede contener { labels: [], datasets: [], tooltip: [] }
             json: [],
             onShow: () => { },
@@ -667,12 +636,17 @@ class SalesDashboard extends Templates {
             class: "text-lg font-bold mb-2",
             text: opts.title
         });
+        const canvasWrapper = $("<div>", {
+            class: "w-full",
+            css: { height: "300px" }
+        });
         const canvas = $("<canvas>", {
             id: opts.id,
-            class: "w-full h-[150px]"
+            class: "w-full h-full"
         });
-        container.append(title, canvas);
-        $('#' + opts.parent).append(container);
+        canvasWrapper.append(canvas);
+        container.append(title, canvasWrapper);
+        $('#' + opts.parent).html(container);
 
         const ctx = document.getElementById(opts.id).getContext("2d");
         if (!window._charts) window._charts = {};
@@ -685,14 +659,13 @@ class SalesDashboard extends Templates {
             data: opts.data,
             options: {
                 responsive: true,
-                aspectRatio: 3,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: { position: "bottom" },
                     tooltip: {
                         callbacks: {
                             title: (items) => {
                                 const index = items[0].dataIndex;
-                                // Si existe "tooltip" en los datos, úsalo. Si no, usa labels.
                                 const tooltips = opts.data.tooltip || opts.data.labels;
                                 return tooltips[index];
                             },
@@ -716,56 +689,77 @@ class SalesDashboard extends Templates {
         const defaults = {
             parent: "containerBarChart",
             id: "chartBar",
-            title: "Ventas por Día de Semana",
+            title: "Comparativa por Categorías",
             class: "border p-4 rounded-xl",
             labels: [],
-            dataA: [],
-            dataB: [],
-            yearA: new Date().getFullYear(),
-            yearB: new Date().getFullYear() - 1
+            dataA: [], // Año anterior
+            dataB: [], // Año actual
+            yearA: new Date().getFullYear() - 1, // 2024
+            yearB: new Date().getFullYear(),     // 2025
         };
 
         const opts = Object.assign({}, defaults, options);
 
-        // Crear contenedor
+        // 📦 Crear contenedor
         const container = $("<div>", { class: opts.class });
         const title = $("<h2>", {
             class: "text-lg font-bold mb-2",
             text: opts.title
         });
+        const canvasWrapper = $("<div>", {
+            class: "w-full",
+            css: { height: "300px" }
+        });
         const canvas = $("<canvas>", {
             id: opts.id,
-            class: "w-full h-[300px]"
+            class: "w-full h-full"
         });
 
-        container.append(title, canvas);
+        canvasWrapper.append(canvas);
+        container.append(title, canvasWrapper);
         $("#" + opts.parent).html(container);
 
         const ctx = document.getElementById(opts.id).getContext("2d");
         if (window._barChart) window._barChart.destroy();
 
-        // Crear gráfico
+        // 🎨 Colores: Azul para período 1 (consulta), Verde para período 2 (comparación)
+        const colorPeriodo1 = "#103B60"; // Azul oscuro - Período de consulta
+        const colorPeriodo2 = "#8CC63F"; // Verde - Período de comparación
+
+        // 📊 Crear gráfico
         window._barChart = new Chart(ctx, {
             type: "bar",
             data: {
                 labels: opts.labels,
                 datasets: [
                     {
-                        label: opts.yearA,
-                        data: opts.dataA,
-                        backgroundColor: "#2196F3" // Azul fuerte
+                        label: `Año ${opts.yearB}`, // Período 1 (consulta)
+                        data: opts.dataB,
+                        backgroundColor: colorPeriodo1
                     },
                     {
-                        label: opts.yearB,
-                        data: opts.dataB,
-                        backgroundColor: "#9E9E9E" // Gris neutro
+                        label: `Año ${opts.yearA}`, // Período 2 (comparación)
+                        data: opts.dataA,
+                        backgroundColor: colorPeriodo2
                     }
                 ]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: "top" },
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: {
+                                size: 13,
+                                weight: "600"
+                            },
+                            color: "#333"
+                        }
+                    },
                     tooltip: {
                         callbacks: {
                             label: (ctx) =>
@@ -777,8 +771,18 @@ class SalesDashboard extends Templates {
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            callback: (v) => formatPrice(v)
-                        }
+                            callback: (v) => formatPrice(v),
+                            color: "#333",
+                            font: { size: 12 }
+                        },
+                        grid: { color: "rgba(0,0,0,0.05)" }
+                    },
+                    x: {
+                        ticks: {
+                            color: "#333",
+                            font: { size: 12 }
+                        },
+                        grid: { display: false }
                     }
                 }
             }
@@ -905,7 +909,7 @@ class SalesDashboard extends Templates {
             );
             content.append(
                 $("<div>", { class: "text-sm text-gray-600 flex justify-between" })
-                    .append($("<span>", { text: `${item.veces} ocurrencias con ${item.clientes} clientes` }))
+                    .append($("<span>", { text: `${item.veces} días con ${item.clientes} clientes` }))
                     .append($("<span>", { class: "italic", text: rank === 1 ? "⭐ Mejor día" : "" }))
             );
 
@@ -930,7 +934,7 @@ class Sales extends Templates {
         this.listSales()
     }
 
-   
+
 
     layout() {
         this.primaryLayout({
@@ -1088,7 +1092,6 @@ class MonthlySales extends Templates {
                 },
             ],
         });
-        const currentMonth = moment().month() + 1; // Mes actual (1-12)
         setTimeout(() => {
             // $(`#filterBar${this.PROJECT_NAME} #mes`).val(currentMonth).trigger("change");
         }, 100);
@@ -1152,7 +1155,7 @@ class CumulativeAverages extends Templates {
                     lbl: "Seleccionar udn",
                     class: "col-sm-3",
                     data: lsudn,
-                    onchange: `acumulados.ls()`,
+                    onchange: `cumulativeAverages.ls()`,
                 },
                 {
                     opc: "select",
@@ -1163,7 +1166,7 @@ class CumulativeAverages extends Templates {
                         const year = moment().year() - i;
                         return { id: year, valor: year.toString() };
                     }),
-                    onchange: `acumulados.ls()`,
+                    onchange: `cumulativeAverages.ls()`,
                 },
                 {
                     opc: "select",
@@ -1175,13 +1178,13 @@ class CumulativeAverages extends Templates {
                         valor: m,
                         selected: i === currentMonth
                     })),
-                    onchange: `acumulados.ls()`,
+                    onchange: `cumulativeAverages.ls()`,
                 },
             ],
         });
         // initialized.
         setTimeout(() => {
-            $(`#filterBar${this.PROJECT_NAME} #mes`).val(currentMonth + 1).trigger("change");
+            // $(`#filterBar${this.PROJECT_NAME} #mes`).val(currentMonth + 1).trigger("change");
         }, 100);
     }
 
