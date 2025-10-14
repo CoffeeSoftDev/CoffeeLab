@@ -9,8 +9,9 @@ class mdl extends CRUD {
 
     public function __construct() {
         $this->util = new Utileria;
-        $this->bd = "";
+        $this->bd = "rfwsmqex_marketing.";
     }
+    
 
     function getDashboardData($array) {
         $query = "

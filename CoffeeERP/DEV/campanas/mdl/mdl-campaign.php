@@ -12,7 +12,7 @@ class mdl extends CRUD {
         $this->bd = "rfwsmqex_marketing.";
     }
 
-    // Campaign Methods
+    // Campaign Methods.
 
     function listCampaigns($array) {
         $leftjoin = [
@@ -157,12 +157,12 @@ class mdl extends CRUD {
     }
 
     function lsUDN($array = []) {
-        $query = "
-            SELECT id, nombre as valor 
-            FROM {$this->bd}udn 
-            WHERE active = 1 
-            ORDER BY nombre ASC
+         $query = "
+            SELECT idUDN AS id, UDN AS valor
+            FROM udn
+            WHERE Stado = 1 AND idUDN NOT IN (8, 10, 7)
+            ORDER BY UDN DESC
         ";
-        return $this->_Read($query, []);
+        return $this->_Read($query, null);
     }
 }

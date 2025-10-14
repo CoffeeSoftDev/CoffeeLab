@@ -238,7 +238,8 @@ class App extends Templates {
                     color: "bg-blue-200",
                     textColor: "text-blue-600",
                     borderColor: "border-blue-600",
-                    onClick: () => soft.render(),
+                    href:'Sales.php',
+                    // onClick: () => soft.render(),
                 },
 
                 {
@@ -372,6 +373,7 @@ class App extends Templates {
 
                 // Ejecutar acciones
                 if (item.enlace) window.location.href = item.enlace;
+                if (item.href) window.location.href = item.href;
                 if (item.onClick) item.onClick();
             });
 

@@ -11,12 +11,12 @@ $(async () => {
     tipo_anuncio  = data.tipo_anuncio;
     clasificacion = data.clasificacion;
 
-    app = new App(api, "root");
-    // campaign = new Campaign(api, "root");
+    app       = new App(api, "root");
+    campaign  = new Campaign(api, "root");
     dashboard = new CampaignDashboard(api, "root");
-    // summary = new CampaignSummary(api, "root");
-    // history = new AnnualHistory(api, "root");
-    admin = new Admin(api_admin, "root");
+    summary   = new CampaignSummary(api, "root");
+    history   = new AnnualHistory(api, "root");
+    admin     = new Admin(api_admin, "root");
 
     app.render();
 });
