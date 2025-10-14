@@ -99,7 +99,7 @@ class ctrl extends mdl {
         $_POST['nombre'] = 'Campaña ' . ($lastId + 1);
         $_POST['fecha_creacion'] = date('Y-m-d H:i:s');
         $_POST['active'] = 1;
-        $_POST['udn_id'] = $_SESSION['SUB'];
+        $_POST['udn_id'] =4;
 
         $create = $this->createCampaign($this->util->sql($_POST));
 

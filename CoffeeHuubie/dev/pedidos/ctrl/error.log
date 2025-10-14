@@ -1,3 +1,1846 @@
+[ 2025-10-14 17:20:56 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT id 
+            FROM fayxzvov_coffee.order_modifier 
+            WHERE LOWER(name) = LOWER(?) 
+            AND id != ? 
+            AND active = 1 
+            AND subsidiaries_id = ?
+            LIMIT 1
+        
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'subsidiaries_id' in 'where clause'
+
+
+[ 2025-10-14 17:20:46 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT id 
+            FROM fayxzvov_coffee.order_modifier 
+            WHERE LOWER(name) = LOWER(?) 
+            AND id != ? 
+            AND active = 1 
+            AND subsidiaries_id = ?
+            LIMIT 1
+        
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'subsidiaries_id' in 'where clause'
+
+
+[ 2025-10-14 17:20:38 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT id 
+            FROM fayxzvov_coffee.order_modifier 
+            WHERE LOWER(name) = LOWER(?) 
+            AND id != ? 
+            AND active = 1 
+            AND subsidiaries_id = ?
+            LIMIT 1
+        
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'subsidiaries_id' in 'where clause'
+
+
+[ 2025-10-14 17:19:47 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT id 
+            FROM fayxzvov_coffee.order_modifier 
+            WHERE LOWER(name) = LOWER(?) 
+            AND id != ? 
+            AND active = 1 
+            AND subsidiaries_id = ?
+            LIMIT 1
+        
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'subsidiaries_id' in 'where clause'
+
+
+[ 2025-10-14 17:18:53 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT id 
+            FROM fayxzvov_coffee.order_modifier 
+            WHERE LOWER(name) = LOWER(?) 
+            AND id != ? 
+            AND active = 1 
+            AND subsidiaries_id = ?
+            LIMIT 1
+        
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'subsidiaries_id' in 'where clause'
+
+
+[ 2025-10-14 17:18:42 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT id 
+            FROM fayxzvov_coffee.order_modifier 
+            WHERE LOWER(name) = LOWER(?) 
+            AND id != ? 
+            AND active = 1 
+            AND subsidiaries_id = ?
+            LIMIT 1
+        
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'subsidiaries_id' in 'where clause'
+
+
+[ 2025-10-14 17:17:28 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT id 
+            FROM fayxzvov_coffee.order_modifier 
+            WHERE LOWER(name) = LOWER(?) 
+            AND active = 1 
+            AND subsidiaries_id = ?
+            LIMIT 1
+        
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'subsidiaries_id' in 'where clause'
+
+
+[ 2025-10-14 17:16:55 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT id 
+            FROM fayxzvov_coffee.order_modifier 
+            WHERE LOWER(name) = LOWER(?) 
+            AND active = 1 
+            AND subsidiaries_id = ?
+            LIMIT 1
+        
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'subsidiaries_id' in 'where clause'
+
+
+[ 2025-10-14 17:16:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT id 
+            FROM fayxzvov_coffee.order_modifier 
+            WHERE LOWER(name) = LOWER(?) 
+            AND active = 1 
+            AND subsidiaries_id = ?
+            LIMIT 1
+        
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'subsidiaries_id' in 'where clause'
+
+
+[ 2025-10-14 17:16:33 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT id 
+            FROM fayxzvov_coffee.order_modifier 
+            WHERE LOWER(name) = LOWER(?) 
+            AND active = 1 
+            AND subsidiaries_id = ?
+            LIMIT 1
+        
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'subsidiaries_id' in 'where clause'
+
+
+[ 2025-10-14 17:01:28 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order_modifier (name,isExtra,date_creation,active,cant) VALUES (?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cant' in 'field list'
+
+
+[ 2025-10-14 17:01:09 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order_modifier (name,isExtra,date_creation,active,cant) VALUES (?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'cant' in 'field list'
+
+
+[ 2025-10-14 16:43:27 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:43:27 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:43:26 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:43:26 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
+                COUNT(*) as orders_count
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+            GROUP BY week_of_month
+            ORDER BY week_of_month
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:43:26 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:43:26 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:43:26 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:38:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:38:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:38:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:38:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
+                COUNT(*) as orders_count
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+            GROUP BY week_of_month
+            ORDER BY week_of_month
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:38:03 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:38:03 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:38:03 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:33:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:33:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:33:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:33:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
+                COUNT(*) as orders_count
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+            GROUP BY week_of_month
+            ORDER BY week_of_month
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:33:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:33:03 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:33:03 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:28:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:28:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:28:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:28:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
+                COUNT(*) as orders_count
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+            GROUP BY week_of_month
+            ORDER BY week_of_month
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:28:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:28:03 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:28:03 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:23:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:23:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:23:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:23:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
+                COUNT(*) as orders_count
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+            GROUP BY week_of_month
+            ORDER BY week_of_month
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:23:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:23:03 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:23:03 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:18:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:18:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:18:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:18:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
+                COUNT(*) as orders_count
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+            GROUP BY week_of_month
+            ORDER BY week_of_month
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:18:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:18:03 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:18:03 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:13:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:13:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:13:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:13:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
+                COUNT(*) as orders_count
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+            GROUP BY week_of_month
+            ORDER BY week_of_month
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:13:03 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:13:03 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 16:13:03 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:32:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:32:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:32:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:32:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
+                COUNT(*) as orders_count
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+            GROUP BY week_of_month
+            ORDER BY week_of_month
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:32:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:32:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:32:51 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:27:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:27:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:27:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:27:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
+                COUNT(*) as orders_count
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+            GROUP BY week_of_month
+            ORDER BY week_of_month
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:27:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:27:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:27:51 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:22:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:22:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:22:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:22:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
+                COUNT(*) as orders_count
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+            GROUP BY week_of_month
+            ORDER BY week_of_month
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:22:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:22:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:22:51 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:17:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:17:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:17:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:17:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
+                COUNT(*) as orders_count
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+            GROUP BY week_of_month
+            ORDER BY week_of_month
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:17:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:17:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:17:51 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:12:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:12:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:12:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:12:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
+                COUNT(*) as orders_count
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+            GROUP BY week_of_month
+            ORDER BY week_of_month
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:12:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:12:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:12:51 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
+                COUNT(*) as orders_count
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+            GROUP BY week_of_month
+            ORDER BY week_of_month
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:51 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:51 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:43 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:43 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:43 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:43 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
+                COUNT(*) as orders_count
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+            GROUP BY week_of_month
+            ORDER BY week_of_month
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:43 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:43 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:43 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:42 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:42 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:42 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:42 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
+                COUNT(*) as orders_count
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+            GROUP BY week_of_month
+            ORDER BY week_of_month
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:42 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:42 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:42 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:40 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:40 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:40 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:40 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
+                COUNT(*) as orders_count
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+            GROUP BY week_of_month
+            ORDER BY week_of_month
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:40 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:40 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:40 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:32 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:32 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:32 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:32 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
+                COUNT(*) as orders_count
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+            GROUP BY week_of_month
+            ORDER BY week_of_month
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:32 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay - COALESCE(
+                    (SELECT SUM(pay) FROM fayxzvov_coffee.order_payments WHERE order_id = fayxzvov_coffee.pedidos_orders.id), 0
+                )), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status IN (1, 2) 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:32 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as count, 
+                COALESCE(SUM(total_pay), 0) as amount
+            FROM fayxzvov_coffee.pedidos_orders 
+            WHERE status = 3 
+            AND MONTH(date_creation) = ? 
+            AND YEAR(date_creation) = ? 
+            AND subsidiaries_id = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-14 11:07:32 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, date_creation, total_pay, status FROM fayxzvov_coffee.pedidos_orders   WHERE MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
 [ 2025-10-14 05:48:56 ]
 [ UNIX_USR ] :: nt authority\system
 [ WINDOWS_USR ] :: DESKTOP-O7AOGR9$

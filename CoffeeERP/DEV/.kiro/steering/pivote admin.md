@@ -53,7 +53,7 @@ class App extends Templates {
         this.primaryLayout({
             parent: `root`,
             id: this.PROJECT_NAME,
-            class: 'flex mx-2 my-2 h-100 mt-5 p-2 ',
+            class: '',
             card: {
                 filterBar: { class: 'w-full my-3', id: 'filterBar' + this.PROJECT_NAME },
                 container: { class: 'w-full my-3 h-full  rounded-lg p-3', id: 'container' + this.PROJECT_NAME }
@@ -71,7 +71,7 @@ class App extends Templates {
             parent: "container" + this.PROJECT_NAME,
             id: "tabsPedidos",
             content: { class: "" },
-            theme: "dark",
+            theme: "light",
             type: 'short',
             json: [
                 {
@@ -96,7 +96,7 @@ class App extends Templates {
 
         $("#container" + this.PROJECT_NAME).prepend(`
         <div class="px-4 pt-3 pb-3">
-            <h2 class="text-2xl font-semibold text-white">📦 Administrador</h2>
+            <h2 class="text-2xl font-semibold ">📦 Administrador</h2>
             <p class="text-gray-400">Gestiona productos, categorías y clientes.</p>
         </div>`);
     }
@@ -142,7 +142,7 @@ class App extends Templates {
             conf: { datatable: true, pag: 10 },
             attr: {
                 id: "tbProductos",
-                theme: 'dark',
+                theme: 'light',
                 right:[3],
                 center:[1,6]
             },
@@ -368,7 +368,7 @@ class Category extends Templates {
             conf: { datatable: true, pag: 10 },
             attr: {
                 id: "tbCategory",
-                theme: 'dark'
+                theme: 'light'
             },
         });
     }
@@ -530,7 +530,7 @@ class Client extends Templates {
             conf: { datatable: true, pag: 10 },
             attr: {
                 id: "tbClient",
-                theme: 'dark'
+                theme: 'light'
             },
         });
     }
@@ -652,7 +652,7 @@ class Client extends Templates {
 ### ctrl-admin.php [ CTRL]
  ```php
  <?php
-    session_start();
+   
     if (empty($_POST['opc'])) exit(0);
 
     header("Access-Control-Allow-Origin: *");
@@ -1050,7 +1050,7 @@ class mdl extends CRUD {
 
     public function __construct() {
         $this->util = new Utileria;
-        $this->bd = "{$_SESSION['DB']}.";
+        $this->bd = "[name_bd].";
     }
 
     // 🛍️ Product.

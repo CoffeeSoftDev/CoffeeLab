@@ -612,8 +612,8 @@ class ctrl extends mdl {
         $yearNow   = $_POST['anio1'];
         $yearOld   = $_POST['anio2'];
 
-        $dataA = $this->getComparativaChequePromedio([$_POST['mes2'], $yearOld,$_POST['udn']]);
-        $dataB = $this->getComparativaChequePromedio([$_POST['mes1'], $yearNow,$_POST['udn']]);
+        $dataA = $this->getComparativaChequePromedio([$_POST['mes1'], $yearNow,$_POST['udn']]);
+        $dataB = $this->getComparativaChequePromedio([$_POST['mes2'], $yearOld,$_POST['udn']]);
 
         $dataset = [
             'labels' => ['A&B', 'Alimentos', 'Bebidas'],
@@ -632,8 +632,8 @@ class ctrl extends mdl {
 
         return [
             'dataset' => $dataset,
-            'anioA' => $yearOld,
-            'anioB' => $yearNow,
+            'anioA' => $yearNow,
+            'anioB' => $yearOld,
         ];
 
 

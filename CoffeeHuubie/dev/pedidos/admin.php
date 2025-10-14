@@ -10,7 +10,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- icons -->
-    <link rel="stylesheet" href="https://huubie.com.mx/alpha/src/plugins/fontello/css/fontello.css" />
+     <link rel="stylesheet" href="<?=PATH_BASE?>src/plugins/fontello/css/fontello.css" />
     <link rel="stylesheet" href="<?=PATH_EVENTOS?>src/css/style.css" />
 
    

@@ -510,7 +510,7 @@
         function addModifier() {
             $_POST['date_creation'] = date('Y-m-d H:i:s');
             $_POST['active']        = 1;
-            $_POST['cant']          = 1;
+            // $_POST['cant']          = 1;
 
             // Verifica si ya existe el modificador
             $existe = $this->existsModifier([$_POST['name']]);
@@ -522,7 +522,9 @@
                 ];
             }
 
-            $create = $this->createModifier($this->util->sql($_POST));
+            $values = $this->util->sql($_POST);
+
+            $create    = $this->createModifier($this->util->sql($_POST));
             $idProduct = $this->maxModifier();
 
            
@@ -534,11 +536,28 @@
         }
 
         function editModifier() {
-            $edit = $this->updateModifier($this->util->sql($_POST, 1));
+            $status = 500;
+            $message = 'Error al editar.';
+
+            $values = [$_POST['name'], $_POST['id'], $_SESSION['SUB']];
+
+            $exists = $this->existsOtherModifierByName($values);
+
+            if ($exists) {
+                $status = 400;
+                $message = 'Ya existe otro modificador con ese nombre.';
+            } else {
+                $edit = $this->updateModifier($this->util->sql($_POST, 1));
+                if ($edit) {
+                    $status = 200;
+                    $message = 'Se actualizó correctamente.';
+                }
+            }
 
             return [
-                'status'  => $edit ? 200 : 500,
-                'message' => $edit ? "Se actualizó correctamente." : "Error al editar.",
+                'status'  => $status,
+                'message' => $message,
+                $values
             ];
         }
 
