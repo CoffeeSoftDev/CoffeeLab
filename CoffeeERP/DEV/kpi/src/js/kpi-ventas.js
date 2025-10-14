@@ -6,18 +6,18 @@ let udn, lsudn, clasificacion;
 $(async () => {
     app = new App(api, "root");
 
-    const data = await useFetch({ url: api, data: { opc: "init" } });
-    udn = data.udn;
-    lsudn = data.lsudn;
-    clasificacion = data.clasification;
+    const data          = await useFetch({ url: api, data: { opc: "init" } });
+          udn           = data.udn;
+          lsudn         = data.lsudn;
+          clasificacion = data.clasification;
 
     // ** Instancias **
     app = new App(api, "root");
 
 
-    salesDashboard = new SalesDashboard(api, "root");
-    sales = new Sales(api, "root");
-    monthlySales = new MonthlySales(api, "root");
+    salesDashboard     = new SalesDashboard(api, "root");
+    sales              = new Sales(api, "root");
+    monthlySales       = new MonthlySales(api, "root");
     cumulativeAverages = new CumulativeAverages(api, "root");
 
 
@@ -81,14 +81,12 @@ class App extends Templates {
                     id: "sales",
                     tab: "Módulo ventas",
                     onClick: () => {
-                        // sales.lsIngresos()
                     }
                 },
                 {
                     id: "comparativasMensuales",
                     tab: "Comparativas mensuales",
                     onClick: () => {
-                        // comparativa.lsComparativa()
                     }
                 },
                 // {
@@ -122,6 +120,7 @@ class App extends Templates {
             textBtn: "Inicio",
             classBtn: "bg-blue-600 hover:bg-blue-700",
             onClick: null,
+            href: 'marketing.php',
         };
 
         const opts = Object.assign({}, defaults, options);
@@ -148,6 +147,9 @@ class App extends Templates {
                 click: () => {
                     if (typeof opts.onClick === "function") {
                         opts.onClick();
+                    }
+                    if (opts.href) {
+                        window.location.href = opts.href;
                     }
                 }
             })
@@ -392,15 +394,16 @@ class SalesDashboard extends Templates {
                 labels: opts.data.labels,
                 datasets: [
                     {
+                        label: `${mes2} ${anio2}`,
+                        data: opts.data.B,
+                        backgroundColor: "#8CC63F"
+                    },
+                    {
                         label: `${mes1} ${anio1}`,
                         data: opts.data.A,
                         backgroundColor: "#103B60"
                     },
-                    {
-                        label: `${mes2} ${anio2}`,
-                        data: opts.data.B,
-                        backgroundColor: "#8CC63F"
-                    }
+
                 ]
             },
             options: {
@@ -443,6 +446,7 @@ class SalesDashboard extends Templates {
             }
         });
     }
+
 
     comparativaIngresosDiarios(options) {
         let periodo1 = $('#filterBarDashboard #periodo1').val();

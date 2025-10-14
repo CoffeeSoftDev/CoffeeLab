@@ -24,7 +24,7 @@ class ctrl extends mdl {
     function lsCampaigns() {
         $__row = [];
         $active = $_POST['active'] ?? 1;
-        $udn_id = $_POST['udn_id'] ?? $_SESSION['SUB'];
+        $udn_id = $_POST['udn_id'] ;
 
         $ls = $this->listCampaigns([$active, $udn_id]);
 

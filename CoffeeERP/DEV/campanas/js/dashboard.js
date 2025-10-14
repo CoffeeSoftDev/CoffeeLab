@@ -15,6 +15,9 @@ class CampaignDashboard extends Templates {
         this.dashboardComponent({
             parent: "container-dashboard",
             id: "dashboardComponent",
+            theme: "light",
+
+
             title: "📊 Dashboard de Campañas Publicitarias",
             subtitle: "Análisis mensual de inversión, clics y métricas de rendimiento",
             json: [
@@ -67,7 +70,7 @@ class CampaignDashboard extends Templates {
                 },
             ],
         });
-        
+
         const currentMonth = moment().month() + 1;
         setTimeout(() => {
             $(`#filterBarDashboard #mes`).val(currentMonth).trigger("change");
@@ -101,7 +104,7 @@ class CampaignDashboard extends Templates {
     showCards(data) {
         this.infoCard({
             parent: "cardDashboard",
-            theme: "dark",
+            theme: "light",
             json: [
                 {
                     id: "kpiInversion",
@@ -144,28 +147,33 @@ class CampaignDashboard extends Templates {
             parent: "containerComparativo",
             id: "chartComparativo",
             title: "",
-            class: "p-4",
+            class: "p-4 border border-gray-200 rounded-xl",
             data: {},
             año: new Date().getFullYear()
         };
-        
+
         const opts = Object.assign({}, defaults, options);
         const container = $("<div>", { class: opts.class });
         const title = $("<h2>", {
-            class: "text-lg font-bold mb-3 text-white",
+            class: "text-lg font-bold mb-3 text-gray-800",
             text: `Comparativa Anual: ${opts.año} vs ${opts.año - 1}`
+        });
+        const canvasWrapper = $("<div>", {
+            class: "w-full",
+            css: { height: "320px" }
         });
         const canvas = $("<canvas>", {
             id: opts.id,
-            class: "w-full h-[320px]"
+            class: "w-full h-full"
         });
-        
-        container.append(title, canvas);
+
+        canvasWrapper.append(canvas);
+        container.append(title, canvasWrapper);
         $('#' + opts.parent).html(container);
 
         const ctx = document.getElementById(opts.id).getContext("2d");
         if (window._chqComp) window._chqComp.destroy();
-        
+
         window._chqComp = new Chart(ctx, {
             type: "bar",
             data: {
@@ -187,9 +195,9 @@ class CampaignDashboard extends Templates {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { 
+                    legend: {
                         position: "bottom",
-                        labels: { color: '#fff' }
+                        labels: { color: '#374151' }
                     },
                     tooltip: {
                         callbacks: {
@@ -202,13 +210,13 @@ class CampaignDashboard extends Templates {
                         beginAtZero: true,
                         ticks: {
                             callback: (v) => formatPrice(v),
-                            color: '#9CA3AF'
+                            color: '#6B7280'
                         },
-                        grid: { color: '#374151' }
+                        grid: { color: '#E5E7EB' }
                     },
                     x: {
-                        ticks: { color: '#9CA3AF' },
-                        grid: { color: '#374151' }
+                        ticks: { color: '#6B7280' },
+                        grid: { color: '#E5E7EB' }
                     }
                 }
             }
@@ -226,22 +234,27 @@ class CampaignDashboard extends Templates {
     }
 
     barChartPorTipo(options) {
-        const container = $("<div>", { class: "p-4" });
+        const container = $("<div>", { class: "p-4 border border-gray-200 rounded-xl" });
         const title = $("<h2>", {
-            class: "text-lg font-bold mb-3 text-white",
+            class: "text-lg font-bold mb-3 text-gray-800",
             text: "Inversión por Tipo de Anuncio"
+        });
+        const canvasWrapper = $("<div>", {
+            class: "w-full",
+            css: { height: "300px" }
         });
         const canvas = $("<canvas>", {
             id: "chartPorTipo",
-            class: "w-full h-[300px]"
+            class: "w-full h-full"
         });
-        
-        container.append(title, canvas);
+
+        canvasWrapper.append(canvas);
+        container.append(title, canvasWrapper);
         $('#containerPorTipo').html(container);
 
         const ctx = document.getElementById("chartPorTipo").getContext("2d");
         if (window._chartTipo) window._chartTipo.destroy();
-        
+
         window._chartTipo = new Chart(ctx, {
             type: "bar",
             data: {
@@ -268,13 +281,13 @@ class CampaignDashboard extends Templates {
                         beginAtZero: true,
                         ticks: {
                             callback: (v) => formatPrice(v),
-                            color: '#9CA3AF'
+                            color: '#6B7280'
                         },
-                        grid: { color: '#374151' }
+                        grid: { color: '#E5E7EB' }
                     },
                     x: {
-                        ticks: { color: '#9CA3AF' },
-                        grid: { color: '#374151' }
+                        ticks: { color: '#6B7280' },
+                        grid: { color: '#E5E7EB' }
                     }
                 }
             }
@@ -290,25 +303,25 @@ class CampaignDashboard extends Templates {
         };
 
         const opts = Object.assign({}, defaults, options);
-        const container = $("<div>", { class: "border p-4 rounded-xl bg-[#1F2A37]" });
+        const container = $("<div>", { class: "border border-gray-200 p-4 rounded-xl bg-white" });
 
         const header = $("<div>", { class: "mb-3" })
-            .append($("<h2>", { class: "text-lg font-bold text-white", text: opts.title }))
-            .append($("<p>", { class: "text-sm text-gray-400", text: opts.subtitle }));
+            .append($("<h2>", { class: "text-lg font-bold text-gray-800", text: opts.title }))
+            .append($("<p>", { class: "text-sm text-gray-500", text: opts.subtitle }));
 
         const list = $("<div>", { class: "space-y-3" });
 
         const colores = [
-            { bg: "bg-green-900", circle: "bg-green-500 text-white" },
-            { bg: "bg-blue-900", circle: "bg-blue-500 text-white" },
-            { bg: "bg-purple-900", circle: "bg-purple-500 text-white" },
-            { bg: "bg-orange-900", circle: "bg-orange-500 text-white" },
-            { bg: "bg-gray-800", circle: "bg-gray-600 text-white" }
+            { bg: "bg-green-100", circle: "bg-green-500 text-white" },
+            { bg: "bg-blue-100", circle: "bg-blue-500 text-white" },
+            { bg: "bg-purple-100", circle: "bg-purple-500 text-white" },
+            { bg: "bg-orange-100", circle: "bg-orange-500 text-white" },
+            { bg: "bg-gray-100", circle: "bg-gray-600 text-white" }
         ];
 
         opts.data.forEach((item, i) => {
             const rank = i + 1;
-            const palette = colores[i] || { bg: "bg-gray-800", circle: "bg-gray-600 text-white" };
+            const palette = colores[i] || { bg: "bg-gray-100", circle: "bg-gray-600 text-white" };
 
             const row = $("<div>", {
                 class: `flex items-center gap-3 p-3 rounded-lg ${palette.bg}`
@@ -324,11 +337,11 @@ class CampaignDashboard extends Templates {
             const content = $("<div>", { class: "flex-1" });
             content.append(
                 $("<div>", { class: "flex justify-between" })
-                    .append($("<span>", { class: "font-semibold text-white", text: item.campaña }))
+                    .append($("<span>", { class: "font-semibold text-gray-800", text: item.campaña }))
                     .append($("<span>", { class: "font-bold text-[#8CC63F]", text: formatPrice(item.inversion) }))
             );
             content.append(
-                $("<div>", { class: "text-sm text-gray-400 flex justify-between" })
+                $("<div>", { class: "text-sm text-gray-600 flex justify-between" })
                     .append($("<span>", { text: `${item.clics} clics` }))
                     .append($("<span>", { text: `CPC: ${formatPrice(item.cpc)}` }))
             );
@@ -347,35 +360,46 @@ class CampaignDashboard extends Templates {
             id: "dashboardComponent",
             title: "📊 Dashboard",
             subtitle: "Resumen de métricas",
-            json: []
+            json: [],
+            theme: "dark" // 'dark' o 'light'
         };
 
         const opts = Object.assign(defaults, options);
+        const isDark = opts.theme === "dark";
+
+        const themeClasses = {
+            containerBg: isDark ? "bg-[#0f172a]" : "bg-gray-100",
+            headerBg: isDark ? "bg-[#1F2A37]" : "bg-white",
+            cardBg: isDark ? "bg-[#1F2A37]" : "bg-white",
+            text: isDark ? "text-white" : "text-gray-800",
+            subtext: isDark ? "text-gray-400" : "text-gray-500",
+            section: isDark ? "bg-transparent" : "bg-gray-50"
+        };
 
         const container = $(`
-        <div id="${opts.id}" class="w-full">
-            <div class="p-6 border-b border-gray-700">
+        <div id="${opts.id}" class="w-full min-h-screen ${themeClasses.text} ${themeClasses.containerBg}">
+            <div class="p-6 ${themeClasses.headerBg}">
                 <div class="mx-auto">
-                    <h1 class="text-2xl font-bold text-white">${opts.title}</h1>
-                    <p class="text-sm text-gray-400">${opts.subtitle}</p>
+                    <h1 class="text-2xl font-bold">${opts.title}</h1>
+                    <p class="text-sm ${themeClasses.subtext}">${opts.subtitle}</p>
                 </div>
             </div>
 
-            <div id="filterBarDashboard" class="mx-auto px-4 py-4"></div>
+            <div id="filterBarDashboard" class="mx-auto px-4 py-4 ${themeClasses.section}"></div>
 
-            <section id="cardDashboard" class="mx-auto px-4 py-4"></section>
+            <section id="cardDashboard" class="mx-auto px-4 py-4 ${themeClasses.section}"></section>
 
-            <section id="content-${opts.id}" class="mx-auto px-4 py-6 grid gap-6 lg:grid-cols-2"></section>
+            <section id="content-${opts.id}" class="mx-auto px-4 py-6 grid gap-6 lg:grid-cols-2 ${themeClasses.section}"></section>
         </div>`);
 
         opts.json.forEach(item => {
             let block = $("<div>", {
                 id: item.id,
-                class: "bg-[#1F2A37] p-4 rounded-xl shadow-md border border-gray-700 min-h-[200px]"
+                class: `${themeClasses.cardBg} p-4 rounded-xl min-h-[200px] border border-gray-200`
             });
 
             if (item.title) {
-                block.prepend(`<h3 class="text-sm font-semibold text-white mb-3">${item.title}</h3>`);
+                block.prepend(`<h3 class="text-sm font-semibold mb-3">${item.title}</h3>`);
             }
 
             $(`#content-${opts.id}`, container).append(block);
@@ -383,6 +407,8 @@ class CampaignDashboard extends Templates {
 
         $(`#${opts.parent}`).html(container);
     }
+
+
 
     infoCard(options) {
         const defaults = {
@@ -392,7 +418,7 @@ class CampaignDashboard extends Templates {
             theme: "dark",
             json: []
         };
-        
+
         const opts = Object.assign({}, defaults, options);
         const isDark = opts.theme === "dark";
         const cardBase = isDark
@@ -435,22 +461,27 @@ class CampaignDashboard extends Templates {
             parent: "containerLineChart",
             id: "linearChart",
             title: "",
-            class: "rounded-xl p-4",
+            class: "rounded-xl p-4 border border-gray-200",
             data: {}
         };
-        
+
         const opts = Object.assign({}, defaults, options);
         const container = $("<div>", { class: opts.class });
         const title = $("<h2>", {
-            class: "text-lg font-bold mb-2 text-white",
+            class: "text-lg font-bold mb-2 text-gray-800",
             text: opts.title
+        });
+        const canvasWrapper = $("<div>", {
+            class: "w-full",
+            css: { height: "250px" }
         });
         const canvas = $("<canvas>", {
             id: opts.id,
-            class: "w-full h-[250px]"
+            class: "w-full h-full"
         });
-        
-        container.append(title, canvas);
+
+        canvasWrapper.append(canvas);
+        container.append(title, canvasWrapper);
         $('#' + opts.parent).html(container);
 
         const ctx = document.getElementById(opts.id).getContext("2d");
@@ -466,9 +497,9 @@ class CampaignDashboard extends Templates {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { 
+                    legend: {
                         position: "bottom",
-                        labels: { color: '#fff' }
+                        labels: { color: '#374151' }
                     },
                     tooltip: {
                         callbacks: {
@@ -481,13 +512,13 @@ class CampaignDashboard extends Templates {
                         beginAtZero: true,
                         ticks: {
                             callback: (v) => formatPrice(v),
-                            color: '#9CA3AF'
+                            color: '#6B7280'
                         },
-                        grid: { color: '#374151' }
+                        grid: { color: '#E5E7EB' }
                     },
                     x: {
-                        ticks: { color: '#9CA3AF' },
-                        grid: { color: '#374151' }
+                        ticks: { color: '#6B7280' },
+                        grid: { color: '#E5E7EB' }
                     }
                 }
             }

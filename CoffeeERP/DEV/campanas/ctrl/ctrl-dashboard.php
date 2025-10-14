@@ -11,16 +11,16 @@ require_once '../mdl/mdl-dashboard.php';
 class ctrl extends mdl {
 
     function apiDashboard() {
-        $udn_id = $_POST['udn_id'] ?? $_SESSION['SUB'];
+        $udn_id        = $_POST['udn_id'] ;
         $red_social_id = $_POST['red_social_id'];
-        $año = $_POST['año'];
-        $mes = $_POST['mes'];
+        $año           = $_POST['año'];
+        $mes           = $_POST['mes'];
 
-        $dashboard = $this->getDashboardData([$udn_id, $red_social_id, $año, $mes]);
-        $trends = $this->getMonthlyTrends([$udn_id, $red_social_id, $año, $mes]);
-        $comparative = $this->getComparativeData([$udn_id, $red_social_id, $mes, $año, $año - 1]);
+        $dashboard    = $this->getDashboardData([$udn_id, $red_social_id, $año, $mes]);
+        $trends       = $this->getMonthlyTrends([$udn_id, $red_social_id, $año, $mes]);
+        $comparative  = $this->getComparativeData([$udn_id, $red_social_id, $mes, $año, $año - 1]);
         $topCampaigns = $this->getTopCampaigns([$udn_id, $red_social_id, $año, $mes]);
-        $byType = $this->getAnnouncementsByType([$udn_id, $red_social_id, $año, $mes]);
+        $byType       = $this->getAnnouncementsByType([$udn_id, $red_social_id, $año, $mes]);
 
         $labels = [];
         $dataInversion = [];
