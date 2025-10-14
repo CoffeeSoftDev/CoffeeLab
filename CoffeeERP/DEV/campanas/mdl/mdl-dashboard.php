@@ -11,6 +11,7 @@ class mdl extends CRUD {
         $this->util = new Utileria;
         $this->bd = "rfwsmqex_marketing.";
     }
+    
 
     function getDashboardData($array) {
         $query = "

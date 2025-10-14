@@ -12,7 +12,7 @@ class mdl extends CRUD {
         $this->bd = "rfwsmqex_marketing.";
     }
 
-    // Campaign Methods
+    // Campaign Methods.
 
     function listCampaigns($array) {
         $leftjoin = [

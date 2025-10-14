@@ -12,7 +12,7 @@ class mdl extends CRUD {
         $this->bd = "rfwsmqex_marketing.";
     }
 
-    // Tipo Anuncio Methods
+    // Tipo Anuncio Methods.
 
     function listTypes($array) {
         return $this->_Select([
