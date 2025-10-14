@@ -437,6 +437,11 @@ class AnalyticsCostsys extends Templates {
     }
 
     lsClasificacion() {
+        if (!clasification || !Array.isArray(clasification)) {
+            console.warn('clasification no está definido o no es un array');
+            return;
+        }
+        
         let clasificacion = clasification.filter(
             (json) => json.udn === $("#UDNs").val()
         );

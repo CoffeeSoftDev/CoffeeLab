@@ -1,3 +1,288 @@
+[ 2025-10-13 14:06:35 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:06:33 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:06:29 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:06:11 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:06:09 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:55 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:54 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:53 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:52 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:50 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:50 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:49 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:48 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:48 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:46 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:11 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:08 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:07 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:07 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:06 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:06 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:05 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:03 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:02 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:05:01 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 14:04:51 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaign_ads.start_date,
+                campaign_ads.end_date,
+                campaign_types.name as type_name,
+                campaign_classification.name as classification_name,
+                campaign_ad_results.total_spent as inversion,
+                campaign_ad_results.total_clicks as clic,
+                campaign_ad_results.cost_per_result as cpc
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id LEFT JOIN rfwsmqex_kpi.campaign_classification ON campaign_ads.classification_id = campaign_classification.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaigns.name, campaign_ads.ad_name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-13 14:04:48 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT 
+                campaign_ads.id,
+                campaigns.name as campaign_name,
+                campaign_ads.ad_name,
+                campaigns.social_network,
+                campaign_ad_results.total_spent as inversion_total,
+                campaign_ad_results.total_clicks as clics_cpc,
+                MONTHNAME(campaign_ads.start_date) as mes_nombre
+             FROM rfwsmqex_kpi.campaign_ads   LEFT JOIN rfwsmqex_kpi.campaigns ON campaign_ads.campaign_id = campaigns.id LEFT JOIN rfwsmqex_kpi.campaign_ad_results ON campaign_ads.id = campaign_ad_results.ad_id LEFT JOIN rfwsmqex_kpi.campaign_types ON campaign_ads.type_id = campaign_types.id WHERE campaign_ads.active = 1 AND campaigns.udn_id = ? AND MONTH(campaign_ads.start_date) = ? AND YEAR(campaign_ads.start_date) = ?  ORDER BY campaign_ads.start_date ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_ad_results' doesn't exist
+
+
+[ 2025-10-13 14:02:56 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 13:59:39 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 13:58:57 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 13:58:24 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 13:54:19 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 13:52:10 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 13:46:55 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 13:37:36 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
+[ 2025-10-13 13:37:18 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT idClasificacion AS id,Clasificacion AS valor,id_UDN as udn FROM rfwsmqex_gvsl_costsys.clasificacion   WHERE idClasificacion != 7 AND idClasificacion != 9   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_costsys.clasificacion' doesn't exist
+
+
 [ 2025-10-13 08:17:21 ]
 [ UNIX_USR ] :: nt authority\system
 [ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
