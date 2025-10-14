@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 [ 2025-10-14 00:20:44 ]
 [ UNIX_USR ] :: nt authority\system
 [ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
@@ -977,6 +978,247 @@
 [ 2025-10-13 23:50:39 ]
 [ UNIX_USR ] :: nt authority\system
 [ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+=======
+[ 2025-10-14 07:45:59 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  
+            SELECT 
+                t.nombre as tipo,
+                COUNT(a.id) as cantidad,
+                SUM(a.total_monto) as inversion,
+                SUM(a.total_clics) as clics
+            FROM anuncio a
+            INNER JOIN campaña c ON a.campaña_id = c.id
+            INNER JOIN tipo_anuncio t ON a.tipo_id = t.id
+            WHERE c.udn_id = ?
+            AND c.red_social_id = ?
+            AND YEAR(a.fecha_inicio) = ?
+            AND MONTH(a.fecha_inicio) = ?
+            GROUP BY t.id, t.nombre
+            ORDER BY inversion DESC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.anuncio' doesn't exist
+
+
+[ 2025-10-14 07:45:59 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  
+            SELECT 
+                c.nombre as campaña,
+                c.estrategia,
+                SUM(a.total_monto) as inversion,
+                SUM(a.total_clics) as clics,
+                CASE 
+                    WHEN SUM(a.total_clics) > 0 
+                    THEN SUM(a.total_monto) / SUM(a.total_clics)
+                    ELSE 0 
+                END as cpc
+            FROM campaña c
+            INNER JOIN anuncio a ON c.id = a.campaña_id
+            WHERE c.udn_id = ?
+            AND c.red_social_id = ?
+            AND YEAR(a.fecha_inicio) = ?
+            AND MONTH(a.fecha_inicio) = ?
+            GROUP BY c.id, c.nombre, c.estrategia
+            ORDER BY inversion DESC
+            LIMIT 5
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.campaña' doesn't exist
+
+
+[ 2025-10-14 07:45:59 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  
+            SELECT 
+                YEAR(a.fecha_inicio) as año,
+                SUM(a.total_monto) as inversion_total,
+                SUM(a.total_clics) as total_clics,
+                CASE 
+                    WHEN SUM(a.total_clics) > 0 
+                    THEN SUM(a.total_monto) / SUM(a.total_clics)
+                    ELSE 0 
+                END as cpc_promedio
+            FROM anuncio a
+            INNER JOIN campaña c ON a.campaña_id = c.id
+            WHERE c.udn_id = ?
+            AND c.red_social_id = ?
+            AND MONTH(a.fecha_inicio) = ?
+            AND YEAR(a.fecha_inicio) IN (?, ?)
+            GROUP BY YEAR(a.fecha_inicio)
+            ORDER BY año DESC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.anuncio' doesn't exist
+
+
+[ 2025-10-14 07:45:59 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  
+            SELECT 
+                DAY(a.fecha_inicio) as dia,
+                SUM(a.total_monto) as inversion,
+                SUM(a.total_clics) as clics
+            FROM anuncio a
+            INNER JOIN campaña c ON a.campaña_id = c.id
+            WHERE c.udn_id = ?
+            AND c.red_social_id = ?
+            AND YEAR(a.fecha_inicio) = ?
+            AND MONTH(a.fecha_inicio) = ?
+            GROUP BY DAY(a.fecha_inicio)
+            ORDER BY dia ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.anuncio' doesn't exist
+
+
+[ 2025-10-14 07:45:59 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  
+            SELECT 
+                SUM(a.total_monto) as inversion_total,
+                SUM(a.total_clics) as total_clics,
+                COUNT(DISTINCT a.campaña_id) as total_campañas,
+                COUNT(a.id) as total_anuncios,
+                CASE 
+                    WHEN SUM(a.total_clics) > 0 
+                    THEN SUM(a.total_monto) / SUM(a.total_clics)
+                    ELSE 0 
+                END as cpc_promedio
+            FROM anuncio a
+            INNER JOIN campaña c ON a.campaña_id = c.id
+            WHERE c.udn_id = ?
+            AND c.red_social_id = ?
+            AND YEAR(a.fecha_inicio) = ?
+            AND MONTH(a.fecha_inicio) = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.anuncio' doesn't exist
+
+
+[ 2025-10-14 07:45:59 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  
+            SELECT 
+                t.nombre as tipo,
+                COUNT(a.id) as cantidad,
+                SUM(a.total_monto) as inversion,
+                SUM(a.total_clics) as clics
+            FROM anuncio a
+            INNER JOIN campaña c ON a.campaña_id = c.id
+            INNER JOIN tipo_anuncio t ON a.tipo_id = t.id
+            WHERE c.udn_id = ?
+            AND c.red_social_id = ?
+            AND YEAR(a.fecha_inicio) = ?
+            AND MONTH(a.fecha_inicio) = ?
+            GROUP BY t.id, t.nombre
+            ORDER BY inversion DESC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.anuncio' doesn't exist
+
+
+[ 2025-10-14 07:45:58 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  
+            SELECT 
+                c.nombre as campaña,
+                c.estrategia,
+                SUM(a.total_monto) as inversion,
+                SUM(a.total_clics) as clics,
+                CASE 
+                    WHEN SUM(a.total_clics) > 0 
+                    THEN SUM(a.total_monto) / SUM(a.total_clics)
+                    ELSE 0 
+                END as cpc
+            FROM campaña c
+            INNER JOIN anuncio a ON c.id = a.campaña_id
+            WHERE c.udn_id = ?
+            AND c.red_social_id = ?
+            AND YEAR(a.fecha_inicio) = ?
+            AND MONTH(a.fecha_inicio) = ?
+            GROUP BY c.id, c.nombre, c.estrategia
+            ORDER BY inversion DESC
+            LIMIT 5
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.campaña' doesn't exist
+
+
+[ 2025-10-14 07:45:58 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  
+            SELECT 
+                YEAR(a.fecha_inicio) as año,
+                SUM(a.total_monto) as inversion_total,
+                SUM(a.total_clics) as total_clics,
+                CASE 
+                    WHEN SUM(a.total_clics) > 0 
+                    THEN SUM(a.total_monto) / SUM(a.total_clics)
+                    ELSE 0 
+                END as cpc_promedio
+            FROM anuncio a
+            INNER JOIN campaña c ON a.campaña_id = c.id
+            WHERE c.udn_id = ?
+            AND c.red_social_id = ?
+            AND MONTH(a.fecha_inicio) = ?
+            AND YEAR(a.fecha_inicio) IN (?, ?)
+            GROUP BY YEAR(a.fecha_inicio)
+            ORDER BY año DESC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.anuncio' doesn't exist
+
+
+[ 2025-10-14 07:45:58 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  
+            SELECT 
+                DAY(a.fecha_inicio) as dia,
+                SUM(a.total_monto) as inversion,
+                SUM(a.total_clics) as clics
+            FROM anuncio a
+            INNER JOIN campaña c ON a.campaña_id = c.id
+            WHERE c.udn_id = ?
+            AND c.red_social_id = ?
+            AND YEAR(a.fecha_inicio) = ?
+            AND MONTH(a.fecha_inicio) = ?
+            GROUP BY DAY(a.fecha_inicio)
+            ORDER BY dia ASC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.anuncio' doesn't exist
+
+
+[ 2025-10-14 07:45:58 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  
+            SELECT 
+                SUM(a.total_monto) as inversion_total,
+                SUM(a.total_clics) as total_clics,
+                COUNT(DISTINCT a.campaña_id) as total_campañas,
+                COUNT(a.id) as total_anuncios,
+                CASE 
+                    WHEN SUM(a.total_clics) > 0 
+                    THEN SUM(a.total_monto) / SUM(a.total_clics)
+                    ELSE 0 
+                END as cpc_promedio
+            FROM anuncio a
+            INNER JOIN campaña c ON a.campaña_id = c.id
+            WHERE c.udn_id = ?
+            AND c.red_social_id = ?
+            AND YEAR(a.fecha_inicio) = ?
+            AND MONTH(a.fecha_inicio) = ?
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_erp.anuncio' doesn't exist
+
+
+[ 2025-10-14 07:45:58 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+>>>>>>> 855896a82fed6ee5b51a83630412d6193b01f5c6
 [ INFO ] ::  
             SELECT id, nombre as valor 
             FROM rfwsmqex_marketing.udn 
