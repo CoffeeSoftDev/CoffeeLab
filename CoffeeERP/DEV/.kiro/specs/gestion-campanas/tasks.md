@@ -134,40 +134,55 @@
     - Show error messages with alert component
     - _Requirements: 12.1, 12.2, 12.3, 12.4, 12.5_
 
-- [ ] 5. Implement dashboard models (mdl-dashboard.php)
-  - [ ] 5.1 Create dashboard data access methods
+- [x] 5. Implement dashboard models (mdl-dashboard.php)
+
+  - [x] 5.1 Create dashboard data access methods
+
+
     - Create getKPIs() method (inversión total, clics totales, CPC promedio, CAC promedio)
     - Create getMonthlyTrends() method for line charts
     - Create getComparativeData() method for bar charts (año actual vs anterior)
     - Create getTopCampaigns() method for ranking
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
+
   - [ ] 5.2 Implement metric calculation methods
     - Create calculateCPC() method (total_monto / total_clics)
     - Create calculateCAC() method (inversión / número de clientes)
+
     - Create calculateAverageCPC() method for campaigns
+
+
     - _Requirements: 3.2, 13.1, 13.2_
 
 - [ ] 6. Implement dashboard controller (ctrl-dashboard.php)
-  - [ ] 6.1 Create dashboard API methods
+  - [x] 6.1 Create dashboard API methods
+
     - Implement getDashboardData() method with filters (año, udn_id, red_social_id)
     - Format data for Chart.js (labels, datasets)
     - Calculate KPIs and return JSON
+
+
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
+
+
 
   - [ ] 6.2 Implement filter handling
     - Process año, mes, udn_id, red_social_id filters
     - Return filtered data for charts and KPIs
+
     - _Requirements: 11.3, 11.4, 11.5_
 
 - [ ] 7. Implement dashboard frontend (dashboard.js)
   - [ ] 7.1 Create CampaignDashboard class
     - Define class CampaignDashboard extends Templates
+
     - Implement render() method
     - Implement layout() method with dashboardComponent
     - _Requirements: 4.1_
 
-  - [ ] 7.2 Implement filter bar
+  - [x] 7.2 Implement filter bar
+
     - Create filterBar() method with año, mes, UDN, red social selects
     - Implement onChange events to reload dashboard
     - Set default values (current year, current month)
@@ -250,27 +265,37 @@
     - Group by month (1-12)
     - Calculate monthly: inversión total, número de clientes, CAC
     - Use formula: inversión / número de clientes
+
+
     - Join with pedidos table to get client count
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
 
-- [ ] 12. Implement history controller (ctrl-history.php)
-  - [ ] 12.1 Create history API methods
+- [x] 12. Implement history controller (ctrl-history.php)
+
+  - [x] 12.1 Create history API methods
+
     - Implement lsCPC() method with filterBar data
     - Implement lsCAC() method with filterBar data
     - Format data for createTable component
     - Return 12-month array with calculated metrics
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 7.1, 7.2, 7.3, 7.4, 7.5_
 
+
   - [ ] 12.2 Implement metric calculations
     - Calculate CPC promedio per month
     - Calculate CAC per month
     - Handle months with no data (return 0 or "Sin datos")
+
+
     - _Requirements: 6.3, 7.2, 13.3, 13.4_
+
+
 
 - [ ] 13. Implement history frontend (history.js)
   - [x] 13.1 Create AnnualHistory class
 
     - Define class AnnualHistory extends Templates
+
 
 
     - Implement render() method
@@ -279,6 +304,7 @@
 
   - [x] 13.2 Implement filter bar
 
+
     - Create filterBar() method with año, UDN, red social, tipo reporte selects
     - Implement onChange events to reload history
     - _Requirements: 6.1, 7.1, 11.3, 11.4, 11.5_
@@ -286,6 +312,7 @@
   - [x] 13.3 Implement CPC history table
 
     - Create lsCPC() method with createTable
+
 
 
     - Display columns: Mes, Inversión Total, Total Clics, CPC Promedio
