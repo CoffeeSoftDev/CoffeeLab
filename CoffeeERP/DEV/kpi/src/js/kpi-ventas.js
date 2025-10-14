@@ -733,13 +733,13 @@ class SalesDashboard extends Templates {
                 labels: opts.labels,
                 datasets: [
                     {
-                        label: `Año ${opts.yearB}`, // Período 1 (consulta)
-                        data: opts.dataB,
+                        label: `Año ${opts.yearB}`, // Período 1 (consulta) - dataA
+                        data: opts.dataA,
                         backgroundColor: colorPeriodo1
                     },
                     {
-                        label: `Año ${opts.yearA}`, // Período 2 (comparación)
-                        data: opts.dataA,
+                        label: `Año ${opts.yearA}`, // Período 2 (comparación) - dataB
+                        data: opts.dataB,
                         backgroundColor: colorPeriodo2
                     }
                 ]

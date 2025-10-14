@@ -606,14 +606,16 @@ class ctrl extends mdl {
         ];
     }
 
-    function comparativaChequePromedio() {
+    function comparativaChequePromedio($anio1 = null, $mes1 = null, $anio2 = null, $mes2 = null, $udn = null) {
 
-        $mesActual = $_POST['mes1'];
-        $yearNow   = $_POST['anio1'];
-        $yearOld   = $_POST['anio2'];
+        $mes1  = $mes1 ?? (isset($_POST['mes1']) ? (int) $_POST['mes1'] : date('m'));
+        $anio1 = $anio1 ?? (isset($_POST['anio1']) ? (int) $_POST['anio1'] : date('Y'));
+        $mes2  = $mes2 ?? (isset($_POST['mes2']) ? (int) $_POST['mes2'] : date('m'));
+        $anio2 = $anio2 ?? (isset($_POST['anio2']) ? (int) $_POST['anio2'] : (date('Y') - 1));
+        $udn   = $udn ?? (isset($_POST['udn']) ? (int) $_POST['udn'] : 1);
 
-        $dataA = $this->getComparativaChequePromedio([$_POST['mes2'], $yearOld,$_POST['udn']]);
-        $dataB = $this->getComparativaChequePromedio([$_POST['mes1'], $yearNow,$_POST['udn']]);
+        $dataA = $this->getComparativaChequePromedio([$mes1, $anio1, $udn]);
+        $dataB = $this->getComparativaChequePromedio([$mes2, $anio2, $udn]);
 
         $dataset = [
             'labels' => ['A&B', 'Alimentos', 'Bebidas'],
@@ -629,15 +631,7 @@ class ctrl extends mdl {
             ]
         ];
 
-
-        return [
-            'dataset' => $dataset,
-            'anioA' => $yearOld,
-            'anioB' => $yearNow,
-        ];
-
-
-       
+        return $dataset;
     }
 
 
