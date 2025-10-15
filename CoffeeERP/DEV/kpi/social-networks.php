@@ -5,11 +5,12 @@
     <title>KPI - Redes Sociales</title>
 </head>
 <body>
-    <?php include 'layout/core-libraries.php'; ?>
+    <?php include '../layout/navbar.php'; ?>
     
     <div id="root"></div>
 
+    <?php include 'layout/core-libraries.php'; ?>
     <?php include 'layout/script.php'; ?>
-    <script src="src/js/campaign.js"></script>
+    <script src="src/js/social-networks.js"></script>
 </body>
 </html>
