@@ -202,37 +202,50 @@
     - _Requirements: 4.3, 4.4, 4.5, 14.5_
 
 - [ ] 8. Implement summary models (mdl-summary.php)
-  - [ ] 8.1 Create summary data access methods
+  - [x] 8.1 Create summary data access methods
+
+
     - Create getCampaignSummary() method with filters (año, mes, udn_id, red_social_id)
     - Join campaña and anuncio tables
     - Calculate totals per campaign (total_clics, total_monto, CPC promedio)
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
+
   - [ ] 8.2 Implement aggregation methods
     - Create calculateCampaignTotals() method
     - Create calculateMonthlySummary() method
     - Group announcements by campaign
+
     - _Requirements: 13.2, 13.5_
+
+
 
 - [ ] 9. Implement summary controller (ctrl-summary.php)
   - [ ] 9.1 Create summary API methods
     - Implement lsSummary() method with filterBar data
     - Format data for createTable component
     - Calculate CPC per announcement and campaign averages
+
     - Return row array with grouped data
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-  - [ ] 9.2 Implement data formatting
+
+
+  - [x] 9.2 Implement data formatting
+
+
     - Format dates with formatSpanishDate()
     - Format currency with evaluar()
     - Calculate duración (fecha_fin - fecha_inicio)
     - _Requirements: 5.2_
+
 
 - [ ] 10. Implement summary frontend (summary.js)
   - [ ] 10.1 Create CampaignSummary class
     - Define class CampaignSummary extends Templates
     - Implement render() method
     - Implement layout() method
+
     - _Requirements: 5.1_
 
   - [ ] 10.2 Implement filter bar

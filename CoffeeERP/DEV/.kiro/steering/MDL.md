@@ -101,7 +101,7 @@ Debe respetarse el formato de CoffeeSoft
 <_Delete>
 
 ```php
-  function update($array){
+  function remove($array){
 
     return $this->_Delete([
       'table' => "{$this->bd}table_name",

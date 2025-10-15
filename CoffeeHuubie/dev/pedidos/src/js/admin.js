@@ -964,7 +964,33 @@ class Modifier extends App {
                     label: 'Cerrar',
                     className: 'btn btn-secondary',
                     callback: () => {
-                        mod.lsModifiers();
+                        if (mod.idModifier) {
+                            useFetch({
+                                url: mod._link,
+                                data: {
+                                    opc: 'editModifier',
+                                    name: $('#name').val(),
+                                    isExtra: $('#isExtra').val(),
+                                    id: mod.idModifier,
+                                },
+                                success: (res) => {
+                                    if (res.status == 200) {
+                                        mod.lsModifiers();
+                                    } else {
+                                        alert({
+                                            icon: "warning",
+                                            title: "Atención",
+                                            text: res.message,
+                                            btn1: true,
+                                            btn1Text: "Ok"
+                                        });
+                                        return false;
+                                    }
+                                }
+                            });
+                        } else {
+                            mod.lsModifiers();
+                        }
                     }
 
                 },
@@ -1113,7 +1139,24 @@ class Modifier extends App {
                             },
                         });
 
-                        this.lsModifiers();
+                        if (save.status == 200) {
+                            alert({
+                                icon: "success",
+                                text: save.message,
+                                btn1: true,
+                                btn1Text: "Ok"
+                            });
+                            this.lsModifiers();
+                        } else {
+                            alert({
+                                icon: "warning",
+                                title: "Atención",
+                                text: save.message,
+                                btn1: true,
+                                btn1Text: "Ok"
+                            });
+                            return false;
+                        }
 
                         return false;
                     }
@@ -1294,7 +1337,7 @@ class Modifier extends App {
             success: (response) => {
                 if (response.status == 200) {
                     // Resetear el formulario
-                    $("#formProduct")[0].reset();
+                    // $("#formProduct")[0].reset();
                     $("#formProduct #name").val('');
                     $("#formProduct #price").val('');
 

@@ -99,7 +99,7 @@ class ctrl extends mdl {
         $_POST['nombre'] = 'Campaña ' . ($lastId + 1);
         $_POST['fecha_creacion'] = date('Y-m-d H:i:s');
         $_POST['active'] = 1;
-        $_POST['udn_id'] = $_SESSION['SUB'];
+        $_POST['udn_id'] =4;
 
         $create = $this->createCampaign($this->util->sql($_POST));
 
@@ -166,35 +166,44 @@ class ctrl extends mdl {
             $a = [];
 
             $a[] = [
-                'class'   => 'btn btn-sm btn-success me-1',
+                'class'   => 'btn btn-sm btn-primary me-1',
                 'html'    => '<i class="icon-pencil"></i>',
                 'onclick' => 'campaign.editAnnouncement(' . $key['id'] . ')'
             ];
 
             if ($key['total_clics'] == 0 || $key['total_monto'] == 0) {
                 $a[] = [
-                    'class'   => 'btn btn-sm btn-warning',
+                    'class'   => 'btn btn-sm btn-success',
                     'html'    => '<i class="icon-chart-bar"></i>',
                     'onclick' => 'campaign.captureResults(' . $key['id'] . ')'
                 ];
             }
 
+            $imageHtml = !empty($key['imagen']) 
+                ? '<img src="' . $key['imagen'] . '" class="w-12 h-12 rounded object-cover" />'
+                : '<div class="w-12 h-12 bg-gray-700 rounded flex items-center justify-center"><i class="icon-image text-gray-400"></i></div>';
+
+            $clasificacionBadge = renderBadge($key['clasificacion']);
+            $tipoBadge = renderBadge($key['tipo'], 'blue');
+
             $__row[] = [
                 'id'              => $key['id'],
-                'Nombre'          => $key['nombre'],
-                'Tipo'            => $key['tipo'],
-                'Clasificación'   => $key['clasificacion'],
+                'Imagen'          => [
+                    'html'  => $imageHtml,
+                    'class' => 'text-center'
+                ],
+                'Campaña'         => $key['campaña_nombre'],
+                'Anuncio'         => $key['nombre'],
+                'Clasificación'   => [
+                    'html'  => $clasificacionBadge,
+                    'class' => 'text-center'
+                ],
+                'Tipo'            => [
+                    'html'  => $tipoBadge,
+                    'class' => 'text-center'
+                ],
                 'Fecha Inicio'    => $key['fecha_inicio'],
-                'Fecha Fin'       => $key['fecha_fin'],
-                'Inversión'       => [
-                    'html'  => evaluar($key['total_monto']),
-                    'class' => 'text-end'
-                ],
-                'Clics'           => $key['total_clics'],
-                'CPC'             => [
-                    'html'  => evaluar($cpc),
-                    'class' => 'text-end'
-                ],
+                'Fecha Final'     => $key['fecha_fin'],
                 'a'               => $a
             ];
         }
@@ -320,6 +329,20 @@ function renderStatus($status) {
 
 function evaluar($value) {
     return '$' . number_format($value, 2, '.', ',');
+}
+
+function renderBadge($text, $color = 'green') {
+    $colors = [
+        'green' => 'bg-green-900 text-green-300',
+        'blue' => 'bg-blue-900 text-blue-300',
+        'purple' => 'bg-purple-900 text-purple-300',
+        'yellow' => 'bg-yellow-900 text-yellow-300',
+        'pink' => 'bg-pink-900 text-pink-300'
+    ];
+    
+    $colorClass = $colors[$color] ?? $colors['green'];
+    
+    return '<span class="px-3 py-1 rounded-full text-xs font-semibold ' . $colorClass . '">' . $text . '</span>';
 }
 
 $obj = new ctrl();

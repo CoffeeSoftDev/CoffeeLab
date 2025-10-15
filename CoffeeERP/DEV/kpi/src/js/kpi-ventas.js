@@ -6,18 +6,18 @@ let udn, lsudn, clasificacion;
 $(async () => {
     app = new App(api, "root");
 
-    const data          = await useFetch({ url: api, data: { opc: "init" } });
-          udn           = data.udn;
-          lsudn         = data.lsudn;
-          clasificacion = data.clasification;
+    const data = await useFetch({ url: api, data: { opc: "init" } });
+    udn = data.udn;
+    lsudn = data.lsudn;
+    clasificacion = data.clasification;
 
     // ** Instancias **
     app = new App(api, "root");
 
 
-    salesDashboard     = new SalesDashboard(api, "root");
-    sales              = new Sales(api, "root");
-    monthlySales       = new MonthlySales(api, "root");
+    salesDashboard = new SalesDashboard(api, "root");
+    sales = new Sales(api, "root");
+    monthlySales = new MonthlySales(api, "root");
     cumulativeAverages = new CumulativeAverages(api, "root");
 
 

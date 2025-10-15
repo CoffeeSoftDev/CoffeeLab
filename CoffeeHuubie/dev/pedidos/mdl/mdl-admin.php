@@ -248,6 +248,20 @@ class mdl extends CRUD {
         return !empty($result);
     }
 
+    function existsOtherModifierByName($array) {
+        $query = "
+            SELECT id 
+            FROM {$this->bd}order_modifier 
+            WHERE LOWER(name) = LOWER(?) 
+            AND id != ? 
+            AND active = 1 
+            AND subsidiaries_id = ?
+            LIMIT 1
+        ";
+        $result = $this->_Read($query, $array);
+        return !empty($result);
+    }
+
     function existsProductModifier($array) {
         $query = "
             SELECT id 
