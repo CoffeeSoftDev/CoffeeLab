@@ -1680,12 +1680,12 @@ class CatalogProduct extends Pos {
 
                 if (product.customer_products && Array.isArray(product.customer_products) && product.customer_products.length > 0) {
                     product.customer_products.forEach(cp => {
-                        descriptionHtml += `<div class="text-[10px] italic font-bold text-gray-600 ml-1">${cp.modifier_name}: ${cp.name} x ${cp.quantity || 1}</div>`;
+                        descriptionHtml += `<div class="text-[10px] italic font-bold text-gray-700 ml-1">${cp.modifier_name}: ${cp.name} x ${cp.quantity || 1}</div>`;
                     });
                 }
 
                 if (product.dedication) {
-                    descriptionHtml += `<div class="text-[8px] italic font-semibold text-gray-700 ml-1">* ${product.dedication}</div>`;
+                    descriptionHtml += `<div class="text-[10px] italic font-semibold text-gray-700 ml-1">Dedicatoria: ${product.dedication}</div>`;
                 }
 
                 return `

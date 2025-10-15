@@ -18,8 +18,8 @@ $(async () => {
     custom = new CustomOrder(api_custom, 'root');
     normal = new CatalogProduct(api_catalogo, 'root');
 
-    app.render();
-    app.actualizarFechaHora();
+    // app.render();
+    // app.actualizarFechaHora();
 
     // idFolio = 25;
     // app.editOrder(idFolio);
@@ -172,7 +172,8 @@ class App extends Templates {
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
             data: { opc: "listOrders", fi: rangePicker.fi, ff: rangePicker.ff },
             conf: {
-                datatable: true, pag: 10, fn_datatable: 'simple_data_table_filter', },
+                datatable: true, pag: 10, fn_datatable: 'simple_data_table_filter',
+            },
             coffeesoft: true,
 
             attr: {
@@ -411,18 +412,9 @@ class App extends Templates {
 
         const pos = await useFetch({
             url: api,
-            // data: { opc: "getOrder", id: id }
             data: { opc: "getOrderDetails", id: id }
         });
 
-        const modal = bootbox.dialog({
-            closeButton: true,
-            title: ` <div class="flex items-center gap-2 text-white text-lg font-semibold">
-                        <i class="icon-print text-blue-400 text-xl"></i>
-                        Imprimir
-                    </div>`,
-            message: `<div id="containerPrintOrder"></div>`
-        });
 
 
         normal.ticketPasteleria({
@@ -961,7 +953,7 @@ class App extends Templates {
     // History.
     async showHistory(id) {
         const data = await useFetch({ url: this._link, data: { opc: 'getHistory', id: id } });
-        
+
         bootbox.dialog({
             title: `
                 <div class="flex items-center gap-3">
@@ -981,8 +973,8 @@ class App extends Templates {
         });
 
         this.createTimelineChat({
-            parent  : 'containerHistory',
-            data    : data.history || [],
+            parent: 'containerHistory',
+            data: data.history || [],
             input_id: 'iptHistorial',
             success: () => {
                 this.addHistory(id);
@@ -992,7 +984,7 @@ class App extends Templates {
 
     async addHistory(id) {
         const comment = $('#iptHistorial').val().trim();
-        
+
         if (!comment) {
             alert({
                 icon: "warning",
@@ -1016,10 +1008,10 @@ class App extends Templates {
 
         if (response.status === 200) {
             $('#iptHistorial').val('');
-            
+
             this.createTimelineChat({
-                parent  : 'containerHistory',
-                data    : response.history || [],
+                parent: 'containerHistory',
+                data: response.history || [],
                 input_id: 'iptHistorial',
                 success: () => {
                     this.addHistory(id);
@@ -1032,7 +1024,7 @@ class App extends Templates {
                 timer: 1000
             });
 
-            
+
         } else {
             alert({
                 icon: "error",

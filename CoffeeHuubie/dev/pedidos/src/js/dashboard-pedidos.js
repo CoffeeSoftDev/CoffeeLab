@@ -1,5 +1,5 @@
-let api = '../pedidos/ctrl/ctrl-pedidos.php';
-let app, dashboardPedidos;
+let apis = '../pedidos/ctrl/ctrl-pedidos.php';
+let dashboard, dashboardPedidos;
 
 let lsSucursales, lsStatus;
 
@@ -8,13 +8,13 @@ $(async () => {
     lsSucursales = data.sucursales || [];
     lsStatus = data.status || [];
 
-    app = new App(api, "root");
+    dashboard = new AppDashboard(api, "root");
     dashboardPedidos = new DashboardPedidos(api, "root");
 
-    app.render();
+    dashboard.render();
 });
 
-class App extends Templates {
+class AppDashboard extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "DashboardPedidos";
@@ -36,12 +36,12 @@ class App extends Templates {
             },
         });
 
-        this.headerBar({
-            parent: `filterBar${this.PROJECT_NAME}`,
-            title: "📊 Dashboard de Pedidos",
-            subtitle: "Consulta las métricas y análisis de pedidos por sucursal.",
-            onClick: () => app.render(),
-        });
+        // this.headerBar({
+        //     parent: `filterBar${this.PROJECT_NAME}`,
+        //     title: "📊 Dashboard de Pedidos",
+        //     subtitle: "Consulta las métricas y análisis de pedidos por sucursal.",
+        //     onClick: () => app.render(),
+        // });
 
         this.tabLayout({
             parent: `container${this.PROJECT_NAME}`,
@@ -61,14 +61,20 @@ class App extends Templates {
                     id: "pedidos",
                     tab: "Pedidos",
                     onClick: () => {
-                        console.log("Tab Pedidos");
+                        if (typeof app !== 'undefined' && app.render) {
+                            $('#container-pedidos').html('<div id="root-pedidos"></div>');
+                            app._div_modulo = 'root-pedidos';
+                            app.render();
+                        }
                     }
                 },
                 {
                     id: "reportes",
                     tab: "Reportes",
                     onClick: () => {
-                        console.log("Tab Reportes");
+                        if (typeof reports !== 'undefined' && reports.render) {
+                            reports.render();
+                        }
                     }
                 },
             ]
@@ -168,7 +174,7 @@ class DashboardPedidos extends Templates {
         });
 
         this.showCards(mkt.dashboard);
-        
+
         this.chequeComparativo({
             data: mkt.barras.dataset,
             anioA: mkt.barras.anioA,
@@ -177,7 +183,7 @@ class DashboardPedidos extends Templates {
 
         this.comparativaIngresosDiarios({ data: mkt.linear });
         this.ventasPorDiaSemana(mkt.barDays);
-        
+
         this.topDiasSemana({
             parent: "Tendencia",
             title: "📊 Ranking por Promedio Semanal",
@@ -301,7 +307,7 @@ class DashboardPedidos extends Templates {
     showCards(data) {
         this.infoCard({
             parent: "cardDashboard",
-            theme: "light",
+            theme: "dark",
             json: [
                 {
                     id: "kpiCotizaciones",
@@ -352,7 +358,7 @@ class DashboardPedidos extends Templates {
             ? "bg-[#1F2A37] text-white rounded-xl shadow"
             : "bg-white text-gray-800 rounded-xl shadow";
         const titleColor = isDark ? "text-gray-300" : "text-gray-600";
-        
+
         const renderCard = (card, i = "") => {
             const box = $("<div>", {
                 id: `${opts.id}_${i}`,
@@ -374,16 +380,16 @@ class DashboardPedidos extends Templates {
             box.append(title, value, description);
             return box;
         };
-        
+
         const container = $("<div>", {
             id: opts.id,
             class: `grid grid-cols-2 md:grid-cols-4 gap-4 ${opts.class}`
         });
-        
+
         opts.json.forEach((item, i) => {
             container.append(renderCard(item, i));
         });
-        
+
         $(`#${opts.parent}`).html(container);
     }
 
