@@ -722,7 +722,7 @@ class App extends Templates {
                 text: `Se eliminará el pago de ${formatPrice(amount)} de forma permanente.`,
                 icon: "warning"
             },
-            data: { opc: "deletePay", id: idFolio, idPay: id },
+            data: { opc: "deletePay", id: idFolio, amount: amount, idPay: id },
             methods: {
                 success: (res) => {
                     const data = res.initHistoryPay;

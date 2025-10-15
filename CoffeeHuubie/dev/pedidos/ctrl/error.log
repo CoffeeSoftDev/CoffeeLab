@@ -1,3 +1,38 @@
+[ 2025-10-15 13:49:29 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order_custom (name,price,price_real,portion_qty,date_created) VALUES (?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[22007]: Invalid datetime format: 1292 Incorrect datetime value: '2025-10-15T18:49:29.170Z' for column 'date_created' at row 1
+
+
+[ 2025-10-15 13:00:36 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order_histories (title,evt_events_id,comment,action,date_action,type,usr_users_id) VALUES (?,?,?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'evt_events_id' in 'field list'
+
+
+[ 2025-10-15 12:58:32 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order_histories (title,evt_events_id,comment,action,date_action,type,usr_users_id) VALUES (?,?,?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'evt_events_id' in 'field list'
+
+
+[ 2025-10-15 12:58:08 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order_histories (title,evt_events_id,comment,action,date_action,type,usr_users_id) VALUES (?,?,?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'evt_events_id' in 'field list'
+
+
+[ 2025-10-15 12:57:27 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order_histories (title,evt_events_id,comment,action,date_action,type,usr_users_id) VALUES (?,?,?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'evt_events_id' in 'field list'
+
+
 [ 2025-10-15 10:28:59 ]
 [ UNIX_USR ] :: nt authority\system
 [ WINDOWS_USR ] :: DESKTOP-FHJB2CN$

@@ -31,8 +31,8 @@ class App extends Templates {
             parent: "root",
             id: this.PROJECT_NAME,
             card: {
-                filterBar: { class: "w-full my-3", id: "filterBar" + this.PROJECT_NAME },
-                container: { class: "w-full my-3 h-full rounded-lg p-3", id: "container" + this.PROJECT_NAME }
+                filterBar: { class: "w-full ", id: "filterBar" + this.PROJECT_NAME },
+                container: { class: "w-full h-full rounded-lg p-3", id: "container" + this.PROJECT_NAME }
             }
         });
 
@@ -71,8 +71,8 @@ class App extends Templates {
             ]
         });
 
-        $("#container" + this.PROJECT_NAME).prepend(`
-            <div class="px-4 pt-3 pb-3">
+        $("#filterBar" + this.PROJECT_NAME).prepend(`
+            <div class="px-4 pt-3 pb-2">
                 <h2 class="text-2xl font-semibold ">📊 Métricas de Redes Sociales</h2>
                 <p class="text-gray-400">Captura y análisis de métricas mensuales por red social</p>
             </div>

@@ -344,6 +344,8 @@ class MPedidos extends CRUD {
         ]);
     }
 
+    
+
 
     // Reservations.
     public function createReservation($array) {

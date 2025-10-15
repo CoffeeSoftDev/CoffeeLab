@@ -356,17 +356,18 @@ class Pedidos extends MPedidos{
 
         $insert = $this->registerPayment($values);
         
-      
-
         if ($addPay) {
             $status  = 200;
             $message = 'Pago registrado correctamente';
+            
+          $success =  $this->logHistory("Se registró un pago de " . evaluar($pay), 'payment');
         }
 
         return [
             'status'  => $status,
             'message' => $message,
-            'data'    => $this->initHistoryPay()
+            'data'    => $this->initHistoryPay(),
+            'success' => $success
          
         ];
     }
@@ -405,10 +406,18 @@ class Pedidos extends MPedidos{
 
         $delete = $this->deletePayment($values);
 
+          // histories.
+        $amount  = evaluar($_POST['amount']);
+        $success = $this->logHistory("Se eliminó un pago de {$amount}", 'payment', 'Eliminar');
+
+
+
+
+
         return [
-            'status'  => $delete ? 200 : 400,
-            'message' => $delete ? "Pago eliminado correctamente." : "No se pudo eliminar el pago.",
-            'initHistoryPay'    => $this->initHistoryPay()
+            'status'         => $delete ? 200 : 400,
+            'message'        => $delete ? "Pago eliminado correctamente." : "No se pudo eliminar el pago.",
+            'initHistoryPay' => $this->initHistoryPay(),
         ];
     }
 
@@ -561,17 +570,6 @@ class Pedidos extends MPedidos{
         ];
     }
 
-    function logHistory($eventId, $message) {
-        // $this->addHistories($this->util->sql([
-        //     'title'         => 'Abono',
-        //     'evt_events_id' => $eventId,
-        //     'comment'       => $message,
-        //     'action'        => $message,
-        //     'date_action'   => date('Y-m-d H:i:s'),
-        //     'type'          => 'payment',
-        //     'usr_users_id'  => $_SESSION['USR']
-        // ]));
-    }
 
     // Dashboard Metrics
     function getDashboardMetrics() {
@@ -1014,6 +1012,20 @@ class Pedidos extends MPedidos{
         ];
     }
 
+    function logHistory($message, $type = 'general', $title = 'Registro de actividad') {
+        $history = [
+            'title'         => $title,
+            'order_id'      => $_POST['id'],
+            'comment'       => $message,
+            'action'        => $message,
+            'date_action'   => date('Y-m-d H:i:s'),
+            'type'          => $type,
+            'usr_users_id'  => $_SESSION['USR'] ?? 1,
+        ];
+
+        return $this->addHistories($this->util->sql($history));
+    }
+
 }
 
    //
@@ -1107,3 +1119,4 @@ echo json_encode($encode);
 
 
 ?>
+
