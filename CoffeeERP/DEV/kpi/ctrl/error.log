@@ -1,3 +1,24 @@
+[ 2025-10-15 10:36:10 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  SELECT id, name, udn_id, description, active, DATE_FORMAT(date_creation, '%d/%m/%Y') as date_creation FROM rfwsmqex_kpi.campaign_classification   WHERE active = ? AND udn_id = ?  ORDER BY id DESC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_classification' doesn't exist
+
+
+[ 2025-10-15 10:36:10 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  SELECT id, name as valor,name, udn_id, description, active, DATE_FORMAT(date_creation, '%d/%m/%Y') as date_creation FROM rfwsmqex_kpi.campaign_types   WHERE active = ? AND udn_id = ?  ORDER BY id DESC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaign_types' doesn't exist
+
+
+[ 2025-10-15 10:36:09 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-GA5LPCM$
+[ INFO ] ::  SELECT id, name as valor, udn_id, social_network, strategy, start_date, end_date, active FROM rfwsmqex_kpi.campaigns   WHERE active = 1  ORDER BY id DESC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_kpi.campaigns' doesn't exist
+
+
 [ 2025-10-13 14:06:35 ]
 [ UNIX_USR ] :: nt authority\system
 [ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
