@@ -15,6 +15,7 @@ class Pedidos extends MPedidos{
             'products' => $this->lsProductos([1,$_SESSION['SUB']]),
             'clients'   => $this->getAllClients([$_SESSION['SUB']]),
             'status'   =>  $this->lsStatus(),
+            'sucursales' => $this->lsSucursales(),
         ];
     }
 
@@ -636,6 +637,186 @@ class Pedidos extends MPedidos{
             'status' => $status,
             'message' => $message,
             'data' => $data
+        ];
+    }
+
+    function apiDashboard() {
+        $sucursal = $_POST['sucursal'] ?? $_SESSION['SUB'];
+        $mes1 = intval($_POST['mes1'] ?? date('n'));
+        $anio1 = intval($_POST['anio1'] ?? date('Y'));
+        $mes2 = intval($_POST['mes2'] ?? date('n'));
+        $anio2 = intval($_POST['anio2'] ?? date('Y') - 1);
+
+        $params1 = [
+            'mes' => $mes1,
+            'anio' => $anio1,
+            'subsidiariesId' => $sucursal
+        ];
+
+        $params2 = [
+            'mes' => $mes2,
+            'anio' => $anio2,
+            'subsidiariesId' => $sucursal
+        ];
+
+        $metrics1 = $this->getOrdersDashboard($params1);
+        $ordersByStatus1 = $this->getOrdersByStatus($params1);
+        $ordersByStatus2 = $this->getOrdersByStatus($params2);
+        $ordersByDay1 = $this->getOrdersByDay($params1);
+        $ordersByDay2 = $this->getOrdersByDay($params2);
+        $ordersByWeekday1 = $this->getOrdersByWeekday($params1);
+        $ordersByWeekday2 = $this->getOrdersByWeekday($params2);
+
+        $cotizaciones = 0;
+        $abonados = 0;
+        $pagados = 0;
+        $cancelados = 0;
+        $totalVentas = 0;
+        $totalIngresos = 0;
+
+        foreach ($ordersByStatus1 as $status) {
+            switch ($status['status']) {
+                case 1:
+                    $cotizaciones = $status['count'];
+                    break;
+                case 2:
+                    $abonados = $status['count'];
+                    $totalIngresos += $status['total'];
+                    break;
+                case 3:
+                    $pagados = $status['count'];
+                    $totalVentas += $status['total'];
+                    $totalIngresos += $status['total'];
+                    break;
+                case 4:
+                    $cancelados = $status['count'];
+                    break;
+            }
+        }
+
+        $pendienteCobrar = $totalVentas - $totalIngresos;
+
+        $dashboard = [
+            'cotizaciones' => $cotizaciones,
+            'ventasTotales' => evaluar($totalVentas),
+            'ingresos' => evaluar($totalIngresos),
+            'pendienteCobrar' => evaluar($pendienteCobrar),
+        ];
+
+        $statusCounts1 = [0, 0, 0, 0];
+        $statusCounts2 = [0, 0, 0, 0];
+
+        foreach ($ordersByStatus1 as $status) {
+            $statusCounts1[$status['status'] - 1] = $status['count'];
+        }
+
+        foreach ($ordersByStatus2 as $status) {
+            $statusCounts2[$status['status'] - 1] = $status['count'];
+        }
+
+        $barras = [
+            'dataset' => [
+                'labels' => ['Cotizaciones', 'Abonados', 'Pagados', 'Cancelados'],
+                'A' => $statusCounts1,
+                'B' => $statusCounts2
+            ],
+            'anioA' => $anio1,
+            'anioB' => $anio2
+        ];
+
+        $labels = [];
+        $tooltip = [];
+        $data1 = [];
+        $data2 = [];
+
+        foreach ($ordersByDay1 as $day) {
+            $labels[] = date('d', strtotime($day['fecha']));
+            $tooltip[] = date('d M Y', strtotime($day['fecha']));
+            $data1[] = floatval($day['total']);
+        }
+
+        $data2Map = [];
+        foreach ($ordersByDay2 as $day) {
+            $dayNum = date('d', strtotime($day['fecha']));
+            $data2Map[$dayNum] = floatval($day['total']);
+        }
+
+        foreach ($labels as $label) {
+            $data2[] = $data2Map[$label] ?? 0;
+        }
+
+        $linear = [
+            'labels' => $labels,
+            'tooltip' => $tooltip,
+            'datasets' => [
+                [
+                    'label' => "Período $mes1/$anio1",
+                    'data' => $data1,
+                    'borderColor' => '#103B60',
+                    'backgroundColor' => 'rgba(16, 59, 96, 0.1)',
+                    'tension' => 0.4
+                ],
+                [
+                    'label' => "Período $mes2/$anio2",
+                    'data' => $data2,
+                    'borderColor' => '#8CC63F',
+                    'backgroundColor' => 'rgba(140, 198, 63, 0.1)',
+                    'tension' => 0.4
+                ]
+            ]
+        ];
+
+        $weekdayLabels = [];
+        $weekdayData1 = [];
+        $weekdayData2 = [];
+
+        $weekdayMap1 = [];
+        foreach ($ordersByWeekday1 as $day) {
+            $weekdayMap1[$day['dia']] = floatval($day['total']);
+        }
+
+        $weekdayMap2 = [];
+        foreach ($ordersByWeekday2 as $day) {
+            $weekdayMap2[$day['dia']] = floatval($day['total']);
+        }
+
+        $daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+        $daysSpanish = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
+        foreach ($daysOrder as $index => $day) {
+            $weekdayLabels[] = $daysSpanish[$index];
+            $weekdayData1[] = $weekdayMap1[$day] ?? 0;
+            $weekdayData2[] = $weekdayMap2[$day] ?? 0;
+        }
+
+        $barDays = [
+            'labels' => $weekdayLabels,
+            'dataA' => $weekdayData1,
+            'dataB' => $weekdayData2,
+            'yearA' => $anio2,
+            'yearB' => $anio1
+        ];
+
+        $topWeek = [];
+        foreach ($ordersByWeekday1 as $day) {
+            $topWeek[] = [
+                'dia' => $day['dia'],
+                'promedio' => floatval($day['promedio']),
+                'veces' => intval($day['veces']),
+                'clientes' => intval($day['clientes'])
+            ];
+        }
+
+        usort($topWeek, function($a, $b) {
+            return $b['promedio'] <=> $a['promedio'];
+        });
+
+        return [
+            'dashboard' => $dashboard,
+            'barras' => $barras,
+            'linear' => $linear,
+            'barDays' => $barDays,
+            'topWeek' => $topWeek
         ];
     }
 

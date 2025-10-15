@@ -22,6 +22,20 @@ class MPedidos extends CRUD {
         return $this->_Read($query, null);
     }
 
+    function lsSucursales(){
+        $query = "SELECT
+            s.id as id,
+            CONCAT(c.social_name, ' - ', s.name) as valor,
+            s.name as sucursal,
+            c.social_name as company
+        FROM
+            fayxzvov_alpha.subsidiaries s
+        INNER JOIN fayxzvov_admin.companies c ON s.companies_id = c.id
+        WHERE s.active = 1
+        ORDER BY c.social_name, s.name";
+        return $this->_Read($query, null);
+    }
+
 
     public function getAdvancedPay($array) {
         return $this->_Select([
@@ -703,7 +717,7 @@ class MPedidos extends CRUD {
 
     function getOrdersByMonth($params) {
         return $this->_Select([
-            'table' => "{$this->bd}pedidos_orders",
+            'table' => "{$this->bd}order",
             'values' => "id, date_creation, total_pay, status",
             'where' => "MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND subsidiaries_id = ?",
             'data' => $params
@@ -715,7 +729,7 @@ class MPedidos extends CRUD {
             SELECT 
                 COUNT(*) as count, 
                 COALESCE(SUM(total_pay), 0) as amount
-            FROM {$this->bd}pedidos_orders 
+            FROM {$this->bd}order 
             WHERE status = 3 
             AND MONTH(date_creation) = ? 
             AND YEAR(date_creation) = ? 
@@ -731,9 +745,9 @@ class MPedidos extends CRUD {
             SELECT 
                 COUNT(*) as count, 
                 COALESCE(SUM(total_pay - COALESCE(
-                    (SELECT SUM(pay) FROM {$this->bd}order_payments WHERE order_id = {$this->bd}pedidos_orders.id), 0
+                    (SELECT SUM(pay) FROM {$this->bd}order_payments WHERE order_id = {$this->bd}order.id), 0
                 )), 0) as amount
-            FROM {$this->bd}pedidos_orders 
+            FROM {$this->bd}order 
             WHERE status IN (1, 2) 
             AND MONTH(date_creation) = ? 
             AND YEAR(date_creation) = ? 
@@ -749,7 +763,7 @@ class MPedidos extends CRUD {
             SELECT 
                 WEEK(date_creation, 1) - WEEK(DATE_SUB(date_creation, INTERVAL DAYOFMONTH(date_creation) - 1 DAY), 1) + 1 as week_of_month,
                 COUNT(*) as orders_count
-            FROM {$this->bd}pedidos_orders 
+            FROM {$this->bd}order 
             WHERE MONTH(date_creation) = ? 
             AND YEAR(date_creation) = ? 
             AND subsidiaries_id = ?
@@ -759,7 +773,6 @@ class MPedidos extends CRUD {
         
         $result = $this->_Read($query, $params);
         
-        // Format data for Chart.js
         $labels = ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4', 'Sem 5'];
         $data = [0, 0, 0, 0, 0];
         
@@ -780,6 +793,181 @@ class MPedidos extends CRUD {
                 ]
             ]
         ];
+    }
+
+    function getOrdersDashboard($params) {
+        $mes = $params['mes'];
+        $anio = $params['anio'];
+        $subsidiariesId = $params['subsidiariesId'];
+
+        $whereClause = "MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND status != 4";
+        $data = [$mes, $anio];
+
+        if ($subsidiariesId !== 'all') {
+            $whereClause .= " AND subsidiaries_id = ?";
+            $data[] = $subsidiariesId;
+        }
+
+        $query = "
+            SELECT 
+                COUNT(*) as numPedidos,
+                COALESCE(SUM(total_pay - COALESCE(discount, 0)), 0) as totalVentas,
+                COALESCE(AVG(total_pay - COALESCE(discount, 0)), 0) as chequePromedio,
+                COUNT(DISTINCT client_id) as numClientes
+            FROM {$this->bd}order
+            WHERE $whereClause
+        ";
+
+        $result = $this->_Read($query, $data);
+        return $result[0] ?? [
+            'numPedidos' => 0,
+            'totalVentas' => 0,
+            'chequePromedio' => 0,
+            'numClientes' => 0
+        ];
+    }
+
+    function getOrdersByDay($params) {
+        $mes = $params['mes'];
+        $anio = $params['anio'];
+        $subsidiariesId = $params['subsidiariesId'];
+
+        $whereClause = "MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND status != 4";
+        $data = [$mes, $anio];
+
+        if ($subsidiariesId !== 'all') {
+            $whereClause .= " AND subsidiaries_id = ?";
+            $data[] = $subsidiariesId;
+        }
+
+        $query = "
+            SELECT 
+                DATE(date_creation) as fecha,
+                COALESCE(SUM(total_pay - COALESCE(discount, 0)), 0) as total,
+                COUNT(DISTINCT client_id) as clientes
+            FROM {$this->bd}order
+            WHERE $whereClause
+            GROUP BY DATE(date_creation)
+            ORDER BY fecha ASC
+        ";
+
+        return $this->_Read($query, $data);
+    }
+
+    function getOrdersByWeekday($params) {
+        $mes = $params['mes'];
+        $anio = $params['anio'];
+        $subsidiariesId = $params['subsidiariesId'];
+
+        $whereClause = "MONTH(date_creation) = ? AND YEAR(date_creation) = ? AND status != 4";
+        $data = [$mes, $anio];
+
+        if ($subsidiariesId !== 'all') {
+            $whereClause .= " AND subsidiaries_id = ?";
+            $data[] = $subsidiariesId;
+        }
+
+        $query = "
+            SELECT 
+                DAYNAME(date_creation) as dia,
+                COALESCE(SUM(total_pay - COALESCE(discount, 0)), 0) as total,
+                COALESCE(AVG(total_pay - COALESCE(discount, 0)), 0) as promedio,
+                COUNT(*) as veces,
+                COUNT(DISTINCT client_id) as clientes
+            FROM {$this->bd}order
+            WHERE $whereClause
+            GROUP BY DAYOFWEEK(date_creation), DAYNAME(date_creation)
+            ORDER BY DAYOFWEEK(date_creation)
+        ";
+
+        return $this->_Read($query, $data);
+    }
+
+    function getTopProducts($params) {
+        $mes = $params['mes'];
+        $anio = $params['anio'];
+        $subsidiariesId = $params['subsidiariesId'];
+        $limit = $params['limit'] ?? 10;
+
+        $whereClause = "MONTH(o.date_creation) = ? AND YEAR(o.date_creation) = ? AND o.status != 4";
+        $data = [$mes, $anio];
+
+        if ($subsidiariesId !== 'all') {
+            $whereClause .= " AND o.subsidiaries_id = ?";
+            $data[] = $subsidiariesId;
+        }
+
+        $query = "
+            SELECT 
+                p.name,
+                SUM(od.quantity) as quantity
+            FROM {$this->bd}order_details od
+            INNER JOIN {$this->bd}order_products p ON od.product_id = p.id
+            INNER JOIN {$this->bd}order o ON od.order_id = o.id
+            WHERE $whereClause
+            GROUP BY p.id, p.name
+            ORDER BY quantity DESC
+            LIMIT $limit
+        ";
+
+        return $this->_Read($query, $data);
+    }
+
+    function getTopClients($params) {
+        $mes = $params['mes'];
+        $anio = $params['anio'];
+        $subsidiariesId = $params['subsidiariesId'];
+        $limit = $params['limit'] ?? 10;
+
+        $whereClause = "MONTH(o.date_creation) = ? AND YEAR(o.date_creation) = ? AND o.status != 4";
+        $data = [$mes, $anio];
+
+        if ($subsidiariesId !== 'all') {
+            $whereClause .= " AND o.subsidiaries_id = ?";
+            $data[] = $subsidiariesId;
+        }
+
+        $query = "
+            SELECT 
+                c.name,
+                COUNT(o.id) as purchases,
+                COALESCE(SUM(o.total_pay - COALESCE(o.discount, 0)), 0) as total
+            FROM {$this->bd}order o
+            INNER JOIN {$this->bd}order_clients c ON o.client_id = c.id
+            WHERE $whereClause
+            GROUP BY c.id, c.name
+            ORDER BY purchases DESC, total DESC
+            LIMIT $limit
+        ";
+
+        return $this->_Read($query, $data);
+    }
+
+    function getOrdersByStatus($params) {
+        $mes = $params['mes'];
+        $anio = $params['anio'];
+        $subsidiariesId = $params['subsidiariesId'];
+
+        $whereClause = "MONTH(date_creation) = ? AND YEAR(date_creation) = ?";
+        $data = [$mes, $anio];
+
+        if ($subsidiariesId !== 'all') {
+            $whereClause .= " AND subsidiaries_id = ?";
+            $data[] = $subsidiariesId;
+        }
+
+        $query = "
+            SELECT 
+                status,
+                COUNT(*) as count,
+                COALESCE(SUM(total_pay - COALESCE(discount, 0)), 0) as total
+            FROM {$this->bd}order
+            WHERE $whereClause
+            GROUP BY status
+            ORDER BY status
+        ";
+
+        return $this->_Read($query, $data);
     }
 
 }

@@ -66,6 +66,9 @@
     <script src="<?=PATH_BASE?>src/plugins/daterangepicker/moment.min.js"></script>
     <script src="<?=PATH_BASE?>src/plugins/daterangepicker/daterangepicker.js"></script>
 
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
     <!-- PRINCIPAL -->
     <script src="<?=PATH_BASE?>access/src/js/session.js"></script>
     <script src="<?=PATH_MENU?>src/js/navbar.js"></script>
@@ -133,6 +136,7 @@
     <script src="<?=PATH_PEDIDOS?>src/js/app.js?t=<?php echo time(); ?>"></script>
     <script src="<?=PATH_PEDIDOS?>src/js/pedidos-catalogo.js?t=<?php echo time(); ?>"></script>
     <script src="<?=PATH_PEDIDOS?>src/js/pedidos-personalizado.js?t=<?php echo time(); ?>"></script>
+    <script src="<?=PATH_PEDIDOS?>src/js/dashboard-pedidos.js?t=<?php echo time(); ?>"></script>
     
 </body>
 </html>

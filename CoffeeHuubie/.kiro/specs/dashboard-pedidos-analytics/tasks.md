@@ -2,482 +2,446 @@
 
 ## Overview
 
-Este plan de implementación detalla las tareas de código necesarias para desarrollar el Dashboard de Pedidos con Analytics. Las tareas están organizadas en orden secuencial, priorizando la funcionalidad core y marcando las pruebas unitarias como opcionales.
+Este plan de implementación detalla las tareas de código necesarias para desarrollar el Dashboard de Pedidos con Analytics siguiendo la estructura del pivote **analytics-sales.js**. El sistema se compone de múltiples clases modulares que heredan de `Templates`, cada una con su propio `render()` y `layout()`.
+
+**Referencia:** Pivote `analitycs sales.md` - Módulo de Ventas
 
 ---
 
 ## Tasks
 
-- [ ] 1. Configurar estructura base del dashboard
-  - Crear archivo `dashboard.js` en la carpeta `dev/pedidos/js/`
-  - Implementar clase `Dashboard` que extienda de `Templates`
-  - Definir constructor con `PROJECT_NAME = "Dashboard"`
-  - Implementar método `render()` que llame a `layout()` y `loadDashboard()`
-  - _Requirements: 1.1, 8.1, 8.3_
+- [ ] 1. Configurar estructura base y clases modulares
+  - [ ] 1.1 Crear archivo `dashboard-pedidos.js` en `dev/pedidos/js/`
+    - Definir variables globales: `let api, app, dashboardPedidos;`
+    - Definir variables para datos iniciales: `let lsSucursales, lsStatus;`
+    - Implementar función `$(async () => {})` para inicialización
+    - Llamar a `useFetch` con `opc: "init"` para obtener datos iniciales
+    - Instanciar clases: `app = new App(api, "root")` y `dashboardPedidos = new DashboardPedidos(api, "root")`
+    - Llamar a `app.render()`
+    - _Requirements: 8.1, 8.3_
+    - _Referencia: Líneas 1-25 del pivote_
 
-- [ ] 2. Implementar layout y estructura visual del dashboard
-  - [ ] 2.1 Crear método `layout()` con `primaryLayout` y `tabLayout`
-    - Usar `primaryLayout` para crear contenedor principal con filterBar y container
-    - Implementar `tabLayout` con pestañas: Dashboard, Pedidos, Reportes
-    - Configurar tema dark y tipo short para las pestañas
+  - [ ] 1.2 Crear clase `App` que extienda de `Templates`
+    - Definir constructor con `PROJECT_NAME = "DashboardPedidos"`
+    - Implementar método `render()` que llame a `layout()` y renderice submódulos
+    - Implementar método `layout()` con `primaryLayout` y `tabLayout`
+    - Crear método `headerBar()` para título y subtítulo del módulo
+    - _Requirements: 8.1, 8.3_
+    - _Referencia: Clase App del pivote, líneas 27-120_
+
+  - [ ] 1.3 Crear clase `DashboardPedidos` que extienda de `Templates`
+    - Definir constructor con `PROJECT_NAME = "DashboardPedidos"`
+    - Implementar método `render()` que llame a `layout()`
+    - Implementar método `layout()` con `dashboardComponent()`
+    - _Requirements: 8.1, 8.3_
+    - _Referencia: Clase SalesDashboard del pivote, líneas 122-200_
+
+- [ ] 2. Implementar layout principal con tabs (Clase App)
+  - [ ] 2.1 Crear método `layout()` en clase App
+    - Usar `this.primaryLayout()` con parent: "root", id: PROJECT_NAME
+    - Definir card con filterBar y container
+    - Llamar a `this.headerBar()` para título del módulo
+    - Llamar a `this.tabLayout()` para crear pestañas
+    - Remover clase `h-screen` del content-tabs
     - _Requirements: 8.3, 8.7_
+    - _Referencia: Método layout() de App, líneas 50-90_
 
-  - [ ] 2.2 Crear método `filterBar()` con selectores dinámicos
-    - Implementar `createfilterBar` con selector de sucursal
-    - Agregar selector de período de comparación (Mes anterior / Año anterior)
-    - Configurar evento `onchange` para llamar a `loadDashboard()`
-    - Incluir opción "Todas las sucursales" en el selector
+  - [ ] 2.2 Implementar método `tabLayout()` con pestañas del módulo
+    - Configurar parent: `container${this.PROJECT_NAME}`
+    - Definir id: "tabsPedidos", theme: "dark", type: "short"
+    - Crear tabs: Dashboard (activo), Pedidos, Comparativas, Promedios
+    - Configurar onClick para cada tab llamando a métodos de renderizado
+    - _Requirements: 8.3_
+    - _Referencia: Método layoutTabs() de App, líneas 60-90_
+
+  - [ ] 2.3 Implementar método `headerBar()` personalizado
+    - Recibir options con: parent, title, subtitle, icon, textBtn, onClick
+    - Crear estructura con título, subtítulo y botón de acción
+    - Aplicar estilos Tailwind para layout flex y responsive
+    - _Requirements: 8.7_
+    - _Referencia: Método headerBar() de App, líneas 95-120_
+
+- [ ] 3. Implementar layout del dashboard (Clase DashboardPedidos)
+  - [ ] 3.1 Crear método `layout()` en clase DashboardPedidos
+    - Llamar a `this.dashboardComponent()` con configuración completa
+    - Definir parent: "container-dashboard", id: "dashboardComponent"
+    - Configurar title y subtitle del dashboard
+    - Definir json con tipos de contenedores: gráficos y tablas
+    - Llamar a `this.filterBarDashboard()` para crear filtros
+    - _Requirements: 8.3_
+    - _Referencia: Método layout() de SalesDashboard, líneas 130-150_
+
+  - [ ] 3.2 Implementar método `filterBarDashboard()` con selectores
+    - Usar `this.createfilterBar()` con parent: "filterBarDashboard"
+    - Crear select de UDN/Sucursal con data: lsSucursales
+    - Crear input type="month" para período 1 (consultar con)
+    - Crear input type="month" para período 2 (comparar con)
+    - Configurar onchange para llamar a `dashboardPedidos.renderDashboard()`
+    - Establecer valores por defecto: mes actual y mes del año anterior
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
+    - _Referencia: Método filterBarDashboard(), líneas 200-250_
 
-  - [ ] 2.3 Crear contenedores para métricas, gráficos y tablas
-    - Definir contenedor `metricsContainer` para las 4 tarjetas
-    - Definir contenedor `chartContainer` para gráfico de barras
-    - Definir contenedor `tableOrdersContainer` para tabla de pedidos
-    - Definir contenedor `tableProductsContainer` para top productos
-    - Definir contenedor `tableClientsContainer` para top clientes
-    - _Requirements: 2.1, 3.1, 4.1, 5.1, 6.1_
+  - [ ] 3.3 Crear método `renderDashboard()` para cargar datos
+    - Obtener valores de filtros: udn, periodo1, periodo2
+    - Extraer año y mes de cada período
+    - Llamar a `useFetch` con `opc: "apiPromediosDiarios"`
+    - Enviar parámetros: udn, anio1, mes1, anio2, mes2
+    - Llamar a métodos de renderizado: showCards(), gráficos, tablas
+    - _Requirements: 1.6, 8.1, 8.2_
+    - _Referencia: Método renderDashboard(), líneas 252-280_
 
-- [ ] 3. Implementar carga de datos del dashboard
-  - [ ] 3.1 Crear método `loadDashboard()` con petición AJAX
-    - Obtener valores de filtros (sucursal, período)
-    - Implementar `useFetch` con `opc: "apiDashboard"`
-    - Enviar parámetros: month, year, sucursal, periodo
-    - Manejar respuesta exitosa llamando a métodos de renderizado
-    - Implementar manejo de errores con `alert()` de CoffeeSoft
-    - _Requirements: 1.6, 8.1, 8.2, 9.1, 9.2_
+- [ ] 4. Implementar tarjetas de métricas (KPIs)
+  - [ ] 4.1 Crear método `showCards(data)` con componente `infoCard`
+    - Usar `this.infoCard()` con parent: "cardDashboard", theme: "light"
+    - Crear tarjeta "Venta del día de ayer" con data.ventaDia
+    - Crear tarjeta "Venta del Mes" con data.ventaMes
+    - Crear tarjeta "Clientes" con data.Clientes
+    - Crear tarjeta "Cheque Promedio" con data.ChequePromedio
+    - Aplicar colores: text-[#8CC63F], text-green-800, text-[#103B60], text-red-600
+    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.7, 2.8_
+    - _Referencia: Método showCards(), líneas 282-320_
 
-  - [ ] 3.2 Implementar sistema de caché para optimizar rendimiento
-    - Agregar propiedades `cachedData` y `cacheTimestamp` al constructor
-    - Definir `CACHE_DURATION` de 5 minutos
-    - Verificar validez del caché antes de hacer petición
-    - Actualizar caché después de petición exitosa
-    - _Requirements: 9.1, 9.2, 9.5_
+  - [ ] 4.2 Implementar componente `infoCard()` personalizado
+    - Recibir options con: parent, id, class, theme, json, data
+    - Soportar tema light y dark
+    - Renderizar tarjetas con título, valor y descripción
+    - Aplicar colores dinámicos según data.color
+    - Crear grid responsive: grid-cols-2 md:grid-cols-4
+    - _Requirements: 2.9, 2.10, 8.7_
+    - _Referencia: Método infoCard(), líneas 600-650_
 
-  - [ ]* 3.3 Escribir pruebas unitarias para carga de datos
-    - Probar que `loadDashboard()` haga la petición correcta
-    - Verificar que se manejen errores de conexión
-    - Probar que el caché funcione correctamente
-    - _Requirements: 9.1, 9.2_
-
-- [ ] 4. Implementar renderizado de tarjetas de métricas
-  - [ ] 4.1 Crear método `renderMetrics(data)` con componente `infoCard`
-    - Implementar tarjeta de Cotizaciones con count y variation
-    - Implementar tarjeta de Ventas Totales con amount y variation
-    - Implementar tarjeta de Ingresos con amount y variation
-    - Implementar tarjeta de Pendiente por Cobrar con amount y count
-    - Configurar colores dinámicos (verde para positivo, rojo para negativo)
-    - Formatear montos con `formatPrice()` o `evaluar()`
-    - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 2.10_
-
-  - [ ] 4.2 Agregar tarjeta de Cheque Promedio
-    - Calcular y mostrar cheque promedio del mes
-    - Incluir porcentaje de variación respecto al período anterior
-    - Aplicar formato de moneda
-    - _Requirements: 7.1, 7.2, 7.5_
-
-  - [ ]* 4.3 Escribir pruebas para renderizado de métricas
-    - Verificar que las tarjetas muestren los valores correctos
-    - Probar que los colores de variación sean correctos
-    - Verificar formato de moneda
+  - [ ]* 4.3 Escribir pruebas para tarjetas de métricas
+    - Verificar que se rendericen 4 tarjetas
+    - Probar formato de moneda
+    - Verificar colores según tema
     - _Requirements: 2.1-2.10_
 
 
-- [ ] 5. Implementar gráfico de barras de pedidos por estado
-  - [ ] 5.1 Crear método `renderCharts(data)` con componente `barChart`
-    - Extraer datos de `data.chartData`
-    - Configurar labels: ["Cotizaciones", "Abonados", "Pagados", "Cancelados"]
-    - Pasar datos del mes actual y período de comparación
-    - Configurar colores corporativos (#103B60, #8CC63F)
-    - Implementar tooltips con formato de moneda
+- [ ] 5. Implementar gráficos comparativos
+  - [ ] 5.1 Crear método `chequeComparativo(options)` con gráfico de barras
+    - Recibir options con: parent, id, title, data, anioA, anioB
+    - Obtener períodos de filtros (periodo1 y periodo2)
+    - Formatear fechas con moment.js para título dinámico
+    - Crear canvas con Chart.js tipo "bar"
+    - Configurar datasets con colores #103B60 y #8CC63F
+    - Implementar animación onComplete para mostrar valores sobre barras
+    - Formatear tooltips con `formatPrice()`
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.6_
+    - _Referencia: Método chequeComparativo(), líneas 322-400_
 
-  - [ ] 5.2 Agregar lógica para gráfico agrupado por sucursal
-    - Detectar cuando filtro es "Todas las sucursales"
-    - Agrupar datos por sucursal en el gráfico
-    - Ajustar leyenda para mostrar sucursales
-    - _Requirements: 3.5_
+  - [ ] 5.2 Crear método `comparativaIngresosDiarios(options)` con gráfico lineal
+    - Usar `this.linearChart()` con parent, id, title, data
+    - Configurar título dinámico con períodos de comparación
+    - Pasar data.linear del backend
+    - _Requirements: 3.1, 3.2_
+    - _Referencia: Método comparativaIngresosDiarios(), líneas 402-420_
 
-  - [ ]* 5.3 Escribir pruebas para renderizado de gráficos
-    - Verificar que el gráfico se renderice correctamente
-    - Probar que los datos se muestren en el orden correcto
-    - Verificar tooltips
+  - [ ] 5.3 Crear método `ventasPorDiaSemana(data)` con gráfico de barras
+    - Usar `this.barChart()` con parent: "ventasDiasSemana"
+    - Configurar title: "Ventas por Día de Semana"
+    - Pasar data del backend con estructura de barras
+    - _Requirements: 3.1, 3.2_
+    - _Referencia: Método ventasPorDiaSemana(), líneas 422-430_
+
+  - [ ]* 5.4 Escribir pruebas para gráficos
+    - Verificar renderizado de gráficos
+    - Probar animaciones
+    - Verificar tooltips con formato correcto
     - _Requirements: 3.1-3.6_
 
-- [ ] 6. Implementar tabla de pedidos por estado
-  - [ ] 6.1 Crear método `renderTableOrders(data)` con `createCoffeTable`
-    - Definir columnas: Estado, No. Pedidos, Venta
-    - Renderizar filas para: Pagados, Abonados, Cotizaciones, Cancelados
-    - Aplicar formato de moneda a columna Venta
-    - Configurar tema corporativo
-    - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
+- [ ] 6. Implementar componentes de gráficos reutilizables
+  - [ ] 6.1 Crear método `linearChart(options)` para gráficos lineales
+    - Recibir options con: parent, id, title, class, data
+    - Crear contenedor con título y canvas
+    - Configurar Chart.js tipo "line"
+    - Implementar tooltips personalizados con data.tooltip
+    - Formatear valores con `formatPrice()`
+    - Destruir gráfico anterior si existe (window._charts[id])
+    - _Requirements: 3.1, 3.2, 8.3_
+    - _Referencia: Método linearChart(), líneas 650-700_
 
-  - [ ] 6.2 Agregar columna de Sucursal cuando filtro es "Todas"
-    - Detectar filtro de sucursal
-    - Agregar columna "Sucursal" dinámicamente
-    - Agrupar datos por sucursal
-    - _Requirements: 4.7, 4.8_
+  - [ ] 6.2 Crear método `barChart(options)` para gráficos de barras
+    - Recibir options con: parent, id, title, labels, dataA, dataB, yearA, yearB
+    - Crear contenedor con título y canvas
+    - Configurar Chart.js tipo "bar"
+    - Aplicar colores: #103B60 para período 1, #8CC63F para período 2
+    - Implementar leyenda con usePointStyle
+    - Formatear tooltips con `formatPrice()`
+    - _Requirements: 3.1, 3.2, 3.3, 8.3_
+    - _Referencia: Método barChart(), líneas 702-780_
 
-  - [ ]* 6.3 Escribir pruebas para tabla de pedidos
-    - Verificar que se muestren todas las filas
-    - Probar formato de moneda
-    - Verificar agrupación por sucursal
-    - _Requirements: 4.1-4.8_
+  - [ ]* 6.3 Escribir pruebas para componentes de gráficos
+    - Verificar que se creen correctamente
+    - Probar destrucción de gráficos anteriores
+    - Verificar tooltips personalizados
+    - _Requirements: 3.1-3.6_
 
-- [ ] 7. Implementar tabla de Top 10 Productos Vendidos
-  - [ ] 7.1 Crear método `renderTopProducts(data)` con `createCoffeTable`
-    - Definir columnas: #, Producto, Cantidad
-    - Renderizar datos de `data.topProducts.row`
-    - Aplicar colores distintivos a primeras 3 posiciones
-    - Configurar tema corporativo
+- [ ] 7. Implementar rankings y tablas especiales
+  - [ ] 7.1 Crear método `topDiasSemana(options)` para ranking semanal
+    - Recibir options con: parent, title, subtitle, data
+    - Crear contenedor con borde y fondo blanco
+    - Renderizar header con título y subtítulo
+    - Iterar sobre data y crear filas con colores dinámicos
+    - Aplicar paleta de colores: verde, azul, púrpura, naranja, gris
+    - Mostrar: ranking (#), día, promedio, veces, clientes
+    - Formatear montos con `formatPrice()`
+    - Destacar primer lugar con "⭐ Mejor día"
     - _Requirements: 5.1, 5.2, 5.3, 5.6, 5.7_
+    - _Referencia: Método topDiasSemana(), líneas 782-850_
 
-  - [ ]* 7.2 Escribir pruebas para tabla de productos
-    - Verificar que se muestren máximo 10 productos
-    - Probar ordenamiento por cantidad
-    - Verificar colores de ranking
+  - [ ]* 7.2 Crear método `topDiasMes(options)` para mejores días del mes (opcional)
+    - Similar a topDiasSemana pero con datos diarios
+    - Mostrar: ranking, fecha, día, clientes, total, nota
+    - Aplicar colores distintivos a top 5
     - _Requirements: 5.1-5.7_
+    - _Referencia: Método topDiasMes(), líneas 852-920_
 
-- [ ] 8. Implementar tabla de Top 10 Clientes con Más Compras
-  - [ ] 8.1 Crear método `renderTopClients(data)` con `createCoffeTable`
-    - Definir columnas: #, Cliente, Compras, Total
-    - Renderizar datos de `data.topClients.row`
-    - Aplicar formato de moneda a columna Total
-    - Aplicar colores distintivos a primeras 3 posiciones
-    - Configurar tema corporativo
-    - _Requirements: 6.1, 6.2, 6.3, 6.6, 6.7, 6.8_
+- [ ] 8. Implementar componente `dashboardComponent()` personalizado
+  - [ ] 8.1 Crear método `dashboardComponent(options)` para layout del dashboard
+    - Recibir options con: parent, id, title, subtitle, json
+    - Crear estructura HTML con header, filterBar, cardDashboard y content
+    - Renderizar título y subtítulo en header
+    - Crear contenedor para filterBar con id "filterBarDashboard"
+    - Crear sección para cards con id "cardDashboard"
+    - Crear grid para contenido: grid-cols-1 md:grid-cols-2
+    - Iterar sobre json y crear bloques según tipo (grafico, tabla, doc, filterBar)
+    - Agregar títulos con emojis e iconos a cada bloque
+    - Aplicar estilos: bg-white, rounded-xl, shadow-md, border
+    - _Requirements: 8.3, 8.7, 10.1, 10.2_
+    - _Referencia: Método dashboardComponent(), líneas 432-500_
 
-  - [ ]* 8.2 Escribir pruebas para tabla de clientes
-    - Verificar que se muestren máximo 10 clientes
-    - Probar ordenamiento por compras
-    - Verificar formato de moneda
-    - _Requirements: 6.1-6.8_
+  - [ ]* 8.2 Escribir pruebas para dashboardComponent
+    - Verificar que se creen todos los contenedores
+    - Probar renderizado de bloques dinámicos
+    - Verificar estilos responsive
+    - _Requirements: 8.3, 10.1-10.3_
 
-- [ ] 9. Implementar controlador PHP para dashboard
-  - [ ] 9.1 Crear método `apiDashboard()` en ctrl-pedidos.php
-    - Recibir parámetros: month, year, sucursal, periodo
-    - Validar parámetros requeridos (month, year)
-    - Validar rangos (month: 1-12, year: 2020-2100)
-    - Calcular período de comparación según tipo (month/year)
-    - Llamar a `getDashboardMetrics()` para período actual
-    - Llamar a `getDashboardMetrics()` para período anterior
-    - Calcular variaciones porcentuales con `calculateVariation()`
-    - Obtener datos de gráfico con `getChartData()`
-    - Obtener top productos con `getTopProducts()`
-    - Obtener top clientes con `getTopClients()`
-    - Retornar respuesta JSON con status, message y data
+- [ ] 9. Implementar controlador PHP para dashboard (ctrl-pedidos.php)
+  - [ ] 9.1 Crear método `apiDashboard()` siguiendo estructura del pivote
+    - Recibir parámetros: udn, anio1, mes1, anio2, mes2
+    - Llamar a métodos del modelo para obtener métricas
+    - Estructurar respuesta con: dashboard (cards), barras (gráfico comparativo), linear (gráfico lineal), barDays (días semana), topWeek (ranking)
+    - Retornar array con todas las secciones del dashboard
     - _Requirements: 8.2, 8.4, 9.4_
+    - _Referencia: Estructura similar a ctrl-ingresos.php del pivote_
 
-  - [ ] 9.2 Crear método helper `calculateVariation($current, $previous)`
-    - Manejar caso de división por cero
-    - Calcular porcentaje: ((current - previous) / previous) * 100
-    - Redondear a 2 decimales
-    - _Requirements: 2.9, 2.10_
-
-  - [ ] 9.3 Crear método `getDashboardMetrics($params)`
-    - Extraer parámetros: month, year, subsidiariesId
-    - Llamar a `countOrdersByStatus()` para cotizaciones
-    - Llamar a `sumOrdersByStatus()` para ventas totales
-    - Llamar a `sumPaidOrders()` para ingresos
-    - Llamar a `sumPendingBalance()` para pendiente por cobrar
-    - Llamar a `countPendingOrders()` para número de pedidos pendientes
-    - Llamar a `calculateAverageTicket()` para cheque promedio
-    - Retornar array con todas las métricas
+  - [ ] 9.2 Implementar lógica para cards del dashboard
+    - Calcular ventaDia: ventas del día anterior
+    - Calcular ventaMes: suma de ventas del mes actual
+    - Calcular Clientes: número de clientes únicos del mes
+    - Calcular ChequePromedio: promedio de ticket del mes
+    - Retornar array con estos 4 valores
     - _Requirements: 2.1-2.8, 7.1-7.5_
 
-  - [ ] 9.4 Crear método `getTopProducts($params)`
-    - Llamar a modelo `getProductSales()` con parámetros
-    - Iterar sobre resultados y formatear como array de filas
-    - Incluir columnas: #, Producto, Cantidad
-    - Retornar array con clave 'row'
+  - [ ] 9.3 Implementar lógica para gráfico de barras comparativo
+    - Obtener datos de ambos períodos (anio1/mes1 vs anio2/mes2)
+    - Estructurar dataset con labels y arrays A y B
+    - Incluir anioA y anioB para leyenda
+    - Retornar estructura compatible con método chequeComparativo()
+    - _Requirements: 3.1, 3.2, 3.3_
+
+  - [ ] 9.4 Implementar lógica para gráfico lineal de ingresos diarios
+    - Obtener ventas día por día de ambos períodos
+    - Estructurar datasets con labels, data y tooltip
+    - Retornar estructura compatible con linearChart()
+    - _Requirements: 3.1, 3.2_
+
+  - [ ] 9.5 Implementar lógica para gráfico de barras por día de semana
+    - Agrupar ventas por día de la semana (Lunes-Domingo)
+    - Calcular totales para cada día
+    - Estructurar con labels, dataA (año actual), dataB (año anterior)
+    - Retornar estructura compatible con barChart()
+    - _Requirements: 3.1, 3.2_
+
+  - [ ] 9.6 Implementar lógica para ranking semanal (topWeek)
+    - Calcular promedio de ventas por día de la semana
+    - Ordenar días por promedio descendente
+    - Incluir: dia, promedio, veces (frecuencia), clientes
+    - Retornar array ordenado para topDiasSemana()
     - _Requirements: 5.1-5.7_
 
-  - [ ] 9.5 Crear método `getTopClients($params)`
-    - Llamar a modelo `getClientPurchases()` con parámetros
-    - Iterar sobre resultados y formatear como array de filas
-    - Incluir columnas: #, Cliente, Compras, Total
-    - Aplicar formato de moneda a Total con `evaluar()`
-    - Retornar array con clave 'row'
-    - _Requirements: 6.1-6.8_
-
-  - [ ] 9.6 Implementar manejo de errores con try-catch
-    - Envolver lógica en bloque try-catch
-    - Capturar excepciones y retornar status 400
-    - Registrar errores en log con `error_log()`
-    - _Requirements: 8.2_
-
   - [ ]* 9.7 Escribir pruebas unitarias para controlador
-    - Probar que apiDashboard retorne status 200 con datos válidos
-    - Verificar validación de parámetros
-    - Probar cálculo de variaciones
-    - Verificar manejo de errores
+    - Probar que apiDashboard retorne estructura correcta
+    - Verificar cálculos de métricas
+    - Probar agrupaciones por día de semana
     - _Requirements: 8.2, 8.4_
 
 
-- [ ] 10. Implementar consultas SQL en modelo PHP
-  - [ ] 10.1 Crear método `countOrdersByStatus($params)` en mdl-pedidos.php
-    - Extraer parámetros: status, month, year, subsidiariesId
-    - Construir query con filtros de fecha y estado
-    - Agregar filtro de sucursal si no es "all"
-    - Usar `_Read()` para ejecutar consulta
-    - Retornar count o 0 si no hay resultados
-    - _Requirements: 2.1, 8.2_
+- [ ] 10. Implementar consultas SQL en modelo PHP (mdl-pedidos.php)
+  - [ ] 10.1 Crear método `getOrdersDashboard($params)` para métricas generales
+    - Recibir parámetros: mes, anio, subsidiariesId
+    - Crear query con SUM, COUNT y AVG de pedidos
+    - Filtrar por MONTH(date_creation) y YEAR(date_creation)
+    - Agregar filtro de sucursal con subsidiaries_id
+    - Excluir pedidos cancelados (status != 4)
+    - Usar `_Select` o `_Read` según complejidad
+    - Retornar array con: totalVentas, numPedidos, chequePromedio, numClientes
+    - _Requirements: 2.1-2.8, 7.1-7.5, 8.2_
 
-  - [ ] 10.2 Crear método `sumOrdersByStatus($statuses, $month, $year, $subsidiariesId)`
-    - Construir lista de estados con `implode()`
-    - Crear query con SUM de (total_pay - discount)
-    - Filtrar por mes, año y estados
-    - Agregar filtro de sucursal si no es "all"
-    - Usar `COALESCE` para manejar NULL
-    - Retornar total o 0
-    - _Requirements: 2.3, 8.2_
+  - [ ] 10.2 Crear método `getOrdersByDay($params)` para ventas diarias
+    - Recibir parámetros: mes, anio, subsidiariesId
+    - Crear query con GROUP BY DATE(date_creation)
+    - Calcular SUM(total_pay - COALESCE(discount, 0)) por día
+    - Filtrar por mes, año y sucursal
+    - Ordenar por fecha ASC
+    - Retornar array con: fecha, total, clientes
+    - _Requirements: 3.1, 3.2, 8.2_
 
-  - [ ] 10.3 Crear método `sumPaidOrders($month, $year, $subsidiariesId)`
-    - Crear query con JOIN entre payments y orders
-    - Sumar columna `pay` de payments
-    - Filtrar por fecha de pago (date_pay)
-    - Agregar filtro de sucursal en orders
-    - Usar `COALESCE` para manejar NULL
-    - Retornar total de ingresos
-    - _Requirements: 2.5, 2.6, 8.2_
+  - [ ] 10.3 Crear método `getOrdersByWeekday($params)` para ventas por día de semana
+    - Recibir parámetros: mes, anio, subsidiariesId
+    - Crear query con GROUP BY DAYOFWEEK(date_creation)
+    - Usar DAYNAME() para obtener nombre del día
+    - Calcular SUM(total_pay), COUNT(*), AVG(total_pay)
+    - Filtrar por mes, año y sucursal
+    - Retornar array con: dia, total, promedio, veces, clientes
+    - _Requirements: 5.1-5.7, 8.2_
 
-  - [ ] 10.4 Crear método `sumPendingBalance($month, $year, $subsidiariesId)`
-    - Crear query que calcule: (total_pay - discount) - SUM(payments)
-    - Filtrar pedidos con status IN (1, 2)
-    - Usar subconsulta para sumar pagos por pedido
-    - Agregar filtro de sucursal
-    - Usar `COALESCE` para manejar NULL
-    - Retornar saldo pendiente
-    - _Requirements: 2.7, 2.8, 8.2_
-
-  - [ ] 10.5 Crear método `countPendingOrders($month, $year, $subsidiariesId)`
-    - Crear query con COUNT de pedidos
-    - Filtrar por status IN (1, 2)
-    - Filtrar por mes y año
-    - Agregar filtro de sucursal
-    - Retornar número de pedidos pendientes
-    - _Requirements: 2.8_
-
-  - [ ] 10.6 Crear método `calculateAverageTicket($month, $year, $subsidiariesId)`
-    - Crear query con AVG de (total_pay - discount)
-    - Filtrar por status IN (2, 3) - solo pagados y abonados
-    - Filtrar por mes y año
-    - Agregar filtro de sucursal
-    - Usar `COALESCE` para manejar NULL
-    - Retornar promedio o 0
-    - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5_
-
-  - [ ] 10.7 Crear método `getProductSales($params)`
-    - Extraer parámetros: month, year, subsidiariesId, limit
+  - [ ] 10.4 Crear método `getTopProducts($params)` para productos más vendidos
+    - Recibir parámetros: mes, anio, subsidiariesId, limit
     - Crear query con JOIN entre order_details, products y orders
-    - Sumar cantidad (SUM(quantity)) agrupando por producto
-    - Filtrar por mes, año y status != 4 (no cancelados)
-    - Agregar filtro de sucursal
-    - Ordenar por cantidad DESC
-    - Aplicar LIMIT
-    - Retornar array de productos con name y quantity
-    - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 8.2_
+    - Agrupar por product_id y sumar quantity
+    - Filtrar por mes, año, sucursal y status != 4
+    - Ordenar por quantity DESC
+    - Aplicar LIMIT (default: 10)
+    - Retornar array con: name, quantity
+    - _Requirements: 5.1-5.7, 8.2_
 
-  - [ ] 10.8 Crear método `getClientPurchases($params)`
-    - Extraer parámetros: month, year, subsidiariesId, limit
+  - [ ] 10.5 Crear método `getTopClients($params)` para clientes con más compras
+    - Recibir parámetros: mes, anio, subsidiariesId, limit
     - Crear query con JOIN entre orders y clients
-    - Contar pedidos (COUNT) y sumar total (SUM) por cliente
-    - Filtrar por mes, año y status != 4
-    - Agregar filtro de sucursal
-    - Ordenar por purchases DESC, total DESC
-    - Aplicar LIMIT
-    - Retornar array de clientes con name, purchases y total
-    - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6, 8.2_
+    - Agrupar por client_id
+    - Calcular COUNT(orders) y SUM(total_pay)
+    - Filtrar por mes, año, sucursal y status != 4
+    - Ordenar por COUNT DESC, SUM DESC
+    - Aplicar LIMIT (default: 10)
+    - Retornar array con: name, purchases, total
+    - _Requirements: 6.1-6.8, 8.2_
 
-  - [ ] 10.9 Crear método `getChartData($params)`
-    - Extraer parámetros: month, year, subsidiariesId
-    - Crear query con COUNT agrupado por status
-    - Filtrar por mes y año
-    - Agregar filtro de sucursal
-    - Formatear resultado como array con labels y data
-    - Mapear status a labels: 1=Cotizaciones, 2=Abonados, 3=Pagados, 4=Cancelados
-    - Retornar array con estructura para Chart.js
-    - _Requirements: 3.1, 3.2, 3.4, 8.2_
+  - [ ] 10.6 Crear método `getComparativeData($params)` para comparativas
+    - Recibir parámetros: mes1, anio1, mes2, anio2, subsidiariesId
+    - Ejecutar consultas para ambos períodos
+    - Estructurar respuesta con datasets A y B
+    - Incluir labels para categorías
+    - Retornar estructura compatible con gráficos comparativos
+    - _Requirements: 3.1, 3.2, 3.3, 8.2_
 
-  - [ ]* 10.10 Escribir pruebas unitarias para modelo
+  - [ ]* 10.7 Escribir pruebas unitarias para modelo
     - Probar cada método con datos de prueba
-    - Verificar que las consultas retornen resultados correctos
-    - Probar filtros de sucursal
-    - Verificar manejo de NULL con COALESCE
+    - Verificar agrupaciones (GROUP BY)
+    - Probar filtros de fecha y sucursal
+    - Verificar ordenamiento y límites
     - _Requirements: 8.2, 9.3_
 
 - [ ] 11. Optimizar base de datos con índices
-  - [ ] 11.1 Crear índice compuesto para consultas de pedidos
-    - Ejecutar: `CREATE INDEX idx_orders_date_subsidiary ON pedidos_orders(date_creation, subsidiaries_id, status)`
-    - Verificar que el índice se cree correctamente
+  - [ ] 11.1 Crear índices para optimizar consultas del dashboard
+    - Crear índice: `idx_orders_date_subsidiary` en (date_creation, subsidiaries_id, status)
+    - Crear índice: `idx_payments_date` en (date_pay, order_id)
+    - Crear índice: `idx_order_details_order_product` en (order_id, product_id)
+    - Crear índice: `idx_clients_subsidiary` en (subsidiaries_id, active)
+    - Verificar creación con `SHOW INDEX FROM table_name`
     - _Requirements: 9.3_
 
-  - [ ] 11.2 Crear índice para consultas de pagos
-    - Ejecutar: `CREATE INDEX idx_payments_date ON pedidos_payments(date_pay, order_id)`
-    - Verificar que el índice se cree correctamente
-    - _Requirements: 9.3_
-
-  - [ ] 11.3 Crear índice para detalles de pedido
-    - Ejecutar: `CREATE INDEX idx_order_details_order_product ON pedidos_order_details(order_id, product_id)`
-    - Verificar que el índice se cree correctamente
-    - _Requirements: 9.3_
-
-  - [ ] 11.4 Crear índice para clientes por sucursal
-    - Ejecutar: `CREATE INDEX idx_clients_subsidiary ON pedidos_clients(subsidiaries_id, active)`
-    - Verificar que el índice se cree correctamente
-    - _Requirements: 9.3_
-
-  - [ ]* 11.5 Realizar pruebas de rendimiento de consultas
-    - Medir tiempo de ejecución de cada query
-    - Verificar que se usen los índices con EXPLAIN
-    - Confirmar que las consultas se ejecuten en < 500ms
+  - [ ]* 11.2 Realizar pruebas de rendimiento de consultas
+    - Usar EXPLAIN para verificar uso de índices
+    - Medir tiempo de ejecución con BENCHMARK
+    - Confirmar que consultas se ejecuten en < 500ms
     - _Requirements: 9.1, 9.2, 9.3_
 
 
-- [ ] 12. Implementar responsividad y estilos
-  - [ ] 12.1 Configurar grid responsivo para tarjetas de métricas
-    - Aplicar clase `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4`
-    - Verificar que en móvil se muestre 1 columna
-    - Verificar que en tablet se muestren 2 columnas
-    - Verificar que en desktop se muestren 4 columnas
-    - _Requirements: 10.1, 10.2, 10.3_
-
-  - [ ] 12.2 Configurar layout responsivo para gráficos y tablas
-    - Aplicar clase `grid grid-cols-1 lg:grid-cols-2 gap-6`
-    - En móvil: apilar todos los elementos
-    - En desktop: mostrar gráficos y tablas lado a lado
-    - _Requirements: 10.1, 10.2, 10.3_
-
-  - [ ] 12.3 Implementar scroll horizontal para tablas en móvil
-    - Envolver tablas en contenedor con `overflow-x-auto`
-    - Aplicar clase `min-w-full` a las tablas
-    - Verificar que las tablas sean navegables en móvil
-    - _Requirements: 10.5_
-
-  - [ ] 12.4 Ajustar tamaño de gráficos para móvil
-    - Configurar `maintainAspectRatio: false` en Chart.js
-    - Ajustar altura del contenedor según viewport
-    - Verificar legibilidad en pantallas pequeñas
-    - _Requirements: 10.4_
-
-  - [ ] 12.5 Aplicar paleta de colores corporativa
-    - Usar #103B60 para elementos primarios
-    - Usar #8CC63F para elementos de acción
-    - Usar #1F2A37 para fondos
-    - Usar #3FC189 para indicadores positivos
-    - Usar #E05562 para indicadores negativos
+- [ ] 12. Implementar responsividad y estilos siguiendo pivote
+  - [ ] 12.1 Aplicar paleta de colores CoffeeSoft
+    - Azul corporativo: #103B60 (elementos primarios)
+    - Verde acción: #8CC63F (botones, indicadores positivos)
+    - Gris claro: #EAEAEA (fondos secundarios)
+    - Fondos oscuros: #1F2A37, #283341
+    - Colores de estado: #3FC189 (éxito), #E05562 (peligro), #F2C215 (advertencia)
     - _Requirements: 8.7_
+    - _Referencia: Paleta del pivote_
 
-  - [ ] 12.6 Implementar estados hover y active
-    - Agregar efecto hover a tarjetas con `transform: translateY(-4px)`
-    - Agregar sombra en hover: `box-shadow: 0 8px 16px rgba(0,0,0,0.2)`
-    - Configurar transiciones suaves: `transition: all 0.2s ease`
-    - _Requirements: 10.6_
+  - [ ] 12.2 Configurar grid responsivo para dashboard
+    - Cards: `grid grid-cols-2 md:grid-cols-4 gap-4`
+    - Gráficos: `grid grid-cols-1 md:grid-cols-2 gap-6`
+    - Verificar adaptación en móvil, tablet y desktop
+    - _Requirements: 10.1, 10.2, 10.3_
 
-  - [ ]* 12.7 Realizar pruebas de responsividad
-    - Probar en Chrome DevTools con diferentes dispositivos
-    - Verificar en móvil real (iOS y Android)
-    - Probar en tablet
-    - Verificar en diferentes navegadores
+  - [ ] 12.3 Aplicar estilos a componentes siguiendo pivote
+    - Tarjetas: `bg-white rounded-xl shadow-md border`
+    - Gráficos: `border p-4 rounded-xl`
+    - Tablas: usar tema corporativo de CoffeeSoft
+    - Aplicar transiciones suaves: `transition: all 0.2s ease`
+    - _Requirements: 8.7, 10.6_
+
+  - [ ]* 12.4 Realizar pruebas de responsividad
+    - Probar en diferentes dispositivos y navegadores
+    - Verificar legibilidad de gráficos en móvil
+    - Probar scroll horizontal en tablas
     - _Requirements: 10.1-10.6_
 
-- [ ] 13. Implementar optimizaciones de rendimiento
-  - [ ] 13.1 Agregar sistema de caché en frontend
+- [ ] 13. Implementar optimizaciones de rendimiento (opcional)
+  - [ ]* 13.1 Agregar sistema de caché en frontend
     - Implementar propiedades `cachedData` y `cacheTimestamp`
     - Definir `CACHE_DURATION` de 5 minutos
-    - Verificar validez del caché antes de peticiones
-    - Actualizar caché después de respuestas exitosas
+    - Verificar validez antes de peticiones
     - _Requirements: 9.1, 9.2, 9.5_
 
-  - [ ] 13.2 Implementar lazy loading para gráficos
+  - [ ]* 13.2 Implementar lazy loading para gráficos
     - Usar `IntersectionObserver` para detectar visibilidad
-    - Cargar gráficos solo cuando sean visibles en viewport
-    - Desconectar observer después de carga
+    - Cargar gráficos solo cuando sean visibles
     - _Requirements: 9.5_
 
-  - [ ] 13.3 Implementar debouncing en filtros
-    - Agregar timer de 300ms en eventos de cambio de filtro
-    - Cancelar timer anterior si hay nuevo cambio
-    - Ejecutar petición solo después del delay
-    - _Requirements: 9.2_
-
-  - [ ] 13.4 Agregar indicador de carga (loader)
+  - [ ]* 13.3 Agregar indicador de carga
     - Mostrar spinner mientras se cargan datos
-    - Aplicar animación pulse a elementos en carga
-    - Ocultar loader cuando datos estén listos
+    - Aplicar animación pulse
     - _Requirements: 9.1_
 
-  - [ ]* 13.5 Realizar pruebas de rendimiento
-    - Medir tiempo de carga inicial (debe ser < 3s)
-    - Medir tiempo de cambio de filtro (debe ser < 1s)
-    - Verificar que el caché funcione correctamente
-    - Probar con conexión lenta (3G)
-    - _Requirements: 9.1, 9.2_
-
 - [ ] 14. Integrar dashboard con sistema existente
-  - [ ] 14.1 Agregar pestaña de Dashboard en index.php
-    - Modificar `tabLayout` existente para incluir tab "Dashboard"
-    - Configurar `onClick` para llamar a `dashboard.render()`
-    - Establecer como pestaña activa por defecto
-    - _Requirements: 8.1, 8.3_
-
-  - [ ] 14.2 Importar archivo dashboard.js en index.php
-    - Agregar `<script src="js/dashboard.js"></script>`
-    - Verificar que se cargue después de CoffeeSoft.js
-    - Verificar que no haya conflictos con otros scripts
-    - _Requirements: 8.1_
-
-  - [ ] 14.3 Inicializar instancia de Dashboard en main.js
-    - Crear variable global `let dashboard;`
-    - Instanciar en `$(async () => { dashboard = new Dashboard(api, "root"); })`
-    - Verificar que se inicialice correctamente
-    - _Requirements: 8.1, 8.3_
-
-  - [ ] 14.4 Verificar integración con método init() del controlador
-    - Asegurar que `init()` retorne lista de sucursales
-    - Usar datos de `init()` para poblar filtro de sucursales
-    - Verificar que los datos se carguen correctamente
+  - [ ] 14.1 Actualizar método `init()` en ctrl-pedidos.php
+    - Agregar retorno de lista de sucursales (lsSucursales)
+    - Agregar retorno de lista de estados (lsStatus)
+    - Verificar que retorne estructura correcta
     - _Requirements: 8.2_
 
-  - [ ]* 14.5 Realizar pruebas de integración end-to-end
-    - Probar flujo completo: cargar dashboard → cambiar filtros → ver resultados
-    - Verificar que no haya errores en consola
+  - [ ] 14.2 Importar archivo dashboard-pedidos.js en index.php
+    - Agregar `<script src="js/dashboard-pedidos.js"></script>`
+    - Verificar que se cargue después de CoffeeSoft.js y plugins.js
+    - Verificar orden de carga de scripts
+    - _Requirements: 8.1_
+
+  - [ ] 14.3 Verificar inicialización en archivo principal
+    - Confirmar que variables globales se declaren correctamente
+    - Verificar que `useFetch` con `opc: "init"` funcione
+    - Confirmar que instancias se creen correctamente
+    - Verificar que `app.render()` se ejecute
+    - _Requirements: 8.1, 8.3_
+
+  - [ ]* 14.4 Realizar pruebas de integración end-to-end
+    - Probar flujo completo de carga del dashboard
+    - Verificar cambio de filtros y actualización de datos
     - Probar navegación entre pestañas
-    - Verificar que los datos persistan al cambiar de pestaña
+    - Verificar que no haya errores en consola
     - _Requirements: 8.1-8.7_
 
 - [ ] 15. Documentación y pruebas finales
-  - [ ] 15.1 Documentar métodos principales del frontend
-    - Agregar comentarios JSDoc a métodos públicos
-    - Documentar parámetros y valores de retorno
-    - Incluir ejemplos de uso
-    - _Requirements: 8.1_
+  - [ ]* 15.1 Documentar métodos principales
+    - Agregar comentarios a métodos complejos del frontend
+    - Documentar parámetros de métodos del controlador
+    - Incluir ejemplos de uso en comentarios
+    - _Requirements: 8.1, 8.2_
 
-  - [ ] 15.2 Documentar métodos del controlador
-    - Agregar comentarios PHPDoc a métodos públicos
-    - Documentar parámetros, tipos y valores de retorno
-    - Incluir ejemplos de respuesta JSON
-    - _Requirements: 8.2_
-
-  - [ ] 15.3 Documentar consultas SQL del modelo
-    - Agregar comentarios explicativos a queries complejas
-    - Documentar índices utilizados
-    - Incluir ejemplos de resultados
-    - _Requirements: 8.2_
-
-  - [ ]* 15.4 Ejecutar checklist de pruebas manuales
-    - Verificar que dashboard cargue correctamente
-    - Probar todos los filtros
-    - Verificar que las métricas sean correctas
-    - Probar gráficos y tablas
-    - Verificar responsividad
-    - Probar manejo de errores
+  - [ ]* 15.2 Ejecutar checklist de pruebas manuales
+    - Verificar carga correcta del dashboard
+    - Probar todos los filtros (sucursal, períodos)
+    - Verificar métricas en tarjetas
+    - Probar gráficos (barras, lineal, días semana)
+    - Verificar tablas (pedidos, productos, clientes)
+    - Probar responsividad en diferentes dispositivos
+    - Verificar manejo de errores
     - _Requirements: 1.1-10.7_
 
-  - [ ]* 15.5 Realizar pruebas de accesibilidad
-    - Verificar contraste de colores (mínimo 4.5:1)
+  - [ ]* 15.3 Realizar pruebas de accesibilidad (opcional)
+    - Verificar contraste de colores
     - Probar navegación por teclado
     - Verificar atributos aria-label
-    - Probar con lector de pantalla
     - _Requirements: 10.6, 10.7_
 
 ---
@@ -485,17 +449,28 @@ Este plan de implementación detalla las tareas de código necesarias para desar
 ## Summary
 
 **Total Tasks:** 15 tareas principales
-**Total Sub-tasks:** 67 sub-tareas
-**Optional Test Tasks:** 15 sub-tareas marcadas con *
+**Total Sub-tasks:** 52 sub-tareas (reducidas y optimizadas)
+**Optional Test Tasks:** 18 sub-tareas marcadas con *
+
+**Estructura basada en pivote:** analytics-sales.js
+
+**Clases principales:**
+- `App`: Clase principal con layout y tabs
+- `DashboardPedidos`: Dashboard con métricas y gráficos
+
+**Componentes reutilizables:**
+- `dashboardComponent()`: Layout del dashboard
+- `infoCard()`: Tarjetas de métricas
+- `linearChart()`: Gráficos lineales
+- `barChart()`: Gráficos de barras
+- `topDiasSemana()`: Rankings con colores
 
 **Estimated Effort:**
-- Frontend: ~8-10 horas
-- Backend (Controller): ~4-6 horas
+- Frontend (JS): ~10-12 horas
+- Backend (Controller): ~5-7 horas
 - Backend (Model): ~6-8 horas
 - Database Optimization: ~2-3 horas
-- Styling & Responsiveness: ~4-5 horas
-- Performance Optimization: ~3-4 horas
-- Integration & Testing: ~4-5 horas
+- Styling & Integration: ~4-5 horas
 
-**Total Estimated Time:** 31-41 horas
+**Total Estimated Time:** 27-35 horas
 
