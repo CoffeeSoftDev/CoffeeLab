@@ -943,6 +943,99 @@ class MPedidos extends CRUD {
         return $this->_Read($query, $data);
     }
 
+    function getOrdersByDateRange($params) {
+        $sucursal = $params['sucursal'];
+        $fechaInicio = $params['fechaInicio'];
+        $fechaFin = $params['fechaFin'];
+
+        $whereClause = "DATE(o.date_creation) BETWEEN ? AND ?";
+        $data = [$fechaInicio, $fechaFin];
+
+        if ($sucursal !== 'all') {
+            $whereClause .= " AND o.subsidiaries_id = ?";
+            $data[] = $sucursal;
+        }
+
+        $query = "
+            SELECT 
+                o.id,
+                o.id as folio,
+                o.date_creation,
+                o.total_pay,
+                o.discount,
+                o.status,
+                c.name as client_name
+            FROM {$this->bd}order o
+            INNER JOIN {$this->bd}order_clients c ON o.client_id = c.id
+            WHERE $whereClause
+            ORDER BY o.date_creation DESC
+        ";
+
+        return $this->_Read($query, $data);
+    }
+
+    function getProductSalesByDateRange($params) {
+        $sucursal = $params['sucursal'];
+        $fechaInicio = $params['fechaInicio'];
+        $fechaFin = $params['fechaFin'];
+        $limit = $params['limit'] ?? 100;
+
+        $whereClause = "DATE(o.date_creation) BETWEEN ? AND ? AND o.status != 4";
+        $data = [$fechaInicio, $fechaFin];
+
+        if ($sucursal !== 'all') {
+            $whereClause .= " AND o.subsidiaries_id = ?";
+            $data[] = $sucursal;
+        }
+
+        $query = "
+            SELECT 
+                p.name,
+                SUM(od.quantity) as quantity,
+                SUM(od.quantity * od.price) as total
+            FROM {$this->bd}order_details od
+            INNER JOIN {$this->bd}order_products p ON od.product_id = p.id
+            INNER JOIN {$this->bd}order o ON od.order_id = o.id
+            WHERE $whereClause
+            GROUP BY p.id, p.name
+            ORDER BY quantity DESC
+            LIMIT $limit
+        ";
+
+        return $this->_Read($query, $data);
+    }
+
+    function getClientPurchasesByDateRange($params) {
+        $sucursal = $params['sucursal'];
+        $fechaInicio = $params['fechaInicio'];
+        $fechaFin = $params['fechaFin'];
+        $limit = $params['limit'] ?? 100;
+
+        $whereClause = "DATE(o.date_creation) BETWEEN ? AND ? AND o.status != 4";
+        $data = [$fechaInicio, $fechaFin];
+
+        if ($sucursal !== 'all') {
+            $whereClause .= " AND o.subsidiaries_id = ?";
+            $data[] = $sucursal;
+        }
+
+        $query = "
+            SELECT 
+                c.name,
+                c.phone,
+                COUNT(o.id) as purchases,
+                COALESCE(SUM(o.total_pay - COALESCE(o.discount, 0)), 0) as total
+            FROM {$this->bd}order o
+            INNER JOIN {$this->bd}order_clients c ON o.client_id = c.id
+            WHERE $whereClause
+            GROUP BY c.id, c.name, c.phone
+            ORDER BY purchases DESC, total DESC
+            LIMIT $limit
+        ";
+
+        return $this->_Read($query, $data);
+    }
+
     function getOrdersByStatus($params) {
         $mes = $params['mes'];
         $anio = $params['anio'];
