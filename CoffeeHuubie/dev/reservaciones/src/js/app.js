@@ -89,8 +89,7 @@ class App extends Templates {
                     id: "btnCalendario",
                     text: "Calendario",
                     onClick: () => {
-                        this.ls();
-                        // window.location.href = '/dev/calendario/'
+                        window.location.href = '../calendario/index.php'
                     },
                 },
             ],

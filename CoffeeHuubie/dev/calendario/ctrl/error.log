@@ -1,0 +1,378 @@
+[ 2025-10-15 17:19:14 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT 
+                order.id,
+                order.folio_id AS folio,
+                order_clients.name AS cliente,
+                order_clients.phone AS telefono,
+                order.date_birthday,
+                order.date_order,
+                order.time_order,
+                order.status,
+                order.location,
+                order.total_pay AS total,
+                order.subsidiaries_id
+             FROM fayxzvov_coffee.order   LEFT JOIN fayxzvov_coffee.order_clients ON order.client_id = order_clients.id WHERE order.date_order BETWEEN ? AND ? 
+                        AND (? IS NULL OR order.subsidiaries_id = ?)  ORDER BY order.date_order, order.time_order ASC 
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'order.folio_id' in 'field list'
+
+
+[ 2025-10-15 17:19:08 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT 
+                order.id,
+                order.folio_id AS folio,
+                order_clients.name AS cliente,
+                order_clients.phone AS telefono,
+                order.date_birthday,
+                order.date_order,
+                order.time_order,
+                order.status,
+                order.location,
+                order.total_pay AS total,
+                order.subsidiaries_id
+             FROM fayxzvov_coffee.order   LEFT JOIN fayxzvov_coffee.order_clients ON order.client_id = order_clients.id WHERE order.date_order BETWEEN ? AND ? 
+                        AND (? IS NULL OR order.subsidiaries_id = ?)  ORDER BY order.date_order, order.time_order ASC 
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'order.folio_id' in 'field list'
+
+
+[ 2025-10-15 17:16:43 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT 
+                order.id,
+                order.folio_id AS folio,
+                order_clients.name AS cliente,
+                order_clients.phone AS telefono,
+                order.date_birthday AS date_order,
+                order.time_order,
+                order.status,
+                order.location,
+                order.total_pay AS total,
+                order.subsidiaries_id
+             FROM fayxzvov_coffee.order   LEFT JOIN fayxzvov_coffee.order_clients ON order.client_id = order_clients.id WHERE order.date_birthday BETWEEN ? AND ? 
+                        AND (? IS NULL OR order.subsidiaries_id = ?)  ORDER BY order.date_birthday, order.time_order ASC 
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'order.folio_id' in 'field list'
+
+
+[ 2025-10-15 17:16:32 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT 
+                order.id,
+                order.folio_id AS folio,
+                order_clients.name AS cliente,
+                order_clients.phone AS telefono,
+                order.date_birthday AS date_order,
+                order.time_order,
+                order.status,
+                order.location,
+                order.total_pay AS total,
+                order.subsidiaries_id
+             FROM fayxzvov_coffee.order   LEFT JOIN fayxzvov_coffee.order_clients ON order.client_id = order_clients.id WHERE order.date_birthday BETWEEN ? AND ? 
+                        AND (? IS NULL OR order.subsidiaries_id = ?)  ORDER BY order.date_birthday, order.time_order ASC 
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'order.folio_id' in 'field list'
+
+
+[ 2025-10-15 17:15:44 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT 
+                order.id,
+                order.folio_id AS folio,
+                order_clients.name AS cliente,
+                order_clients.phone AS telefono,
+                order.date_birthday AS date_order,
+                order.time_order,
+                order.status,
+                order.location,
+                order.total_pay AS total,
+                order.subsidiaries_id
+             FROM fayxzvov_coffee.order   LEFT JOIN fayxzvov_coffee.order_clients ON order.client_id = order_clients.id WHERE order.date_birthday BETWEEN ? AND ? 
+                        AND (? IS NULL OR order.subsidiaries_id = ?)  ORDER BY order.date_birthday, order.time_order ASC 
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'order.folio_id' in 'field list'
+
+
+[ 2025-10-15 17:15:33 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT 
+                order.id,
+                order.folio_id AS folio,
+                order_clients.name AS cliente,
+                order_clients.phone AS telefono,
+                order.date_birthday AS date_order,
+                order.time_order,
+                order.status,
+                order.location,
+                order.total_pay AS total,
+                order.subsidiaries_id
+             FROM fayxzvov_coffee.order   LEFT JOIN fayxzvov_coffee.order_clients ON order.client_id = order_clients.id WHERE order.date_birthday BETWEEN ? AND ? 
+                        AND (? IS NULL OR order.subsidiaries_id = ?)  ORDER BY order.date_birthday, order.time_order ASC 
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'order.folio_id' in 'field list'
+
+
+[ 2025-10-15 17:06:59 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT 
+                pedidos_orders.id,
+                pedidos_orders.folio,
+                pedidos_orders.name AS cliente,
+                pedidos_orders.phone AS telefono,
+                pedidos_orders.date_order,
+                pedidos_orders.time_order,
+                pedidos_orders.status,
+                pedidos_status.valor AS estado_nombre,
+                pedidos_orders.total_pay AS total,
+                pedidos_orders.subsidiaries_id
+             FROM fayxzvov_coffee.pedidos_orders   LEFT JOIN fayxzvov_coffee.pedidos_status ON pedidos_orders.status = pedidos_status.id WHERE pedidos_orders.date_order BETWEEN ? AND ? 
+                        AND (? IS NULL OR pedidos_orders.subsidiaries_id = ?)  ORDER BY pedidos_orders.date_order, pedidos_orders.time_order ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-15 17:04:56 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT 
+                pedidos_orders.id,
+                pedidos_orders.folio,
+                pedidos_orders.name AS cliente,
+                pedidos_orders.phone AS telefono,
+                pedidos_orders.date_order,
+                pedidos_orders.time_order,
+                pedidos_orders.status,
+                pedidos_status.valor AS estado_nombre,
+                pedidos_orders.total_pay AS total,
+                pedidos_orders.subsidiaries_id
+             FROM fayxzvov_coffee.pedidos_orders   LEFT JOIN fayxzvov_coffee.pedidos_status ON pedidos_orders.status = pedidos_status.id WHERE pedidos_orders.date_order BETWEEN ? AND ? 
+                        AND (? IS NULL OR pedidos_orders.subsidiaries_id = ?)  ORDER BY pedidos_orders.date_order, pedidos_orders.time_order ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-15 17:04:33 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT 
+                pedidos_orders.id,
+                pedidos_orders.folio,
+                pedidos_orders.name AS cliente,
+                pedidos_orders.phone AS telefono,
+                pedidos_orders.date_order,
+                pedidos_orders.time_order,
+                pedidos_orders.status,
+                pedidos_status.valor AS estado_nombre,
+                pedidos_orders.total_pay AS total,
+                pedidos_orders.subsidiaries_id
+             FROM fayxzvov_coffee.pedidos_orders   LEFT JOIN fayxzvov_coffee.pedidos_status ON pedidos_orders.status = pedidos_status.id WHERE pedidos_orders.date_order BETWEEN ? AND ? 
+                        AND (? IS NULL OR pedidos_orders.subsidiaries_id = ?)  ORDER BY pedidos_orders.date_order, pedidos_orders.time_order ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-15 17:04:33 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, valor FROM fayxzvov_coffee.status_process   WHERE active = 1  ORDER BY id ASC 
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'valor' in 'field list'
+
+
+[ 2025-10-15 17:04:27 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT 
+                pedidos_orders.id,
+                pedidos_orders.folio,
+                pedidos_orders.name AS cliente,
+                pedidos_orders.phone AS telefono,
+                pedidos_orders.date_order,
+                pedidos_orders.time_order,
+                pedidos_orders.status,
+                pedidos_status.valor AS estado_nombre,
+                pedidos_orders.total_pay AS total,
+                pedidos_orders.subsidiaries_id
+             FROM fayxzvov_coffee.pedidos_orders   LEFT JOIN fayxzvov_coffee.pedidos_status ON pedidos_orders.status = pedidos_status.id WHERE pedidos_orders.date_order BETWEEN ? AND ? 
+                        AND (? IS NULL OR pedidos_orders.subsidiaries_id = ?)  ORDER BY pedidos_orders.date_order, pedidos_orders.time_order ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-15 17:04:27 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, valor FROM fayxzvov_coffee.status_process   WHERE active = 1  ORDER BY id ASC 
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'valor' in 'field list'
+
+
+[ 2025-10-15 17:02:36 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT 
+                pedidos_orders.id,
+                pedidos_orders.folio,
+                pedidos_orders.name AS cliente,
+                pedidos_orders.phone AS telefono,
+                pedidos_orders.date_order,
+                pedidos_orders.time_order,
+                pedidos_orders.status,
+                pedidos_status.valor AS estado_nombre,
+                pedidos_orders.total_pay AS total,
+                pedidos_orders.subsidiaries_id
+             FROM fayxzvov_coffee.pedidos_orders   LEFT JOIN fayxzvov_coffee.pedidos_status ON pedidos_orders.status = pedidos_status.id WHERE pedidos_orders.date_order BETWEEN ? AND ? 
+                        AND (? IS NULL OR pedidos_orders.subsidiaries_id = ?)  ORDER BY pedidos_orders.date_order, pedidos_orders.time_order ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-15 17:02:36 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, valor FROM fayxzvov_coffee.pedidos_status   WHERE active = 1  ORDER BY id ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_status' doesn't exist
+
+
+[ 2025-10-15 16:57:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT 
+                pedidos_orders.id,
+                pedidos_orders.folio,
+                pedidos_orders.name AS cliente,
+                pedidos_orders.phone AS telefono,
+                pedidos_orders.date_order,
+                pedidos_orders.time_order,
+                pedidos_orders.status,
+                pedidos_status.valor AS estado_nombre,
+                pedidos_orders.total_pay AS total,
+                pedidos_orders.subsidiaries_id
+             FROM fayxzvov_coffee.pedidos_orders   LEFT JOIN fayxzvov_coffee.pedidos_status ON pedidos_orders.status = pedidos_status.id WHERE pedidos_orders.date_order BETWEEN ? AND ? 
+                        AND (? IS NULL OR pedidos_orders.subsidiaries_id = ?)  ORDER BY pedidos_orders.date_order, pedidos_orders.time_order ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-15 16:57:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, valor FROM fayxzvov_coffee.pedidos_status   WHERE active = 1  ORDER BY id ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_status' doesn't exist
+
+
+[ 2025-10-15 16:57:04 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, name AS valor FROM fayxzvov_coffee.subsidiaries   WHERE active = 1  ORDER BY name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.subsidiaries' doesn't exist
+
+
+[ 2025-10-15 16:51:21 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT 
+                pedidos_orders.id,
+                pedidos_orders.folio,
+                pedidos_orders.name AS cliente,
+                pedidos_orders.phone AS telefono,
+                pedidos_orders.date_order,
+                pedidos_orders.time_order,
+                pedidos_orders.status,
+                pedidos_status.valor AS estado_nombre,
+                pedidos_orders.total_pay AS total,
+                pedidos_orders.subsidiaries_id
+             FROM fayxzvov_coffee.pedidos_orders   LEFT JOIN fayxzvov_coffee.pedidos_status ON pedidos_orders.status = pedidos_status.id WHERE pedidos_orders.date_order BETWEEN ? AND ? 
+                        AND (? IS NULL OR pedidos_orders.subsidiaries_id = ?)  ORDER BY pedidos_orders.date_order, pedidos_orders.time_order ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-15 16:51:21 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, valor FROM fayxzvov_coffee.pedidos_status   WHERE active = 1  ORDER BY id ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_status' doesn't exist
+
+
+[ 2025-10-15 16:51:21 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, name AS valor FROM fayxzvov_coffee.subsidiaries   WHERE active = 1  ORDER BY name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.subsidiaries' doesn't exist
+
+
+[ 2025-10-15 16:50:26 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT 
+                pedidos_orders.id,
+                pedidos_orders.folio,
+                pedidos_orders.name AS cliente,
+                pedidos_orders.phone AS telefono,
+                pedidos_orders.date_order,
+                pedidos_orders.time_order,
+                pedidos_orders.status,
+                pedidos_status.valor AS estado_nombre,
+                pedidos_orders.total_pay AS total,
+                pedidos_orders.subsidiaries_id
+             FROM fayxzvov_coffee.pedidos_orders   LEFT JOIN fayxzvov_coffee.pedidos_status ON pedidos_orders.status = pedidos_status.id WHERE pedidos_orders.date_order BETWEEN ? AND ? 
+                        AND (? IS NULL OR pedidos_orders.subsidiaries_id = ?)  ORDER BY pedidos_orders.date_order, pedidos_orders.time_order ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-15 16:50:26 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, valor FROM fayxzvov_coffee.pedidos_status   WHERE active = 1  ORDER BY id ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_status' doesn't exist
+
+
+[ 2025-10-15 16:50:26 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, name AS valor FROM fayxzvov_coffee.subsidiaries   WHERE active = 1  ORDER BY name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.subsidiaries' doesn't exist
+
+
+[ 2025-10-15 16:49:16 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT 
+                pedidos_orders.id,
+                pedidos_orders.folio,
+                pedidos_orders.name AS cliente,
+                pedidos_orders.phone AS telefono,
+                pedidos_orders.date_order,
+                pedidos_orders.time_order,
+                pedidos_orders.status,
+                pedidos_status.valor AS estado_nombre,
+                pedidos_orders.total_pay AS total,
+                pedidos_orders.subsidiaries_id
+             FROM fayxzvov_coffee.pedidos_orders   LEFT JOIN fayxzvov_coffee.pedidos_status ON pedidos_orders.status = pedidos_status.id WHERE pedidos_orders.date_order BETWEEN ? AND ? 
+                        AND (? IS NULL OR pedidos_orders.subsidiaries_id = ?)  ORDER BY pedidos_orders.date_order, pedidos_orders.time_order ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_orders' doesn't exist
+
+
+[ 2025-10-15 16:49:16 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, valor FROM fayxzvov_coffee.pedidos_status   WHERE active = 1  ORDER BY id ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_status' doesn't exist
+
+
+[ 2025-10-15 16:49:16 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, name AS valor FROM fayxzvov_coffee.subsidiaries   WHERE active = 1  ORDER BY name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.subsidiaries' doesn't exist
+
+
+[ 2025-10-15 16:44:21 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, valor FROM fayxzvov_coffee.pedidos_status   WHERE active = 1  ORDER BY id ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.pedidos_status' doesn't exist
+
+
+[ 2025-10-15 16:44:21 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  SELECT id, name AS valor FROM fayxzvov_coffee.subsidiaries   WHERE active = 1  ORDER BY name ASC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.subsidiaries' doesn't exist
+
+
