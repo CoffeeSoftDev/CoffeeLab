@@ -139,9 +139,11 @@ class DashboardPedidos extends Templates {
     }
 
     layout() {
+
         this.dashboardComponent({
             parent: "container-dashboard",
             id: "dashboardComponent",
+            theme: 'dark',
             title: "📊 Dashboard de Pedidos",
             subtitle: "Análisis comparativo de pedidos entre dos períodos",
             json: [
@@ -151,7 +153,9 @@ class DashboardPedidos extends Templates {
                 { type: "grafico", id: "Tendencia", title: "Tendencia de Ventas" },
             ]
         });
+
         this.filterBarDashboard();
+
     }
 
     async renderDashboard() {
@@ -193,6 +197,7 @@ class DashboardPedidos extends Templates {
     }
 
     filterBarDashboard() {
+
         this.createfilterBar({
             parent: `filterBarDashboard`,
             data: [
@@ -258,29 +263,42 @@ class DashboardPedidos extends Templates {
             id: "dashboardComponent",
             title: "📊 Dashboard",
             subtitle: "Resumen de métricas",
-            json: []
+            json: [],
+            theme: "light"
         };
 
         const opts = Object.assign(defaults, options);
+        const isDark = opts.theme === "dark";
+
+        // 🎨 Paleta exacta corregida
+        const theme = {
+            bgMain: isDark ? "bg-[#0E1521]" : "bg-white",
+            textMain: isDark ? "text-white" : "text-[#103B60]",
+            textSecondary: isDark ? "text-gray-400" : "text-gray-600",
+            cardBg: isDark ? "bg-[#1F2A37]" : "bg-white",
+            cardText: isDark ? "text-gray-300" : "text-gray-800",
+            titleColor: isDark ? "text-white" : "text-[#103B60]",
+        };
 
         const container = $(`
-        <div id="${opts.id}" class="w-full">
-            <div class="p-6 border-b border-gray-200">
+        <div id="${opts.id}" class="w-full ${theme.bgMain} min-h-screen p-6">
+            <div class="pb-4">
                 <div class="mx-auto">
-                    <h1 class="text-2xl font-bold text-[#103B60]">${opts.title}</h1>
-                    <p class="text-sm text-gray-600">${opts.subtitle}</p>
+                    <h1 class="text-2xl font-bold ${theme.titleColor}">${opts.title}</h1>
+                    <p class="text-sm ${theme.textSecondary}">${opts.subtitle}</p>
                 </div>
             </div>
 
-            <div id="filterBarDashboard" class="mx-auto px-4 py-4"></div>
-            <section id="cardDashboard" class="mx-auto px-4 py-4"></section>
-            <section id="content-${opts.id}" class="mx-auto px-4 py-6 grid gap-6 grid-cols-1 md:grid-cols-2"></section>
-        </div>`);
+            <div id="filterBarDashboard" class="mx-auto px-2 py-4"></div>
+            <section id="cardDashboard" class=""></section>
+            <section id="content-${opts.id}" class="mx-auto px-2 py-6 grid gap-6 grid-cols-1 md:grid-cols-2"></section>
+        </div>
+    `);
 
         opts.json.forEach(item => {
             let block = $("<div>", {
                 id: item.id,
-                class: "bg-white p-2 rounded-xl shadow-md border border-gray-200 min-h-[200px] w-full"
+                class: `${theme.cardBg} p-4 rounded-xl shadow-sm min-h-[180px] w-full transition duration-300`,
             });
 
             if (item.title) {
@@ -295,7 +313,7 @@ class DashboardPedidos extends Templates {
                 const iconHtml = item.icon ? `<i class="${item.icon}"></i> ` : '';
                 const titleContent = `${emoji} ${iconHtml}${item.title}`;
 
-                block.prepend(`<h3 class="text-sm font-semibold text-gray-800 mb-3">${titleContent}</h3>`);
+                block.prepend(`<h3 class="text-base font-semibold ${theme.cardText} mb-3">${titleContent}</h3>`);
             }
 
             $(`#content-${opts.id}`, container).append(block);
@@ -304,17 +322,19 @@ class DashboardPedidos extends Templates {
         $(`#${opts.parent}`).html(container);
     }
 
+    // Cards.
     showCards(data) {
         this.infoCard({
             parent: "cardDashboard",
             theme: "dark",
+            class: "w-full",
             json: [
                 {
                     id: "kpiCotizaciones",
                     title: "Cotizaciones del Mes",
                     data: {
                         value: data.cotizaciones || 0,
-                        color: "text-[#2A55A3]",
+                        color: "text-purple-400"
                     },
                 },
                 {
@@ -322,14 +342,14 @@ class DashboardPedidos extends Templates {
                     title: "Ventas Totales",
                     data: {
                         value: data.ventasTotales || "$0",
-                        color: "text-green-800",
+                        color: "text-pink-400"
                     },
                 },
                 {
                     title: "Ingresos del Mes",
                     data: {
                         value: data.ingresos || "$0",
-                        color: "text-[#8CC63F]",
+                        color: "text-cyan-400"
                     },
                 },
                 {
@@ -337,7 +357,7 @@ class DashboardPedidos extends Templates {
                     title: "Pendiente por Cobrar",
                     data: {
                         value: data.pendienteCobrar || "$0",
-                        color: "text-red-600",
+                        color: "text-red-400"
                     },
                 },
             ],
@@ -366,16 +386,16 @@ class DashboardPedidos extends Templates {
             });
             const title = $("<p>", {
                 class: `text-sm ${titleColor}`,
-                text: card.title
+                html: card.title
             });
             const value = $("<p>", {
                 id: card.id || "",
                 class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
-                text: card.data?.value
+                html: card.data?.value
             });
             const description = $("<p>", {
                 class: `text-xs mt-1 ${card.data?.color || "text-gray-500"}`,
-                text: card.data?.description || ""
+                html: card.data?.description || ""
             });
             box.append(title, value, description);
             return box;
@@ -393,12 +413,15 @@ class DashboardPedidos extends Templates {
         $(`#${opts.parent}`).html(container);
     }
 
+    // Grapighs.
+
+
     chequeComparativo(options) {
         const defaults = {
             parent: "containerChequePro",
             id: "chart",
             title: "Comparativa por Categorías",
-            class: "border p-4 rounded-xl",
+            class: "p-4 rounded-xl",
             data: {},
             anioA: new Date().getFullYear(),
             anioB: new Date().getFullYear() - 1,
@@ -433,6 +456,11 @@ class DashboardPedidos extends Templates {
 
         const ctx = document.getElementById(opts.id).getContext("2d");
         if (window._chq) window._chq.destroy();
+
+        // Colores para cada categoría
+        const coloresPeriodo1 = ["#4A90E2", "#E94B8A", "#2ECC71", "#FF8C42"];
+        const coloresPeriodo2 = ["#5BA3F5", "#F55C9B", "#3FDD82", "#FFA055"];
+
         window._chq = new Chart(ctx, {
             type: "bar",
             data: {
@@ -441,12 +469,12 @@ class DashboardPedidos extends Templates {
                     {
                         label: `${mes1} ${anio1}`,
                         data: opts.data.A,
-                        backgroundColor: "#103B60"
+                        backgroundColor: coloresPeriodo1
                     },
                     {
                         label: `${mes2} ${anio2}`,
                         data: opts.data.B,
-                        backgroundColor: "#8CC63F"
+                        backgroundColor: coloresPeriodo2
                     }
                 ]
             },
@@ -498,12 +526,14 @@ class DashboardPedidos extends Templates {
         });
     }
 
+    // Components.
+
     linearChart(options) {
         const defaults = {
             parent: "containerLineChart",
             id: "linearChart",
             title: "",
-            class: "border p-4 rounded-xl",
+            class: "p-4 rounded-xl",
             data: {},
         };
         const opts = Object.assign({}, defaults, options);
@@ -528,6 +558,16 @@ class DashboardPedidos extends Templates {
         if (!window._charts) window._charts = {};
         if (window._charts[opts.id]) {
             window._charts[opts.id].destroy();
+        }
+
+        // Aplicar colores a los datasets
+        const coloresLinea = ["#4A90E2", "#2ECC71"];
+        if (opts.data.datasets) {
+            opts.data.datasets.forEach((dataset, index) => {
+                dataset.borderColor = coloresLinea[index] || "#4A90E2";
+                dataset.backgroundColor = coloresLinea[index] || "#4A90E2";
+                dataset.tension = 0.4;
+            });
         }
 
         window._charts[opts.id] = new Chart(ctx, {
@@ -566,7 +606,7 @@ class DashboardPedidos extends Templates {
             parent: "containerBarChart",
             id: "chartBar",
             title: "Comparativa por Categorías",
-            class: "border p-4 rounded-xl",
+            class: "p-4 rounded-xl",
             labels: [],
             dataA: [],
             dataB: [],
@@ -597,8 +637,8 @@ class DashboardPedidos extends Templates {
         const ctx = document.getElementById(opts.id).getContext("2d");
         if (window._barChart) window._barChart.destroy();
 
-        const colorPeriodo1 = "#103B60";
-        const colorPeriodo2 = "#8CC63F";
+        // Colores para cada día de la semana
+        const coloresDias = ["#4A90E2", "#E94B8A", "#2ECC71", "#FF8C42", "#9B59B6", "#F39C12", "#1ABC9C"];
 
         window._barChart = new Chart(ctx, {
             type: "bar",
@@ -608,12 +648,12 @@ class DashboardPedidos extends Templates {
                     {
                         label: `Año ${opts.yearB}`,
                         data: opts.dataA,
-                        backgroundColor: colorPeriodo1
+                        backgroundColor: coloresDias
                     },
                     {
                         label: `Año ${opts.yearA}`,
                         data: opts.dataB,
-                        backgroundColor: colorPeriodo2
+                        backgroundColor: coloresDias.map(color => color + "CC") // Añade transparencia
                     }
                 ]
             },
@@ -666,31 +706,45 @@ class DashboardPedidos extends Templates {
             parent: "containerTopDiasSemana",
             title: "📊 Ranking por Promedio Semanal",
             subtitle: "",
-            data: []
+            data: [],
+            theme: "dark" // o 'dark'
         };
 
         const opts = Object.assign({}, defaults, options);
-        const container = $("<div>", { class: "border p-4 rounded-xl bg-white" });
+        const isDark = opts.theme === "dark";
 
-        const header = $("<div>", { class: "mb-3" })
-            .append($("<h2>", { class: "text-lg font-bold", text: opts.title }))
-            .append($("<p>", { class: "text-sm text-gray-500", text: opts.subtitle }));
+        // 🎨 Paleta Huubie dark
+        const theme = {
+            bgMain: isDark ? "bg-[#1F2A37]" : "bg-white",
+            textMain: isDark ? "text-white" : "text-gray-900",
+            textSecondary: isDark ? "text-gray-400" : "text-gray-500",
+            textMeta: isDark ? "text-gray-300" : "text-gray-600",
+            card: isDark ? "bg-[#111827]" : "bg-gray-100",
+        };
+
+        const container = $("<div>", {
+            class: `p-4 rounded-xl ${theme.bgMain}`
+        });
+
+        const header = $("<div>", { class: "mb-4" })
+            .append($("<h2>", { class: `text-lg font-bold ${theme.textMain}`, text: opts.title }))
+            .append($("<p>", { class: `text-sm ${theme.textSecondary}`, text: opts.subtitle }));
 
         const list = $("<div>", { class: "space-y-3" });
 
         const colores = [
-            { bg: "bg-green-100", circle: "bg-green-500 text-white" },
-            { bg: "bg-blue-100", circle: "bg-blue-500 text-white" },
-            { bg: "bg-purple-100", circle: "bg-purple-500 text-white" },
-            { bg: "bg-orange-100", circle: "bg-orange-500 text-white" },
-            { bg: "bg-pink-100", circle: "bg-pink-500 text-white" },
-            { bg: "bg-yellow-100", circle: "bg-yellow-600 text-white" },
-            { bg: "bg-gray-100", circle: "bg-gray-600 text-white" }
+            { bg: "bg-green-600/20", circle: "bg-green-500 text-white" },
+            { bg: "bg-blue-600/20", circle: "bg-blue-500 text-white" },
+            { bg: "bg-purple-600/20", circle: "bg-purple-500 text-white" },
+            { bg: "bg-orange-600/20", circle: "bg-orange-500 text-white" },
+            { bg: "bg-pink-600/20", circle: "bg-pink-500 text-white" },
+            { bg: "bg-yellow-600/20", circle: "bg-yellow-500 text-white" },
+            { bg: "bg-gray-600/20", circle: "bg-gray-500 text-white" }
         ];
 
         opts.data.forEach((item, i) => {
             const rank = i + 1;
-            const palette = colores[i] || { bg: "bg-white", circle: "bg-gray-300 text-black" };
+            const palette = colores[i] || { bg: "bg-gray-700/20", circle: "bg-gray-400 text-black" };
 
             const row = $("<div>", {
                 class: `flex items-center gap-3 p-3 rounded-lg ${palette.bg}`
@@ -706,13 +760,19 @@ class DashboardPedidos extends Templates {
             const content = $("<div>", { class: "flex-1" });
             content.append(
                 $("<div>", { class: "flex justify-between" })
-                    .append($("<span>", { class: "font-semibold", text: item.dia }))
-                    .append($("<span>", { class: "font-bold", text: formatPrice(item.promedio) }))
+                    .append($("<span>", { class: `font-semibold ${theme.textMain}`, text: item.dia }))
+                    .append($("<span>", { class: `font-bold ${theme.textMain}`, text: formatPrice(item.promedio) }))
             );
+
             content.append(
-                $("<div>", { class: "text-sm text-gray-600 flex justify-between" })
-                    .append($("<span>", { text: `${item.veces} días con ${item.clientes} clientes` }))
-                    .append($("<span>", { class: "italic", text: rank === 1 ? "⭐ Mejor día" : "" }))
+                $("<div>", { class: `text-sm ${theme.textMeta} flex justify-between` })
+                    .append($("<span>", {
+                        text: `${item.veces} días con ${item.clientes} clientes`
+                    }))
+                    .append($("<span>", {
+                        class: "italic",
+                        text: rank === 1 ? "⭐ Mejor día" : ""
+                    }))
             );
 
             row.append(content);
@@ -722,4 +782,5 @@ class DashboardPedidos extends Templates {
         container.append(header, list);
         $("#" + opts.parent).html(container);
     }
+
 }

@@ -11,10 +11,10 @@ require_once '../mdl/mdl-pedidos.php';
 class Pedidos extends MPedidos{
     function init(){
         return [
-            'modifier' => $this->getAllModifiers([1]),
-            'products' => $this->lsProductos([1,$_SESSION['SUB']]),
-            'clients'   => $this->getAllClients([$_SESSION['SUB']]),
-            'status'   =>  $this->lsStatus(),
+            'modifier'   => $this->getAllModifiers([1]),
+            'products'   => $this->lsProductos([1,$_SESSION['SUB']]),
+            'clients'    => $this->getAllClients([$_SESSION['SUB']]),
+            'status'     => $this->lsStatus(),
             'sucursales' => $this->lsSucursales(),
         ];
     }
@@ -881,9 +881,9 @@ class Pedidos extends MPedidos{
         $pendienteCobrar = $totalVentas - $totalIngresos;
 
         $dashboard = [
-            'cotizaciones' => $cotizaciones,
-            'ventasTotales' => evaluar($totalVentas),
-            'ingresos' => evaluar($totalIngresos),
+            'cotizaciones'    => $cotizaciones,
+            'ventasTotales'   => evaluar($totalVentas),
+            'ingresos'        => evaluar($totalIngresos),
             'pendienteCobrar' => evaluar($pendienteCobrar),
         ];
 
@@ -981,10 +981,20 @@ class Pedidos extends MPedidos{
             'yearB' => $anio1
         ];
 
+        $daysTranslation = [
+            'Monday' => 'Lunes',
+            'Tuesday' => 'Martes',
+            'Wednesday' => 'Miércoles',
+            'Thursday' => 'Jueves',
+            'Friday' => 'Viernes',
+            'Saturday' => 'Sábado',
+            'Sunday' => 'Domingo'
+        ];
+
         $topWeek = [];
         foreach ($ordersByWeekday1 as $day) {
             $topWeek[] = [
-                'dia' => $day['dia'],
+                'dia' => $daysTranslation[$day['dia']] ?? $day['dia'],
                 'promedio' => floatval($day['promedio']),
                 'veces' => intval($day['veces']),
                 'clientes' => intval($day['clientes'])

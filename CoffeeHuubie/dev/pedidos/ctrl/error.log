@@ -1,3 +1,117 @@
+[ 2025-10-15 10:28:59 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT
+                order_histories.id as id,
+                order_histories.title as valor,
+                order_histories.action as message,
+                DATE_FORMAT(order_histories.date_action, '%d/%m/%Y %h:%i %p') as date,
+                order_histories.comment,
+                order_histories.type,
+                fullname AS author
+            FROM
+                fayxzvov_coffee.order_histories
+            LEFT JOIN fayxzvov_alpha.usr_users ON order_histories.usr_users_id = fayxzvov_alpha.usr_users.id
+            WHERE
+                order_histories.order_id = ?
+            ORDER BY
+                order_histories.date_action DESC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.order_histories' doesn't exist
+
+
+[ 2025-10-15 10:28:59 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order_histories (order_id,comment,action,title,type,date_action) VALUES (?,?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.order_histories' doesn't exist
+
+
+[ 2025-10-15 10:28:55 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT
+                order_histories.id as id,
+                order_histories.title as valor,
+                order_histories.action as message,
+                DATE_FORMAT(order_histories.date_action, '%d/%m/%Y %h:%i %p') as date,
+                order_histories.comment,
+                order_histories.type,
+                fullname AS author
+            FROM
+                fayxzvov_coffee.order_histories
+            LEFT JOIN fayxzvov_alpha.usr_users ON order_histories.usr_users_id = fayxzvov_alpha.usr_users.id
+            WHERE
+                order_histories.order_id = ?
+            ORDER BY
+                order_histories.date_action DESC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.order_histories' doesn't exist
+
+
+[ 2025-10-15 10:25:08 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT
+                order_histories.id as id,
+                order_histories.title as valor,
+                order_histories.action as message,
+                DATE_FORMAT(order_histories.date_action, '%d/%m/%Y %h:%i %p') as date,
+                order_histories.comment,
+                order_histories.type,
+                fullname AS author
+            FROM
+                fayxzvov_coffee.order_histories
+            LEFT JOIN fayxzvov_alpha.usr_users ON order_histories.usr_users_id = fayxzvov_alpha.usr_users.id
+            WHERE
+                order_histories.order_id = ?
+            ORDER BY
+                order_histories.date_action DESC
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.order_histories' doesn't exist
+
+
+[ 2025-10-15 10:23:18 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                p.name,
+                SUM(od.quantity) as quantity,
+                SUM(od.quantity * od.price) as total
+            FROM fayxzvov_coffee.order_details od
+            INNER JOIN fayxzvov_coffee.order_products p ON od.product_id = p.id
+            INNER JOIN fayxzvov_coffee.order o ON od.order_id = o.id
+            WHERE DATE(o.date_creation) BETWEEN ? AND ? AND o.status != 4 AND o.subsidiaries_id = ?
+            GROUP BY p.id, p.name
+            ORDER BY quantity DESC
+            LIMIT 100
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.order_details' doesn't exist
+
+
+[ 2025-10-15 10:23:13 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                p.name,
+                SUM(od.quantity) as quantity,
+                SUM(od.quantity * od.price) as total
+            FROM fayxzvov_coffee.order_details od
+            INNER JOIN fayxzvov_coffee.order_products p ON od.product_id = p.id
+            INNER JOIN fayxzvov_coffee.order o ON od.order_id = o.id
+            WHERE DATE(o.date_creation) BETWEEN ? AND ? AND o.status != 4 AND o.subsidiaries_id = ?
+            GROUP BY p.id, p.name
+            ORDER BY quantity DESC
+            LIMIT 100
+        
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'fayxzvov_coffee.order_details' doesn't exist
+
+
 [ 2025-10-15 08:04:17 ]
 [ UNIX_USR ] :: nt authority\system
 [ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
