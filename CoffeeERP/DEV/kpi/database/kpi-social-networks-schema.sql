@@ -4,63 +4,50 @@
 -- ============================================
 
 -- Tabla de redes sociales
-CREATE TABLE IF NOT EXISTS kpi_social_networks (
+CREATE TABLE IF NOT EXISTS red_social (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    subsidiaries_id INT NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    icon VARCHAR(50),
+    nombre VARCHAR(100) NOT NULL,
     color VARCHAR(20),
-    description TEXT,
-    active TINYINT(1) DEFAULT 1,
-    date_creation DATETIME,
-    UNIQUE KEY unique_network (subsidiaries_id, name),
-    INDEX idx_subsidiaries (subsidiaries_id),
+    active SMALLINT(6) DEFAULT 1,
+    UNIQUE KEY unique_network (nombre)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Tabla de métricas por red social
+CREATE TABLE IF NOT EXISTS metrica_red (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    red_social_id INT(11) NOT NULL,
+    active SMALLINT(6) DEFAULT 1,
+    FOREIGN KEY (red_social_id) REFERENCES red_social(id) ON DELETE RESTRICT,
+    UNIQUE KEY unique_metric (nombre, red_social_id),
+    INDEX idx_red_social (red_social_id),
     INDEX idx_active (active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla de métricas
-CREATE TABLE IF NOT EXISTS kpi_metrics (
+-- Tabla de historial de capturas mensuales
+CREATE TABLE IF NOT EXISTS historial_red (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    subsidiaries_id INT NOT NULL,
-    social_network_id INT NOT NULL,
-    name VARCHAR(100) NOT NULL,
-    description TEXT,
-    active TINYINT(1) DEFAULT 1,
-    date_creation DATETIME,
-    FOREIGN KEY (social_network_id) REFERENCES kpi_social_networks(id) ON DELETE RESTRICT,
-    UNIQUE KEY unique_metric (subsidiaries_id, social_network_id, name),
-    INDEX idx_subsidiaries (subsidiaries_id),
-    INDEX idx_social_network (social_network_id),
+    mes INT(11) NOT NULL,
+    año INT(11) NOT NULL,
+    fecha_creacion DATETIME(0),
+    udn_id INT(11) NOT NULL,
+    active SMALLINT(6) DEFAULT 1,
+    UNIQUE KEY unique_capture (udn_id, año, mes),
+    INDEX idx_udn (udn_id),
+    INDEX idx_year_month (año, mes),
     INDEX idx_active (active)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- Tabla de capturas mensuales
-CREATE TABLE IF NOT EXISTS kpi_social_captures (
+-- Tabla de métricas capturadas por historial
+CREATE TABLE IF NOT EXISTS metrica_historial_red (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    subsidiaries_id INT NOT NULL,
-    social_network_id INT NOT NULL,
-    year INT NOT NULL,
-    month INT NOT NULL,
-    date_creation DATETIME,
-    user_id INT,
-    FOREIGN KEY (social_network_id) REFERENCES kpi_social_networks(id) ON DELETE RESTRICT,
-    UNIQUE KEY unique_capture (subsidiaries_id, social_network_id, year, month),
-    INDEX idx_subsidiaries (subsidiaries_id),
-    INDEX idx_social_network (social_network_id),
-    INDEX idx_year_month (year, month)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Tabla de movimientos de métricas
-CREATE TABLE IF NOT EXISTS kpi_metric_movements (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    capture_id INT NOT NULL,
-    metric_id INT NOT NULL,
-    value DECIMAL(15,2) NOT NULL DEFAULT 0,
-    date_creation DATETIME,
-    FOREIGN KEY (capture_id) REFERENCES kpi_social_captures(id) ON DELETE CASCADE,
-    FOREIGN KEY (metric_id) REFERENCES kpi_metrics(id) ON DELETE RESTRICT,
-    INDEX idx_capture (capture_id),
-    INDEX idx_metric (metric_id)
+    cantidad DECIMAL(10,0) NOT NULL DEFAULT 0,
+    metrica_id INT(11) NOT NULL,
+    historial_id INT(11) NOT NULL,
+    FOREIGN KEY (metrica_id) REFERENCES metrica_red(id) ON DELETE RESTRICT,
+    FOREIGN KEY (historial_id) REFERENCES historial_red(id) ON DELETE CASCADE,
+    INDEX idx_metrica (metrica_id),
+    INDEX idx_historial (historial_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================
@@ -68,28 +55,37 @@ CREATE TABLE IF NOT EXISTS kpi_metric_movements (
 -- ============================================
 
 -- Insertar redes sociales de ejemplo
-INSERT INTO kpi_social_networks (subsidiaries_id, name, icon, color, description, active, date_creation) VALUES
-(1, 'Facebook', 'fab fa-facebook', '#1877F2', 'Red social principal', 1, NOW()),
-(1, 'Instagram', 'fab fa-instagram', '#E4405F', 'Plataforma visual', 1, NOW()),
-(1, 'TikTok', 'fab fa-tiktok', '#000000', 'Videos cortos', 1, NOW()),
-(1, 'Twitter', 'fab fa-twitter', '#1DA1F2', 'Microblogging', 1, NOW()),
-(1, 'LinkedIn', 'fab fa-linkedin', '#0A66C2', 'Red profesional', 1, NOW())
-ON DUPLICATE KEY UPDATE name=name;
+INSERT INTO red_social (nombre, color, active) VALUES
+('Facebook', '#1877F2', 1),
+('Instagram', '#E4405F', 1),
+('TikTok', '#000000', 1),
+('Twitter', '#1DA1F2', 1),
+('LinkedIn', '#0A66C2', 1)
+ON DUPLICATE KEY UPDATE nombre=nombre;
 
--- Insertar métricas de ejemplo para Facebook
-INSERT INTO kpi_metrics (subsidiaries_id, social_network_id, name, description, active, date_creation) VALUES
-(1, 1, 'Alcance', 'Número de personas que vieron el contenido', 1, NOW()),
-(1, 1, 'Interacciones', 'Likes, comentarios y compartidos', 1, NOW()),
-(1, 1, 'Seguidores', 'Número total de seguidores', 1, NOW()),
-(1, 1, 'Inversión', 'Monto invertido en publicidad', 1, NOW()),
-(1, 1, 'Visualizaciones', 'Número de visualizaciones de contenido', 1, NOW())
-ON DUPLICATE KEY UPDATE name=name;
+-- Insertar métricas de ejemplo para Facebook (id=1)
+INSERT INTO metrica_red (nombre, red_social_id, active) VALUES
+('Alcance', 1, 1),
+('Interacciones', 1, 1),
+('Seguidores', 1, 1),
+('Inversión', 1, 1),
+('Visualizaciones', 1, 1)
+ON DUPLICATE KEY UPDATE nombre=nombre;
 
--- Insertar métricas de ejemplo para Instagram
-INSERT INTO kpi_metrics (subsidiaries_id, social_network_id, name, description, active, date_creation) VALUES
-(1, 2, 'Alcance', 'Número de cuentas únicas alcanzadas', 1, NOW()),
-(1, 2, 'Interacciones', 'Likes, comentarios y guardados', 1, NOW()),
-(1, 2, 'Seguidores', 'Número total de seguidores', 1, NOW()),
-(1, 2, 'Inversión', 'Monto invertido en publicidad', 1, NOW()),
-(1, 2, 'Visualizaciones', 'Visualizaciones de historias y reels', 1, NOW())
-ON DUPLICATE KEY UPDATE name=name;
+-- Insertar métricas de ejemplo para Instagram (id=2)
+INSERT INTO metrica_red (nombre, red_social_id, active) VALUES
+('Alcance', 2, 1),
+('Interacciones', 2, 1),
+('Seguidores', 2, 1),
+('Inversión', 2, 1),
+('Visualizaciones', 2, 1)
+ON DUPLICATE KEY UPDATE nombre=nombre;
+
+-- Insertar métricas de ejemplo para TikTok (id=3)
+INSERT INTO metrica_red (nombre, red_social_id, active) VALUES
+('Alcance', 3, 1),
+('Interacciones', 3, 1),
+('Seguidores', 3, 1),
+('Inversión', 3, 1),
+('Visualizaciones', 3, 1)
+ON DUPLICATE KEY UPDATE nombre=nombre;
