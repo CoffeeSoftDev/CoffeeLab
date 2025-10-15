@@ -112,11 +112,11 @@ class ctrl extends mdl {
     function addSocialNetwork() {
         $status = 500;
         $message = 'No se pudo agregar la red social';
-        $_POST['date_creation'] = date('Y-m-d H:i:s');
-        $_POST['subsidiaries_id'] = $_SESSION['SUB'];
         $_POST['active'] = 1;
+        $_POST['nombre'] = $_POST['name'];
+        unset($_POST['name']);
 
-        $exists = $this->existsSocialNetworkByName([$_POST['name'], $_SESSION['SUB']]);
+        $exists = $this->existsSocialNetworkByName([$_POST['nombre']]);
 
         if (!$exists) {
             $create = $this->createSocialNetwork($this->util->sql($_POST));
@@ -139,6 +139,9 @@ class ctrl extends mdl {
         $id = $_POST['id'];
         $status = 500;
         $message = 'Error al editar red social';
+        
+        $_POST['nombre'] = $_POST['name'];
+        unset($_POST['name']);
 
         $edit = $this->updateSocialNetwork($this->util->sql($_POST, 1));
         if ($edit) {
@@ -239,14 +242,15 @@ class ctrl extends mdl {
     function addMetric() {
         $status = 500;
         $message = 'No se pudo agregar la métrica';
-        $_POST['date_creation'] = date('Y-m-d H:i:s');
-        $_POST['subsidiaries_id'] = $_SESSION['SUB'];
         $_POST['active'] = 1;
+        $_POST['nombre'] = $_POST['name'];
+        $_POST['red_social_id'] = $_POST['social_network_id'];
+        unset($_POST['name']);
+        unset($_POST['social_network_id']);
 
         $exists = $this->existsMetricByName([
-            $_POST['name'],
-            $_POST['social_network_id'],
-            $_SESSION['SUB']
+            $_POST['nombre'],
+            $_POST['red_social_id']
         ]);
 
         if (!$exists) {
@@ -270,6 +274,11 @@ class ctrl extends mdl {
         $id = $_POST['id'];
         $status = 500;
         $message = 'Error al editar métrica';
+        
+        $_POST['nombre'] = $_POST['name'];
+        $_POST['red_social_id'] = $_POST['social_network_id'];
+        unset($_POST['name']);
+        unset($_POST['social_network_id']);
 
         $edit = $this->updateMetric($this->util->sql($_POST, 1));
         if ($edit) {
@@ -352,7 +361,7 @@ class ctrl extends mdl {
 
     function getMetricsByNetwork() {
         $networkId = $_POST['social_network_id'];
-        $metrics = $this->lsMetricsByNetwork([$networkId, $_SESSION['SUB'], 1]);
+        $metrics = $this->lsMetricsByNetwork([$networkId, 1]);
 
         return [
             'status' => 200,
@@ -364,14 +373,12 @@ class ctrl extends mdl {
         $status = 500;
         $message = 'No se pudo guardar la captura';
 
-        $networkId = $_POST['social_network_id'];
         $month = $_POST['month'];
         $year = $_POST['year'];
         $metrics = json_decode($_POST['metrics'], true);
 
         $exists = $this->existsCapture([
             $_SESSION['SUB'],
-            $networkId,
             $year,
             $month
         ]);
@@ -384,12 +391,11 @@ class ctrl extends mdl {
         }
 
         $captureData = [
-            'subsidiaries_id' => $_SESSION['SUB'],
-            'social_network_id' => $networkId,
-            'year' => $year,
-            'month' => $month,
-            'date_creation' => date('Y-m-d H:i:s'),
-            'user_id' => $_SESSION['ID']
+            'udn_id' => $_SESSION['SUB'],
+            'año' => $year,
+            'mes' => $month,
+            'fecha_creacion' => date('Y-m-d H:i:s'),
+            'active' => 1
         ];
 
         $captureId = $this->createCapture($this->util->sql($captureData));
@@ -397,10 +403,9 @@ class ctrl extends mdl {
         if ($captureId) {
             foreach ($metrics as $metric) {
                 $movementData = [
-                    'capture_id' => $captureId,
-                    'metric_id' => $metric['metric_id'],
-                    'value' => $metric['value'],
-                    'date_creation' => date('Y-m-d H:i:s')
+                    'historial_id' => $captureId,
+                    'metrica_id' => $metric['metric_id'],
+                    'cantidad' => $metric['value']
                 ];
                 $this->createMetricMovement($this->util->sql($movementData));
             }
