@@ -93,13 +93,13 @@ class CampaignSummary extends Templates {
             conf: { datatable: false, pag: 50 },
             attr: {
                 id: "tbSummary",
-                theme: 'dark',
+                theme: 'corporativo',
                 right: [3, 5],
                 center: [2, 4]
             },
             success: () => {
                 this._link = tempLink;
-                console.log('Resumen de campaña cargado');
+               
             }
         });
     }

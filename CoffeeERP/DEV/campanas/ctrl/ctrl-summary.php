@@ -11,14 +11,14 @@ require_once '../mdl/mdl-summary.php';
 class ctrl extends mdl {
 
     function lsSummary() {
-        $__row = [];
-        $udn_id = $_POST['udn_id'] ?? $_SESSION['SUB'];
+        $__row         = [];
+        $udn_id        = $_POST['udn_id'];
         $red_social_id = $_POST['red_social_id'];
-        $año = $_POST['año'];
-        $mes = $_POST['mes'];
+        $año           = $_POST['año'];
+        $mes           = $_POST['mes'];
 
-        $data = $this->getCampaignSummary([$udn_id, $red_social_id, $año, $mes]);
-        $totals = $this->getCampaignTotals([$udn_id, $red_social_id, $año, $mes]);
+        $data           = $this->getCampaignSummary([$udn_id, $red_social_id, $año, $mes]);
+        $totals         = $this->getCampaignTotals([$udn_id, $red_social_id, $año, $mes]);
         $monthlySummary = $this->getMonthlySummary([$udn_id, $red_social_id, $año, $mes]);
 
         $campaignGroups = [];
@@ -48,27 +48,25 @@ class ctrl extends mdl {
             $__row[] = [
                 'Campaña' => [
                     'html' => '<strong class="text-[#8CC63F]">' . $group['campaña'] . '</strong>',
-                    'class' => 'bg-[#1a2332]'
                 ],
                 'Estrategia' => [
                     'html' => $group['estrategia'],
-                    'class' => 'bg-[#1a2332]'
                 ],
                 'Anuncios' => [
                     'html' => $campaignTotal['total_anuncios'] . ' anuncios',
-                    'class' => 'bg-[#1a2332] text-center'
+                    'class' => ' text-center'
                 ],
                 'Inversión Total' => [
                     'html' => evaluar($campaignTotal['total_inversion']),
-                    'class' => 'bg-[#1a2332] text-end'
+                    'class' => ' text-end'
                 ],
                 'Total Clics' => [
                     'html' => number_format($campaignTotal['total_clics'], 0, '.', ','),
-                    'class' => 'bg-[#1a2332] text-center'
+                    'class' => ' text-center'
                 ],
                 'CPC Promedio' => [
                     'html' => evaluar($campaignTotal['cpc_promedio']),
-                    'class' => 'bg-[#1a2332] text-end'
+                    'class' => 'text-end'
                 ]
             ];
 
@@ -99,11 +97,10 @@ class ctrl extends mdl {
         $__row[] = [
             'Campaña' => [
                 'html' => '<strong class="text-white">TOTAL MENSUAL</strong>',
-                'class' => 'bg-[#103B60] text-white'
             ],
             'Estrategia' => [
                 'html' => '',
-                'class' => 'bg-[#103B60]'
+                'class' => ''
             ],
             'Anuncios' => [
                 'html' => '',
@@ -111,15 +108,12 @@ class ctrl extends mdl {
             ],
             'Inversión Total' => [
                 'html' => '<strong>' . evaluar($monthlySummary['costo_total']) . '</strong>',
-                'class' => 'bg-[#103B60] text-end text-white'
             ],
             'Total Clics' => [
                 'html' => '<strong>' . number_format($monthlySummary['total_resultados'], 0, '.', ',') . '</strong>',
-                'class' => 'bg-[#103B60] text-center text-white'
             ],
             'CPC Promedio' => [
                 'html' => '<strong>' . evaluar($monthlySummary['cpc_promedio_mes']) . '</strong>',
-                'class' => 'bg-[#103B60] text-end text-white'
             ]
         ];
 
