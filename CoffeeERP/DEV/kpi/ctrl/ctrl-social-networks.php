@@ -11,11 +11,12 @@ require_once '../mdl/mdl-social-networks.php';
 class ctrl extends mdl {
 
     function init() {
+        
         return [
-            'udn' => $this->lsUDN(),
-            'lsudn' => $this->lsUDN(),
+            'udn'            => $this->lsUDN(),
+            'lsudn'          => $this->lsUDN(),
             'socialNetworks' => $this->lsSocialNetworksFilter([$_SESSION['SUB'], 1]),
-            'metrics' => $this->lsMetricsFilter([$_SESSION['SUB'], 1])
+            'metrics'        => $this->lsMetricsFilter([$_SESSION['SUB'], 1])
         ];
     }
 
@@ -24,17 +25,17 @@ class ctrl extends mdl {
         $month = $_POST['mes'];
         $year = $_POST['anio'];
 
-        $metrics = $this->getDashboardMetrics([$udn, $year, $month]);
-        $trendData = $this->getTrendData([$udn, $year, $month]);
+        $metrics            = $this->getDashboardMetrics([$udn, $year, $month]);
+        $trendData          = $this->getTrendData([$udn, $year, $month]);
         $monthlyComparative = $this->getMonthlyComparativeData([$udn, $year, $month]);
-        $comparativeTable = $this->getComparativeTableData([$udn, $year, $month]);
+        $comparativeTable   = $this->getComparativeTableData([$udn, $year, $month]);
 
         return [
             'dashboard' => [
-                'totalReach' => formatPrice($metrics['total_reach'] ?? 0),
-                'interactions' => formatPrice($metrics['total_interactions'] ?? 0),
-                'monthViews' => formatPrice($metrics['total_views'] ?? 0),
-                'totalInvestment' => formatPrice($metrics['total_investment'] ?? 0)
+                'totalReach'      => evaluar($metrics['total_reach'] ?? 0),
+                'interactions'    => evaluar($metrics['total_interactions'] ?? 0),
+                'monthViews'      => evaluar($metrics['total_views'] ?? 0),
+                'totalInvestment' => evaluar($metrics['total_investment'] ?? 0)
             ],
             'trendData' => $this->formatTrendChartData($trendData),
             'monthlyComparative' => $this->formatMonthlyComparativeData($monthlyComparative),
@@ -47,35 +48,35 @@ class ctrl extends mdl {
         $udn = $_POST['udn'];
         $active = $_POST['active'];
 
-        $ls = $this->listSocialNetworks([$udn, $active]);
+        $ls = $this->listSocialNetworks([ $active]);
 
         foreach ($ls as $key) {
             $a = [];
 
             if ($key['active'] == 1) {
                 $a[] = [
-                    'class' => 'btn btn-sm btn-primary me-1',
-                    'html' => '<i class="icon-pencil"></i>',
+                    'class'   => 'btn btn-sm btn-primary me-1',
+                    'html'    => '<i class="icon-pencil"></i>',
                     'onclick' => 'adminSocialNetWork.editSocialNetwork(' . $key['id'] . ')'
                 ];
 
                 $a[] = [
-                    'class' => 'btn btn-sm btn-danger',
-                    'html' => '<i class="icon-toggle-on"></i>',
+                    'class'   => 'btn btn-sm btn-danger',
+                    'html'    => '<i class="icon-toggle-on"></i>',
                     'onclick' => 'adminSocialNetWork.statusSocialNetwork(' . $key['id'] . ', ' . $key['active'] . ')'
                 ];
             } else {
                 $a[] = [
-                    'class' => 'btn btn-sm btn-outline-danger',
-                    'html' => '<i class="icon-toggle-off"></i>',
+                    'class'   => 'btn btn-sm btn-outline-danger',
+                    'html'    => '<i class="icon-toggle-off"></i>',
                     'onclick' => 'adminSocialNetWork.statusSocialNetwork(' . $key['id'] . ', ' . $key['active'] . ')'
                 ];
             }
 
             $__row[] = [
                 'id' => $key['id'],
-                'Icono' => '<i class="' . $key['icon'] . '" style="color:' . $key['color'] . '; font-size: 24px;"></i>',
-                'Nombre' => $key['name'],
+                'Icono' => '<i class="' . $key['icono'] . '" style="color:' . $key['color'] . '; font-size: 24px;"></i>',
+                'Nombre' => $key['nombre'],
                 'Estado' => renderStatus($key['active']),
                 'Fecha' => formatSpanishDate($key['date_creation']),
                 'a' => $a
@@ -113,9 +114,7 @@ class ctrl extends mdl {
         $status = 500;
         $message = 'No se pudo agregar la red social';
         $_POST['active'] = 1;
-        $_POST['nombre'] = $_POST['name'];
-        unset($_POST['name']);
-
+      
         $exists = $this->existsSocialNetworkByName([$_POST['nombre']]);
 
         if (!$exists) {
@@ -140,10 +139,11 @@ class ctrl extends mdl {
         $status = 500;
         $message = 'Error al editar red social';
         
-        $_POST['nombre'] = $_POST['name'];
-        unset($_POST['name']);
+     
 
         $edit = $this->updateSocialNetwork($this->util->sql($_POST, 1));
+
+
         if ($edit) {
             $status = 200;
             $message = 'Red social editada correctamente';
@@ -172,12 +172,14 @@ class ctrl extends mdl {
         ];
     }
 
+    // Metrics.
+
     function lsMetrics() {
         $__row = [];
         $udn = $_POST['udn'];
         $active = $_POST['active'];
 
-        $ls = $this->listMetrics([$udn, $active]);
+        $ls = $this->listMetrics([ $active]);
 
         foreach ($ls as $key) {
             $a = [];
@@ -203,11 +205,14 @@ class ctrl extends mdl {
             }
 
             $__row[] = [
-                'id' => $key['id'],
-                'Tipo' => $key['name'],
-                'Red Social' => $key['social_network_name'],
+                'id'         => $key['id'],
+                'Metrica'    => $key['name'],
+                'Red Social' => '<div class="flex items-center gap-2">
+                                    <i class = "' . $key['social_network_icon'] . ' text-xs "
+                                       style = "color:' . $key['social_network_color'] . '; font-size: 15px;"></i>
+                                    <span>' . $key['social_network_name'] . '</span>
+                                </div>',
                 'Estado' => renderStatus($key['active']),
-                'Descripción' => $key['description'],
                 'a' => $a
             ];
         }
@@ -243,11 +248,7 @@ class ctrl extends mdl {
         $status = 500;
         $message = 'No se pudo agregar la métrica';
         $_POST['active'] = 1;
-        $_POST['nombre'] = $_POST['name'];
-        $_POST['red_social_id'] = $_POST['social_network_id'];
-        unset($_POST['name']);
-        unset($_POST['social_network_id']);
-
+    
         $exists = $this->existsMetricByName([
             $_POST['nombre'],
             $_POST['red_social_id']
@@ -275,11 +276,7 @@ class ctrl extends mdl {
         $status = 500;
         $message = 'Error al editar métrica';
         
-        $_POST['nombre'] = $_POST['name'];
-        $_POST['red_social_id'] = $_POST['social_network_id'];
-        unset($_POST['name']);
-        unset($_POST['social_network_id']);
-
+       
         $edit = $this->updateMetric($this->util->sql($_POST, 1));
         if ($edit) {
             $status = 200;
@@ -431,19 +428,19 @@ class ctrl extends mdl {
         foreach ($data as $key) {
             $__row[] = [
                 'Métrica' => $key['metric_name'],
-                'Enero' => formatPrice($key['month_1']),
-                'Febrero' => formatPrice($key['month_2']),
-                'Marzo' => formatPrice($key['month_3']),
-                'Abril' => formatPrice($key['month_4']),
-                'Mayo' => formatPrice($key['month_5']),
-                'Junio' => formatPrice($key['month_6']),
-                'Julio' => formatPrice($key['month_7']),
-                'Agosto' => formatPrice($key['month_8']),
-                'Septiembre' => formatPrice($key['month_9']),
-                'Octubre' => formatPrice($key['month_10']),
-                'Noviembre' => formatPrice($key['month_11']),
-                'Diciembre' => formatPrice($key['month_12']),
-                'Total' => formatPrice($key['total'])
+                'Enero' => evaluar($key['month_1']),
+                'Febrero' => evaluar($key['month_2']),
+                'Marzo' => evaluar($key['month_3']),
+                'Abril' => evaluar($key['month_4']),
+                'Mayo' => evaluar($key['month_5']),
+                'Junio' => evaluar($key['month_6']),
+                'Julio' => evaluar($key['month_7']),
+                'Agosto' => evaluar($key['month_8']),
+                'Septiembre' => evaluar($key['month_9']),
+                'Octubre' => evaluar($key['month_10']),
+                'Noviembre' => evaluar($key['month_11']),
+                'Diciembre' => evaluar($key['month_12']),
+                'Total' => evaluar($key['total'])
             ];
         }
 
@@ -467,11 +464,11 @@ class ctrl extends mdl {
                 : 0;
 
             $__row[] = [
-                'Métrica' => $key['metric_name'],
-                'Mes Anterior' => formatPrice($key['previous_value']),
-                'Mes Actual' => formatPrice($key['current_value']),
-                'Comparación' => formatPrice($comparison),
-                'Porcentaje' => number_format($percentage, 2) . '%'
+                'Métrica'      => $key['metric_name'],
+                'Mes Anterior' => $key['previous_value'],
+                'Mes Actual'   => $key['current_value'],
+                'Comparación'  => $comparison,
+                'Porcentaje'   => number_format($percentage, 2) . '%'
             ];
         }
 
@@ -495,11 +492,11 @@ class ctrl extends mdl {
                 : 0;
 
             $__row[] = [
-                'Métrica' => $key['metric_name'],
-                'Año ' . ($year - 1) => formatPrice($key['previous_year']),
-                'Año ' . $year => formatPrice($key['current_year']),
-                'Comparación' => formatPrice($comparison),
-                'Porcentaje' => number_format($percentage, 2) . '%'
+                              'Métrica'     => $key['metric_name'],
+                       'Año ' . ($year - 1) => $key['previous_year'],
+                       'Año ' . $year       => $key['current_year'],
+                              'Comparación' => $comparison,
+                              'Porcentaje'  => number_format($percentage, 2) . '%'
             ];
         }
 
@@ -507,16 +504,143 @@ class ctrl extends mdl {
             'row' => $__row
         ];
     }
+
+    function apiGetHistoryMetrics() {
+        $udn = $_SESSION['SUB'];
+        $data = $this->getHistoryMetrics([$udn]);
+        $history = [];
+
+        foreach ($data as $item) {
+            $metrics = [];
+            if (!empty($item['metrics_data'])) {
+                $metricsArray = explode('|', $item['metrics_data']);
+                foreach ($metricsArray as $metric) {
+                    $parts = explode(':', $metric);
+                    if (count($parts) == 2) {
+                        $metrics[] = [
+                            'name' => $parts[0],
+                            'value' => $parts[1]
+                        ];
+                    }
+                }
+            }
+
+            $history[] = [
+                'id' => $item['id'],
+                'network' => $item['social_network_name'],
+                'icon' => $item['social_network_icon'],
+                'color' => $item['social_network_color'],
+                'date' => formatSpanishDate($item['fecha_creacion']),
+                'year' => $item['año'],
+                'month' => $item['mes'],
+                'metrics' => $metrics
+            ];
+        }
+
+        return [
+            'status' => 200,
+            'data' => $history
+        ];
+    }
+
+    function deleteCapture() {
+        $status = 500;
+        $message = 'No se pudo eliminar la captura';
+
+        $update = $this->updateCapture($this->util->sql(['active' => 0, 'id' => $_POST['id']], 1));
+
+        if ($update) {
+            $status = 200;
+            $message = 'Captura eliminada correctamente';
+        }
+
+        return [
+            'status' => $status,
+            'message' => $message
+        ];
+    }
+
+    function getCaptureById() {
+        $id = $_POST['id'];
+        $status = 404;
+        $message = 'Captura no encontrada';
+        $data = null;
+
+        $capture = $this->_getCaptureById([$id]);
+
+        if ($capture) {
+            $metrics = $this->getMetricsByHistorialId([$id]);
+            $capture['metrics'] = $metrics;
+            $capture['date'] = formatSpanishDate($capture['fecha_creacion']);
+
+            $status = 200;
+            $message = 'Captura encontrada';
+            $data = $capture;
+        }
+
+        return [
+            'status' => $status,
+            'message' => $message,
+            'data' => $data
+        ];
+    }
+
+    function updateCaptureMetrics() {
+        $status = 500;
+        $message = 'No se pudo actualizar la captura';
+        $id = $_POST['id'];
+        $metrics = json_decode($_POST['metrics'], true);
+
+        if (empty($metrics)) {
+            return [
+                'status' => 400,
+                'message' => 'No se recibieron métricas para actualizar'
+            ];
+        }
+
+        $updated = true;
+        foreach ($metrics as $metric) {
+            $updateData = [
+                'cantidad' => $metric['value'],
+                'id' => $metric['historial_metric_id']
+            ];
+            
+            $result = $this->updateMetricHistorial($this->util->sql($updateData, 1));
+            if (!$result) {
+                $updated = false;
+                break;
+            }
+        }
+
+        if ($updated) {
+            $status = 200;
+            $message = 'Captura actualizada correctamente';
+        }
+
+        return [
+            'status' => $status,
+            'message' => $message
+        ];
+    }
 }
 
 function renderStatus($status) {
     switch ($status) {
         case 1:
-            return '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-[#014737] text-[#3FC189]">Activo</span>';
+            return '<span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-700">
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Activo
+                    </span>';
         case 0:
-            return '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-[#721c24] text-[#ba464d]">Inactivo</span>';
+            return '<span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-red-100 text-red-700">
+                        <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                        Inactivo
+                    </span>';
         default:
-            return '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-gray-500 text-white">Desconocido</span>';
+            return '<span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
+                        <span class="w-2 h-2 bg-gray-500 rounded-full"></span>
+                        Desconocido
+                    </span>';
     }
 }
 

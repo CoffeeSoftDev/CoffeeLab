@@ -13,9 +13,10 @@ $(async () => {
     app = new App(api, "root");
     dashboardSocialNetwork = new DashboardSocialNetwork(api, "root");
     registerSocialNetWork = new RegisterSocialNetWork(api, "root");
+
     adminMetrics = new AdminMetrics(api, "root");
     adminSocialNetWork = new AdminSocialNetWork(api, "root");
-    
+
     app.render();
 });
 
@@ -27,6 +28,7 @@ class App extends Templates {
 
     render() {
         this.layout();
+        registerSocialNetWork.render()
         dashboardSocialNetwork.render();
     }
 
@@ -34,6 +36,7 @@ class App extends Templates {
         this.primaryLayout({
             parent: "root",
             id: this.PROJECT_NAME,
+
             class: "w-full",
             card: {
                 filterBar: { class: "w-full", id: "filterBar" + this.PROJECT_NAME },
@@ -59,12 +62,12 @@ class App extends Templates {
                     id: "dashboard",
                     tab: "Dashboard",
                     class: "mb-1",
-                    active: true,
                     onClick: () => dashboardSocialNetwork.renderDashboard()
                 },
                 {
                     id: "capture",
                     tab: "Captura de información",
+                    active: true,
                     onClick: () => registerSocialNetWork.render()
                 },
                 {
@@ -145,7 +148,7 @@ class DashboardSocialNetwork extends Templates {
             title: "📊 Dashboard de Redes Sociales",
             subtitle: "Análisis mensual de métricas por plataforma",
             json: [
-                { type: "grafico", id: "containerMonthlyComparative" },
+                { type: "grafico", id: "containerMonthlyComparative", title: 'Comparitva mensual' },
                 { type: "grafico", id: "containerTrendChart", title: "Tendencia de Interacciones" },
                 { type: "tabla", id: "containerComparativeTable", title: "Resumen General de Métricas" },
             ]
@@ -210,9 +213,8 @@ class DashboardSocialNetwork extends Templates {
                 },
             ],
         });
-        const currentMonth = moment().month() + 1;
         setTimeout(() => {
-            $(`#filterBarDashboard #mes`).val(currentMonth).trigger("change");
+            // $(`#filterBarDashboard #mes`).val(currentMonth).trigger("change");
         }, 100);
     }
 
@@ -371,7 +373,7 @@ class DashboardSocialNetwork extends Templates {
             Interacciones: formatPrice(item.interactions),
             Seguidores: formatPrice(item.followers),
             Inversión: formatPrice(item.investment),
-            ROI: item.roi.toFixed(2)
+            ROI: item.roi
         }));
 
         this.createCoffeTable({
@@ -539,6 +541,7 @@ class RegisterSocialNetWork extends Templates {
                         { id: "1", valor: "Concentrado Anual" },
                         { id: "2", valor: "Comparativa Mensual" },
                         { id: "3", valor: "Comparativa Anual" },
+                        { id: "0", valor: "Capturar información" },
                     ],
                     onchange: `registerSocialNetWork.updateView()`,
                 },
@@ -548,8 +551,8 @@ class RegisterSocialNetWork extends Templates {
 
     updateView() {
         const reportType = $('#filterBarCapture #reportType').val();
-        
-        switch(reportType) {
+
+        switch (reportType) {
             case "1":
                 this.showAnnualReport();
                 break;
@@ -566,59 +569,60 @@ class RegisterSocialNetWork extends Templates {
 
     showCaptureForm() {
         $(`#container${this.PROJECT_NAME}`).html(`
-            <div class="px-2 pt-2 pb-2">
-                <h2 class="text-2xl font-semibold">📝 Captura de Información</h2>
-                <p class="text-gray-400">Registra las métricas mensuales de redes sociales</p>
-            </div>
-            <div id="capture-form-container" class="p-4">
-                <div class="bg-white rounded-lg shadow p-4">
-                    <h3 class="text-lg font-semibold mb-4">Nueva Captura Mensual</h3>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
+                <!-- Formulario de Captura -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="icon-edit text-blue-600 text-xl"></i>
+                        <h3 class="text-lg font-semibold text-gray-800">Capturar Métricas Manualmente</h3>
+                    </div>
                     <div id="capture-filters" class="mb-4"></div>
-                    <div id="metrics-inputs"></div>
-                    <button id="btnSaveCapture" class="btn btn-primary mt-3">Guardar Captura</button>
+                    <div id="metrics-inputs" class="grid grid-cols-2 gap-3"></div>
+                    <button id="btnSaveCapture" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg mt-4 flex items-center justify-center gap-2">
+                        <i class="icon-check"></i>
+                        Actualizar Métrica
+                    </button>
+                </div>
+
+                <!-- Historial de Métricas -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="icon-clock text-green-600 text-xl"></i>
+                        <h3 class="text-lg font-semibold text-gray-800">Historial de Métricas</h3>
+                    </div>
+                    <div id="history-container" class="space-y-3"></div>
                 </div>
             </div>
         `);
 
         this.createCaptureFilters();
+        this.loadHistory();
     }
 
     createCaptureFilters() {
-        this.createfilterBar({
-            parent: 'capture-filters',
-            data: [
-                {
-                    opc: "select",
-                    id: "captureNetwork",
-                    lbl: "Red Social",
-                    class: "col-sm-4",
-                    data: socialNetworks,
-                    onchange: `registerSocialNetWork.loadMetrics()`,
-                },
-                {
-                    opc: "select",
-                    id: "captureMonth",
-                    lbl: "Mes",
-                    class: "col-sm-4",
-                    data: moment.months().map((m, i) => ({ id: i + 1, valor: m })),
-                },
-                {
-                    opc: "select",
-                    id: "captureYear",
-                    lbl: "Año",
-                    class: "col-sm-4",
-                    data: Array.from({ length: 5 }, (_, i) => {
-                        const year = moment().year() - i;
-                        return { id: year, valor: year.toString() };
-                    }),
-                },
-            ],
+        const container = $('#capture-filters');
+        container.html(`
+            <div class="mb-3">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Red Social</label>
+                <select id="captureNetwork" class="form-select w-full" onchange="registerSocialNetWork.loadMetrics()">
+                    <option value="">Seleccionar...</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de la Métrica</label>
+                <input type="date" id="captureDate" class="form-control w-full" value="${moment().format('YYYY-MM-DD')}">
+            </div>
+        `);
+
+        // Llenar select de redes sociales
+        socialNetworks.forEach(network => {
+            $('#captureNetwork').append(`<option value="${network.id}">${network.valor}</option>`);
         });
     }
 
     async loadMetrics() {
         const networkId = $('#capture-filters #captureNetwork').val();
-        
+
         if (!networkId) return;
 
         const data = await useFetch({
@@ -637,20 +641,20 @@ class RegisterSocialNetWork extends Templates {
         container.empty();
 
         if (!metrics || metrics.length === 0) {
-            container.html('<p class="text-gray-500">No hay métricas configuradas para esta red social.</p>');
+            container.html('<p class="col-span-2 text-gray-500 text-center py-4">Selecciona una red social para ver sus métricas</p>');
             return;
         }
 
         metrics.forEach(metric => {
             const input = $(`
-                <div class="mb-3">
-                    <label class="form-label">${metric.name}</label>
+                <div class="mb-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">${metric.name}</label>
                     <input type="number" 
-                           class="form-control metric-input" 
+                           class="form-control w-full metric-input" 
                            data-metric-id="${metric.id}"
-                           placeholder="Ingrese el valor"
-                           step="0.01">
-                    <small class="text-muted">${metric.description || ''}</small>
+                           data-metric-name="${metric.name}"
+                           placeholder="0"
+                           step="1">
                 </div>
             `);
             container.append(input);
@@ -660,17 +664,20 @@ class RegisterSocialNetWork extends Templates {
     }
 
     async saveCapture() {
-        const networkId = $('#capture-filters #captureNetwork').val();
-        const month = $('#capture-filters #captureMonth').val();
-        const year = $('#capture-filters #captureYear').val();
+        const networkId = $('#captureNetwork').val();
+        const captureDate = $('#captureDate').val();
 
-        if (!networkId || !month || !year) {
-            alert({ icon: "warning", text: "Por favor complete todos los filtros" });
+        if (!networkId || !captureDate) {
+            alert({ icon: "warning", text: "Por favor selecciona una red social y fecha" });
             return;
         }
 
+        const date = moment(captureDate);
+        const month = date.month() + 1;
+        const year = date.year();
+
         const metrics = [];
-        $('.metric-input').each(function() {
+        $('.metric-input').each(function () {
             const value = $(this).val();
             if (value) {
                 metrics.push({
@@ -699,9 +706,206 @@ class RegisterSocialNetWork extends Templates {
         if (response.status === 200) {
             alert({ icon: "success", text: response.message });
             $('.metric-input').val('');
+            this.loadHistory();
         } else {
             alert({ icon: "error", text: response.message });
         }
+    }
+
+    async loadHistory() {
+        const container = $('#history-container');
+        container.html('<p class="text-gray-500 text-center">Cargando historial...</p>');
+
+        // Simulación de historial - aquí deberías hacer una consulta real
+        const mockHistory = [
+            {
+                network: 'YouTube',
+                icon: 'icon-youtube',
+                color: '#FF0000',
+                date: '28/10/2025',
+                metrics: [
+                    { name: 'Seguidores', value: 2, change: 150 },
+                    { name: 'Likes', value: 1, change: null },
+                ],
+                engagement: '150%'
+            },
+            {
+                network: 'Facebook',
+                icon: 'icon-facebook',
+                color: '#1877F2',
+                date: '14/10/2025',
+                metrics: [
+                    { name: 'Seguidores', value: 22, change: 59.09 },
+                    { name: 'Likes', value: 1, change: null },
+                ],
+                engagement: '59.09%'
+            }
+        ];
+
+        container.empty();
+        mockHistory.forEach(item => {
+            const card = $(`
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: ${item.color}20;">
+                                <i class="${item.icon}" style="color: ${item.color}; font-size: 20px;"></i>
+                            </div>
+                            <span class="font-semibold text-gray-800">${item.network}</span>
+                        </div>
+                        <span class="text-sm text-gray-500">${item.date}</span>
+                    </div>
+                    <div class="space-y-2 mb-3">
+                        ${item.metrics.map(m => `
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">${m.name}:</span>
+                                <span class="font-medium">${m.value}</span>
+                            </div>
+                        `).join('')}
+                        ${item.engagement ? `
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">Engagement:</span>
+                                <span class="font-medium text-green-600">${item.engagement}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="flex-1 text-blue-600 hover:bg-blue-50 py-2 px-3 rounded text-sm font-medium transition">
+                            <i class="icon-edit mr-1"></i> Editar
+                        </button>
+                        <button class="flex-1 text-red-600 hover:bg-red-50 py-2 px-3 rounded text-sm font-medium transition">
+                            <i class="icon-trash mr-1"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            `);
+            container.append(card);
+        });
+    }
+
+    async editCapture(id) {
+        const response = await useFetch({
+            url: api,
+            data: {
+                opc: "getCaptureById",
+                id: id
+            }
+        });
+
+        if (response.status !== 200) {
+            alert({ icon: "error", text: "No se pudo cargar la información" });
+            return;
+        }
+
+        const capture = response.data;
+
+        $(`#container${this.PROJECT_NAME}`).html(`
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <i class="icon-edit text-blue-600 text-xl"></i>
+                        <h3 class="text-lg font-semibold text-gray-800">Editar Captura de Métricas</h3>
+                    </div>
+                    <div id="edit-capture-info" class="mb-4"></div>
+                    <div id="edit-metrics-inputs" class="grid grid-cols-2 gap-3"></div>
+                    <div class="flex gap-2 mt-4">
+                        <button id="btnUpdateCapture" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2">
+                            <i class="icon-check"></i>
+                            Actualizar Métrica
+                        </button>
+                        <button id="btnCancelEdit" class="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3 px-4 rounded-lg flex items-center justify-center gap-2">
+                            <i class="icon-close"></i>
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `);
+
+        $('#edit-capture-info').html(`
+            <div class="bg-gray-50 p-3 rounded-lg mb-3">
+                <div class="flex items-center gap-2 mb-2">
+                    <i class="${capture.social_network_icon}" style="color: ${capture.social_network_color}; font-size: 24px;"></i>
+                    <span class="font-semibold">${capture.social_network_name}</span>
+                </div>
+                <p class="text-sm text-gray-600">Fecha: ${capture.date}</p>
+            </div>
+        `);
+
+        const metricsContainer = $('#edit-metrics-inputs');
+        capture.metrics.forEach(metric => {
+            const input = $(`
+                <div class="mb-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">${metric.name}</label>
+                    <input type="number" 
+                           class="form-control w-full metric-input-edit" 
+                           data-metric-id="${metric.metric_id}"
+                           data-historial-metric-id="${metric.historial_metric_id}"
+                           value="${metric.value}"
+                           placeholder="0"
+                           step="1">
+                </div>
+            `);
+            metricsContainer.append(input);
+        });
+
+        $('#btnUpdateCapture').on('click', () => this.updateCapture(id));
+        $('#btnCancelEdit').on('click', () => this.showCaptureForm());
+    }
+
+    async updateCapture(id) {
+        const metrics = [];
+        $('.metric-input-edit').each(function () {
+            const value = $(this).val();
+            if (value) {
+                metrics.push({
+                    historial_metric_id: $(this).data('historial-metric-id'),
+                    metric_id: $(this).data('metric-id'),
+                    value: parseFloat(value)
+                });
+            }
+        });
+
+        if (metrics.length === 0) {
+            alert({ icon: "warning", text: "Por favor ingrese al menos una métrica" });
+            return;
+        }
+
+        const response = await useFetch({
+            url: api,
+            data: {
+                opc: "updateCaptureMetrics",
+                id: id,
+                metrics: JSON.stringify(metrics)
+            }
+        });
+
+        if (response.status === 200) {
+            alert({ icon: "success", text: response.message });
+            this.showCaptureForm();
+        } else {
+            alert({ icon: "error", text: response.message });
+        }
+    }
+
+    deleteCapture(id) {
+        this.swalQuestion({
+            opts: {
+                title: "¿Eliminar esta captura?",
+                text: "Esta acción no se puede deshacer",
+                icon: "warning",
+            },
+            data: {
+                opc: "deleteCapture",
+                id: id,
+            },
+            methods: {
+                send: () => {
+                    alert({ icon: "success", text: "Captura eliminada correctamente" });
+                    this.loadHistory();
+                },
+            },
+        });
     }
 
     async showAnnualReport() {
@@ -720,7 +924,7 @@ class RegisterSocialNetWork extends Templates {
         this.createTable({
             parent: "annual-report-table",
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
-            data: { 
+            data: {
                 opc: 'apiAnnualReport',
                 udn: udn,
                 social_network_id: networkId,
@@ -730,7 +934,7 @@ class RegisterSocialNetWork extends Templates {
             conf: { datatable: false, pag: 15 },
             attr: {
                 id: "tbAnnualReport",
-                theme: 'light',
+                theme: 'corporativo',
                 right: [13]
             },
         });
@@ -752,7 +956,7 @@ class RegisterSocialNetWork extends Templates {
         this.createTable({
             parent: "monthly-comparative-table",
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
-            data: { 
+            data: {
                 opc: 'apiMonthlyComparative',
                 udn: udn,
                 social_network_id: networkId,
@@ -762,7 +966,7 @@ class RegisterSocialNetWork extends Templates {
             conf: { datatable: false, pag: 15 },
             attr: {
                 id: "tbMonthlyComparative",
-                theme: 'light',
+                theme: 'corporativo',
                 center: [1, 2, 3],
                 right: [4]
             },
@@ -785,7 +989,7 @@ class RegisterSocialNetWork extends Templates {
         this.createTable({
             parent: "annual-comparative-table",
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
-            data: { 
+            data: {
                 opc: 'apiAnnualComparative',
                 udn: udn,
                 social_network_id: networkId,
@@ -795,7 +999,7 @@ class RegisterSocialNetWork extends Templates {
             conf: { datatable: false, pag: 15 },
             attr: {
                 id: "tbAnnualComparative",
-                theme: 'light',
+                theme: 'corporativo',
                 center: [1, 2, 3],
                 right: [4]
             },
@@ -830,14 +1034,7 @@ class AdminMetrics extends Templates {
         this.createfilterBar({
             parent: `filterBar${this.PROJECT_NAME}`,
             data: [
-                {
-                    opc: "select",
-                    id: "udn",
-                    lbl: "UDN",
-                    class: "col-sm-3",
-                    data: lsudn,
-                    onchange: `adminMetrics.lsMetrics()`,
-                },
+
                 {
                     opc: "select",
                     id: "active",
@@ -862,10 +1059,7 @@ class AdminMetrics extends Templates {
 
     lsMetrics() {
         $(`#container${this.PROJECT_NAME}`).html(`
-            <div class="px-2 pt-2 pb-2">
-                <h2 class="text-2xl font-semibold">📊 Administrador de Métricas</h2>
-                <p class="text-gray-400">Gestiona las métricas de captura por red social</p>
-            </div>
+           
             <div id="container-table-metrics"></div>
         `);
 
@@ -877,7 +1071,7 @@ class AdminMetrics extends Templates {
             conf: { datatable: true, pag: 10 },
             attr: {
                 id: "tbMetrics",
-                theme: 'light',
+                theme: 'corporativo',
                 center: [2]
             },
         });
@@ -890,29 +1084,7 @@ class AdminMetrics extends Templates {
             bootbox: {
                 title: 'Agregar Métrica',
             },
-            json: [
-                {
-                    opc: "select",
-                    id: "social_network_id",
-                    lbl: "Red Social",
-                    class: "col-12 mb-3",
-                    data: socialNetworks,
-                    text: "valor",
-                    value: "id"
-                },
-                {
-                    opc: "input",
-                    id: "name",
-                    lbl: "Nombre de la Métrica",
-                    class: "col-12 mb-3"
-                },
-                {
-                    opc: "textarea",
-                    id: "description",
-                    lbl: "Descripción",
-                    class: "col-12 mb-3"
-                }
-            ],
+            json: this.jsonMetric(),
             success: (response) => {
                 if (response.status === 200) {
                     alert({ icon: "success", text: response.message });
@@ -942,29 +1114,7 @@ class AdminMetrics extends Templates {
                 title: 'Editar Métrica',
             },
             autofill: metric,
-            json: [
-                {
-                    opc: "select",
-                    id: "social_network_id",
-                    lbl: "Red Social",
-                    class: "col-12 mb-3",
-                    data: socialNetworks,
-                    text: "valor",
-                    value: "id"
-                },
-                {
-                    opc: "input",
-                    id: "name",
-                    lbl: "Nombre de la Métrica",
-                    class: "col-12 mb-3"
-                },
-                {
-                    opc: "textarea",
-                    id: "description",
-                    lbl: "Descripción",
-                    class: "col-12 mb-3"
-                }
-            ],
+            json: this.jsonMetric(),
             success: (response) => {
                 if (response.status === 200) {
                     alert({ icon: "success", text: response.message });
@@ -992,6 +1142,27 @@ class AdminMetrics extends Templates {
                 send: () => this.lsMetrics(),
             },
         });
+    }
+
+    jsonMetric() {
+        return [
+            {
+                opc: "select",
+                id: "red_social_id",
+                lbl: "Red Social",
+                class: "col-12 mb-3",
+                data: socialNetworks,
+                text: "valor",
+                value: "id"
+            },
+            {
+                opc: "input",
+                id: "nombre",
+                lbl: "Nombre de la Métrica",
+                class: "col-12 mb-3"
+            },
+
+        ];
     }
 }
 
@@ -1022,14 +1193,7 @@ class AdminSocialNetWork extends Templates {
         this.createfilterBar({
             parent: `filterBar${this.PROJECT_NAME}`,
             data: [
-                {
-                    opc: "select",
-                    id: "udn",
-                    lbl: "UDN",
-                    class: "col-sm-3",
-                    data: lsudn,
-                    onchange: `adminSocialNetWork.lsSocialNetworks()`,
-                },
+
                 {
                     opc: "select",
                     id: "active",
@@ -1053,13 +1217,7 @@ class AdminSocialNetWork extends Templates {
     }
 
     lsSocialNetworks() {
-        $(`#container${this.PROJECT_NAME}`).html(`
-            <div class="px-2 pt-2 pb-2">
-                <h2 class="text-2xl font-semibold">📱 Administrador de Redes Sociales</h2>
-                <p class="text-gray-400">Gestiona el catálogo de redes sociales</p>
-            </div>
-            <div id="container-table-networks"></div>
-        `);
+        $(`#container${this.PROJECT_NAME}`).html(`<div id="container-table-networks"></div>`);
 
         this.createTable({
             parent: "container-table-networks",
@@ -1069,7 +1227,7 @@ class AdminSocialNetWork extends Templates {
             conf: { datatable: true, pag: 10 },
             attr: {
                 id: "tbNetworks",
-                theme: 'light',
+                theme: 'corporativo',
                 center: [2, 3]
             },
         });
@@ -1082,34 +1240,7 @@ class AdminSocialNetWork extends Templates {
             bootbox: {
                 title: 'Agregar Red Social',
             },
-            json: [
-                {
-                    opc: "input",
-                    id: "name",
-                    lbl: "Nombre de la Red Social",
-                    class: "col-12 mb-3"
-                },
-                {
-                    opc: "input",
-                    id: "icon",
-                    lbl: "Icono (Font Awesome)",
-                    class: "col-12 mb-3",
-                    placeholder: "fab fa-facebook"
-                },
-                {
-                    opc: "input",
-                    id: "color",
-                    lbl: "Color (Hex)",
-                    class: "col-12 mb-3",
-                    placeholder: "#1877F2"
-                },
-                {
-                    opc: "textarea",
-                    id: "description",
-                    lbl: "Descripción",
-                    class: "col-12 mb-3"
-                }
-            ],
+            json: this.jsonSocialNetwork(),
             success: (response) => {
                 if (response.status === 200) {
                     alert({ icon: "success", text: response.message });
@@ -1139,34 +1270,7 @@ class AdminSocialNetWork extends Templates {
                 title: 'Editar Red Social',
             },
             autofill: network,
-            json: [
-                {
-                    opc: "input",
-                    id: "name",
-                    lbl: "Nombre de la Red Social",
-                    class: "col-12 mb-3"
-                },
-                {
-                    opc: "input",
-                    id: "icon",
-                    lbl: "Icono (Font Awesome)",
-                    class: "col-12 mb-3",
-                    placeholder: "fab fa-facebook"
-                },
-                {
-                    opc: "input",
-                    id: "color",
-                    lbl: "Color (Hex)",
-                    class: "col-12 mb-3",
-                    placeholder: "#1877F2"
-                },
-                {
-                    opc: "textarea",
-                    id: "description",
-                    lbl: "Descripción",
-                    class: "col-12 mb-3"
-                }
-            ],
+            json: this.jsonSocialNetwork(),
             success: (response) => {
                 if (response.status === 200) {
                     alert({ icon: "success", text: response.message });
@@ -1195,4 +1299,30 @@ class AdminSocialNetWork extends Templates {
             },
         });
     }
+
+    jsonSocialNetwork() {
+        return [
+            {
+                opc: "input",
+                id: "nombre",
+                lbl: "Nombre de la Red Social",
+                class: "col-12 mb-3"
+            },
+            {
+                opc: "input",
+                id: "icono",
+                lbl: "Icono ",
+                class: "col-12 mb-3",
+                placeholder: "icon-facebook"
+            },
+            {
+                opc: "input",
+                id: "color",
+                lbl: "Color (Hex)",
+                class: "col-12 mb-3",
+                placeholder: "#1877F2"
+            },
+        ];
+    }
+
 }

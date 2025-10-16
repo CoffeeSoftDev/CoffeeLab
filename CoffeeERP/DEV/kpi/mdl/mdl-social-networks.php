@@ -9,16 +9,17 @@ class mdl extends CRUD {
 
     public function __construct() {
         $this->util = new Utileria;
-        $this->bd = "erp_varoch.";
+        $this->bd = "rfwsmqex_marketing.";
     }
 
     function lsUDN() {
-        return $this->_Select([
-            'table' => "{$this->bd}subsidiaries",
-            'values' => "id, name AS valor",
-            'where' => 'active = ?',
-            'data' => [1]
-        ]);
+        $query = "
+            SELECT idUDN AS id, UDN AS valor
+            FROM udn
+            WHERE Stado = 1 AND idUDN NOT IN (8, 10, 7)
+            ORDER BY UDN DESC
+        ";
+        return $this->_Read($query, null);
     }
 
     function lsSocialNetworksFilter($array) {
@@ -44,17 +45,17 @@ class mdl extends CRUD {
     function listSocialNetworks($array) {
         return $this->_Select([
             'table' => "{$this->bd}red_social",
-            'values' => "id, nombre AS name, color, active",
+            'values' => "id, nombre ,icono, color, active",
             'where' => 'active = ?',
             'order' => ['DESC' => 'id'],
-            'data' => [$array[1]]
+            'data' => $array
         ]);
     }
 
     function getSocialNetworkById($array) {
         $result = $this->_Select([
             'table' => "{$this->bd}red_social",
-            'values' => 'id, nombre AS name, color, active',
+            'values' => 'id, icono,nombre , color, active',
             'where' => 'id = ?',
             'data' => $array
         ]);
@@ -90,29 +91,26 @@ class mdl extends CRUD {
     }
 
     function listMetrics($array) {
-        $leftjoin = [
-            $this->bd . 'red_social' => 'metrica_red.red_social_id = red_social.id'
-        ];
-
-        return $this->_Select([
-            'table' => "{$this->bd}metrica_red",
-            'values' => "
-                metrica_red.id,
-                metrica_red.nombre AS name,
-                metrica_red.active,
-                red_social.nombre AS social_network_name
-            ",
-            'leftjoin' => $leftjoin,
-            'where' => 'metrica_red.active = ?',
-            'order' => ['DESC' => 'metrica_red.id'],
-            'data' => [$array[1]]
-        ]);
+        $query = "
+            SELECT 
+                m.id,
+                m.nombre AS name,
+                m.active,
+                r.nombre AS social_network_name,
+                r.icono AS social_network_icon,
+                r.color AS social_network_color
+            FROM {$this->bd}metrica_red m
+            LEFT JOIN {$this->bd}red_social r ON m.red_social_id = r.id
+            WHERE m.active = ?
+            ORDER BY m.id DESC
+        ";
+        return $this->_Read($query, $array);
     }
 
     function getMetricById($array) {
         $result = $this->_Select([
             'table' => "{$this->bd}metrica_red",
-            'values' => 'id, nombre AS name, red_social_id AS social_network_id, active',
+            'values' => 'id, nombre , red_social_id , active',
             'where' => 'id = ?',
             'data' => $array
         ]);
@@ -342,5 +340,84 @@ class mdl extends CRUD {
             ORDER BY m.nombre
         ";
         return $this->_Read($query, [$array[2], $array[2], $array[0], $array[1]]);
+    }
+
+    function getHistoryMetrics($array) {
+        $query = "
+            SELECT 
+                h.id,
+                h.año,
+                h.mes,
+                h.fecha_creacion,
+                rs.nombre AS social_network_name,
+                rs.icono AS social_network_icon,
+                rs.color AS social_network_color,
+                GROUP_CONCAT(
+                    CONCAT(m.nombre, ':', mh.cantidad) 
+                    SEPARATOR '|'
+                ) AS metrics_data
+            FROM {$this->bd}historial_red h
+            LEFT JOIN {$this->bd}red_social rs ON h.red_social_id = rs.id
+            LEFT JOIN {$this->bd}metrica_historial_red mh ON h.id = mh.historial_id
+            LEFT JOIN {$this->bd}metrica_red m ON mh.metrica_id = m.id
+            WHERE h.udn_id = ?
+            AND h.active = 1
+            GROUP BY h.id, h.año, h.mes, h.fecha_creacion, rs.nombre, rs.icono, rs.color
+            ORDER BY h.fecha_creacion DESC
+            LIMIT 10
+        ";
+        return $this->_Read($query, $array);
+    }
+
+    function updateCapture($array) {
+        return $this->_Update([
+            'table' => "{$this->bd}historial_red",
+            'values' => $array['values'],
+            'where' => 'id = ?',
+            'data' => $array['data']
+        ]);
+    }
+
+    function _getCaptureById($array) {
+        $query = "
+            SELECT 
+                h.id,
+                h.año,
+                h.mes,
+                h.fecha_creacion,
+                h.red_social_id,
+                rs.nombre AS social_network_name,
+                rs.icono AS social_network_icon,
+                rs.color AS social_network_color
+            FROM {$this->bd}historial_red h
+            LEFT JOIN {$this->bd}red_social rs ON h.red_social_id = rs.id
+            WHERE h.id = ?
+            AND h.active = 1
+        ";
+        $result = $this->_Read($query, $array);
+        return $result[0] ?? null;
+    }
+
+    function getMetricsByHistorialId($array) {
+        $query = "
+            SELECT 
+                mh.id AS historial_metric_id,
+                mh.cantidad AS value,
+                mh.metrica_id AS metric_id,
+                m.nombre AS name
+            FROM {$this->bd}metrica_historial_red mh
+            LEFT JOIN {$this->bd}metrica_red m ON mh.metrica_id = m.id
+            WHERE mh.historial_id = ?
+        ";
+        return $this->_Read($query, $array);
+    }
+
+    function updateMetricHistorial($array) {
+        return $this->_Update([
+            'table' => "{$this->bd}metrica_historial_red",
+            'values' => $array['values'],
+            'where' => 'id = ?',
+            'data' => $array['data']
+        ]);
     }
 }

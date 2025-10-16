@@ -720,7 +720,6 @@ class Client extends Templates {
             return [
                 'row' => $rows,
                 'ls'  => $data,
-                $_SESSION['SUB']
             ];
         }
 
@@ -749,9 +748,8 @@ class Client extends Templates {
             $status = 500;
             $message = 'No se pudo agregar el producto';
             $_POST['date_creation'] = date('Y-m-d H:i:s');
-            $_POST['subsidiaries_id'] = $_SESSION['SUB'];
 
-            $exists = $this->existsProductoByName([$_POST['name'], $_SESSION['SUB']]);
+            $exists = $this->existsProductoByName([$_POST['name']]);
 
             if ($exists === 0) {
                 $create = $this->createProducto($this->util->sql($_POST));
@@ -776,16 +774,12 @@ class Client extends Templates {
             $status = 500;
             $message = 'Error al editar producto';
 
-            // if (!$this->existsOtherProductoByName([$_POST['name'], $id, $_SESSION['SUB']])) {
-            //     $status = 409;
-            //     $message = 'Ya existe otro producto con ese nombre.';
-            // } else {
+        
                 $edit = $this->updateProducto($this->util->sql($_POST, 1));
                 if ($edit) {
                     $status = 200;
                     $message = 'Producto editado correctamente';
                 }
-            // }
 
             return [
                 'status' => $status,
@@ -864,7 +858,6 @@ class Client extends Templates {
 
             $_POST['date_creation']   = date('Y-m-d H:i:s');
             $_POST['active']          = 1;
-            $_POST['subsidiaries_id'] = $_SESSION['SUB'];
 
             $data   = $this->util->sql($_POST);
             $create = $this->createCategory($data);
@@ -914,7 +907,7 @@ class Client extends Templates {
         function listClient() {
             $__row = [];
 
-            $ls = $this->lsClient([1, $_SESSION['SUB']]);
+            $ls = $this->lsClient([1]);
 
             foreach ($ls as $key) {
 
@@ -951,7 +944,6 @@ class Client extends Templates {
         function addClient() {
             $_POST['date_create']    = date('Y-m-d H:i:s');
             $_POST['active']         = 1;
-            $_POST['subsidiaries_id'] = $_SESSION['SUB'];
 
             $data   = $this->util->sql($_POST);
             $create = $this->createClient($data);
@@ -1073,7 +1065,7 @@ class mdl extends CRUD {
                 pedidos_products.active",
 
             'leftjoin' => $leftjoin,
-            'where'    => 'pedidos_products.active = ? AND pedidos_products.subsidiaries_id = ?',
+            'where'    => 'pedidos_products.active = ? ',
             'order'    => ['DESC' => 'pedidos_products.id'],
             'data'     => $array
         ]);
@@ -1094,7 +1086,7 @@ class mdl extends CRUD {
             FROM {$this->bd}pedidos_products
             WHERE LOWER(name) = LOWER(?)
             AND active = 1
-            AND subsidiaries_id = ?
+           
         ";
 
         $exists = $this->_Read($query, $array);
@@ -1105,7 +1097,7 @@ class mdl extends CRUD {
         $res = $this->_Select([
             'table'  => $this->bd . 'pedidos_products',
             'values' => 'id',
-            'where'  => 'LOWER(name) = LOWER(?) AND id != ? AND active = 1 AND subsidiaries_id = ?',
+            'where'  => 'LOWER(name) = LOWER(?) AND id != ? AND active = 1 ',
             'data'   => $array
         ]);
         return count($res) <= 0;
@@ -1199,7 +1191,7 @@ class mdl extends CRUD {
                 phone,
                 email,
                 DATE_FORMAT(date_create, '%Y-%m-%d') as date_create",
-            'where'  => 'active = ? AND subsidiaries_id = ?',
+            'where'  => 'active = ?' 
             'order'  => ['DESC' => 'id'],
             'data'   => $array
         ]);
