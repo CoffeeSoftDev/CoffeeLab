@@ -104,9 +104,13 @@ class Pedidos extends MPedidos{
 
                 'Fecha de entrega' => formatSpanishDate($order['date_order']),
                 'Hora de entrega'         => $order['time_order'] ,
-                // 'Personas'         => '',
                 'Estado'          => status($order['idStatus']),
-                // 'Entregado'          => '',
+                
+                'Entrega' => [
+                    'html' => renderDeliveryBadge(array_merge($order, ['folio' => $Folio])),
+                    'class' => 'text-center'
+                ],
+                
                 'dropdown'        => dropdownOrder($order['id'], $order['idStatus']),
             ];
         }
@@ -1026,6 +1030,57 @@ class Pedidos extends MPedidos{
         return $this->addHistories($this->util->sql($history));
     }
 
+    function updateDeliveryStatus() {
+        $status = 500;
+        $message = 'Error al actualizar el estado de entrega';
+        
+        $id = $_POST['id'] ?? null;
+        $is_delivered = $_POST['is_delivered'] ?? null;
+        
+        if (!$id || !isset($is_delivered)) {
+            return [
+                'status' => 400,
+                'message' => 'Parámetros incompletos'
+            ];
+        }
+        
+        $order = $this->getOrderID([$id]);
+        
+        if (empty($order)) {
+            return [
+                'status' => 404,
+                'message' => 'Pedido no encontrado'
+            ];
+        }
+        
+        if ($order[0]['status'] == 1) {
+            return [
+                'status' => 403,
+                'message' => 'No se puede actualizar el estado de entrega de una cotización'
+            ];
+        }
+        
+        $update = $this->updateOrderDeliveryStatus([
+            'id' => $id,
+            'is_delivered' => $is_delivered
+        ]);
+        
+        if ($update) {
+            $status = 200;
+            $statusText = $is_delivered == 1 ? 'entregado' : 'no entregado';
+            $message = "El pedido fue marcado como {$statusText}";
+        }
+        
+        return [
+            'status' => $status,
+            'message' => $message,
+            'data' => [
+                'id' => $id,
+                'is_delivered' => $is_delivered
+            ]
+        ];
+    }
+
 }
 
    //
@@ -1085,6 +1140,35 @@ function status($idEstado){
             return '<span class="bg-[#572A34] w-32 text-[#E05562] text-xs font-semibold mr-2 px-3 py-1 rounded">CANCELADO</span>';
 
     }
+}
+
+function renderDeliveryBadge($order) {
+    $orderId = $order['id'];
+    $status = $order['idStatus'];
+    $isDelivered = isset($order['is_delivered']) ? intval($order['is_delivered']) : 0;
+    $folio = $order['folio'] ?? '';
+    
+    if ($status == 1) {
+        return '<span class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-400 text-gray-700">
+                    <i class="icon-minus"></i> No aplica
+                </span>';
+    }
+    
+    $bgColor = $isDelivered === 1 ? 'bg-green-500' : 'bg-red-500';
+    $icon = $isDelivered === 1 ? 'icon-ok' : 'icon-cancel';
+    $text = $isDelivered === 1 ? 'Entregado' : 'No entregado';
+    
+    $clickable = $status != 4;
+    $cursorClass = $clickable ? 'cursor-pointer hover:opacity-80' : 'cursor-not-allowed opacity-60';
+    $onclick = $clickable ? "onclick=\"app.handleDeliveryClick({$orderId}, {$isDelivered}, '{$folio}')\"" : '';
+    
+    return "<span 
+                class=\"px-3 py-1 rounded-full text-xs font-semibold {$bgColor} text-white {$cursorClass} transition\"
+                {$onclick}
+                data-order-id=\"{$orderId}\"
+                data-delivered=\"{$isDelivered}\">
+                <i class=\"{$icon}\"></i> {$text}
+            </span>";
 }
 
 

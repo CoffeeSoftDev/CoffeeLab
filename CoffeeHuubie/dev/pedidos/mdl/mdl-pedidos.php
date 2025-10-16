@@ -131,6 +131,7 @@ class MPedidos extends CRUD {
             order.total_pay,
             order.discount,
             order.info_discount,
+            order.is_delivered,
             order_clients. NAME AS name_client,
             order_clients.phone AS phone,
             order_clients.email AS email,
@@ -1063,6 +1064,18 @@ class MPedidos extends CRUD {
         ";
 
         return $this->_Read($query, $data);
+    }
+
+    function updateOrderDeliveryStatus($data) {
+        return $this->_Update([
+            'table' => "{$this->bd}order",
+            'values' => 'is_delivered = ?',
+            'where' => 'id = ?',
+            'data' => [
+                $data['is_delivered'],
+                $data['id']
+            ]
+        ]);
     }
 
 }

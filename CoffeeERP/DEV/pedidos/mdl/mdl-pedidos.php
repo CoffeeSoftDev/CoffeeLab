@@ -9,7 +9,7 @@ class mdl extends CRUD {
 
     public function __construct() {
         $this->util = new Utileria;
-        $this->bd = "database_name.";
+        $this->bd = "rfwsmqex_marketing.";
     }
 
     function lsUDN() {
@@ -44,7 +44,7 @@ class mdl extends CRUD {
 
     function lsCampanas($array) {
         return $this->_Select([
-            'table' => "{$this->bd}campana",
+            'table' => "{$this->bd}campaña",
             'values' => "id, nombre AS valor",
             'where' => 'active = ?',
             'order' => ['DESC' => 'fecha_creacion'],
@@ -52,40 +52,41 @@ class mdl extends CRUD {
         ]);
     }
 
-    function listPedidos($array) {
-        $leftjoin = [
-            $this->bd . 'cliente' => 'pedido.cliente_id = cliente.id',
-            $this->bd . 'canal' => 'pedido.canal_id = canal.id',
-            $this->bd . 'red_social' => 'pedido.red_social_id = red_social.id'
-        ];
-
+    function lsSocialNetworks($array) {
         return $this->_Select([
-            'table' => $this->bd . 'pedido',
-            'values' => "
-                pedido.id,
-                pedido.monto,
-                pedido.fecha_pedido,
-                pedido.hora_entrega,
-                pedido.fecha_creacion,
-                pedido.envio_domicilio,
-                pedido.llego_establecimiento,
-                pedido.pago_verificado,
-                pedido.notas,
-                pedido.active,
-                cliente.nombre AS cliente_nombre,
-                cliente.telefono AS cliente_telefono,
-                cliente.correo AS cliente_correo,
-                cliente.fecha_cumpleaños AS cliente_cumpleaños,
-                canal.nombre AS canal_nombre,
-                red_social.nombre AS red_social_nombre,
-                red_social.icono AS red_social_icono,
-                red_social.color AS red_social_color
-            ",
-            'leftjoin' => $leftjoin,
-            'where' => 'pedido.fecha_pedido BETWEEN ? AND ? AND pedido.udn_id = ? AND pedido.active = 1',
-            'order' => ['DESC' => 'pedido.fecha_creacion'],
-            'data' => $array
+            'table' => "{$this->bd}red_social",
+            'values' => "id, nombre AS valor",
+            'where' => 'active = ?',
+            'order' => ['ASC' => 'nombre'],
+            'data' => [1]
         ]);
+    }
+    // Pedidos
+
+    function listPedidos($array) {
+        $query = "
+            SELECT 
+                p.id,
+                p.monto,
+                p.fecha_pedido,
+                p.fecha_creacion,
+                p.envio_domicilio,
+                p.active,
+                c.nombre AS canal_nombre,
+                rs.nombre AS red_social_nombre,
+                rs.color AS red_social_color,
+                ca.nombre AS campana_nombre,
+                ca.estrategia AS campana_estrategia
+            FROM {$this->bd}pedido p
+            LEFT JOIN {$this->bd}canal c ON p.canal_id = c.id
+            LEFT JOIN {$this->bd}red_social rs ON p.red_social_id = rs.id
+            LEFT JOIN {$this->bd}campaña ca ON p.campaña_id = ca.id
+            WHERE p.fecha_pedido BETWEEN ? AND ? 
+            AND p.udn_id = ? 
+            AND p.active = 1
+            ORDER BY p.fecha_creacion DESC
+        ";
+        return $this->_Read($query, $array);
     }
 
     function getPedidoById($array) {

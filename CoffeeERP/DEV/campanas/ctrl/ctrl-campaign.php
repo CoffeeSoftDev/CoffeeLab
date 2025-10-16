@@ -327,9 +327,9 @@ function renderStatus($status) {
     }
 }
 
-function evaluar($value) {
-    return '$' . number_format($value, 2, '.', ',');
-}
+// function evaluar($value) {
+//     return '$' . number_format($value, 2, '.', ',');
+// }
 
 function renderBadge($text, $color = 'green') {
     $colors = [

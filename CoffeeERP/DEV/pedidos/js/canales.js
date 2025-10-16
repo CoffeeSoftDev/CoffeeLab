@@ -1,10 +1,10 @@
 let canales;
 const apiCanales = 'ctrl/ctrl-canales.php';
 
-$(async () => {
-    canales = new Canales(apiCanales, 'root');
-    canales.render();
-});
+// $(async () => {
+//     canales = new Canales(apiCanales, 'root');
+//     canales.render();
+// });
 
 class Canales extends Templates {
     constructor(link, div_modulo) {

@@ -1,10 +1,10 @@
 let productos;
 const apiProductos = 'ctrl/ctrl-productos.php';
 
-$(async () => {
-    productos = new Productos(apiProductos, 'root');
-    productos.render();
-});
+// $(async () => {
+//     // productos = new Productos(apiProductos, 'root');
+//     // productos.render();
+// });
 
 class Productos extends Templates {
     constructor(link, div_modulo) {

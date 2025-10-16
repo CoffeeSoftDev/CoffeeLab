@@ -11,11 +11,13 @@ require_once '../mdl/mdl-pedidos.php';
 class ctrl extends mdl {
 
     function init() {
+
         return [
-            'udn' => $this->lsUDN(),
-            'canales' => $this->lsCanales([1]),
-            'productos' => $this->lsProductos([1]),
-            'campanas' => $this->lsCampanas([1])
+            'udn'            => $this-> lsUDN(),
+            'canales'        => $this-> lsCanales([1]),
+            'productos'      => $this-> lsProductos([1]),
+            'campanas'       => $this-> lsCampanas([1]),
+            'redes_sociales' => $this-> lsSocialNetworks([])
         ];
     }
 
@@ -23,33 +25,36 @@ class ctrl extends mdl {
         $__row = [];
         $fi = $_POST['fi'];
         $ff = $_POST['ff'];
-        $udn = $_POST['udn'] ?? $_SESSION['SUB'];
+        $udn = $_POST['udn'] ;
         
         $ls = $this->listPedidos([$fi, $ff, $udn]);
         
         foreach ($ls as $key) {
-            $diasTranscurridos = (strtotime(date('Y-m-d')) - strtotime($key['fecha_creacion'])) / 86400;
-            $puedeEditar = $diasTranscurridos <= 7;
+            // $diasTranscurridos = (strtotime(date('Y-m-d')) - strtotime($key['fecha_creacion'])) / 86400;
+            $diasTranscurridos = 4;
+            $puedeEditar       = $diasTranscurridos <= 7;
             
             $__row[] = [
-                'id' => $key['id'],
-                'Fecha' => formatSpanishDate($key['fecha_pedido']),
-                'Hora' => $key['hora_entrega'],
-                'Cliente' => $key['cliente_nombre'],
-                'Teléfono' => $key['cliente_telefono'],
-                'Canal' => [
-                    'html' => '<div class="flex items-center gap-2">
-                                <i class="' . $key['red_social_icono'] . '" style="color:' . $key['red_social_color'] . '"></i>
-                                <span>' . $key['canal_nombre'] . '</span>
-                              </div>',
-                    'class' => 'text-left'
-                ],
-                'Monto' => evaluar($key['monto']),
-                'Envío' => $key['envio_domicilio'] ? 'Domicilio' : 'Recoger',
-                'Pago' => renderPaymentStatus($key['pago_verificado']),
-                'Llegada' => renderArrivalStatus($key['llego_establecimiento']),
-                'Estado' => renderStatus($key['active']),
-                'dropdown' => dropdown($key['id'], $key['active'], $puedeEditar, $key['pago_verificado'])
+                'id'       => $key['id'],
+                // 'Fecha'    => formatSpanishDate($key['fecha_pedido']),
+                // // 'Hora'     => $key['hora_entrega'],
+                // // 'Cliente'  => $key['cliente_nombre'],
+                // // 'Teléfono' => $key['cliente_telefono'],
+                
+                // 'Canal'    => [
+                //     'html' => '<div class="flex items-center gap-2">
+                //                 <i class = "' . $key['red_social_icono'] . '" style = "color:' . $key['red_social_color'] . '"></i>
+                //                 <span>' . $key['canal_nombre'] . '</span>
+                //               </div>',
+                //     'class' => 'text-left'
+                // ],
+
+                // 'Monto'    => evaluar($key['monto']),
+                // 'Envío'    => $key['envio_domicilio'] ? 'Domicilio' : 'Recoger',
+                // 'Pago'     => renderPaymentStatus($key['pago_verificado']),
+                // 'Llegada'  => renderArrivalStatus($key['llego_establecimiento']),
+                // 'Estado'   => renderStatus($key['active']),
+                'dropdown' => dropdown($key['id'], $key['active'], $puedeEditar,1)
             ];
         }
         
@@ -82,22 +87,21 @@ class ctrl extends mdl {
         $message = 'Error al crear pedido';
         
         $_POST['fecha_creacion'] = date('Y-m-d H:i:s');
-        $_POST['user_id'] = $_SESSION['USER_ID'];
-        $_POST['udn_id'] = $_SESSION['SUB'];
+        $_POST['udn_id'] = 4;
         $_POST['active'] = 1;
         $_POST['pago_verificado'] = 0;
         
-        $clienteExiste = $this->getClienteByPhone([$_POST['cliente_telefono'], $_SESSION['SUB']]);
+        $clienteExiste = $this->getClienteByPhone([$_POST['cliente_telefono'], 4]);
         
         if (!$clienteExiste) {
             $clienteData = [
-                'nombre' => $_POST['cliente_nombre'],
-                'telefono' => $_POST['cliente_telefono'],
-                'correo' => $_POST['cliente_correo'] ?? null,
+                'nombre'           => $_POST['cliente_nombre'],
+                'telefono'         => $_POST['cliente_telefono'],
+                'correo'           => $_POST['cliente_correo'] ?? null,
                 'fecha_cumpleaños' => $_POST['cliente_cumpleaños'] ?? null,
-                'fecha_creacion' => date('Y-m-d H:i:s'),
-                'udn_id' => $_SESSION['SUB'],
-                'active' => 1
+                'fecha_creacion'   => date('Y-m-d H:i:s'),
+                'udn_id'           => 4,
+                'active'           => 1
             ];
             
             $clienteId = $this->createCliente($this->util->sql($clienteData));
@@ -105,8 +109,21 @@ class ctrl extends mdl {
         } else {
             $_POST['cliente_id'] = $clienteExiste['id'];
         }
+
+        $values = $this->util->sql([
+            'monto'            => $_POST['monto'],
+            'envio_domicilio'  => $_POST['envio_domicilio'],
+            'fecha_pedido'     => $_POST['fecha_pedido'],
+
+            'campaña_id'       => $_POST['campana_id'],
+            'canal_id'         => $_POST['canal_id'],
+            'cliente_id'       => $_POST['cliente_id'],
+            'udn_id'           => $_POST['udn_id'],
+            'red_social_id'    => $_POST['red_social_id'],
+            'active'           => $_POST['active'],
+        ]);
         
-        $create = $this->createPedido($this->util->sql($_POST));
+        $create = $this->createPedido($values);
         
         if ($create) {
             $status = 200;
@@ -115,7 +132,8 @@ class ctrl extends mdl {
         
         return [
             'status' => $status,
-            'message' => $message
+            'message' => $message,
+            $values
         ];
     }
 

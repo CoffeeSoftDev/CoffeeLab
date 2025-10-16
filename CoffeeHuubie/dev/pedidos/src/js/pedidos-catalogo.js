@@ -1233,7 +1233,7 @@ class CatalogProduct extends Pos {
 
         const modal = bootbox.dialog({
             closeButton: true,
-            title: `<h2 class="text-lg text-white"> 🎂 ${product.name} </h2>`,
+            title: `<h2 class="text-lg "> 🎂 ${product.name} </h2>`,
             message: `<div><form id="formEditProducto" novalidate></form></div>`
         });
 

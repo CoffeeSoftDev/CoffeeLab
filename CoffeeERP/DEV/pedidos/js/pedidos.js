@@ -1,13 +1,14 @@
 let pedidos;
 const apiPedidos = 'ctrl/ctrl-pedidos.php';
-let canales, productos, campanas, lsudn;
+let canales, productos, campanas, lsudn,redes_sociales;
 
 $(async () => {
     const data = await useFetch({ url: apiPedidos, data: { opc: "init" } });
-    canales = data.canales;
-    productos = data.productos;
-    campanas = data.campanas;
-    lsudn = data.udn;
+    canales        = data.canales;
+    productos      = data.productos;
+    campanas       = data.campanas;
+    lsudn          = data.udn;
+    redes_sociales = data.redes_sociales;
 
     pedidos = new Pedidos(apiPedidos, 'root');
     pedidos.render();
@@ -24,10 +25,11 @@ class Pedidos extends Templates {
     }
 
     layout() {
+        
         this.primaryLayout({
             parent: 'root',
             id: this.PROJECT_NAME,
-            class: 'w-full min-h-screen bg-[#0f172a]',
+            class: 'w-full min-h-screen ',
             card: {
                 filterBar: { class: 'w-full border-b border-gray-700 pb-4', id: `filterBar${this.PROJECT_NAME}` },
                 container: { class: 'w-full my-4', id: `container${this.PROJECT_NAME}` }
@@ -36,7 +38,7 @@ class Pedidos extends Templates {
 
         $(`#${this.PROJECT_NAME}`).prepend(`
             <div class="px-6 pt-6 pb-4">
-                <h1 class="text-3xl font-bold text-white">📦 Gestión de Pedidos</h1>
+                <h1 class="text-3xl font-bold ">📦 Gestión de Pedidos</h1>
                 <p class="text-gray-400 mt-2">Captura, visualización y administración de pedidos diarios</p>
             </div>
         `);
@@ -44,7 +46,7 @@ class Pedidos extends Templates {
         this.tabLayout({
             parent: `container${this.PROJECT_NAME}`,
             id: `tabs${this.PROJECT_NAME}`,
-            theme: "dark",
+            theme: "corporativo",
             type: "short",
             json: [
                 {
@@ -70,9 +72,9 @@ class Pedidos extends Templates {
     showCapturaForm() {
         $(`#container-captura`).html(`
             <div class="px-6 py-4">
-                <div class="bg-gray-800 rounded-xl p-6">
-                    <h2 class="text-xl font-semibold text-white mb-4">📝 Nuevo Pedido</h2>
-                    <div id="formCapturaPedido"></div>
+                <div class=" rounded-xl p-6">
+                    <h2 class="text-xl font-semibold mb-4">📝 Nuevo Pedido</h2>
+                    <form id="formCapturaPedido" novalidate></div>
                 </div>
             </div>
         `);
@@ -323,7 +325,7 @@ class Pedidos extends Templates {
                 opc: "label",
                 id: "lblCliente",
                 text: "Información del cliente",
-                class: "col-12 fw-bold text-lg mb-2 text-white"
+                class: "col-12 fw-bold text-lg mb-2 "
             },
             {
                 opc: "input",
@@ -413,12 +415,7 @@ class Pedidos extends Templates {
                 id: "red_social_id",
                 lbl: "Red social",
                 class: "col-12 col-lg-4 mb-3",
-                data: [
-                    { id: 1, valor: "WhatsApp" },
-                    { id: 2, valor: "Facebook" },
-                    { id: 3, valor: "Instagram" },
-                    { id: 4, valor: "Llamada telefónica" }
-                ]
+                data: redes_sociales
             },
             {
                 opc: "textarea",

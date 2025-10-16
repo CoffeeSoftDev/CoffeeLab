@@ -430,6 +430,73 @@ class App extends Templates {
 
     }
 
+    handleDeliveryClick(orderId, currentStatus, folio) {
+        const newStatus = currentStatus === 1 ? 0 : 1;
+        const statusText = newStatus === 1 ? 'entregado' : 'no entregado';
+        
+        this.swalQuestion({
+            opts: {
+                title: '📦 Actualizar estado de entrega',
+                html: `¿El pedido <strong>${folio}</strong> fue ${statusText}?`,
+                icon: 'question',
+                confirmButtonText: newStatus === 1 ? '✓ Sí, entregado' : '✗ No entregado',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: newStatus === 1 ? '#10b981' : '#ef4444'
+            },
+            data: {
+                opc: 'updateDeliveryStatus',
+                id: orderId,
+                is_delivered: newStatus
+            },
+            methods: {
+                send: (response) => {
+                    if (response.status === 200) {
+                        this.updateBadgeUI(orderId, newStatus);
+                        
+                        alert({
+                            icon: 'success',
+                            title: 'Estado actualizado',
+                            text: response.message,
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    } else {
+                        alert({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message,
+                            btn1: true,
+                            btn1Text: 'Ok'
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+    updateBadgeUI(orderId, newStatus) {
+        const badge = $(`span[data-order-id="${orderId}"]`);
+        
+        if (badge.length === 0) return;
+        
+        const isDelivered = newStatus === 1;
+        const bgColor = isDelivered ? 'bg-green-500' : 'bg-red-500';
+        const icon = isDelivered ? 'icon-ok' : 'icon-cancel';
+        const text = isDelivered ? 'Entregado' : 'No entregado';
+        
+        const folio = badge.closest('tr').find('td:eq(1)').text();
+        
+        badge.fadeOut(200, function() {
+            $(this)
+                .removeClass('bg-green-500 bg-red-500')
+                .addClass(bgColor)
+                .attr('data-delivered', newStatus)
+                .attr('onclick', `app.handleDeliveryClick(${orderId}, ${newStatus}, '${folio}')`)
+                .html(`<i class="${icon}"></i> ${text}`)
+                .fadeIn(200);
+        });
+    }
+
     jsonOrder() {
         return [
             {
