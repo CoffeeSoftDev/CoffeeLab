@@ -132,9 +132,6 @@ class ctrl extends mdl {
     }
 }
 
-function evaluar($value) {
-    return '$' . number_format($value, 2, '.', ',');
-}
 
 $obj = new ctrl();
 echo json_encode($obj->{$_POST['opc']}());

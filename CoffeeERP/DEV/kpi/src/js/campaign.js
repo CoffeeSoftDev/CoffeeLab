@@ -1,4 +1,4 @@
-let api = 'ctrl/ctrl-campaign.php';
+let api = 'ctrl/ctrl-kpí-campaign.php';
 let app, dashboardSocialNetwork, registerSocialNetWork, adminMetrics, adminSocialNetWork;
 
 let udn, lsudn, socialNetworks, metrics;

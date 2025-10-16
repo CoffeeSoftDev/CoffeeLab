@@ -212,7 +212,7 @@ class Campaign extends Templates {
             conf: { datatable: true, pag: 15 },
             attr: {
                 id: "tbCampaigns",
-                theme: 'dark',
+                theme: 'corporativo',
                 center: [5]
             },
         });
