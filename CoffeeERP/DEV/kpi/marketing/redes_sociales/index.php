@@ -1,5 +1,4 @@
 <?php
-    if (empty($_COOKIE["IDU"])) require_once('../acceso/ctrl/ctrl-logout.php');
     require_once('layout/head.php');
     require_once('layout/core-libraries.php');
 ?>
@@ -10,7 +9,7 @@
 <script src="https://www.plugins.erp-varoch.com/ERP/JS/complementos.js"></script>
 
 <body>
-    <?php require_once('../layout/navbar.php'); ?>
+    <?php require_once('../../../layout/navbar.php'); ?>
 
     <main>
         <section id="sidebar"></section>
@@ -23,19 +22,13 @@
                 </ol>
             </nav>
 
-          
+            <div class="bg-[#DBDBDC] main-container" id="root"></div>
 
-            <div class=" main-container" id="root"></div>
-
-          <!-- Módulos del Sistema -->
-    <script src="js/dashboard.js?t=<?php echo time(); ?>"></script>
-    <script src="js/productos.js?t=<?php echo time(); ?>"></script>
-    <script src="js/canales.js?t=<?php echo time(); ?>"></script>
-    <script src="js/pedidos.js?t=<?php echo time(); ?>"></script>
-
-
+            <!-- Module Script -->
+            <script src='src/js/social-networks.js?t=<?php echo time(); ?>'></script>
         </div>
     </main>
 </body>
 </html>
+
 
