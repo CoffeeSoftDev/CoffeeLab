@@ -11,7 +11,7 @@ $(async () => {
     dashboard = new AppDashboard(api, "root");
     dashboardPedidos = new DashboardPedidos(api, "root");
 
-    dashboard.render();
+    // dashboard.render();
 });
 
 class AppDashboard extends Templates {

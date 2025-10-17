@@ -7,6 +7,7 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 
 require_once '../mdl/mdl-social-networks.php';
+require_once '../../../../conf/coffeSoft.php';
 
 class ctrl extends mdl {
 
@@ -15,8 +16,8 @@ class ctrl extends mdl {
         return [
             'udn'            => $this->lsUDN(),
             'lsudn'          => $this->lsUDN(),
-            'socialNetworks' => $this->lsSocialNetworksFilter([$_SESSION['SUB'], 1]),
-            'metrics'        => $this->lsMetricsFilter([$_SESSION['SUB'], 1])
+            'socialNetworks' => $this->lsSocialNetworksFilter([ 1]),
+            'metrics'        => $this->lsMetricsFilter([ 1])
         ];
     }
 
@@ -44,8 +45,7 @@ class ctrl extends mdl {
     }
 
     function lsSocialNetworks() {
-        $__row = [];
-        $udn = $_POST['udn'];
+        $__row  = [];
         $active = $_POST['active'];
 
         $ls = $this->listSocialNetworks([ $active]);
@@ -74,11 +74,10 @@ class ctrl extends mdl {
             }
 
             $__row[] = [
-                'id' => $key['id'],
-                'Icono' => '<i class="' . $key['icono'] . '" style="color:' . $key['color'] . '; font-size: 24px;"></i>',
+                'id'     => $key['id'],
+                'Icono'  => '<i class="' . $key['icono'] . '" style="color:' . $key['color'] . '; font-size: 24px;"></i>',
                 'Nombre' => $key['nombre'],
                 'Estado' => renderStatus($key['active']),
-                'Fecha' => formatSpanishDate($key['date_creation']),
                 'a' => $a
             ];
         }
@@ -176,10 +175,10 @@ class ctrl extends mdl {
 
     function lsMetrics() {
         $__row = [];
-        $udn = $_POST['udn'];
         $active = $_POST['active'];
+        $socialNetworkId = isset($_POST['socialNetwork']) && $_POST['socialNetwork'] !== '' ? $_POST['socialNetwork'] : null;
 
-        $ls = $this->listMetrics([ $active]);
+        $ls = $this->listMetrics([$active, $socialNetworkId]);
 
         foreach ($ls as $key) {
             $a = [];
@@ -205,15 +204,18 @@ class ctrl extends mdl {
             }
 
             $__row[] = [
-                'id'         => $key['id'],
-                'Metrica'    => $key['name'],
-                'Red Social' => '<div class="flex items-center gap-2">
-                                    <i class = "' . $key['social_network_icon'] . ' text-xs "
-                                       style = "color:' . $key['social_network_color'] . '; font-size: 15px;"></i>
+                'id'      => $key['id'],
+                'Metrica' => $key['name'],
+                'Red Social' => [
+                    'class' => 'text-center ',
+                    'html'  => '<div class="flex items-center gap-2">
+                                    <i class="' . $key['social_network_icon'] . ' text-xs" 
+                                    style="color:' . $key['social_network_color'] . '; font-size: 15px;"></i>
                                     <span>' . $key['social_network_name'] . '</span>
-                                </div>',
+                                </div>'
+                ],
                 'Estado' => renderStatus($key['active']),
-                'a' => $a
+                'a'      => $a
             ];
         }
 
@@ -627,12 +629,12 @@ class ctrl extends mdl {
 function renderStatus($status) {
     switch ($status) {
         case 1:
-            return '<span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-green-100 text-green-700">
+            return '<span class="inline-flex items-center gap-2 px-4 py-1 rounded text-sm font-medium bg-green-100 text-green-700">
                         <span class="w-2 h-2 bg-green-500 rounded-full"></span>
                         Activo
                     </span>';
         case 0:
-            return '<span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-red-100 text-red-700">
+            return '<span class="inline-flex items-center gap-2 px-4 py-1 rounded text-sm font-medium bg-red-100 text-red-700">
                         <span class="w-2 h-2 bg-red-500 rounded-full"></span>
                         Inactivo
                     </span>';

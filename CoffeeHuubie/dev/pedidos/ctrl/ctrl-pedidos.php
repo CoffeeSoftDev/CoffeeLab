@@ -1177,13 +1177,13 @@ function dropdownOrder($id, $status) {
 function status($idEstado){
     switch ($idEstado) {
         case 1:
-            return '<span class="bg-[#9EBBDB] w-32 text-[#2A55A3] text-xs font-semibold mr-2 px-3 py-1 rounded">COTIZACIÓN</span>';
+            return '<span class="bg-[#9EBBDB] w-32 text-[#2A55A3] text-[10px] font-semibold mr-2 px-3 py-1 rounded">COTIZACIÓN</span>';
         case 2:
-            return '<span class="bg-[#633112] w-32 text-[#F2C215] text-xs font-semibold mr-2 px-3 py-1 rounded">PENDIENTE</span>';
+            return '<span class="bg-[#633112] w-32 text-[#F2C215] text-[10px] font-semibold mr-2 px-3 py-1 rounded">PENDIENTE</span>';
         case 3:
-            return '<span class="bg-[#014737] w-32 text-[#3FC189] text-xs font-semibold mr-2 px-3 py-1 rounded">PAGADO</span>';
+            return '<span class="bg-[#014737] w-32 text-[#3FC189] text-[10px] font-semibold mr-2 px-3 py-1 rounded">PAGADO</span>';
         case 4:
-            return '<span class="bg-[#572A34] w-32 text-[#E05562] text-xs font-semibold mr-2 px-3 py-1 rounded">CANCELADO</span>';
+            return '<span class="bg-[#572A34] w-32 text-[#E05562] text-[10px] font-semibold mr-2 px-3 py-1 rounded">CANCELADO</span>';
 
     }
 }
@@ -1205,9 +1205,7 @@ function renderDeliveryStatus($order) {
     $folio       = $order['folio'] ?? '';
 
     if ($status == 1) {
-        return '<span class="bg-gray-400 w-32 text-gray-700 text-xs font-semibold mr-2 px-3 py-1 rounded-full">
-                    <i class="icon-minus"></i> No aplica
-                </span>';
+        return '<span text="text-gray-400">No aplica</span>';
     }
 
     $bgColor = $isDelivered === 1 ? 'bg-[#014737] ' : 'bg-[#572A34]';
@@ -1220,7 +1218,7 @@ function renderDeliveryStatus($order) {
     $onclick = $clickable ? "onclick=\"app.handleDeliveryClick({$orderId}, {$isDelivered}, '{$folio}')\"" : '';
 
     return "<span
-                class=\"{$bgColor} w-32 {$textColor} text-xs font-semibold mr-2 px-3 py-1 rounded {$cursorClass}\"
+                class=\"{$bgColor} w-32 {$textColor} text-[10px] font-semibold mr-2 px-2 py-1 rounded {$cursorClass}\"
                 {$onclick}
                 data-order-id=\"{$orderId}\"
                 data-delivered=\"{$isDelivered}\">

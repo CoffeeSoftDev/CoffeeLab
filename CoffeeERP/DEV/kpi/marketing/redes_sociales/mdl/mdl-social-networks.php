@@ -91,6 +91,26 @@ class mdl extends CRUD {
     }
 
     function listMetrics($array) {
+        $active = $array[0];
+        $socialNetworkId = isset($array[1]) ? $array[1] : null;
+
+        if ($socialNetworkId !== null) {
+            $query = "
+                SELECT 
+                    m.id,
+                    m.nombre AS name,
+                    m.active,
+                    r.nombre AS social_network_name,
+                    r.icono AS social_network_icon,
+                    r.color AS social_network_color
+                FROM {$this->bd}metrica_red m
+                LEFT JOIN {$this->bd}red_social r ON m.red_social_id = r.id
+                WHERE m.active = ? AND m.red_social_id = ?
+                ORDER BY m.id DESC
+            ";
+            return $this->_Read($query, [$active, $socialNetworkId]);
+        }
+
         $query = "
             SELECT 
                 m.id,
@@ -104,7 +124,7 @@ class mdl extends CRUD {
             WHERE m.active = ?
             ORDER BY m.id DESC
         ";
-        return $this->_Read($query, $array);
+        return $this->_Read($query, [$active]);
     }
 
     function getMetricById($array) {

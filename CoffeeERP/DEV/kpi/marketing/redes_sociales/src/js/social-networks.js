@@ -71,6 +71,12 @@ class App extends Templates {
                     onClick: () => registerSocialNetWork.render()
                 },
                 {
+                    id: "report",
+                    tab: "Reportes",
+                    active: true,
+                    onClick: () => registerSocialNetWork.render()
+                },
+                {
                     id: "adminMetrics",
                     tab: "Administrador de métricas",
                     onClick: () => adminMetrics.render()
@@ -1034,7 +1040,6 @@ class AdminMetrics extends Templates {
         this.createfilterBar({
             parent: `filterBar${this.PROJECT_NAME}`,
             data: [
-
                 {
                     opc: "select",
                     id: "active",
@@ -1043,6 +1048,17 @@ class AdminMetrics extends Templates {
                     data: [
                         { id: "1", valor: "Activos" },
                         { id: "0", valor: "Inactivos" }
+                    ],
+                    onchange: `adminMetrics.lsMetrics()`,
+                },
+                {
+                    opc: "select",
+                    id: "socialNetwork",
+                    lbl: "Red Social",
+                    class: "col-sm-3",
+                    data: [
+                        { id: "", valor: "-- Todas las redes sociales --" },
+                        ...socialNetworks
                     ],
                     onchange: `adminMetrics.lsMetrics()`,
                 },
@@ -1072,7 +1088,8 @@ class AdminMetrics extends Templates {
             attr: {
                 id: "tbMetrics",
                 theme: 'corporativo',
-                center: [2]
+                center: [2, 3],
+                striped: true
             },
         });
     }
@@ -1183,7 +1200,7 @@ class AdminSocialNetWork extends Templates {
             parent: `container-adminNetworks`,
             id: this.PROJECT_NAME,
             card: {
-                filterBar: { class: 'w-full border-b pb-2', id: `filterBar${this.PROJECT_NAME}` },
+                filterBar: { class: 'w-full ', id: `filterBar${this.PROJECT_NAME}` },
                 container: { class: 'w-full my-2 h-full', id: `container${this.PROJECT_NAME}` }
             }
         });
