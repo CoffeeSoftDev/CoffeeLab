@@ -274,43 +274,56 @@
     - Tabs: Captura, Listado, Historial
     - _Requirements: 1.1, 2.1, 7.1_
   
-  - [ ] 9.2 Implementar barra de filtros de pedidos
+  - [x] 9.2 Implementar barra de filtros de pedidos
+
+
+
     - Método filterBar() con createfilterBar
     - Filtros: UDN, fecha, canal, cliente, monto, modalidad, campaña
     - Integrar dataPicker para rango de fechas
     - Botón de exportar
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5_
+
   
   - [ ] 9.3 Implementar listado de pedidos
     - Método lsPedidos() usando createTable
     - Configurar DataTables con paginación
     - Columnas: Fecha, Cliente, Teléfono, Canal, Monto, Estado pago, Estado llegada, Campaña, Acciones
+
     - Formato de moneda y fechas
     - Dropdown de acciones según estado
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7_
   
-  - [ ] 9.4 Implementar formulario de captura de pedidos
+  - [x] 9.4 Implementar formulario de captura de pedidos
+
     - Método addPedido() usando createModalForm
     - Método jsonPedido() con estructura del formulario
     - Sección "Información del cliente": nombre, teléfono, email, cumpleaños
     - Sección "Datos del pedido": fecha, hora, canal, monto, modalidad, envío
     - Checkbox y select para campaña
     - Textarea para notas
+
     - Validaciones frontend
     - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 1.10, 1.11, 1.12, 1.13, 1.14, 1.15_
   
   - [ ] 9.5 Implementar edición de pedidos
     - Método editPedido(id) con useFetch para obtener datos
+
     - Usar createModalForm con autofill
     - Validar edad del pedido (7 días)
     - Deshabilitar edición si excede límite
     - Mostrar mensaje de error si no se puede editar
+
+
+
+
     - _Requirements: 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7_
   
   - [ ] 9.6 Implementar verificación de transferencias
     - Método verifyTransfer(id) con swalQuestion
     - Validar que modalidad sea transferencia
     - Actualizar estado de pago
+
     - Mostrar indicador visual de transferencias pendientes
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7_
   
@@ -318,6 +331,7 @@
     - Método registerArrival(id) con modal de confirmación
     - Opciones: Llegó, No llegó, Pendiente
     - Validar que sea tipo servicio
+
     - Actualizar estado de llegada
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6, 5.7_
   
@@ -326,6 +340,7 @@
     - Confirmación con folio del pedido
     - Cambiar estado a inactivo
     - Registrar usuario y fecha de cancelación
+
     - _Requirements: 3.6, 3.7_
   
   - [ ] 9.9 Implementar exportación de reportes
