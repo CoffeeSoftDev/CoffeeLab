@@ -106,13 +106,15 @@ class Pedidos extends MPedidos{
                 'Hora de entrega'         => $order['time_order'] ,
                 'Estado'          => status($order['idStatus']),
                 
-                'Tipo' => [
-                    'html' => renderDeliveryType($order['delivery_type']),
-                    'class' => 'text-center'
-                ],
+             
                 
                 'Entregado' => [
                     'html' => renderDeliveryStatus(array_merge($order, ['folio' => $Folio])),
+                    'class' => 'text-center'
+                ],
+
+                'Tipo' => [
+                    'html' => renderDeliveryType($order['delivery_type']),
                     'class' => 'text-center'
                 ],
                 
@@ -1189,41 +1191,43 @@ function status($idEstado){
 function renderDeliveryType($deliveryType) {
     $deliveryType = $deliveryType ?? 'local';
     
-    if ($deliveryType === 1) {
-        return '<i class="icon-store text-amber-500 text-xl" title="Entrega a domicilio"></i>';
+    if ($deliveryType == 1) {
+        return '<i class="icon-motorcycle text-amber-500 text-xl" title="Entrega a domicilio"></i>';
     } else {
-        return '<i class="icon-store text-gray-500" title="Entrega local"></i>';
+        return '<i class="icon-shopa text-gray-300" title="Entrega local"></i>';
     }
 }
 
 function renderDeliveryStatus($order) {
-    $orderId = $order['id'];
-    $status = $order['idStatus'];
+    $orderId     = $order['id'];
+    $status      = $order['idStatus'];
     $isDelivered = isset($order['is_delivered']) ? intval($order['is_delivered']) : 0;
-    $folio = $order['folio'] ?? '';
-    
+    $folio       = $order['folio'] ?? '';
+
     if ($status == 1) {
-        return '<span class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-400 text-gray-700">
+        return '<span class="bg-gray-400 w-32 text-gray-700 text-xs font-semibold mr-2 px-3 py-1 rounded-full">
                     <i class="icon-minus"></i> No aplica
                 </span>';
     }
-    
-    $bgColor = $isDelivered === 1 ? 'bg-green-500' : 'bg-red-500';
-    $icon = $isDelivered === 1 ? 'icon-ok' : 'icon-cancel';
+
+    $bgColor = $isDelivered === 1 ? 'bg-[#014737] ' : 'bg-[#572A34]';
+    $textColor = $isDelivered === 1 ? 'text-[#3FC189] ' : 'text-[#E05562]';
+    $icon = $isDelivered === 1 ? 'icon-ok' : 'icon-cancela';
     $text = $isDelivered === 1 ? 'Entregado' : 'No entregado';
-    
+
     $clickable = $status != 4;
     $cursorClass = $clickable ? 'cursor-pointer hover:opacity-80' : 'cursor-not-allowed opacity-60';
     $onclick = $clickable ? "onclick=\"app.handleDeliveryClick({$orderId}, {$isDelivered}, '{$folio}')\"" : '';
-    
-    return "<span 
-                class=\"px-3 py-1 rounded-full text-xs font-semibold {$bgColor} text-white {$cursorClass} transition\"
+
+    return "<span
+                class=\"{$bgColor} w-32 {$textColor} text-xs font-semibold mr-2 px-3 py-1 rounded {$cursorClass}\"
                 {$onclick}
                 data-order-id=\"{$orderId}\"
                 data-delivered=\"{$isDelivered}\">
                 <i class=\"{$icon}\"></i> {$text}
             </span>";
 }
+
 
 
 function formatSucursal($compania, $sucursal, $numero = null){

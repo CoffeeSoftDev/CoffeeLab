@@ -1,3 +1,120 @@
+[ 2025-10-17 12:46:07 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+        SELECT
+            order.id AS id,
+            DATE_FORMAT( order.date_creation, '%Y-%m-%d' ) AS date_creation,
+            order.note,
+            DATE_FORMAT( order.date_birthday,'%Y-%m-%d' ) AS date_birthday,
+            order.STATUS,
+            order.location,
+            order.total_pay,
+            order.discount,
+            order.info_discount,
+            order.is_delivered,
+            order.delivery_type,
+            order_clients. NAME AS name_client,
+            order_clients.phone AS phone,
+            order_clients.email AS email,
+            status_process. STATUS AS status_label,
+            DATE_FORMAT( order.date_order,'%Y-%m-%d' ) AS date_order,
+
+            DATE_FORMAT(order.time_order, '%h:%i %p') AS time_order,
+
+            status_process.id AS idStatus
+        FROM
+            fayxzvov_coffee.order
+        INNER JOIN fayxzvov_coffee.order_clients ON client_id = order_clients.id
+        INNER JOIN fayxzvov_coffee.status_process ON order.STATUS = status_process.id
+        WHERE
+        order.date_creation BETWEEN ? AND ?
+
+
+           ORDER BY
+            status_process.id ASC,
+            order.date_creation DESC
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'order.delivery_type' in 'field list'
+
+
+[ 2025-10-17 12:45:49 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+        SELECT
+            order.id AS id,
+            DATE_FORMAT( order.date_creation, '%Y-%m-%d' ) AS date_creation,
+            order.note,
+            DATE_FORMAT( order.date_birthday,'%Y-%m-%d' ) AS date_birthday,
+            order.STATUS,
+            order.location,
+            order.total_pay,
+            order.discount,
+            order.info_discount,
+            order.is_delivered,
+            order.delivery_type,
+            order_clients. NAME AS name_client,
+            order_clients.phone AS phone,
+            order_clients.email AS email,
+            status_process. STATUS AS status_label,
+            DATE_FORMAT( order.date_order,'%Y-%m-%d' ) AS date_order,
+
+            DATE_FORMAT(order.time_order, '%h:%i %p') AS time_order,
+
+            status_process.id AS idStatus
+        FROM
+            fayxzvov_coffee.order
+        INNER JOIN fayxzvov_coffee.order_clients ON client_id = order_clients.id
+        INNER JOIN fayxzvov_coffee.status_process ON order.STATUS = status_process.id
+        WHERE
+        order.date_creation BETWEEN ? AND ?
+
+
+           ORDER BY
+            status_process.id ASC,
+            order.date_creation DESC
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'order.delivery_type' in 'field list'
+
+
+[ 2025-10-17 12:45:17 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+        SELECT
+            order.id AS id,
+            DATE_FORMAT( order.date_creation, '%Y-%m-%d' ) AS date_creation,
+            order.note,
+            DATE_FORMAT( order.date_birthday,'%Y-%m-%d' ) AS date_birthday,
+            order.STATUS,
+            order.location,
+            order.total_pay,
+            order.discount,
+            order.info_discount,
+            order.is_delivered,
+            order.delivery_type,
+            order_clients. NAME AS name_client,
+            order_clients.phone AS phone,
+            order_clients.email AS email,
+            status_process. STATUS AS status_label,
+            DATE_FORMAT( order.date_order,'%Y-%m-%d' ) AS date_order,
+
+            DATE_FORMAT(order.time_order, '%h:%i %p') AS time_order,
+
+            status_process.id AS idStatus
+        FROM
+            fayxzvov_coffee.order
+        INNER JOIN fayxzvov_coffee.order_clients ON client_id = order_clients.id
+        INNER JOIN fayxzvov_coffee.status_process ON order.STATUS = status_process.id
+        WHERE
+        order.date_creation BETWEEN ? AND ?
+
+
+           ORDER BY
+            status_process.id ASC,
+            order.date_creation DESC
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'order.delivery_type' in 'field list'
+
+
 [ 2025-10-17 11:05:02 ]
 [ UNIX_USR ] :: nt authority\system
 [ WINDOWS_USR ] :: DESKTOP-GA5LPCM$

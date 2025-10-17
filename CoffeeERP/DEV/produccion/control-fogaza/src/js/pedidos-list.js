@@ -391,14 +391,14 @@ class ListaPedidos extends App {
 
         // this.showTicket({ parent: 'containerPrintOrder', data: pos, type: 'details' });
 
-        this.ticketPasteleria({ 
+        this.ticketPasteleria({
 
             parent: 'containerPrintOrder',
-            data  : {
-                head    : pos.order || {},
+            data: {
+                head: pos.order || {},
                 products: pos.products || {},
-             }
-         });
+            }
+        });
 
     }
 
@@ -434,7 +434,10 @@ class ListaPedidos extends App {
             class: opts.class
         });
 
-        const formatPrice = (val) => `$${parseFloat(val || 0).toFixed(2)}`;
+        const fmt = (val) => {
+            const num = parseFloat(val || 0);
+            return num > 0 ? `$${num.toFixed(2)}` : "-";
+        };
 
         const header = `
         <div class="flex flex-col items-center mb-4">
@@ -467,38 +470,35 @@ class ListaPedidos extends App {
                 <div class="font-semibold">NOTA:</div>
                 <div>${data.observacion}</div>
             </div>` : ""}
+            <hr class="border-dashed border-t my-2 mt-4" />
+            <div class="text-center font-bold mb-2 mt-2">PRODUCTOS</div>
             <hr class="border-dashed border-t my-2" />
         </div>`;
 
         let containerProducto = '';
+        let totalGeneral = 0;
 
         productos.forEach(product => {
             const p = product.data[0] || {};
             const base = parseFloat(p.importeBase || 0);
             const oblea = parseFloat(p.importeOblea || 0);
-            const total = parseFloat(p.total || 0);
+            const precio = parseFloat(p.total || 0);
+            const subtotal = base + oblea + precio;
 
-            const anticipo =
-                parseFloat(data.anticipo || 0) +
-                parseFloat(data.efectivo || 0) +
-                parseFloat(data.tdc || 0);
-
-            const totalGral = base + oblea + total;
-            const restante = totalGral - anticipo;
+            totalGeneral += subtotal;
 
             containerProducto += `
-        <div class="text-center font-bold mb-3 mt-4">PRODUCTOS</div>
-        <div class="text-sm space-y-2">
-            <div class="grid grid-cols-2 gap-4 mt-2">
-                <div>
-                    <div class="font-semibold">MODELO:</div>
-                    <div class="uppercase">${product.name || "-"}</div>
+            <div class="text-sm space-y-2 mb-4">
+                <div class="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                        <div class="font-semibold">MODELO:</div>
+                        <div class="uppercase">${product.name || "-"}</div>
+                    </div>
+                    <div>
+                        <div class="font-semibold">PERSONAS:</div>
+                        <div class="uppercase">${product.portion || "-"}</div>
+                    </div>
                 </div>
-                <div>
-                    <div class="font-semibold">PERSONAS:</div>
-                    <div class="uppercase">${product.portion || "-"}</div>
-                </div>
-            </div>
 
             ${(p.relleno || p.leyenda) ? `
             <div class="grid grid-cols-2 gap-4 mt-2">
@@ -514,45 +514,56 @@ class ListaPedidos extends App {
                 </div>` : ""}
             </div>` : ""}
 
-            <hr class="border-dashed border-t my-2" />
-            <div class="grid grid-cols-2 gap-4 mt-2">
+           
+            <div class="grid grid-cols-2 gap-4 mt-4">
                 <div>
                     <div class="font-semibold">PRECIO:</div>
-                    <div class="text-right me-5">${formatPrice(total)}</div>
+                    <div class="text-right me-5">${fmt(precio)}</div>
                 </div>
+                ${oblea > 0 ? `
                 <div>
                     <div class="font-semibold">IMPORTE OBLEA:</div>
-                    <div class="text-right me-5">${formatPrice(oblea)}</div>
-                </div>
+                    <div class="text-right me-5">${fmt(oblea)}</div>
+                </div>` : ""}
             </div>
+            ${base > 0 ? `
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <div class="font-semibold">IMPORTE BASE:</div>
-                    <div class="text-right me-5">${formatPrice(base)}</div>
+                    <div class="text-right me-5">${fmt(base)}</div>
                 </div>
-                <div>
-                    <div class="font-semibold">ANTICIPO:</div>
-                    <div class="text-right me-5">${formatPrice(anticipo)}</div>
-                </div>
-            </div>
-
-            <hr class="border-dashed border-t my-2" />
-            
-            <div class="grid grid-cols-2 gap-4 mt-3">
-                <div>
-                    <div class="font-semibold">TOTAL:</div>
-                    <div class="text-right me-5">${formatPrice(totalGral)}</div>
-                </div>
-                ${anticipo > 0 ? `
-                <div>
-                    <div class="font-semibold">RESTANTE:</div>
-                    <div class="text-right me-5">${formatPrice(restante)}</div>
-                </div>` : ""}
-            </div>
+            </div>` : ""}
             <hr class="border-dashed border-t my-2" />
         </div>`;
         });
 
+        const anticipo =
+
+            parseFloat(data.efectivo || 0) +
+            parseFloat(data.tdc || 0);
+
+        const restante = totalGeneral - anticipo;
+
+        containerProducto += `
+        <div class="text-sm space-y-2 mt-4">
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <div class="font-semibold">TOTAL GENERAL:</div>
+                    <div class="text-right me-5">${fmt(totalGeneral)}</div>
+                </div>
+                <div>
+                    <div class="font-semibold">ANTICIPO:</div>
+                    <div class="text-right me-5">${fmt(anticipo)}</div>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-4 mt-2">
+                <div>
+                    <div class="font-semibold">RESTANTE:</div>
+                    <div class="text-right me-5">${fmt(restante)}</div>
+                </div>
+            </div>
+            <hr class="border-dashed border-t my-2" />
+        </div>`;
 
         container.append(header);
         container.append(containerProducto);
