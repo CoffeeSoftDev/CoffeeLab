@@ -306,7 +306,7 @@ class App extends Templates {
         });
 
         const order = request.data;
-      
+
 
         this.createForm({
             parent: "formEditPedido",
@@ -318,10 +318,10 @@ class App extends Templates {
                 if (response.status == 200) {
 
                     alert({
-                        icon    : "success",
-                        title   : "Pedido actualizado",
-                        text    : response.message,
-                        btn1    : true,
+                        icon: "success",
+                        title: "Pedido actualizado",
+                        text: response.message,
+                        btn1: true,
                         btn1Text: "Aceptar"
                     });
 
@@ -345,9 +345,9 @@ class App extends Templates {
                 } else {
 
                     alert({
-                        icon    : "error",
-                        text    : response.message,
-                        btn1    : true,
+                        icon: "error",
+                        text: response.message,
+                        btn1: true,
                         btn1Text: "Ok"
                     });
                 }
@@ -449,7 +449,7 @@ class App extends Templates {
     handleDeliveryClick(orderId, currentStatus, folio) {
         const newStatus = currentStatus === 1 ? 0 : 1;
         const statusText = newStatus === 1 ? 'entregado' : 'no entregado';
-        
+
         this.swalQuestion({
             opts: {
                 title: '📦 Actualizar estado de entrega',
@@ -468,7 +468,7 @@ class App extends Templates {
                 send: (response) => {
                     if (response.status === 200) {
                         this.updateBadgeUI(orderId, newStatus);
-                        
+
                         alert({
                             icon: 'success',
                             title: 'Estado actualizado',
@@ -492,17 +492,17 @@ class App extends Templates {
 
     updateBadgeUI(orderId, newStatus) {
         const badge = $(`span[data-order-id="${orderId}"]`);
-        
+
         if (badge.length === 0) return;
-        
+
         const isDelivered = newStatus === 1;
         const bgColor = isDelivered ? 'bg-green-500' : 'bg-red-500';
         const icon = isDelivered ? 'icon-ok' : 'icon-cancel';
         const text = isDelivered ? 'Entregado' : 'No entregado';
-        
+
         const folio = badge.closest('tr').find('td:eq(1)').text();
-        
-        badge.fadeOut(200, function() {
+
+        badge.fadeOut(200, function () {
             $(this)
                 .removeClass('bg-green-500 bg-red-500')
                 .addClass(bgColor)
@@ -1634,44 +1634,40 @@ class App extends Templates {
 
     generateDailyClose() {
         const today = moment().format('YYYY-MM-DD');
-        
+
         const modalContent = `
-            <div class="bg-[#1F2A37] p-4 rounded-lg">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="bg-blue-600 p-3 rounded-lg">
-                        <i class="icon-calendar text-white text-2xl"></i>
-                    </div>
+            <div class="mb-4 p-3  rounded">
+                <div class="flex items-center gap-3">
                     <div>
-                        <label class="text-white font-semibold text-sm mb-1 block">Seleccionar fecha:</label>
+                        <label class="font-semibold text-sm mb-1 block">Seleccionar fecha:</label>
                         <input 
                             type="date" 
                             id="dailyCloseDate" 
-                            class="form-control bg-[#374151] text-white border-gray-600"
+                            class="form-control"
                             value="${today}"
                         />
                     </div>
                     <button 
                         id="btnGenerateTicket" 
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition flex items-center gap-2 ml-auto">
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded transition mt-auto">
                         <i class="icon-print"></i> Imprimir
                     </button>
                 </div>
-                
-                <div id="ticketContainer" class="bg-white rounded-lg p-6 min-h-[400px]">
-                    <div class="text-center text-gray-400 py-20">
-                        <i class="icon-doc-text text-6xl mb-4"></i>
-                        <p>Selecciona una fecha y presiona "Imprimir" para generar el reporte</p>
-                    </div>
+            </div>
+            
+            <div id="ticketContainer">
+                <div class="text-center text-gray-400 py-10">
+                    <i class="icon-doc-text text-5xl mb-3"></i>
+                    <p>Selecciona una fecha y presiona "Imprimir"</p>
                 </div>
             </div>
         `;
 
         bootbox.dialog({
-            title: `<i class="icon-receipt"></i> Cierre del Día - Pedidos de Pastelería`,
+            title: `<i class="icon-calendar"></i> Cierre del Día - Pedidos de Pastelería`,
             message: modalContent,
-            size: 'large',
+            // size: 'large',
             closeButton: true,
-            className: 'modal-daily-close',
             buttons: {
                 close: {
                     label: 'Cerrar',
@@ -1697,10 +1693,8 @@ class App extends Templates {
 
     async loadDailyCloseData(date) {
         $('#ticketContainer').html(`
-            <div class="text-center py-20">
-                <div class="spinner-border text-blue-600" role="status">
-                    <span class="sr-only">Cargando...</span>
-                </div>
+            <div class="text-center py-10">
+                <div class="spinner-border text-blue-600" role="status"></div>
                 <p class="text-gray-600 mt-3">Generando reporte...</p>
             </div>
         `);
@@ -1714,20 +1708,87 @@ class App extends Templates {
         });
 
         if (request.status === 200) {
-            this.renderDailyCloseTicket(request.data, date);
+            this.renderDailyCloseTicketInModal(request.data, date);
         } else {
             $('#ticketContainer').html(`
-                <div class="text-center py-20">
-                    <i class="icon-attention text-6xl text-gray-400 mb-4"></i>
+                <div class="text-center py-10">
+                    <i class="icon-attention text-5xl text-gray-400 mb-3"></i>
                     <p class="text-gray-600">${request.message || "No hay pedidos registrados para esta fecha"}</p>
                 </div>
             `);
         }
     }
 
+    renderDailyCloseTicketInModal(data, date) {
+        const formattedDate = moment(date).format('DD [de] MMMM [de] YYYY');
+
+        const ticketHtml = `
+            <div id="ticketPasteleria" class="bg-white text-gray-800 p-6 rounded-lg max-w-md mx-auto">
+                <div class="text-center mb-6">
+                    <img src="../src/img/logo/logo.png" alt="CoffeeSoft Logo" class="h-16 mx-auto mb-3">
+                    <h2 class="text-xl font-bold text-gray-800">PEDIDOS DE PASTELERÍA</h2>
+                    <p class="text-sm text-gray-600">Cierre del Día</p>
+                    <p class="text-sm text-gray-600">${formattedDate}</p>
+                </div>
+
+                <div class="border-t-2 border-dashed border-gray-300 pt-4 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700 font-medium">🧁 Venta total del día:</span>
+                        <span class="text-lg font-bold text-green-600">${formatPrice(data.total_sales || 0)}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">💳 Ingresos por tarjeta:</span>
+                        <span class="font-semibold">${formatPrice(data.card_sales || 0)}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">💵 Ingresos en efectivo:</span>
+                        <span class="font-semibold">${formatPrice(data.cash_sales || 0)}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">🔄 Ingresos por transferencia:</span>
+                        <span class="font-semibold">${formatPrice(data.transfer_sales || 0)}</span>
+                    </div>
+
+                    <div class="border-t-2 border-gray-300 pt-3 flex justify-between items-center">
+                        <span class="text-gray-700 font-medium">📦 Número de pedidos:</span>
+                        <span class="text-lg font-bold text-blue-600">${data.total_orders || 0}</span>
+                    </div>
+                </div>
+
+                <div class="mt-6 text-center text-xs text-gray-500">
+                    <p>Generado: ${moment().format('DD/MM/YYYY HH:mm:ss')}</p>
+                    <p class="mt-2">¡Gracias por usar CoffeeSoft!</p>
+                </div>
+            </div>
+        `;
+
+        $('#ticketContainer').html(ticketHtml);
+
+        $('#btnGenerateTicket').html('<i class="icon-print"></i> Imprimir Ticket').off('click').on('click', () => {
+            this.printDailyCloseTicket();
+        });
+    }
+
+    printDailyCloseTicket() {
+        const printContent = document.getElementById('ticketPasteleria').innerHTML;
+        const printWindow = window.open('', '', 'height=600,width=800');
+        printWindow.document.write('<html><head><title>Cierre del Día</title>');
+        printWindow.document.write('<style>body{font-family:Arial,sans-serif;padding:20px;max-width:400px;margin:0 auto;}</style>');
+        printWindow.document.write('</head><body>');
+        printWindow.document.write(printContent);
+        printWindow.document.write('</body></html>');
+        printWindow.document.close();
+        setTimeout(() => {
+            printWindow.print();
+        }, 250);
+    }
+
     renderDailyCloseTicket(data, date) {
         const formattedDate = moment(date).format('DD [de] MMMM [de] YYYY');
-        
+
         const ticketHtml = `
             <div id="ticketPasteleria" class="bg-white text-gray-800 p-6 rounded-lg max-w-md mx-auto">
                 <div class="text-center mb-6">
@@ -1780,7 +1841,7 @@ class App extends Templates {
                 print: {
                     label: '<i class="icon-print"></i> Imprimir',
                     className: 'btn-primary',
-                    callback: function() {
+                    callback: function () {
                         const printContent = document.getElementById('ticketPasteleria').innerHTML;
                         const printWindow = window.open('', '', 'height=600,width=800');
                         printWindow.document.write('<html><head><title>Cierre del Día</title>');
