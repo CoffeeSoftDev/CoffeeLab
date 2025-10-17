@@ -1082,16 +1082,27 @@ class MPedidos extends CRUD {
 
     function getDailySalesMetrics($params) {
         $query = "
-            SELECT 
-                COUNT(*) as total_orders,
-                SUM(total_pay - IFNULL(discount, 0)) as total_sales,
-                SUM(CASE WHEN payment_method = 'tarjeta' THEN total_pay - IFNULL(discount, 0) ELSE 0 END) as card_sales,
-                SUM(CASE WHEN payment_method = 'efectivo' THEN total_pay - IFNULL(discount, 0) ELSE 0 END) as cash_sales,
-                SUM(CASE WHEN payment_method = 'transferencia' THEN total_pay - IFNULL(discount, 0) ELSE 0 END) as transfer_sales
-            FROM {$this->bd}order
-            WHERE DATE(date_creation) = ?
-            AND subsidiaries_id = ?
-            AND status != 4
+           SELECT 
+            COUNT(DISTINCT o.id) AS total_orders,
+            SUM(op.pay - IFNULL(o.discount, 0)) AS total_sales,
+
+            -- 💳 Ventas por tarjeta
+            SUM(CASE WHEN op.method_pay_id = 1 THEN op.pay ELSE 0 END) AS card_sales,
+
+            -- 💵 Ventas en efectivo
+            SUM(CASE WHEN op.method_pay_id = 2 THEN op.pay ELSE 0 END) AS cash_sales,
+
+            -- 🔄 Ventas por transferencia
+            SUM(CASE WHEN op.method_pay_id = 3 THEN op.pay ELSE 0 END) AS transfer_sales
+
+        FROM {$this->bd}`order` o
+        LEFT JOIN {$this->bd}`order_payments` op ON o.id = op.order_id
+
+        WHERE DATE(o.date_creation) = ?
+        AND o.subsidiaries_id = ?
+        AND o.status != 4
+
+        GROUP BY DATE(o.date_creation);
         ";
         
         $result = $this->_Read($query, [
