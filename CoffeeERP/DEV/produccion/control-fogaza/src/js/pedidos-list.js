@@ -348,8 +348,6 @@ class ListaPedidos extends App {
         $('#id_colaborador').option_select({ select2: true, father: true });
     }
 
-
-
     cancelPedidoTicket(id) {
         this.swalQuestion({
             opts: {

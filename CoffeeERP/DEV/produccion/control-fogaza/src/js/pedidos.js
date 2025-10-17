@@ -1225,12 +1225,12 @@ class App extends Templates {
 
     // Pedidos
     addProduct() {
-        let idCard = event.currentTarget;
-        let costo = idCard.getAttribute('costo') || '0';
+        
+        let idCard   = event.currentTarget;
+        let costo    = idCard.getAttribute('costo') || '0';
         let idPedido = idCard.getAttribute('id');
-        let nombre = idCard.querySelector('.fw-semibold')?.textContent.trim() || 'Sin nombre';
+        let nombre   = idCard.querySelector('.fw-semibold')?.textContent.trim() || 'Sin nombre';
 
-        console.log(idCard)
 
         const modal = bootbox.dialog({
             closeButton: true,
