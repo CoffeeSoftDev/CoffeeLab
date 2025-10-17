@@ -122,7 +122,7 @@ class App extends Templates {
 
         const rightSection = $("<div>").append(
             $("<button>", {
-                class: `${opts.classBtn} text-white font-semibold px-4 py-2 rounded transition flex items-center`,
+                class: `${opts.classBtn} txt font-semibold px-4 py-2 rounded transition flex items-center`,
                 html: `<i class="${opts.icon} mr-2"></i>${opts.textBtn}`,
                 click: () => {
                     if (typeof opts.onClick === "function") {
@@ -198,7 +198,7 @@ class Campaign extends Templates {
     lsCampaigns() {
         $(`#container${this.PROJECT_NAME}`).html(`
             <div class="px-2 pt-2 pb-2">
-                <h2 class="text-2xl font-semibold text-white">📦 Campañas Publicitarias</h2>
+                <h2 class="text-2xl font-semibold txt">📦 Campañas Publicitarias</h2>
                 <p class="text-gray-400">Gestiona campañas y anuncios por red social</p>
             </div>
             <div id="container-table-campaigns"></div>
@@ -212,7 +212,7 @@ class Campaign extends Templates {
             conf: { datatable: true, pag: 15 },
             attr: {
                 id: "tbCampaigns",
-                theme: 'dark',
+                theme: 'corporativo',
                 center: [5]
             },
         });
@@ -308,16 +308,16 @@ class Campaign extends Templates {
         $(`#container${this.PROJECT_NAME}`).html(`
             <div class="px-2 pt-2 pb-2 flex justify-between items-center">
                 <div>
-                    <h2 class="text-2xl font-semibold text-white">📢 Anuncios de la Campaña</h2>
+                    <h2 class="text-2xl font-semibold txt">📢 Anuncios de la Campaña</h2>
                     <p class="text-gray-400">Gestión y seguimiento de anuncios publicitarios</p>
                 </div>
-                <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded" onclick="campaign.addMultipleAnnouncements(${campaña_id})">
+                <button class="bg-green-600 hover:bg-green-700 txt px-4 py-2 rounded" onclick="campaign.addMultipleAnnouncements(${campaña_id})">
                     <i class="icon-plus mr-2"></i>Agregar Anuncios
                 </button>
             </div>
             <div id="container-table-announcements"></div>
             <div class="px-2 pt-2">
-                <button class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded" onclick="campaign.lsCampaigns()">
+                <button class="bg-gray-600 hover:bg-gray-700 txt px-4 py-2 rounded" onclick="campaign.lsCampaigns()">
                     <i class="icon-arrow-left mr-2"></i>Volver a Campañas
                 </button>
             </div>
@@ -331,7 +331,7 @@ class Campaign extends Templates {
             conf: { datatable: true, pag: 15 },
             attr: {
                 id: "tbAnnouncements",
-                theme: 'dark',
+                theme: 'corporativo',
                 center: [0, 3, 4]
             },
         });
@@ -339,25 +339,25 @@ class Campaign extends Templates {
 
     addMultipleAnnouncements(campaña_id) {
         const modalContent = `
-            <div class="bg-[#1F2A37] p-6 rounded-lg">
-                <h3 class="text-xl font-bold text-white mb-4">Agregar Anuncios a la Campaña</h3>
+            <div class=" p-6 rounded-lg">
+                <h3 class="text-xl font-bold txt mb-4">Agregar Anuncios a la Campaña</h3>
                 <p class="text-gray-400 mb-6">Puedes agregar uno o varios anuncios a esta campaña</p>
                 
                 <div id="announcements-container" class="space-y-4">
-                    <div class="announcement-form border border-gray-700 rounded-lg p-4 bg-[#111827]" data-index="0">
-                        <h4 class="text-white font-semibold mb-3">Anuncio 1</h4>
+                    <div class="announcement-form border border-gray-700 rounded-lg p-4 bg-white" data-index="0">
+                        <h4 class="txt font-semibold mb-3">Anuncio 1</h4>
                         ${this.getAnnouncementFormHTML(0)}
                     </div>
                 </div>
                 
                 <div class="mt-4 flex gap-2">
-                    <button type="button" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded" onclick="campaign.addAnnouncementForm()">
+                    <button type="button" class="bg-blue-600 hover:bg-blue-700 txt px-4 py-2 rounded" onclick="campaign.addAnnouncementForm()">
                         <i class="icon-plus mr-2"></i>Agregar Otro Anuncio
                     </button>
-                    <button type="button" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded" onclick="campaign.saveAllAnnouncements(${campaña_id})">
+                    <button type="button" class="bg-green-600 hover:bg-green-700 txt px-4 py-2 rounded" onclick="campaign.saveAllAnnouncements(${campaña_id})">
                         <i class="icon-check mr-2"></i>Guardar Todos
                     </button>
-                    <button type="button" class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded" onclick="bootbox.hideAll()">
+                    <button type="button" class="bg-gray-600 hover:bg-gray-700 txt px-4 py-2 rounded" onclick="bootbox.hideAll()">
                         Cancelar
                     </button>
                 </div>
@@ -376,25 +376,25 @@ class Campaign extends Templates {
             <div class="grid grid-cols-2 gap-4">
                 <div class="col-span-2">
                     <label class="text-gray-300 text-sm">Nombre del Anuncio</label>
-                    <input type="text" class="form-control bg-[#1F2A37] text-white border-gray-600" id="nombre_${index}" placeholder="Ej: Anuncio Carnes Premium">
+                    <input type="text" class="form-control bg-white txt border-gray-600" id="nombre_${index}" placeholder="Ej: Anuncio Carnes Premium">
                 </div>
                 <div>
                     <label class="text-gray-300 text-sm">Fecha Inicio</label>
-                    <input type="date" class="form-control bg-[#1F2A37] text-white border-gray-600" id="fecha_inicio_${index}">
+                    <input type="date" class="form-control bg-white txt border-gray-600" id="fecha_inicio_${index}">
                 </div>
                 <div>
                     <label class="text-gray-300 text-sm">Fecha Fin</label>
-                    <input type="date" class="form-control bg-[#1F2A37] text-white border-gray-600" id="fecha_fin_${index}">
+                    <input type="date" class="form-control bg-white txt border-gray-600" id="fecha_fin_${index}">
                 </div>
                 <div>
                     <label class="text-gray-300 text-sm">Tipo de Anuncio</label>
-                    <select class="form-control bg-[#1F2A37] text-white border-gray-600" id="tipo_id_${index}">
+                    <select class="form-control bg-white txt border-gray-600" id="tipo_id_${index}">
                         ${tipo_anuncio.map(t => `<option value="${t.id}">${t.valor}</option>`).join('')}
                     </select>
                 </div>
                 <div>
                     <label class="text-gray-300 text-sm">Clasificación</label>
-                    <select class="form-control bg-[#1F2A37] text-white border-gray-600" id="clasificacion_id_${index}">
+                    <select class="form-control bg-white txt border-gray-600" id="clasificacion_id_${index}">
                         ${clasificacion.map(c => `<option value="${c.id}">${c.valor}</option>`).join('')}
                     </select>
                 </div>
@@ -416,9 +416,9 @@ class Campaign extends Templates {
         const newIndex = currentCount;
 
         const newForm = `
-            <div class="announcement-form border border-gray-700 rounded-lg p-4 bg-[#111827]" data-index="${newIndex}">
+            <div class="announcement-form border border-gray-700 rounded-lg p-4 bg-white" data-index="${newIndex}">
                 <div class="flex justify-between items-center mb-3">
-                    <h4 class="text-white font-semibold">Anuncio ${newIndex + 1}</h4>
+                    <h4 class="txt font-semibold">Anuncio ${newIndex + 1}</h4>
                     <button type="button" class="text-red-400 hover:text-red-300" onclick="$(this).closest('.announcement-form').remove()">
                         <i class="icon-trash"></i>
                     </button>
@@ -692,12 +692,12 @@ class Campaign extends Templates {
                 lbl: "Imagen del Anuncio",
                 class: "col-12 mt-3",
                 html: `
-                    <div class="w-full p-4 border-2 border-dashed border-violet-500 rounded-xl bg-[#1F2A37] text-center">
+                    <div class="w-full p-4 border-2 border-dashed border-violet-500 rounded-xl bg-white text-center">
                         <div class="flex flex-col items-center justify-center py-6">
                             <div class="w-12 h-12 bg-violet-600 rounded-full flex items-center justify-center mb-4">
-                                <i class="fas fa-upload text-white"></i>
+                                <i class="fas fa-upload txt"></i>
                             </div>
-                            <p class="text-white text-sm">
+                            <p class="txt text-sm">
                                 Drag & Drop or <span class="text-violet-400 cursor-pointer underline">choose file</span> to upload
                             </p>
                             <p class="text-xs text-gray-400 mt-2">Formatos soportados: JPEG, PNG, PDF</p>
