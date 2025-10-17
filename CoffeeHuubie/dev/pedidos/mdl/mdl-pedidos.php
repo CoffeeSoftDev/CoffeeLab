@@ -132,6 +132,7 @@ class MPedidos extends CRUD {
             order.discount,
             order.info_discount,
             order.is_delivered,
+            order.delivery_type,
             order_clients. NAME AS name_client,
             order_clients.phone AS phone,
             order_clients.email AS email,
@@ -1076,6 +1077,28 @@ class MPedidos extends CRUD {
                 $data['id']
             ]
         ]);
+    }
+
+    function getDailySalesMetrics($params) {
+        $query = "
+            SELECT 
+                COUNT(*) as total_orders,
+                SUM(total_pay - IFNULL(discount, 0)) as total_sales,
+                SUM(CASE WHEN payment_method = 'tarjeta' THEN total_pay - IFNULL(discount, 0) ELSE 0 END) as card_sales,
+                SUM(CASE WHEN payment_method = 'efectivo' THEN total_pay - IFNULL(discount, 0) ELSE 0 END) as cash_sales,
+                SUM(CASE WHEN payment_method = 'transferencia' THEN total_pay - IFNULL(discount, 0) ELSE 0 END) as transfer_sales
+            FROM {$this->bd}order
+            WHERE DATE(date_creation) = ?
+            AND subsidiaries_id = ?
+            AND status != 4
+        ";
+        
+        $result = $this->_Read($query, [
+            $params['date'],
+            $params['subsidiaries_id']
+        ]);
+        
+        return is_array($result) && !empty($result) ? $result[0] : null;
     }
 
 }
