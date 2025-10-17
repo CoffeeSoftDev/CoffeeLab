@@ -1632,37 +1632,96 @@ class App extends Templates {
         }
     }
 
-    async generateDailyClose() {
-        const rangePicker = getDataRangePicker("calendar");
-        const selectedDate = rangePicker.fi;
+    generateDailyClose() {
+        const today = moment().format('YYYY-MM-DD');
+        
+        const modalContent = `
+            <div class="bg-[#1F2A37] p-4 rounded-lg">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="bg-blue-600 p-3 rounded-lg">
+                        <i class="icon-calendar text-white text-2xl"></i>
+                    </div>
+                    <div>
+                        <label class="text-white font-semibold text-sm mb-1 block">Seleccionar fecha:</label>
+                        <input 
+                            type="date" 
+                            id="dailyCloseDate" 
+                            class="form-control bg-[#374151] text-white border-gray-600"
+                            value="${today}"
+                        />
+                    </div>
+                    <button 
+                        id="btnGenerateTicket" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg transition flex items-center gap-2 ml-auto">
+                        <i class="icon-print"></i> Imprimir
+                    </button>
+                </div>
+                
+                <div id="ticketContainer" class="bg-white rounded-lg p-6 min-h-[400px]">
+                    <div class="text-center text-gray-400 py-20">
+                        <i class="icon-doc-text text-6xl mb-4"></i>
+                        <p>Selecciona una fecha y presiona "Imprimir" para generar el reporte</p>
+                    </div>
+                </div>
+            </div>
+        `;
 
-        if (!selectedDate) {
-            alert({
-                icon: "warning",
-                text: "Por favor selecciona una fecha en el calendario",
-                btn1: true,
-                btn1Text: "Ok"
-            });
-            return;
-        }
+        bootbox.dialog({
+            title: `<i class="icon-receipt"></i> Cierre del Día - Pedidos de Pastelería`,
+            message: modalContent,
+            size: 'large',
+            closeButton: true,
+            className: 'modal-daily-close',
+            buttons: {
+                close: {
+                    label: 'Cerrar',
+                    className: 'btn-secondary'
+                }
+            }
+        });
+
+        $('#btnGenerateTicket').on('click', () => {
+            const selectedDate = $('#dailyCloseDate').val();
+            if (selectedDate) {
+                this.loadDailyCloseData(selectedDate);
+            } else {
+                alert({
+                    icon: "warning",
+                    text: "Por favor selecciona una fecha",
+                    btn1: true,
+                    btn1Text: "Ok"
+                });
+            }
+        });
+    }
+
+    async loadDailyCloseData(date) {
+        $('#ticketContainer').html(`
+            <div class="text-center py-20">
+                <div class="spinner-border text-blue-600" role="status">
+                    <span class="sr-only">Cargando...</span>
+                </div>
+                <p class="text-gray-600 mt-3">Generando reporte...</p>
+            </div>
+        `);
 
         const request = await useFetch({
             url: this._link,
             data: {
                 opc: "getDailySummary",
-                date: selectedDate
+                date: date
             }
         });
 
         if (request.status === 200) {
-            this.renderDailyCloseTicket(request.data, selectedDate);
+            this.renderDailyCloseTicket(request.data, date);
         } else {
-            alert({
-                icon: "info",
-                text: request.message || "No hay pedidos registrados para esta fecha",
-                btn1: true,
-                btn1Text: "Ok"
-            });
+            $('#ticketContainer').html(`
+                <div class="text-center py-20">
+                    <i class="icon-attention text-6xl text-gray-400 mb-4"></i>
+                    <p class="text-gray-600">${request.message || "No hay pedidos registrados para esta fecha"}</p>
+                </div>
+            `);
         }
     }
 
