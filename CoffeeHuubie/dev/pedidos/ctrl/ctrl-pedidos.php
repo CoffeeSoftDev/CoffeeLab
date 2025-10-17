@@ -106,8 +106,13 @@ class Pedidos extends MPedidos{
                 'Hora de entrega'         => $order['time_order'] ,
                 'Estado'          => status($order['idStatus']),
                 
-                'Entrega' => [
-                    'html' => renderDeliveryBadge(array_merge($order, ['folio' => $Folio])),
+                'Tipo' => [
+                    'html' => renderDeliveryType($order['delivery_type']),
+                    'class' => 'text-center'
+                ],
+                
+                'Entregado' => [
+                    'html' => renderDeliveryStatus(array_merge($order, ['folio' => $Folio])),
                     'class' => 'text-center'
                 ],
                 
@@ -150,11 +155,16 @@ class Pedidos extends MPedidos{
 
         }
 
+        if (!isset($_POST['delivery_type']) || !in_array($_POST['delivery_type'], ['local', 'domicilio'])) {
+            $_POST['delivery_type'] = 'local';
+        }
+
         $data = $this->util->sql([
             'note'            => $_POST['note'],
             'date_birthday'   => $_POST['date_birthday'],
             'date_order'      => $_POST['date_order'],
             'time_order'      => $_POST['time_order'],
+            'delivery_type'   => $_POST['delivery_type'],
             'date_creation'   => date('Y-m-d H:i:s'),
             'client_id'       => $client['id'],
             'status'          => 1,
@@ -211,11 +221,16 @@ class Pedidos extends MPedidos{
         $status  = 500;
         $message = 'No se pudo actualizar el pedido';
 
+        if (!isset($_POST['delivery_type']) || !in_array($_POST['delivery_type'], ['local', 'domicilio'])) {
+            $_POST['delivery_type'] = 'local';
+        }
+
         $update = $this->updateOrder($this->util->sql([
-            'date_order' => $_POST['date_order'],
-            'time_order' => $_POST['time_order'],
-            'note'       => $_POST['note'],
-            'id'         => $_POST['id'],
+            'date_order'    => $_POST['date_order'],
+            'time_order'    => $_POST['time_order'],
+            'note'          => $_POST['note'],
+            'delivery_type' => $_POST['delivery_type'],
+            'id'            => $_POST['id'],
 
         ], 1));
 
@@ -1081,6 +1096,35 @@ class Pedidos extends MPedidos{
         ];
     }
 
+    function getDailySummary() {
+        $status = 500;
+        $message = 'Error al obtener resumen del día';
+        $data = null;
+        
+        $date = $_POST['date'] ?? date('Y-m-d');
+        $subsidiaries_id = $_SESSION['SUB'] ?? 1;
+        
+        $summary = $this->getDailySalesMetrics([
+            'date' => $date,
+            'subsidiaries_id' => $subsidiaries_id
+        ]);
+        
+        if ($summary && $summary['total_orders'] > 0) {
+            $status = 200;
+            $message = 'Resumen obtenido correctamente';
+            $data = $summary;
+        } else {
+            $status = 404;
+            $message = 'No hay pedidos registrados para esta fecha';
+        }
+        
+        return [
+            'status' => $status,
+            'message' => $message,
+            'data' => $data
+        ];
+    }
+
 }
 
    //
@@ -1142,7 +1186,17 @@ function status($idEstado){
     }
 }
 
-function renderDeliveryBadge($order) {
+function renderDeliveryType($deliveryType) {
+    $deliveryType = $deliveryType ?? 'local';
+    
+    if ($deliveryType === 1) {
+        return '<i class="icon-store text-amber-500 text-xl" title="Entrega a domicilio"></i>';
+    } else {
+        return '<i class="icon-store text-gray-500" title="Entrega local"></i>';
+    }
+}
+
+function renderDeliveryStatus($order) {
     $orderId = $order['id'];
     $status = $order['idStatus'];
     $isDelivered = isset($order['is_delivered']) ? intval($order['is_delivered']) : 0;

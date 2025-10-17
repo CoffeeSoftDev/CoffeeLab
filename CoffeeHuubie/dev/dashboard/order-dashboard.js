@@ -21,11 +21,11 @@ class OrderDashboard extends Templates {
     init() {
         this.initializeErrorHandling();
         this.setupConnectionMonitoring();
-        
+
         const perfMonitor = this.monitorPerformance();
         this.render();
         perfMonitor.end();
-        
+
         this.finalizeInitialization();
     }
 
@@ -142,21 +142,21 @@ class OrderDashboard extends Templates {
                             <label for="monthSelect" class="block text-sm font-medium text-gray-300">Mes</label>
                             <select id="monthSelect" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
                                 ${Array.from({ length: 12 }, (_, i) => {
-                                    const monthNum = String(i + 1).padStart(2, '0');
-                                    const monthName = new Date(0, i).toLocaleString('es-MX', { month: 'long' });
-                                    const selected = monthNum === currentMonth ? 'selected' : '';
-                                    return `<option value="${monthNum}" ${selected}>${monthName}</option>`;
-                                }).join('')}
+            const monthNum = String(i + 1).padStart(2, '0');
+            const monthName = new Date(0, i).toLocaleString('es-MX', { month: 'long' });
+            const selected = monthNum === currentMonth ? 'selected' : '';
+            return `<option value="${monthNum}" ${selected}>${monthName}</option>`;
+        }).join('')}
                             </select>
                         </div>
                         <div class="space-y-2">
                             <label for="yearSelect" class="block text-sm font-medium text-gray-300">Año</label>
                             <select id="yearSelect" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200">
                                 ${Array.from({ length: 5 }, (_, i) => {
-                                    const year = this.currentYear - i;
-                                    const selected = year === this.currentYear ? 'selected' : '';
-                                    return `<option value="${year}" ${selected}>${year}</option>`;
-                                }).join('')}
+            const year = this.currentYear - i;
+            const selected = year === this.currentYear ? 'selected' : '';
+            return `<option value="${year}" ${selected}>${year}</option>`;
+        }).join('')}
                             </select>
                         </div>
                         <div class="space-y-2">
@@ -1092,11 +1092,11 @@ class OrderDashboard extends Templates {
         this.deviceType = this.detectDeviceType();
         this.ensureViewportMeta();
         this.setupBreakpointListeners();
-        
+
         if (this.deviceType === 'mobile') {
             this.setupMobileGestures();
         }
-        
+
         this.setupOrientationHandling();
         this.applyResponsiveAdjustments();
     }
@@ -1173,7 +1173,7 @@ class OrderDashboard extends Templates {
         const container = $(`#${this.PROJECT_NAME}`);
         container.addClass('mobile-layout');
         container.removeClass('p-4 sm:p-6 lg:p-8').addClass('p-3');
-        
+
         $('#metricsCards').removeClass('grid-cols-1 sm:grid-cols-2 lg:grid-cols-3')
             .addClass('grid-cols-1 gap-3');
     }
@@ -1181,7 +1181,7 @@ class OrderDashboard extends Templates {
     applyTabletLayout() {
         const container = $(`#${this.PROJECT_NAME}`);
         container.addClass('tablet-layout');
-        
+
         $('#metricsCards').removeClass('grid-cols-1 gap-3')
             .addClass('grid-cols-1 sm:grid-cols-2 gap-4');
     }
@@ -1189,7 +1189,7 @@ class OrderDashboard extends Templates {
     applyDesktopLayout() {
         const container = $(`#${this.PROJECT_NAME}`);
         container.addClass('desktop-layout');
-        
+
         $('#metricsCards').removeClass('grid-cols-1 gap-3')
             .addClass('grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6');
     }

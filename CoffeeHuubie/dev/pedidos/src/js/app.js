@@ -105,6 +105,16 @@ class App extends Templates {
                     }
                 },
 
+                {
+                    opc: "button",
+                    id: "btnDailyClose",
+                    text: "Cierre del día",
+                    class: "col-sm-2",
+                    className: "bg-amber-500 hover:bg-amber-600 text-white font-semibold w-100",
+                    icono: "icon-receipt",
+                    onClick: () => this.generateDailyClose()
+                },
+
             ]
         });
 
@@ -560,7 +570,17 @@ class App extends Templates {
                 class: "col-12  col-lg-3 mb-3"
             },
 
-
+            {
+                opc: "radio",
+                id: "delivery_type",
+                lbl: "Tipo de entrega",
+                class: "col-12 col-lg-6 mb-3",
+                data: [
+                    { id: "local", valor: "Local" },
+                    { id: "domicilio", valor: "A domicilio" }
+                ],
+                default: "local"
+            },
 
             {
                 opc: "textarea",
@@ -1585,6 +1605,116 @@ class App extends Templates {
         } else {
             btn.prop("disabled", false).removeClass("opacity-50 cursor-not-allowed");
         }
+    }
+
+    async generateDailyClose() {
+        const rangePicker = getDataRangePicker("calendar");
+        const selectedDate = rangePicker.fi;
+
+        if (!selectedDate) {
+            alert({
+                icon: "warning",
+                text: "Por favor selecciona una fecha en el calendario",
+                btn1: true,
+                btn1Text: "Ok"
+            });
+            return;
+        }
+
+        const request = await useFetch({
+            url: this._link,
+            data: {
+                opc: "getDailySummary",
+                date: selectedDate
+            }
+        });
+
+        if (request.status === 200) {
+            this.renderDailyCloseTicket(request.data, selectedDate);
+        } else {
+            alert({
+                icon: "info",
+                text: request.message || "No hay pedidos registrados para esta fecha",
+                btn1: true,
+                btn1Text: "Ok"
+            });
+        }
+    }
+
+    renderDailyCloseTicket(data, date) {
+        const formattedDate = moment(date).format('DD [de] MMMM [de] YYYY');
+        
+        const ticketHtml = `
+            <div id="ticketPasteleria" class="bg-white text-gray-800 p-6 rounded-lg max-w-md mx-auto">
+                <div class="text-center mb-6">
+                    <img src="../src/img/logo/logo.png" alt="CoffeeSoft Logo" class="h-16 mx-auto mb-3">
+                    <h2 class="text-xl font-bold text-gray-800">PEDIDOS DE PASTELERÍA</h2>
+                    <p class="text-sm text-gray-600">Cierre del Día</p>
+                    <p class="text-sm text-gray-600">${formattedDate}</p>
+                </div>
+
+                <div class="border-t-2 border-dashed border-gray-300 pt-4 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700 font-medium">🧁 Venta total del día:</span>
+                        <span class="text-lg font-bold text-green-600">${formatPrice(data.total_sales || 0)}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">💳 Ingresos por tarjeta:</span>
+                        <span class="font-semibold">${formatPrice(data.card_sales || 0)}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">💵 Ingresos en efectivo:</span>
+                        <span class="font-semibold">${formatPrice(data.cash_sales || 0)}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-gray-700">🔄 Ingresos por transferencia:</span>
+                        <span class="font-semibold">${formatPrice(data.transfer_sales || 0)}</span>
+                    </div>
+
+                    <div class="border-t-2 border-gray-300 pt-3 flex justify-between items-center">
+                        <span class="text-gray-700 font-medium">📦 Número de pedidos:</span>
+                        <span class="text-lg font-bold text-blue-600">${data.total_orders || 0}</span>
+                    </div>
+                </div>
+
+                <div class="mt-6 text-center text-xs text-gray-500">
+                    <p>Generado: ${moment().format('DD/MM/YYYY HH:mm:ss')}</p>
+                    <p class="mt-2">¡Gracias por usar CoffeeSoft!</p>
+                </div>
+            </div>
+        `;
+
+        bootbox.dialog({
+            title: `<i class="icon-receipt"></i> Cierre del Día - ${formattedDate}`,
+            message: ticketHtml,
+            size: 'large',
+            closeButton: true,
+            buttons: {
+                print: {
+                    label: '<i class="icon-print"></i> Imprimir',
+                    className: 'btn-primary',
+                    callback: function() {
+                        const printContent = document.getElementById('ticketPasteleria').innerHTML;
+                        const printWindow = window.open('', '', 'height=600,width=800');
+                        printWindow.document.write('<html><head><title>Cierre del Día</title>');
+                        printWindow.document.write('<style>body{font-family:Arial,sans-serif;padding:20px;}</style>');
+                        printWindow.document.write('</head><body>');
+                        printWindow.document.write(printContent);
+                        printWindow.document.write('</body></html>');
+                        printWindow.document.close();
+                        printWindow.print();
+                        return false;
+                    }
+                },
+                close: {
+                    label: 'Cerrar',
+                    className: 'btn-secondary'
+                }
+            }
+        });
     }
 }
 

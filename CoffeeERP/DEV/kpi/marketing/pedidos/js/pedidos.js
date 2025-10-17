@@ -1,9 +1,6 @@
 let pedidos;
-const apiPedidos   = 'ctrl/ctrl-pedidos.php';
-const apiCanales   = 'ctrl/ctrl-canales.php';
-const apiProductos = 'ctrl/ctrl-productos.php';
-
-let canales, productos, campanas, lsudn, redes_sociales, redesSociales;
+const apiPedidos = 'ctrl/ctrl-pedidos.php';
+let canales, productos, campanas, lsudn,redes_sociales;
 
 $(async () => {
     const data = await useFetch({ url: apiPedidos, data: { opc: "init" } });
@@ -12,17 +9,14 @@ $(async () => {
     campanas       = data.campanas;
     lsudn          = data.udn;
     redes_sociales = data.redes_sociales;
-    redesSociales = data.redes_sociales;
 
     pedidos = new Pedidos(apiPedidos, 'root');
     pedidos.render();
 
-    canales = new Canales(apiCanales, 'root');
-    // canales.render();
-
-    productos = new Productos(apiProductos, 'root');
-        productos.render();
 });
+
+
+
 
 class Pedidos extends Templates {
     constructor(link, div_modulo) {
@@ -42,7 +36,7 @@ class Pedidos extends Templates {
             class: 'w-full min-h-screen ',
             card: {
                 filterBar: { class: 'w-full ', id: `filterBar${this.PROJECT_NAME}` },
-                container: { class: 'w-full my-4', id: `container${this.PROJECT_NAME}` }
+                container: { class: 'w-full', id: `container${this.PROJECT_NAME}` }
             }
         });
 
@@ -149,7 +143,7 @@ class Pedidos extends Templates {
             coffeesoft: true,
             attr: {
                 id: "tbPedidos",
-                theme: 'dark',
+                theme: 'corporativo',
                 center: [1, 2, 7, 8, 9],
                 right: [6]
             }
