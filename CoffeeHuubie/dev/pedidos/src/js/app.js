@@ -204,90 +204,91 @@ class App extends Templates {
             data: { opc: "addOrder" },
             json: this.jsonOrder(),
 
-        //     success: (response) => {
-        //         if (response.status == 200) {
+            success: (response) => {
+                if (response.status == 200) {
 
-        //             alert({
-        //                 icon: "success",
-        //                 title: "Pedido creado con éxito",
-        //                 text: response.message,
-        //                 btn1: true,
-        //                 btn1Text: "Aceptar"
-        //             });
+                    alert({
+                        icon: "success",
+                        title: "Pedido creado con éxito",
+                        text: response.message,
+                        btn1: true,
+                        btn1Text: "Aceptar"
+                    });
 
-        //             idFolio = response.id;
-        //             normal.layoutPos();
-
-
-        //             // 🔵 Activar la pestaña "Catálogo de productos"
-        //             setTimeout(() => {
-        //                 $("#tab-package")
-        //                     .attr("data-state", "active")
-        //                     .addClass("bg-blue-600 text-white")
-        //                     .removeClass("text-gray-300 hover:bg-gray-700")
-        //                     .trigger("click"); // 👈 simula el click real
-
-        //                 $("#tab-pedido")
-        //                     .attr("data-state", "inactive")
-        //                     .removeClass("bg-blue-600 text-white")
-        //                     .addClass("text-gray-300 hover:bg-gray-700");
-        //             }, 300);
-
-        //             // 🔒 Bloquear todos los campos después de guardar
-        //             $("#formPedido :input, #formPedido textarea").prop("disabled", true);
+                    idFolio = response.id;
+                    normal.layoutPos();
 
 
-        //         } else {
-        //             alert({
-        //                 icon: "error",
-        //                 text: response.message,
-        //                 btn1: true,
-        //                 btn1Text: "Ok"
-        //             });
-        //         }
-            // }
+                    // 🔵 Activar la pestaña "Catálogo de productos"
+                    setTimeout(() => {
+                        $("#tab-package")
+                            .attr("data-state", "active")
+                            .addClass("bg-blue-600 text-white")
+                            .removeClass("text-gray-300 hover:bg-gray-700")
+                            .trigger("click"); // 👈 simula el click real
+
+                        $("#tab-pedido")
+                            .attr("data-state", "inactive")
+                            .removeClass("bg-blue-600 text-white")
+                            .addClass("text-gray-300 hover:bg-gray-700");
+                    }, 300);
+
+                    // 🔒 Bloquear todos los campos después de guardar
+                    $("#formPedido :input, #formPedido textarea").prop("disabled", true);
+
+
+                } else {
+                    alert({
+                        icon: "error",
+                        text: response.message,
+                        btn1: true,
+                        btn1Text: "Ok"
+                    });
+                }
+            }
         });
 
-        // // render.
+        // render.
+        $('#radioDeliveryType').removeClass('col-12 col-lg-6');
 
-        // $("#date_order").val(new Date().toISOString().split("T")[0]);
-        // $("#date_birthday").val(new Date().toISOString().split("T")[0]);
+        $("#date_order").val(new Date().toISOString().split("T")[0]);
+        $("#date_birthday").val(new Date().toISOString().split("T")[0]);
 
-        // const ahora = new Date();
-        // const hora = ahora.toTimeString().split(":").slice(0, 2).join(":");
-        // $("#time_order").val(hora);
+        const ahora = new Date();
+        const hora = ahora.toTimeString().split(":").slice(0, 2).join(":");
+        $("#time_order").val(hora);
 
-        // $("#lblCliente").addClass("border-b p-1");
-        // $("#lblPedido").addClass("border-b p-1");
+        $("#lblCliente").addClass("border-b p-1");
+        $("#lblPedido").addClass("border-b p-1");
 
-        // $("#phone").on("input", function () {
-        //     let value = $(this).val().replace(/\D/g, ""); // Elimina caracteres no numéricos
-        //     if (value.length > 10) {
-        //         value = value.slice(0, 10); // Limita a 10 dígitos
-        //     }
-        //     $(this).val(value);
-        // });
+        $("#phone").on("input", function () {
+            let value = $(this).val().replace(/\D/g, ""); // Elimina caracteres no numéricos
+            if (value.length > 10) {
+                value = value.slice(0, 10); // Limita a 10 dígitos
+            }
+            $(this).val(value);
+        });
 
 
-        // $('#formPedido #name').autocomplete({
-        //     source: clients.map(client => ({
-        //         label: client.name,   // lo que se muestra en el dropdown
-        //         phone: client.phone,  // extra
-        //         email: client.email   // extra
-        //     })),
-        //     select: function (event, ui) {
-        //         $('#formPedido #phone').val(ui.item.phone);
-        //         $('#formPedido #email').val(ui.item.email);
-        //     }
-        // });
+        $('#formPedido #name').autocomplete({
+            source: clients.map(client => ({
+                label: client.name,   // lo que se muestra en el dropdown
+                phone: client.phone,  // extra
+                email: client.email   // extra
+            })),
+            select: function (event, ui) {
+                $('#formPedido #phone').val(ui.item.phone);
+                $('#formPedido #email').val(ui.item.email);
+            }
+        });
 
-        // // 🔄 Si borra el nombre, limpiar teléfono y correo
-        // $('#formPedido #name').on("input", function () {
-        //     if ($(this).val().trim() === "") {
-        //         $('#formPedido #phone').val("");
-        //         $('#formPedido #email').val("");
-        //     }
-        // });
+        // 🔄 Si borra el nombre, limpiar teléfono y correo
+        $('#formPedido #name').on("input", function () {
+            if ($(this).val().trim() === "") {
+                $('#formPedido #phone').val("");
+                $('#formPedido #email').val("");
+            }
+        });
 
 
     }
@@ -299,15 +300,13 @@ class App extends Templates {
 
         $("#container-pedido").html(`<form id="formEditPedido" novalidate></form>`);
 
-
-
         const request = await useFetch({
             url: this._link,
             data: { opc: "getOrder", id }
         });
 
         const order = request.data;
-
+      
 
         this.createForm({
             parent: "formEditPedido",
@@ -317,15 +316,14 @@ class App extends Templates {
             json: this.jsonOrder(),
             success: (response) => {
                 if (response.status == 200) {
+
                     alert({
-                        icon: "success",
-                        title: "Pedido actualizado",
-                        text: response.message,
-                        btn1: true,
+                        icon    : "success",
+                        title   : "Pedido actualizado",
+                        text    : response.message,
+                        btn1    : true,
                         btn1Text: "Aceptar"
                     });
-
-
 
                     // 🔒 Bloquear campos tras guardar
                     $("#formPedido :input, #formPedido textarea").prop("disabled", true);
@@ -345,15 +343,19 @@ class App extends Templates {
                     }, 250);
 
                 } else {
+
                     alert({
-                        icon: "error",
-                        text: response.message,
-                        btn1: true,
+                        icon    : "error",
+                        text    : response.message,
+                        btn1    : true,
                         btn1Text: "Ok"
                     });
                 }
             }
         });
+
+        $('#radioDeliveryType').removeClass('col-12 col-lg-6');
+
 
         if (!$("#date_order").val()) $("#date_order").val(new Date().toISOString().split("T")[0]);
         if (!$("#date_birthday").val()) $("#date_birthday").val(new Date().toISOString().split("T")[0]);
@@ -382,6 +384,10 @@ class App extends Templates {
                 $('#formPedido #email').val(ui.item.email);
             }
         });
+
+        // ✅ Asignar radio seleccionado
+        // console.log(order.delivery_type);
+        // $(`input[name="delivery_type"][value="${order.delivery_type}"]`).prop("checked", true);
 
         // 🔄 Si borra el nombre, limpiar teléfono y correo
         $('#formPedido #name').on("input", function () {
@@ -569,16 +575,36 @@ class App extends Templates {
                 type: "time",
                 class: "col-12  col-lg-3 mb-3"
             },
-
             {
-                // opc: "radio",
-                // id: "delivery_type",
-                // lbl: "Tipo de entrega",
-                // class: "col-12 col-lg-6 mb-3",
-                // data: [
-                //     { id: "local", valor: "Local" },
-                //     { id: "domicilio", valor: "A domicilio" }
-                // ],
+                opc: "div",
+                id: "radioDeliveryType",
+                lbl: "Tipo de entrega",
+                class: "col-12 col-lg-6",
+                html: `
+                    <div class="form-check form-check-inline col-sm-3  mt-2 ">
+                        <input 
+                            class="form-check-input me-2" 
+                            type="radio" 
+                            name="delivery_type"
+                            id="local" 
+                            value=0 
+                             onclick="this.value='0'"
+                            checked 
+                        >
+                        <label class="form-check-label" for="local">Local</label>
+                    </div>
+                    <div class="form-check form-check-inline col-sm-3  mt-2  ">
+                        <input 
+                            class="form-check-input me-2" 
+                            type="radio" 
+                            name="delivery_type"
+                            id="domicilio" 
+                            onclick="this.value='1'"
+                            value=1
+                        >
+                        <label class="form-check-label" for="domicilio">A domicilio</label>
+                    </div>
+                `
             },
 
             {

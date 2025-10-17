@@ -82,6 +82,7 @@ class MPedidos extends CRUD {
             email,
             order.note,
             order.discount,
+            order.delivery_type,
             order.total_pay,
             DATE_FORMAT(date_order, '%d/%m/%Y') AS date_order,
             DATE_FORMAT(time_order, '%h:%i %p') AS time_order

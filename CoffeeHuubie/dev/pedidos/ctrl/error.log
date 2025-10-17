@@ -1,3 +1,96 @@
+[ 2025-10-17 18:03:49 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as total_orders,
+                SUM(total_pay - IFNULL(discount, 0)) as total_sales,
+                SUM(CASE WHEN payment_method = 'tarjeta' THEN total_pay - IFNULL(discount, 0) ELSE 0 END) as card_sales,
+                SUM(CASE WHEN payment_method = 'efectivo' THEN total_pay - IFNULL(discount, 0) ELSE 0 END) as cash_sales,
+                SUM(CASE WHEN payment_method = 'transferencia' THEN total_pay - IFNULL(discount, 0) ELSE 0 END) as transfer_sales
+            FROM fayxzvov_coffee.order
+            WHERE DATE(date_creation) = ?
+            AND subsidiaries_id = ?
+            AND status != 4
+        
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_method' in 'field list'
+
+
+[ 2025-10-17 18:03:49 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as total_orders,
+                SUM(total_pay - IFNULL(discount, 0)) as total_sales,
+                SUM(CASE WHEN payment_method = 'tarjeta' THEN total_pay - IFNULL(discount, 0) ELSE 0 END) as card_sales,
+                SUM(CASE WHEN payment_method = 'efectivo' THEN total_pay - IFNULL(discount, 0) ELSE 0 END) as cash_sales,
+                SUM(CASE WHEN payment_method = 'transferencia' THEN total_pay - IFNULL(discount, 0) ELSE 0 END) as transfer_sales
+            FROM fayxzvov_coffee.order
+            WHERE DATE(date_creation) = ?
+            AND subsidiaries_id = ?
+            AND status != 4
+        
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_method' in 'field list'
+
+
+[ 2025-10-17 18:03:47 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as total_orders,
+                SUM(total_pay - IFNULL(discount, 0)) as total_sales,
+                SUM(CASE WHEN payment_method = 'tarjeta' THEN total_pay - IFNULL(discount, 0) ELSE 0 END) as card_sales,
+                SUM(CASE WHEN payment_method = 'efectivo' THEN total_pay - IFNULL(discount, 0) ELSE 0 END) as cash_sales,
+                SUM(CASE WHEN payment_method = 'transferencia' THEN total_pay - IFNULL(discount, 0) ELSE 0 END) as transfer_sales
+            FROM fayxzvov_coffee.order
+            WHERE DATE(date_creation) = ?
+            AND subsidiaries_id = ?
+            AND status != 4
+        
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_method' in 'field list'
+
+
+[ 2025-10-17 18:03:22 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  
+            SELECT 
+                COUNT(*) as total_orders,
+                SUM(total_pay - IFNULL(discount, 0)) as total_sales,
+                SUM(CASE WHEN payment_method = 'tarjeta' THEN total_pay - IFNULL(discount, 0) ELSE 0 END) as card_sales,
+                SUM(CASE WHEN payment_method = 'efectivo' THEN total_pay - IFNULL(discount, 0) ELSE 0 END) as cash_sales,
+                SUM(CASE WHEN payment_method = 'transferencia' THEN total_pay - IFNULL(discount, 0) ELSE 0 END) as transfer_sales
+            FROM fayxzvov_coffee.order
+            WHERE DATE(date_creation) = ?
+            AND subsidiaries_id = ?
+            AND status != 4
+        
+[ ERROR READ] :: SQLSTATE[42S22]: Column not found: 1054 Unknown column 'payment_method' in 'field list'
+
+
+[ 2025-10-17 15:11:44 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order (note,date_birthday,date_order,time_order,delivery_type,date_creation,client_id,status,type_id,subsidiaries_id) VALUES (?,?,?,?,?,?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[HY000]: General error: 1366 Incorrect integer value: 'local' for column 'delivery_type' at row 1
+
+
+[ 2025-10-17 15:10:51 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order (note,date_birthday,date_order,time_order,delivery_type,date_creation,client_id,status,type_id,subsidiaries_id) VALUES (?,?,?,?,?,?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[HY000]: General error: 1366 Incorrect integer value: 'local' for column 'delivery_type' at row 1
+
+
+[ 2025-10-17 15:10:36 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-FHJB2CN$
+[ INFO ] ::  INSERT INTO fayxzvov_coffee.order (note,date_birthday,date_order,time_order,delivery_type,date_creation,client_id,status,type_id,subsidiaries_id) VALUES (?,?,?,?,?,?,?,?,?,?)
+[ ERROR C.U.D. ] :: SQLSTATE[HY000]: General error: 1366 Incorrect integer value: 'local' for column 'delivery_type' at row 1
+
+
 [ 2025-10-17 12:46:07 ]
 [ UNIX_USR ] :: nt authority\system
 [ WINDOWS_USR ] :: DESKTOP-FHJB2CN$

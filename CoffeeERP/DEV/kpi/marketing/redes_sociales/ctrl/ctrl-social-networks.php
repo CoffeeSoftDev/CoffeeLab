@@ -429,20 +429,20 @@ class ctrl extends mdl {
 
         foreach ($data as $key) {
             $__row[] = [
-                'Métrica' => $key['metric_name'],
-                'Enero' => evaluar($key['month_1']),
-                'Febrero' => evaluar($key['month_2']),
-                'Marzo' => evaluar($key['month_3']),
-                'Abril' => evaluar($key['month_4']),
-                'Mayo' => evaluar($key['month_5']),
-                'Junio' => evaluar($key['month_6']),
-                'Julio' => evaluar($key['month_7']),
-                'Agosto' => evaluar($key['month_8']),
-                'Septiembre' => evaluar($key['month_9']),
-                'Octubre' => evaluar($key['month_10']),
-                'Noviembre' => evaluar($key['month_11']),
-                'Diciembre' => evaluar($key['month_12']),
-                'Total' => evaluar($key['total'])
+                'Métrica'    => $key['metric_name'],
+                'Enero'      => formatNumber($key['month_1']),
+                'Febrero'    => formatNumber($key['month_2']),
+                'Marzo'      => formatNumber($key['month_3']),
+                'Abril'      => formatNumber($key['month_4']),
+                'Mayo'       => formatNumber($key['month_5']),
+                'Junio'      => formatNumber($key['month_6']),
+                'Julio'      => formatNumber($key['month_7']),
+                'Agosto'     => formatNumber($key['month_8']),
+                'Septiembre' => formatNumber($key['month_9']),
+                'Octubre'    => formatNumber($key['month_10']),
+                'Noviembre'  => formatNumber($key['month_11']),
+                'Diciembre'  => formatNumber($key['month_12']),
+                'Total'      => formatNumber($key['total'])
             ];
         }
 
@@ -459,6 +459,18 @@ class ctrl extends mdl {
 
         $data = $this->getMonthlyComparativeReport([$udn, $networkId, $year]);
 
+        $meses = [
+            1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
+            5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
+            9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
+        ];
+
+        $mesActual = date('n');
+        $mesAnterior = $mesActual > 1 ? $mesActual - 1 : 12;
+
+        $nombreMesAnterior = $meses[$mesAnterior];
+        $nombreMesActual = $meses[$mesActual];
+
         foreach ($data as $key) {
             $comparison = $key['current_value'] - $key['previous_value'];
             $percentage = $key['previous_value'] > 0 
@@ -466,11 +478,11 @@ class ctrl extends mdl {
                 : 0;
 
             $__row[] = [
-                'Métrica'      => $key['metric_name'],
-                'Mes Anterior' => $key['previous_value'],
-                'Mes Actual'   => $key['current_value'],
-                'Comparación'  => $comparison,
-                'Porcentaje'   => number_format($percentage, 2) . '%'
+                'Métrica'           => $key['metric_name'],
+                $nombreMesAnterior  => formatNumber($key['previous_value']),
+                $nombreMesActual    => formatNumber($key['current_value']),
+                'Comparación'       => formatNumber($comparison),
+                'Porcentaje'        => $percentage == 0 ? '-' : number_format($percentage, 2) . '%'
             ];
         }
 
@@ -495,10 +507,10 @@ class ctrl extends mdl {
 
             $__row[] = [
                               'Métrica'     => $key['metric_name'],
-                       'Año ' . ($year - 1) => $key['previous_year'],
-                       'Año ' . $year       => $key['current_year'],
-                              'Comparación' => $comparison,
-                              'Porcentaje'  => number_format($percentage, 2) . '%'
+                       'Año ' . ($year - 1) => formatNumber($key['previous_year']),
+                       'Año ' . $year       => formatNumber($key['current_year']),
+                              'Comparación' => formatNumber($comparison),
+                              'Porcentaje'  => $percentage == 0 ? '-' : number_format($percentage, 2) . '%'
             ];
         }
 
@@ -644,6 +656,10 @@ function renderStatus($status) {
                         Desconocido
                     </span>';
     }
+}
+
+function formatNumber($value) {
+    return ($value == 0 || $value === null || $value === '') ? '-' : $value;
 }
 
 $obj = new ctrl();

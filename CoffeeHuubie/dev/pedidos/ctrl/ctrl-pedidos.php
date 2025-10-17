@@ -132,6 +132,7 @@ class Pedidos extends MPedidos{
     public function addOrder(){
 
         $client = $this->getClientName([$_POST['name']]);
+        $folio = null;
 
         if (!is_array($client) || empty($client['id'])) {
             $data_client = $this->util->sql([
@@ -157,9 +158,7 @@ class Pedidos extends MPedidos{
 
         }
 
-        if (!isset($_POST['delivery_type']) || !in_array($_POST['delivery_type'], ['local', 'domicilio'])) {
-            $_POST['delivery_type'] = 'local';
-        }
+       
 
         $data = $this->util->sql([
             'note'            => $_POST['note'],
@@ -223,9 +222,6 @@ class Pedidos extends MPedidos{
         $status  = 500;
         $message = 'No se pudo actualizar el pedido';
 
-        if (!isset($_POST['delivery_type']) || !in_array($_POST['delivery_type'], ['local', 'domicilio'])) {
-            $_POST['delivery_type'] = 'local';
-        }
 
         $update = $this->updateOrder($this->util->sql([
             'date_order'    => $_POST['date_order'],
@@ -1099,24 +1095,24 @@ class Pedidos extends MPedidos{
     }
 
     function getDailySummary() {
-        $status = 500;
+        $status  = 500;
         $message = 'Error al obtener resumen del día';
-        $data = null;
+        $data    = null;
         
-        $date = $_POST['date'] ?? date('Y-m-d');
-        $subsidiaries_id = $_SESSION['SUB'] ?? 1;
+        $date            = $_POST['date'] ?? date('Y-m-d');
+        $subsidiaries_id = $_SESSION['SUB'] ?? 4;
         
         $summary = $this->getDailySalesMetrics([
-            'date' => $date,
+            'date'            => $date,
             'subsidiaries_id' => $subsidiaries_id
         ]);
         
         if ($summary && $summary['total_orders'] > 0) {
-            $status = 200;
+            $status  = 200;
             $message = 'Resumen obtenido correctamente';
-            $data = $summary;
+            $data    = $summary;
         } else {
-            $status = 404;
+            $status  = 404;
             $message = 'No hay pedidos registrados para esta fecha';
         }
         

@@ -1,5 +1,5 @@
 let api = 'ctrl/ctrl-social-networks.php';
-let app, dashboardSocialNetwork, registerSocialNetWork, adminMetrics, adminSocialNetWork;
+let app, dashboardSocialNetwork, registerSocialNetWork, report, adminMetrics, adminSocialNetWork;
 
 let udn, lsudn, socialNetworks, metrics;
 
@@ -13,6 +13,7 @@ $(async () => {
     app = new App(api, "root");
     dashboardSocialNetwork = new DashboardSocialNetwork(api, "root");
     registerSocialNetWork = new RegisterSocialNetWork(api, "root");
+    report = new ReportSocialNetwork(api, "root");
 
     adminMetrics = new AdminMetrics(api, "root");
     adminSocialNetWork = new AdminSocialNetWork(api, "root");
@@ -29,6 +30,7 @@ class App extends Templates {
     render() {
         this.layout();
         registerSocialNetWork.render()
+        report.render();
         dashboardSocialNetwork.render();
     }
 
@@ -73,7 +75,7 @@ class App extends Templates {
                 {
                     id: "report",
                     tab: "Reportes",
-                    active: true,
+
                     onClick: () => registerSocialNetWork.render()
                 },
                 {
@@ -494,6 +496,7 @@ class RegisterSocialNetWork extends Templates {
     render() {
         this.layout();
         this.filterBar();
+        this.layoutCaptureForm()
     }
 
     layout() {
@@ -501,7 +504,7 @@ class RegisterSocialNetWork extends Templates {
             parent: `container-capture`,
             id: this.PROJECT_NAME,
             card: {
-                filterBar: { class: 'w-full border-b pb-2', id: `filterBar${this.PROJECT_NAME}` },
+                filterBar: { class: 'w-full  pb-2', id: `filterBar${this.PROJECT_NAME}` },
                 container: { class: 'w-full my-2 h-full', id: `container${this.PROJECT_NAME}` }
             }
         });
@@ -538,60 +541,34 @@ class RegisterSocialNetWork extends Templates {
                     }),
                     onchange: `registerSocialNetWork.updateView()`,
                 },
-                {
-                    opc: "select",
-                    id: "reportType",
-                    lbl: "Tipo de Reporte",
-                    class: "col-sm-4",
-                    data: [
-                        { id: "1", valor: "Concentrado Anual" },
-                        { id: "2", valor: "Comparativa Mensual" },
-                        { id: "3", valor: "Comparativa Anual" },
-                        { id: "0", valor: "Capturar información" },
-                    ],
-                    onchange: `registerSocialNetWork.updateView()`,
-                },
+
             ],
         });
     }
 
-    updateView() {
-        const reportType = $('#filterBarCapture #reportType').val();
-
-        switch (reportType) {
-            case "1":
-                this.showAnnualReport();
-                break;
-            case "2":
-                this.showMonthlyComparative();
-                break;
-            case "3":
-                this.showAnnualComparative();
-                break;
-            default:
-                this.showCaptureForm();
-        }
-    }
-
-    showCaptureForm() {
+    layoutCaptureForm() {
         $(`#container${this.PROJECT_NAME}`).html(`
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
                 <!-- Formulario de Captura -->
-                <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="bg-white rounded-lg border p-6">
                     <div class="flex items-center gap-2 mb-4">
                         <i class="icon-edit text-blue-600 text-xl"></i>
                         <h3 class="text-lg font-semibold text-gray-800">Capturar Métricas Manualmente</h3>
                     </div>
+
                     <div id="capture-filters" class="mb-4"></div>
-                    <div id="metrics-inputs" class="grid grid-cols-2 gap-3"></div>
-                    <button id="btnSaveCapture" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg mt-4 flex items-center justify-center gap-2">
+                    <div id="metrics-inputs" class="grid grid-cols-2 gap-3 border rounded p-3 "></div>
+                    
+                    <button id="btnSaveCapture" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-2 rounded-lg mt-4 flex items-center justify-center gap-2">
                         <i class="icon-check"></i>
                         Actualizar Métrica
                     </button>
+
+
                 </div>
 
                 <!-- Historial de Métricas -->
-                <div class="bg-white rounded-lg shadow-md p-6">
+                <div class="bg-white rounded-lg border  p-6">
                     <div class="flex items-center gap-2 mb-4">
                         <i class="icon-clock text-green-600 text-xl"></i>
                         <h3 class="text-lg font-semibold text-gray-800">Historial de Métricas</h3>
@@ -604,6 +581,66 @@ class RegisterSocialNetWork extends Templates {
         this.createCaptureFilters();
         this.loadHistory();
     }
+
+    async loadHistory() {
+        const container = $('#history-container');
+        container.html('<p class="text-gray-500 text-center">Cargando historial...</p>');
+
+        const response = await useFetch({
+            url: api,
+            data: {
+                opc: "apiGetHistoryMetrics"
+            }
+        });
+
+        if (response.status !== 200) {
+            container.html('<p class="text-red-500 text-center">Error al cargar el historial</p>');
+            return;
+        }
+
+        const history = response.data;
+
+        if (!history || history.length === 0) {
+            container.html('<p class="text-gray-500 text-center">No hay registros en el historial</p>');
+            return;
+        }
+
+        container.empty();
+        history.forEach(item => {
+            const card = $(`
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: ${item.color}20;">
+                                <i class="${item.icon}" style="color: ${item.color}; font-size: 20px;"></i>
+                            </div>
+                            <span class="font-semibold text-gray-800">${item.network}</span>
+                        </div>
+                        <span class="text-sm text-gray-500">${item.date}</span>
+                    </div>
+                    <div class="space-y-2 mb-3">
+                        ${item.metrics.map(m => `
+                            <div class="flex justify-between text-sm">
+                                <span class="text-gray-600">${m.name}:</span>
+                                <span class="font-medium">${m.value}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="flex-1 text-blue-600 hover:bg-blue-50 py-2 px-3 rounded text-sm font-medium transition" onclick="registerSocialNetWork.editHistory(${item.id})">
+                            <i class="icon-edit mr-1"></i> Editar
+                        </button>
+                        <button class="flex-1 text-red-600 hover:bg-red-50 py-2 px-3 rounded text-sm font-medium transition" onclick="registerSocialNetWork.deleteHistory(${item.id})">
+                            <i class="icon-trash mr-1"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            `);
+            container.append(card);
+        });
+    }
+
+
 
     createCaptureFilters() {
         const container = $('#capture-filters');
@@ -718,76 +755,7 @@ class RegisterSocialNetWork extends Templates {
         }
     }
 
-    async loadHistory() {
-        const container = $('#history-container');
-        container.html('<p class="text-gray-500 text-center">Cargando historial...</p>');
 
-        // Simulación de historial - aquí deberías hacer una consulta real
-        const mockHistory = [
-            {
-                network: 'YouTube',
-                icon: 'icon-youtube',
-                color: '#FF0000',
-                date: '28/10/2025',
-                metrics: [
-                    { name: 'Seguidores', value: 2, change: 150 },
-                    { name: 'Likes', value: 1, change: null },
-                ],
-                engagement: '150%'
-            },
-            {
-                network: 'Facebook',
-                icon: 'icon-facebook',
-                color: '#1877F2',
-                date: '14/10/2025',
-                metrics: [
-                    { name: 'Seguidores', value: 22, change: 59.09 },
-                    { name: 'Likes', value: 1, change: null },
-                ],
-                engagement: '59.09%'
-            }
-        ];
-
-        container.empty();
-        mockHistory.forEach(item => {
-            const card = $(`
-                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-2">
-                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: ${item.color}20;">
-                                <i class="${item.icon}" style="color: ${item.color}; font-size: 20px;"></i>
-                            </div>
-                            <span class="font-semibold text-gray-800">${item.network}</span>
-                        </div>
-                        <span class="text-sm text-gray-500">${item.date}</span>
-                    </div>
-                    <div class="space-y-2 mb-3">
-                        ${item.metrics.map(m => `
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">${m.name}:</span>
-                                <span class="font-medium">${m.value}</span>
-                            </div>
-                        `).join('')}
-                        ${item.engagement ? `
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">Engagement:</span>
-                                <span class="font-medium text-green-600">${item.engagement}</span>
-                            </div>
-                        ` : ''}
-                    </div>
-                    <div class="flex gap-2">
-                        <button class="flex-1 text-blue-600 hover:bg-blue-50 py-2 px-3 rounded text-sm font-medium transition">
-                            <i class="icon-edit mr-1"></i> Editar
-                        </button>
-                        <button class="flex-1 text-red-600 hover:bg-red-50 py-2 px-3 rounded text-sm font-medium transition">
-                            <i class="icon-trash mr-1"></i> Eliminar
-                        </button>
-                    </div>
-                </div>
-            `);
-            container.append(card);
-        });
-    }
 
     async editCapture(id) {
         const response = await useFetch({
@@ -856,7 +824,7 @@ class RegisterSocialNetWork extends Templates {
         });
 
         $('#btnUpdateCapture').on('click', () => this.updateCapture(id));
-        $('#btnCancelEdit').on('click', () => this.showCaptureForm());
+        $('#btnCancelEdit').on('click', () => this.layoutCaptureForm());
     }
 
     async updateCapture(id) {
@@ -888,7 +856,7 @@ class RegisterSocialNetWork extends Templates {
 
         if (response.status === 200) {
             alert({ icon: "success", text: response.message });
-            this.showCaptureForm();
+            this.layoutCaptureForm();
         } else {
             alert({ icon: "error", text: response.message });
         }
@@ -914,103 +882,182 @@ class RegisterSocialNetWork extends Templates {
         });
     }
 
-    async showAnnualReport() {
-        const udn = $('#filterBarCapture #udn').val();
-        const networkId = $('#filterBarCapture #socialNetwork').val();
-        const year = $('#filterBarCapture #anio').val();
+    editHistory(id) {
+        this.editCapture(id);
+    }
 
-        $(`#container${this.PROJECT_NAME}`).html(`
-            <div class="px-2 pt-2 pb-2">
-                <h2 class="text-2xl font-semibold">📊 Concentrado Anual</h2>
-                <p class="text-gray-400">Resumen de métricas por mes del año ${year}</p>
-            </div>
-            <div id="annual-report-table"></div>
-        `);
+    deleteHistory(id) {
+        this.deleteCapture(id);
+    }
+}
+
+class ReportSocialNetwork extends Templates {
+    constructor(link, div_modulo) {
+        super(link, div_modulo);
+        this.PROJECT_NAME = "report";
+    }
+
+    render() {
+        this.layout();
+        this.filterBar();
+        this.lsMonthlyComparative();
+    }
+
+    layout() {
+        this.primaryLayout({
+            parent: `container-report`,
+            id: this.PROJECT_NAME,
+            card: {
+                filterBar: { class: 'w-full border-b pb-2', id: `filterBar${this.PROJECT_NAME}` },
+                container: { class: 'w-full my-2 h-full', id: `container${this.PROJECT_NAME}` }
+            }
+        });
+    }
+
+    filterBar() {
+        this.createfilterBar({
+            parent: `filterBar${this.PROJECT_NAME}`,
+            data: [
+                {
+                    opc: "select",
+                    id: "udn",
+                    lbl: "UDN",
+                    class: "col-sm-3",
+                    data: lsudn,
+                    onchange: `report.updateView()`,
+                },
+                {
+                    opc: "select",
+                    id: "social_network_id",
+                    lbl: "Red Social",
+                    class: "col-sm-3",
+                    data: socialNetworks,
+                    onchange: `report.updateView()`,
+                },
+                {
+                    opc: "select",
+                    id: "year",
+                    lbl: "Año",
+                    class: "col-sm-2",
+                    data: Array.from({ length: 5 }, (_, i) => {
+                        const year = moment().year() - i;
+                        return { id: year, valor: year.toString() };
+                    }),
+                    onchange: `report.updateView()`,
+                },
+                {
+                    opc: "select",
+                    id: "reportType",
+                    lbl: "Tipo de Reporte",
+                    class: "col-sm-4",
+                    data: [
+                        { id: "1", valor: "Concentrado Anual" },
+                        { id: "2", valor: "Comparativa Mensual" },
+                        { id: "3", valor: "Comparativa Anual" },
+                    ],
+                    onchange: `report.updateView()`,
+                },
+            ],
+        });
+    }
+
+    updateView() {
+        const reportType = $('#filterBarreport #reportType').val();
+
+        switch (reportType) {
+            case "1":
+                this.lsAnualReport();
+                break;
+            case "2":
+                this.lsMonthlyComparative();
+                break;
+            case "3":
+                this.lsAnnualComparative();
+                break;
+
+        }
+
+    }
+
+    // Concentrado anual.
+
+    lsAnualReport() {
+        const year = $('#filterBarreport #year').val();
+        const networkId = $('#filterBarreport #social_network_id').val();
+        const networkName = $('#filterBarreport #social_network_id option:selected').text();
+
+        const title = networkId ? `📊 Concentrado Anual - ${networkName}` : '📊 Concentrado Anual';
 
         this.createTable({
-            parent: "annual-report-table",
+            parent: `container${this.PROJECT_NAME}`,
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
-            data: {
-                opc: 'apiAnnualReport',
-                udn: udn,
-                social_network_id: networkId,
-                year: year
-            },
+            data: { opc: 'apiAnnualReport' },
             coffeesoft: true,
             conf: { datatable: false, pag: 15 },
             attr: {
+                title: title,
+                subtitle: `Resumen de métricas por mes del año ${year}`,
                 id: "tbAnnualReport",
                 theme: 'corporativo',
-                right: [13]
+                center: [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13],
+                striped: true
             },
         });
     }
 
-    async showMonthlyComparative() {
-        const udn = $('#filterBarCapture #udn').val();
-        const networkId = $('#filterBarCapture #socialNetwork').val();
-        const year = $('#filterBarCapture #anio').val();
+    lsMonthlyComparative() {
+        const year = $('#filterBarreport #year').val();
+        const networkId = $('#filterBarreport #socialNetwork').val();
+        const networkName = $('#filterBarreport #socialNetwork option:selected').text();
 
-        $(`#container${this.PROJECT_NAME}`).html(`
-            <div class="px-2 pt-2 pb-2">
-                <h2 class="text-2xl font-semibold">📊 Comparativa Mensual</h2>
-                <p class="text-gray-400">Comparación mes a mes del año ${year}</p>
-            </div>
-            <div id="monthly-comparative-table"></div>
-        `);
+        const title = networkId ? `📊 Comparativa Mensual - ${networkName}` : '📊 Comparativa Mensual';
 
         this.createTable({
-            parent: "monthly-comparative-table",
+            parent: `container${this.PROJECT_NAME}`,
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
-            data: {
-                opc: 'apiMonthlyComparative',
-                udn: udn,
-                social_network_id: networkId,
-                year: year
-            },
+            data: { opc: 'apiMonthlyComparative' },
             coffeesoft: true,
             conf: { datatable: false, pag: 15 },
             attr: {
+                title: title,
+                subtitle: `Comparación mes a mes del año ${year}`,
                 id: "tbMonthlyComparative",
                 theme: 'corporativo',
                 center: [1, 2, 3],
-                right: [4]
+                right: [4],
+                striped: true
             },
         });
     }
 
-    async showAnnualComparative() {
-        const udn = $('#filterBarCapture #udn').val();
-        const networkId = $('#filterBarCapture #socialNetwork').val();
-        const year = $('#filterBarCapture #anio').val();
+    lsAnnualComparative() {
 
-        $(`#container${this.PROJECT_NAME}`).html(`
-            <div class="px-2 pt-2 pb-2">
-                <h2 class="text-2xl font-semibold">📊 Comparativa Anual</h2>
-                <p class="text-gray-400">Comparación año ${year} vs ${year - 1}</p>
-            </div>
-            <div id="annual-comparative-table"></div>
-        `);
+        const year = $('#filterBarreport #year').val();
+        const networkId = $('#filterBarreport #socialNetwork').val();
+        const networkName = $('#filterBarreport #socialNetwork option:selected').text();
+
+        const title = networkId ? `📊 Comparativa Anual - ${networkName}` : '📊 Comparativa Anual';
 
         this.createTable({
-            parent: "annual-comparative-table",
+            parent: `container${this.PROJECT_NAME}`,
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
-            data: {
-                opc: 'apiAnnualComparative',
-                udn: udn,
-                social_network_id: networkId,
-                year: year
-            },
+            data: { opc: 'apiAnnualComparative' },
             coffeesoft: true,
             conf: { datatable: false, pag: 15 },
             attr: {
+                title: title,
+                subtitle: `Comparación año ${year} vs ${year - 1}`,
                 id: "tbAnnualComparative",
                 theme: 'corporativo',
                 center: [1, 2, 3],
-                right: [4]
+                right: [4],
+                striped: true
             },
         });
     }
+
+
+
 }
 
 class AdminMetrics extends Templates {
