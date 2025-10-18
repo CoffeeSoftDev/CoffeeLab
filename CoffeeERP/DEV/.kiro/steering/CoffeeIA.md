@@ -280,29 +280,47 @@ Incluye una biblioteca de componentes reutilizables, herramientas para gestión 
 
 ## Reglas de Comentarios
 
-**IMPORTANTE:** No generar comentarios automáticamente en métodos o clases a menos que sea estrictamente necesario para la funcionalidad.
+**CRÍTICO:** NUNCA generar comentarios automáticamente en métodos o clases. El código debe ser limpio y autoexplicativo.
 
+### ❌ PROHIBIDO:
+
+- **NO** usar comentarios PHPDoc (`/** */`)
 - **NO** agregar comentarios descriptivos en funciones simples
 - **NO** agregar comentarios explicativos en métodos CRUD básicos
-- **NO** agregar comentarios de documentación automática
-- **SÍ** agregar comentarios solo cuando:
-  - La lógica sea compleja y requiera explicación
-  - Se necesite documentar parámetros específicos
-  - El usuario lo solicite explícitamente
+- **NO** agregar comentarios de documentación automática tipo `@param`, `@return`
+- **NO** agregar comentarios inline innecesarios
 
-**Ejemplo de lo que NO hacer:**
+### ✅ PERMITIDO (solo cuando sea absolutamente necesario):
+
+- Lógica compleja que requiera explicación
+- Algoritmos no obvios
+- Cuando el usuario lo solicite explícitamente
+
+### Ejemplos de lo que NO hacer:
 
 ```php
+/**
+ * Obtiene top clientes por monto
+ * @return array Top clientes
+ */
+function getTopClients() {
+    // Consulta a la base de datos
+    return $this->_Select([...]);
+}
+
 // Método para obtener lista de usuarios
 function getUsers() {
-    // Consulta a la base de datos
     return $this->_Select([...]);
 }
 ```
 
-**Ejemplo correcto:**
+### Ejemplo correcto:
 
 ```php
+function getTopClients() {
+    return $this->_Select([...]);
+}
+
 function getUsers() {
     return $this->_Select([...]);
 }
