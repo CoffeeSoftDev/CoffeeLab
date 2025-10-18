@@ -23,11 +23,11 @@ class ctrl extends mdl {
 
     function ls() {
         $__row = [];
-        $fi = $_POST['fi'];
-        $ff = $_POST['ff'];
-        $udn = $_POST['udn'] ;
+        $udn = $_POST['udn'];
+        $anio = $_POST['anio'];
+        $mes = $_POST['mes'];
         
-        $ls = $this->listPedidos([$fi, $ff, $udn]);
+        $ls = $this->listPedidos([$udn]);
         
         foreach ($ls as $key) {
             // $diasTranscurridos = (strtotime(date('Y-m-d')) - strtotime($key['fecha_creacion'])) / 86400;
