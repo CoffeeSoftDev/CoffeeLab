@@ -1,7 +1,7 @@
 let api = 'ctrl/ctrl-campaign.php';
 let api_admin = 'ctrl/ctrl-admin.php';
-let app, campaign, dashboard, summary, history, admin;
 
+let app, campaign, dashboard, summary, history, admin; // Instancias globales
 let udn, red_social, tipo_anuncio, clasificacion;
 
 $(async () => {
@@ -141,14 +141,12 @@ class App extends Templates {
         container.append(leftSection, centerSection);
         $(`#${opts.parent}`).html(container);
     }
-
 }
 
 class Campaign extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "Campaign";
-        this.currentCampaignId = null;
         this.idCampaign = null;
     }
 
@@ -229,7 +227,6 @@ class Campaign extends Templates {
             },
         });
     }
-
 
     async addCampaign() {
         const result = await alert({
@@ -858,7 +855,6 @@ class Campaign extends Templates {
             }
         }
     }
-
 
     validationInputForNumber(selector) {
         const value = $(selector).val();
