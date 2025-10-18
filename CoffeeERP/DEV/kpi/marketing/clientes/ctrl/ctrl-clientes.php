@@ -1,11 +1,4 @@
 <?php
-/**
- * Controlador - Gestión de Clientes
- * Sistema: KPI / Marketing - CoffeeSoft ERP
- * 
- * Este controlador maneja todas las peticiones AJAX del módulo de clientes,
- * valida datos de entrada y coordina las operaciones del modelo
- */
 
 session_start();
 if (empty($_POST['opc'])) exit(0);
@@ -18,63 +11,46 @@ require_once '../mdl/mdl-clientes.php';
 
 class ctrl extends mdl {
 
-    /**
-     * Inicializa el módulo cargando datos necesarios
-     * @return array Datos iniciales (UDN)
-     */
     function init() {
         return [
             'udn' => $this->lsUDN()
         ];
     }
 
-    // ============================================
-    // GESTIÓN DE CLIENTES
-    // ============================================
-
-    /**
-     * Lista clientes con filtros y formatea para tabla
-     * @return array Filas formateadas y datos originales
-     */
     function listClientes() {
         $__row = [];
         
-        // Obtener filtros
         $active = isset($_POST['active']) ? $_POST['active'] : 1;
-        $udnId = isset($_POST['udn_id']) && $_POST['udn_id'] !== 'all' ? $_POST['udn_id'] : null;
-        $vip = isset($_POST['vip']) && $_POST['vip'] !== 'all' ? $_POST['vip'] : null;
-
-        // Obtener lista de clientes
-        $ls = $this->lsClientes([$active, $udnId, $vip]);
+        $udnId  = isset($_POST['udn_id']) && $_POST['udn_id'] !== 'all' ? $_POST['udn_id'] : null;
+        $vip    = isset($_POST['vip']) && $_POST['vip']       !== 'all' ? $_POST['vip'] : null;
+        
+        $ls     = $this->lsClientes([$active, $udnId, $vip]);
 
         foreach ($ls as $key) {
             $a = [];
 
-            // Formatear nombre completo
             $nombreCompleto = trim($key['nombre'] . ' ' . $key['apellido_paterno'] . ' ' . $key['apellido_materno']);
 
-            // Badge VIP
             $badgeVIP = $key['vip'] == 1 
-                ? '<span class="px-2 py-1 rounded-md text-xs font-semibold bg-yellow-500 text-white"><i class="icon-star"></i> VIP</span>' 
+                ? '<span class="px-2 py-1 rounded-md text-xs font-semibold bg-orange-400 text-white"><i class="icon-star"></i> VIP</span>' 
                 : '<span class="px-2 py-1 rounded-md text-xs font-semibold bg-gray-300 text-gray-600">Regular</span>';
 
-            // Botones de acción según estatus
             if ($key['active'] == 1) {
                 $a[] = [
-                    'class' => 'btn btn-sm btn-primary me-1',
-                    'html' => '<i class="icon-pencil"></i>',
+                    'class'   => 'btn btn-sm btn-primary me-1',
+                    'html'    => '<i class="icon-pencil"></i>',
                     'onclick' => 'clientes.editCliente(' . $key['id'] . ')'
                 ];
 
                 $a[] = [
-                    'class' => 'btn btn-sm btn-danger',
-                    'html' => '<i class="icon-toggle-on"></i>',
+                    'class'   => 'btn btn-sm btn-danger',
+                    'html'    => '<i class="icon-toggle-on"></i>',
                     'onclick' => 'clientes.statusCliente(' . $key['id'] . ', ' . $key['active'] . ')'
                 ];
             } else {
                 $a[] = [
-                    'class' => 'btn btn-sm btn-outline-success',
-                    'html' => '<i class="icon-toggle-off"></i>',
+                    'class'   => 'btn btn-sm btn-outline-success',
+                    'html'    => '<i class="icon-toggle-off"></i>',
                     'onclick' => 'clientes.statusCliente(' . $key['id'] . ', ' . $key['active'] . ')'
                 ];
             }
@@ -97,10 +73,6 @@ class ctrl extends mdl {
         ];
     }
 
-    /**
-     * Obtiene un cliente específico por ID
-     * @return array Status, mensaje y datos del cliente
-     */
     function getCliente() {
         $status = 500;
         $message = 'Error al obtener los datos del cliente';
@@ -132,193 +104,64 @@ class ctrl extends mdl {
         ];
     }
 
-    /**
-     * Crea un nuevo cliente con validaciones
-     * @return array Status y mensaje de resultado
-     */
     function addCliente() {
         $status = 500;
         $message = 'No se pudo registrar el cliente';
 
-        // Validar campos obligatorios
-        if (empty($_POST['nombre']) || empty($_POST['telefono']) || empty($_POST['udn_id'])) {
-            return [
-                'status' => 400,
-                'message' => 'Los campos Nombre, Teléfono y Unidad de Negocio son obligatorios'
-            ];
-        }
+       
 
-        // Validar formato de teléfono
-        if (!is_numeric($_POST['telefono']) || strlen($_POST['telefono']) < 10) {
-            return [
-                'status' => 400,
-                'message' => 'El teléfono debe tener al menos 10 dígitos numéricos'
-            ];
-        }
-
-        // Validar formato de correo (si se proporciona)
-        if (!empty($_POST['correo']) && !filter_var($_POST['correo'], FILTER_VALIDATE_EMAIL)) {
-            return [
-                'status' => 400,
-                'message' => 'El formato del correo electrónico no es válido'
-            ];
-        }
-
-        // Validar domicilio obligatorio
-        if (empty($_POST['calle'])) {
-            return [
-                'status' => 400,
-                'message' => 'El domicilio (calle) es obligatorio'
-            ];
-        }
-
-        // Verificar si ya existe un cliente con ese teléfono
-        $exists = $this->existsClienteByPhone($_POST['telefono']);
-        if ($exists > 0) {
-            return [
-                'status' => 409,
-                'message' => 'Ya existe un cliente registrado con ese número de teléfono'
-            ];
-        }
-
-        // Preparar datos del cliente
         $_POST['fecha_creacion'] = date('Y-m-d H:i:s');
-        $_POST['active'] = 1;
-        $_POST['vip'] = isset($_POST['vip']) && $_POST['vip'] == 1 ? 1 : 0;
+        $_POST['active']         = 1;
+        $_POST['vip']            = isset($_POST['vip']) && $_POST['vip'] == 1 ? 1 : 0;
 
-        // Guardar datos del domicilio antes de eliminarlos del POST
-        $domicilioData = [
-            'calle' => $_POST['calle'] ?? '',
-            'numero_exterior' => $_POST['numero_exterior'] ?? '',
-            'numero_interior' => $_POST['numero_interior'] ?? '',
-            'colonia' => $_POST['colonia'] ?? '',
-            'ciudad' => $_POST['ciudad'] ?? '',
-            'estado' => $_POST['estado'] ?? '',
-            'codigo_postal' => $_POST['codigo_postal'] ?? '',
-            'referencias' => $_POST['referencias'] ?? '',
-            'es_principal' => 1
-        ];
 
-        // Eliminar campos de domicilio del POST para no insertarlos en la tabla cliente
-        unset($_POST['calle'], $_POST['numero_exterior'], $_POST['numero_interior'], 
-              $_POST['colonia'], $_POST['ciudad'], $_POST['estado'], 
-              $_POST['codigo_postal'], $_POST['referencias']);
 
-        // Crear cliente
         $clienteId = $this->createCliente($this->util->sql($_POST));
+         if ($clienteId) {
+           
+            $status = 200;
+            $message = 'Cliente agregado correctamente';
 
-        if ($clienteId) {
-            // Crear domicilio asociado
-            $domicilioData['cliente_id'] = $clienteId;
-            $domicilioCreated = $this->createDomicilio($this->util->sql($domicilioData));
-
-            if ($domicilioCreated) {
-                $status = 200;
-                $message = 'Cliente registrado correctamente';
-            } else {
-                $status = 200;
-                $message = 'Cliente registrado pero hubo un error al guardar el domicilio';
-            }
         }
-
+      
         return [
             'status' => $status,
             'message' => $message
         ];
     }
 
-    /**
-     * Actualiza los datos de un cliente existente
-     * @return array Status y mensaje de resultado
-     */
     function editCliente() {
         $status = 500;
         $message = 'Error al actualizar el cliente';
 
-        // Validar campos obligatorios
-        if (empty($_POST['id']) || empty($_POST['nombre']) || empty($_POST['telefono']) || empty($_POST['udn_id'])) {
-            return [
-                'status' => 400,
-                'message' => 'Los campos ID, Nombre, Teléfono y Unidad de Negocio son obligatorios'
-            ];
-        }
 
-        // Validar formato de teléfono
-        if (!is_numeric($_POST['telefono']) || strlen($_POST['telefono']) < 10) {
-            return [
-                'status' => 400,
-                'message' => 'El teléfono debe tener al menos 10 dígitos numéricos'
-            ];
-        }
 
-        // Validar formato de correo (si se proporciona)
-        if (!empty($_POST['correo']) && !filter_var($_POST['correo'], FILTER_VALIDATE_EMAIL)) {
-            return [
-                'status' => 400,
-                'message' => 'El formato del correo electrónico no es válido'
-            ];
-        }
+        // $exists = $this->existsClienteByPhone($_POST['telefono'], $_POST['id']);
+        // if ($exists > 0) {
+        //     return [
+        //         'status' => 409,
+        //         'message' => 'Ya existe otro cliente registrado con ese número de teléfono'
+        //     ];
+        // }
 
-        // Verificar si ya existe otro cliente con ese teléfono (excluyendo el actual)
-        $exists = $this->existsClienteByPhone($_POST['telefono'], $_POST['id']);
-        if ($exists > 0) {
-            return [
-                'status' => 409,
-                'message' => 'Ya existe otro cliente registrado con ese número de teléfono'
-            ];
-        }
+        // $_POST['vip'] = isset($_POST['vip']) && $_POST['vip'] == 1 ? 1 : 0;
 
-        // Actualizar VIP
-        $_POST['vip'] = isset($_POST['vip']) && $_POST['vip'] == 1 ? 1 : 0;
-
-        // Guardar datos del domicilio antes de eliminarlos del POST
-        $domicilioData = [
-            'calle' => $_POST['calle'] ?? '',
-            'numero_exterior' => $_POST['numero_exterior'] ?? '',
-            'numero_interior' => $_POST['numero_interior'] ?? '',
-            'colonia' => $_POST['colonia'] ?? '',
-            'ciudad' => $_POST['ciudad'] ?? '',
-            'estado' => $_POST['estado'] ?? '',
-            'codigo_postal' => $_POST['codigo_postal'] ?? '',
-            'referencias' => $_POST['referencias'] ?? '',
-            'cliente_id' => $_POST['id']
-        ];
-
-        // Eliminar campos de domicilio del POST
-        unset($_POST['calle'], $_POST['numero_exterior'], $_POST['numero_interior'], 
-              $_POST['colonia'], $_POST['ciudad'], $_POST['estado'], 
-              $_POST['codigo_postal'], $_POST['referencias']);
-
-        // Actualizar cliente
-        $updated = $this->updateCliente($this->util->sql($_POST, 1));
+        $values  = $this->util->sql($_POST, 1);
+        $updated = $this->updateCliente($values);
 
         if ($updated) {
-            // Verificar si existe domicilio
-            $domicilioExiste = $this->getDomicilioPrincipal($_POST['id']);
-
-            if ($domicilioExiste) {
-                // Actualizar domicilio existente
-                $this->updateDomicilio($this->util->sql($domicilioData, 1));
-            } else {
-                // Crear nuevo domicilio
-                $domicilioData['es_principal'] = 1;
-                $this->createDomicilio($this->util->sql($domicilioData));
-            }
-
+        
             $status = 200;
             $message = 'Cliente actualizado correctamente';
         }
 
         return [
             'status' => $status,
-            'message' => $message
+            'message' => $message,
+            $values
         ];
     }
 
-    /**
-     * Cambia el estatus de un cliente (activo/inactivo)
-     * @return array Status y mensaje de resultado
-     */
     function statusCliente() {
         $status = 500;
         $message = 'No se pudo actualizar el estatus del cliente';
@@ -330,15 +173,11 @@ class ctrl extends mdl {
             ];
         }
 
-        // Invertir el estatus actual
-        $_POST['active'] = $_POST['active'] == 1 ? 0 : 1;
-
         $updated = $this->updateCliente($this->util->sql($_POST, 1));
 
         if ($updated) {
             $status = 200;
-            $nuevoEstatus = $_POST['active'] == 1 ? 'activado' : 'desactivado';
-            $message = "El cliente ha sido {$nuevoEstatus} correctamente";
+            $message = "guardado correctamente";
         }
 
         return [
@@ -347,14 +186,6 @@ class ctrl extends mdl {
         ];
     }
 
-    // ============================================
-    // REPORTES Y ESTADÍSTICAS
-    // ============================================
-
-    /**
-     * Obtiene estadísticas generales de clientes
-     * @return array Estadísticas de clientes
-     */
     function getEstadisticas() {
         $udnId = isset($_POST['udn_id']) && $_POST['udn_id'] !== 'all' ? $_POST['udn_id'] : null;
 
@@ -374,31 +205,26 @@ class ctrl extends mdl {
     }
 }
 
-// ============================================
-// FUNCIONES AUXILIARES
-// ============================================
-
-/**
- * Renderiza el badge de estatus (activo/inactivo)
- * @param int $status Estatus (1 = activo, 0 = inactivo)
- * @return string HTML del badge
- */
 function renderStatus($status) {
     switch ($status) {
         case 1:
-            return '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-[#014737] text-[#3FC189]">Activo</span>';
+            return '<span class="inline-flex items-center gap-2 px-4 py-1 rounded text-sm font-medium bg-green-100 text-green-700">
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Activo
+                    </span>';
         case 0:
-            return '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-[#721c24] text-[#ba464d]">Inactivo</span>';
+            return '<span class="inline-flex items-center gap-2 px-4 py-1 rounded text-sm font-medium bg-red-100 text-red-700">
+                        <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                        Inactivo
+                    </span>';
         default:
-            return '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-gray-500 text-white">Desconocido</span>';
+            return '<span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
+                        <span class="w-2 h-2 bg-gray-500 rounded-full"></span>
+                        Desconocido
+                    </span>';
     }
 }
 
-/**
- * Formatea fecha en español
- * @param string $date Fecha en formato Y-m-d
- * @return string Fecha formateada
- */
 function formatSpanishDate($date) {
     if (empty($date)) return '-';
     $timestamp = strtotime($date);
@@ -406,6 +232,5 @@ function formatSpanishDate($date) {
     return date('d', $timestamp) . ' ' . $months[date('n', $timestamp) - 1] . ' ' . date('Y', $timestamp);
 }
 
-// Ejecutar método solicitado
 $obj = new ctrl();
 echo json_encode($obj->{$_POST['opc']}());

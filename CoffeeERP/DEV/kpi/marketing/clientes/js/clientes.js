@@ -1,31 +1,18 @@
-/**
- * Módulo JavaScript - Gestión de Clientes
- * Sistema: KPI / Marketing - CoffeeSoft ERP
- * 
- * Este módulo maneja toda la interfaz de usuario para la gestión de clientes,
- * incluyendo listado, creación, edición y cambio de estatus
- */
 
 let clientes;
 let udnData = [];
 
 const api = "ctrl/ctrl-clientes.php";
 
-// Inicialización del módulo
 $(async () => {
-    // Cargar datos iniciales
     const data = await useFetch({ url: api, data: { opc: "init" } });
     udnData = data.udn;
 
-    // Inicializar módulo
     clientes = new Clientes(api, "root");
     clientes.render();
 });
 
-/**
- * Clase principal del módulo de Gestión de Clientes
- * Extiende de Templates para usar componentes de CoffeeSoft
- */
+
 class Clientes extends Templates {
 
     constructor(link, div_modulo) {
@@ -33,30 +20,25 @@ class Clientes extends Templates {
         this.PROJECT_NAME = "Clientes";
     }
 
-    /**
-     * Renderiza el módulo completo
-     */
+
     render() {
         this.layout();
         this.filterBar();
         this.ls();
     }
 
-    /**
-     * Crea la estructura principal del layout
-     */
+
     layout() {
         this.primaryLayout({
             parent: 'root',
             id: this.PROJECT_NAME,
             class: '',
             card: {
-                filterBar: { class: 'w-full my-3', id: 'filterBar' + this.PROJECT_NAME },
-                container: { class: 'w-full my-3 h-full rounded-lg p-3', id: 'container' + this.PROJECT_NAME }
+                filterBar: { class: 'w-full my-2 border rounded p-3', id: 'filterBar' + this.PROJECT_NAME },
+                container: { class: 'w-full h-full border rounded p-3', id: 'container' + this.PROJECT_NAME }
             }
         });
 
-        // Agregar título y descripción
         $("#filterBar" + this.PROJECT_NAME).before(`
             <div class="px-4 pt-3 pb-3">
                 <h2 class="text-2xl font-semibold">👥 Gestión de Clientes</h2>
@@ -65,9 +47,6 @@ class Clientes extends Templates {
         `);
     }
 
-    /**
-     * Crea la barra de filtros con opciones de búsqueda
-     */
     filterBar() {
         this.createfilterBar({
             parent: "filterBar" + this.PROJECT_NAME,
@@ -110,16 +89,13 @@ class Clientes extends Templates {
                     opc: "button",
                     class: "col-12 col-md-3",
                     id: "btnNuevoCliente",
-                    text: "➕ Agregar Cliente",
+                    text: "Agregar Cliente",
                     onClick: () => this.addCliente()
                 }
             ]
         });
     }
 
-    /**
-     * Lista los clientes en una tabla dinámica
-     */
     ls() {
         this.createTable({
             parent: "container" + this.PROJECT_NAME,
@@ -129,22 +105,19 @@ class Clientes extends Templates {
             conf: { datatable: true, pag: 10 },
             attr: {
                 id: "tbClientes",
-                theme: 'light',
-                right: [7],  // Columna de acciones a la derecha
-                center: [5, 6]  // Columnas de Estatus y VIP centradas
+                theme: 'corporativo',
+                right: [7],
+                center: [5, 6]
             }
         });
     }
 
-    /**
-     * Abre el formulario para agregar un nuevo cliente
-     */
     addCliente() {
         this.createModalForm({
             id: 'formClienteAdd',
             data: { opc: 'addCliente' },
             bootbox: {
-                title: '➕ Agregar Cliente',
+                title: 'Agregar Cliente',
                 size: 'large'
             },
             json: this.jsonFormCliente(),
@@ -163,12 +136,7 @@ class Clientes extends Templates {
         });
     }
 
-    /**
-     * Abre el formulario para editar un cliente existente
-     * @param {number} id - ID del cliente a editar
-     */
     async editCliente(id) {
-        // Obtener datos del cliente
         const request = await useFetch({
             url: this._link,
             data: {
@@ -184,7 +152,6 @@ class Clientes extends Templates {
 
         const cliente = request.data;
 
-        // Preparar datos para autofill (incluir domicilio si existe)
         const autofillData = {
             ...cliente,
             ...(cliente.domicilio || {})
@@ -214,16 +181,13 @@ class Clientes extends Templates {
         });
     }
 
-    /**
-     * Cambia el estatus de un cliente (activo/inactivo)
-     * @param {number} id - ID del cliente
-     * @param {number} active - Estatus actual (1 = activo, 0 = inactivo)
-     */
     statusCliente(id, active) {
         const accion = active == 1 ? 'desactivar' : 'activar';
-        const textoAccion = active == 1 
-            ? 'El cliente no estará disponible para nuevos pedidos.' 
+        const textoAccion = active == 1
+            ? 'El cliente no estará disponible para nuevos pedidos.'
             : 'El cliente volverá a estar disponible para pedidos.';
+
+        const nuevoEstado = active == 1 ? 0 : 1;
 
         this.swalQuestion({
             opts: {
@@ -233,8 +197,8 @@ class Clientes extends Templates {
             },
             data: {
                 opc: "statusCliente",
+                active: nuevoEstado,
                 id: id,
-                active: active
             },
             methods: {
                 send: (response) => {
@@ -249,18 +213,23 @@ class Clientes extends Templates {
         });
     }
 
-    /**
-     * Define la estructura del formulario de cliente
-     * @returns {Array} JSON con la configuración del formulario
-     */
     jsonFormCliente() {
         return [
-            // Sección: Información Personal
             {
                 opc: "div",
                 class: "col-12 mb-3",
-                html: '<h5 class="text-lg font-semibold border-b pb-2">📋 Información Personal</h5>'
+                html: '<h5 class="text-lg font-bold border-b pb-2">📋 Información Personal</h5>'
             },
+            {
+                opc: "select",
+                id: "udn_id",
+                lbl: "Unidad de Negocio ",
+                class: "col-12 col-md-4 mb-3",
+                data: udnData,
+                text: "valor",
+                value: "id"
+            },
+
             {
                 opc: "input",
                 id: "nombre",
@@ -282,12 +251,10 @@ class Clientes extends Templates {
                 class: "col-12 col-md-4 mb-3",
                 placeholder: "Ej: García"
             },
-
-            // Sección: Información de Contacto
             {
                 opc: "div",
-                class: "col-12 mb-3 mt-2",
-                html: '<h5 class="text-lg font-semibold border-b pb-2">📞 Información de Contacto</h5>'
+                class: "col-12 mb-3 mt-1",
+                html: '<h5 class="text-lg font-bold border-b pb-2">📞 Información de Contacto</h5>'
             },
             {
                 opc: "input",
@@ -310,98 +277,11 @@ class Clientes extends Templates {
                 opc: "input",
                 id: "fecha_cumpleaños",
                 lbl: "Fecha de Cumpleaños",
-                tipo: "date",
+                type: "date",
                 class: "col-12 col-md-4 mb-3"
             },
 
-            // Sección: Clasificación
-            {
-                opc: "div",
-                class: "col-12 mb-3 mt-2",
-                html: '<h5 class="text-lg font-semibold border-b pb-2">🏢 Clasificación</h5>'
-            },
-            {
-                opc: "select",
-                id: "udn_id",
-                lbl: "Unidad de Negocio *",
-                class: "col-12 col-md-6 mb-3",
-                data: udnData,
-                text: "valor",
-                value: "id"
-            },
-            {
-                opc: "checkbox",
-                id: "vip",
-                lbl: "⭐ Cliente VIP",
-                class: "col-12 col-md-6 mb-3 d-flex align-items-center",
-                value: 1
-            },
 
-            // Sección: Domicilio
-            {
-                opc: "div",
-                class: "col-12 mb-3 mt-2",
-                html: '<h5 class="text-lg font-semibold border-b pb-2">🏠 Domicilio de Entrega</h5>'
-            },
-            {
-                opc: "input",
-                id: "calle",
-                lbl: "Calle *",
-                class: "col-12 col-md-8 mb-3",
-                placeholder: "Ej: Av. Constituyentes"
-            },
-            {
-                opc: "input",
-                id: "numero_exterior",
-                lbl: "Número Exterior",
-                class: "col-12 col-md-2 mb-3",
-                placeholder: "123"
-            },
-            {
-                opc: "input",
-                id: "numero_interior",
-                lbl: "Número Interior",
-                class: "col-12 col-md-2 mb-3",
-                placeholder: "Depto 3"
-            },
-            {
-                opc: "input",
-                id: "colonia",
-                lbl: "Colonia",
-                class: "col-12 col-md-4 mb-3",
-                placeholder: "Ej: Centro"
-            },
-            {
-                opc: "input",
-                id: "ciudad",
-                lbl: "Ciudad",
-                class: "col-12 col-md-4 mb-3",
-                placeholder: "Ej: Querétaro"
-            },
-            {
-                opc: "input",
-                id: "estado",
-                lbl: "Estado",
-                class: "col-12 col-md-4 mb-3",
-                placeholder: "Ej: Querétaro"
-            },
-            {
-                opc: "input",
-                id: "codigo_postal",
-                lbl: "Código Postal",
-                class: "col-12 col-md-4 mb-3",
-                placeholder: "76000"
-            },
-            {
-                opc: "textarea",
-                id: "referencias",
-                lbl: "Referencias",
-                class: "col-12 mb-3",
-                placeholder: "Ej: Casa blanca con portón negro, frente al parque",
-                rows: 2
-            },
-
-            // Nota informativa
             {
                 opc: "div",
                 class: "col-12 mt-2",

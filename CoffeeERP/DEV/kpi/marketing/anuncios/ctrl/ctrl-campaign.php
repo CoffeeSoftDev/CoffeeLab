@@ -73,37 +73,48 @@ class ctrl extends mdl {
     }
 
     function getCampaign() {
-        $status = 500;
-        $message = 'Error al obtener los datos';
-        $getCampaign = $this->getCampaignById([$_POST['id']]);
+        $id = $_POST['id'] ?? null;
+        if (!$id) {
+            return ['status' => 400, 'message' => 'Falta ID de campaña'];
+        }
 
-        if ($getCampaign) {
-            $status = 200;
-            $message = 'Datos obtenidos correctamente.';
+        $campaña  = $this->getCampaignById([$id]);
+        $ads = $this->getAnnouncementsByCampaign([$id]);
+
+        $anuncios = [];
+        foreach ($ads as $ad) {
+            $anuncios[] = [
+                'id'             => $ad['id'],
+                'nombre'         => $ad['nombre'],
+                'fecha_inicio'   => date('Y-m-d', strtotime($ad['fecha_inicio'])),
+                'fecha_fin'      => date('Y-m-d', strtotime($ad['fecha_fin'])),
+                'imagen'         => $ad['imagen'] ? "https://www.erp-varoch.com/DEV/" . ltrim($ad['imagen']) : null,
+                'tipo_id'        => $ad['tipo_id'],
+                'clasificacion_id'=> $ad['clasificacion_id'],
+                'total_monto'    => $ad['total_monto'],
+                'total_clics'    => $ad['total_clics']
+            ];
         }
 
         return [
-            'status'  => $status,
-            'message' => $message,
-            'data'    => $getCampaign
+            'status' => 200,
+            'data'   => [
+                'campaña'  => $campaña,
+                'anuncios' => $anuncios
+            ]
         ];
     }
+
 
     function addCampaign() {
         $status = 500;
         $message = 'No se pudo crear la campaña';
 
-        if (empty($_POST['udn_id'])) {
-            return [
-                'status'  => 400,
-                'message' => 'Debe seleccionar una unidad de negocio'
-            ];
-        }
-
         $lastId = $this->getLastCampaignId();
         $_POST['nombre'] = 'Campaña ' . ($lastId + 1);
         $_POST['fecha_creacion'] = date('Y-m-d H:i:s');
-        $_POST['active'] = 1;
+        // $_POST['active'] = 1;
+        $_POST['udn_id'] = 4;
 
         $create = $this->createCampaign($this->util->sql($_POST));
 
@@ -115,7 +126,7 @@ class ctrl extends mdl {
         return [
             'status'  => $status,
             'message' => $message,
-            'id'      => $lastId + 1
+            'data'      => ['id' => $lastId + 1]
         ];
     }
 
@@ -157,64 +168,88 @@ class ctrl extends mdl {
 
     function lsAnnouncements() {
         $__row = [];
-        $campaña_id = $_POST['campaña_id'];
+        $campaña_id    = $_POST['campaña_id'] ?? null;
+        $udn_id        = $_POST['udn_id'] ?? null;
+        $red_social_id = $_POST['red_social_id'] ?? null;
 
-        $ls = $this->listAnnouncements([$campaña_id]);
+        $values = [$campaña_id, $udn_id, $red_social_id];
+
+        // 🧩 Obtener lista filtrada
+        $ls = $this->listAnnouncements($campaña_id, $udn_id, $red_social_id);
 
         foreach ($ls as $key) {
-            $cpc = 0;
-            if ($key['total_clics'] > 0) {
-                $cpc = $key['total_monto'] / $key['total_clics'];
+            $a = []; // 🔹 Reiniciar acciones por fila
+
+            // 🖼️ Imagen
+            $imageHtml = !empty($key['imagen']) 
+                ? '<img src="https://www.erp-varoch.com/DEV/' . ltrim($key['imagen'], '/') . '" class="w-16 h-16 rounded-lg object-cover shadow-md mx-auto my-1" />'
+                : '<div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center mx-auto my-1"><i class="icon-image text-gray-400"></i></div>';
+
+            // 🎨 Badges
+            $clasificacionBadge = renderBadge($key['clasificacion_nombre'], 'gray');
+            $tipoBadge          = renderBadge($key['tipo_nombre'], 'blue');
+
+            // 📅 Validación fechas
+            $mostrarBoton = false;
+            $hoy = new DateTime();
+            $fechaResultado = !empty($key['fecha_resultado']) ? new DateTime($key['fecha_resultado']) : null;
+
+            if (empty($key['total_monto'])) {
+                $mostrarBoton = true;
+            } elseif ($fechaResultado) {
+                $diff = (int)$fechaResultado->diff($hoy)->format('%r%a');
+                if ($diff >= 0 && $diff <= 2) $mostrarBoton = true;
             }
 
-            $a = [];
+            // 🧩 Acciones
+            $tieneEditar = false;
+            $tieneResultados = false;
 
-            $a[] = [
-                'class'   => 'btn btn-sm btn-primary me-1',
-                'html'    => '<i class="icon-pencil"></i>',
-                'onclick' => 'campaign.editAnnouncement(' . $key['id'] . ')'
-            ];
-
-            if ($key['total_clics'] == 0 || $key['total_monto'] == 0) {
+            if ($mostrarBoton) {
                 $a[] = [
-                    'class'   => 'btn btn-sm btn-success',
+                    'class'   => 'btn btn-sm btn-success me-1',
                     'html'    => '<i class="icon-chart-bar"></i>',
                     'onclick' => 'campaign.captureResults(' . $key['id'] . ')'
                 ];
+                $tieneResultados = true;
             }
 
-            $imageHtml = !empty($key['imagen']) 
-                ? '<img src="' . $key['imagen'] . '" class="w-12 h-12 rounded object-cover" />'
-                : '<div class="w-12 h-12 bg-gray-700 rounded flex items-center justify-center"><i class="icon-image text-gray-400"></i></div>';
+            if (empty($key['total_monto'])) {
+                $a[] = [
+                    'class'   => 'btn btn-sm btn-primary me-1',
+                    'html'    => '<i class="icon-pencil"></i>',
+                    'onclick' => 'campaign.editCampaign(' . $key['campaña_id'] . ')'
+                ];
+                $tieneEditar = true;
+            }
 
-            $clasificacionBadge = renderBadge($key['clasificacion']);
-            $tipoBadge = renderBadge($key['tipo'], 'blue');
+            if (!($tieneEditar && $tieneResultados)) {
+                $a[] = [
+                    'class'   => 'btn btn-sm btn-info',
+                    'html'    => '<i class="icon-eye"></i>',
+                    'onclick' => 'campaign.viewCampaign(' . $key['campaña_id'] . ')'
+                ];
+            }
 
+            // 🧱 Construcción de fila
             $__row[] = [
-                'id'              => $key['id'],
-                'Imagen'          => [
-                    'html'  => $imageHtml,
-                    'class' => 'text-center'
-                ],
-                'Campaña'         => $key['campaña_nombre'],
-                'Anuncio'         => $key['nombre'],
-                'Clasificación'   => [
-                    'html'  => $clasificacionBadge,
-                    'class' => 'text-center'
-                ],
-                'Tipo'            => [
-                    'html'  => $tipoBadge,
-                    'class' => 'text-center'
-                ],
-                'Fecha Inicio'    => $key['fecha_inicio'],
-                'Fecha Final'     => $key['fecha_fin'],
-                'a'               => $a
+                'id'             => $key['id'],
+                'index'          => $key['id'],
+                'Imagen'         => ['html' => $imageHtml, 'class' => 'text-center align-middle'],
+                'Campaña'        => $key['campaña_nombre'],
+                'Anuncio'        => $key['anuncio_nombre'],
+                'Clasificación'  => ['html' => $clasificacionBadge, 'class' => 'text-center'],
+                'Tipo'           => ['html' => $tipoBadge, 'class' => 'text-center'],
+                'Fecha Inicio'   => $key['fecha_inicio'],
+                'Fecha Final'    => $key['fecha_fin'],
+                'a'              => $a
             ];
         }
 
         return [
             'row' => $__row,
-            'ls'  => $ls
+            'ls'  => $ls,
+            $values
         ];
     }
 
@@ -236,8 +271,91 @@ class ctrl extends mdl {
     }
 
     function addAnnouncement() {
-        $status = 500;
+        $status  = 500;
         $message = 'No se pudo crear el anuncio';
+        $fileUrl = null;
+
+        // 🧩 Validaciones básicas
+        if (empty($_POST['nombre']) || empty($_POST['fecha_inicio']) || empty($_POST['fecha_fin'])) {
+            return [
+                'status'  => 400,
+                'message' => 'Campos obligatorios faltantes'
+            ];
+        }
+
+        if (strtotime($_POST['fecha_fin']) < strtotime($_POST['fecha_inicio'])) {
+            return [
+                'status'  => 400,
+                'message' => 'La fecha fin debe ser mayor a la fecha inicio'
+            ];
+        }
+
+        // 🖼️ Cargar imagen si existe
+        if (!empty($_FILES['image']['name'])) {
+            $carpeta = "../../../../erp_files/marketing/anuncios/";
+
+            if (!file_exists($carpeta)) {
+                mkdir($carpeta, 0777, true);
+            }
+
+            $tmp_name = $_FILES['image']['tmp_name'];
+            $nombre   = $_FILES['image']['name'];
+            $ext      = pathinfo($nombre, PATHINFO_EXTENSION);
+            $nuevo    = uniqid("anuncio_") . "." . strtolower($ext);
+            $destino  = $carpeta . $nuevo;
+
+            if (move_uploaded_file($tmp_name, $destino)) {
+                $fileUrl = "erp_files/marketing/anuncios/" . $nuevo;
+            }
+        }
+
+        // 📦 Preparar datos para insertar
+        $values = [
+            'nombre'          => $_POST['nombre'],
+            'fecha_inicio'    => $_POST['fecha_inicio'],
+            'fecha_fin'       => $_POST['fecha_fin'],
+            'imagen'          => $fileUrl,
+            'campaña_id'      => $_POST['campaña_id'] ?? null,
+            'tipo_id'         => $_POST['tipo_id'] ?? null,
+            'clasificacion_id'=> $_POST['clasificacion_id'] ?? null
+        ];
+
+        $create = $this->createAnnouncement($this->util->sql($values));
+        $idAd = null;
+        if ($create) {
+            $status  = 200;
+            $message = '✅ Anuncio creado correctamente';
+            $idAd = $this->maxAnnouncement();
+
+            // Actualizar el active de campaña a 1
+            $dataCampaign = [
+                    'id'     => $_POST['campaña_id'],
+                    'active' => 1
+            ];
+            $this->updateCampaign($this->util->sql($dataCampaign, 1));
+        }
+
+        return [
+            'status'  => $status,
+            'message' => $message,
+            'data'    => [
+                'id'    => $idAd,
+                'image' => $fileUrl
+            ]
+        ];
+    }
+
+    function editAnnouncement() {
+        $status  = 500;
+        $message = 'No se pudo actualizar el anuncio';
+        $fileUrl = null;
+
+        if (empty($_POST['id'])) {
+            return [
+                'status'  => 400,
+                'message' => 'Falta el ID del anuncio'
+            ];
+        }
 
         if (empty($_POST['nombre']) || empty($_POST['fecha_inicio']) || empty($_POST['fecha_fin'])) {
             return [
@@ -253,38 +371,103 @@ class ctrl extends mdl {
             ];
         }
 
-        $_POST['total_monto'] = $_POST['total_monto'] ?? 0;
-        $_POST['total_clics'] = $_POST['total_clics'] ?? 0;
+        // 📸 Si se sube una nueva imagen
+        if (!empty($_FILES['image']['name'])) {
+            $carpeta = "../../../../erp_files/marketing/anuncios/";
 
-        $create = $this->createAnnouncement($this->util->sql($_POST));
+            if (!file_exists($carpeta)) {
+                mkdir($carpeta, 0777, true);
+            }
 
-        if ($create) {
-            $status = 200;
-            $message = 'Anuncio creado correctamente';
+            $tmp_name = $_FILES['image']['tmp_name'];
+            $nombre   = $_FILES['image']['name'];
+            $ext      = pathinfo($nombre, PATHINFO_EXTENSION);
+            $nuevo    = uniqid("anuncio_") . "." . strtolower($ext);
+            $destino  = $carpeta . $nuevo;
+
+            if (move_uploaded_file($tmp_name, $destino)) {
+                $fileUrl = "erp_files/marketing/anuncios/" . $nuevo;
+            }
         }
+
+        // 🔹 Preparar datos para actualizar
+        $values = [
+            'nombre'           => $_POST['nombre'],
+            'fecha_inicio'     => $_POST['fecha_inicio'],
+            'fecha_fin'        => $_POST['fecha_fin'],
+            'campaña_id'       => $_POST['campaña_id'] ?? null,
+            'tipo_id'          => $_POST['tipo_id'] ?? null,
+            'clasificacion_id' => $_POST['clasificacion_id'] ?? null,
+        ];
+
+        // ✅ Solo agrega el campo imagen si hay una nueva
+        if (!empty($fileUrl)) {
+            $values['imagen'] = $fileUrl;
+        }
+
+        // Agregar a values el id
+        $values['id'] = $_POST['id'];
+
+        $update = $this->updateAnnouncement($this->util->sql($values, 1));
+
+        if ($update) {
+            $status  = 200;
+            $message = '✅ Anuncio actualizado correctamente';
+        }
+
+        $baseUrl = (isset($_SERVER['HTTPS']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . '/DEV/';
 
         return [
             'status'  => $status,
-            'message' => $message
+            'message' => $message,
+            'data'    => [
+                'id'    => $_POST['id'],
+                'image' => !empty($fileUrl) ? $baseUrl . ltrim($fileUrl) : null
+            ]
         ];
     }
 
-    function editAnnouncement() {
-        $status = 500;
-        $message = 'Error al editar anuncio';
+    function removeAnnouncement() {
+        $status  = 500;
+        $message = 'No se pudo eliminar el anuncio';
+        $fileUrl = null;
 
-        if (strtotime($_POST['fecha_fin']) < strtotime($_POST['fecha_inicio'])) {
+        // 🧩 Validar ID obligatorio
+        if (empty($_POST['id'])) {
             return [
                 'status'  => 400,
-                'message' => 'La fecha fin debe ser mayor a la fecha inicio'
+                'message' => 'Falta el ID del anuncio'
             ];
         }
 
-        $edit = $this->updateAnnouncement($this->util->sql($_POST, 1));
+        // 📦 Obtener anuncio antes de eliminar (para borrar la imagen física)
+        $ad = $this->getAnnouncementById([$_POST['id']]);
 
-        if ($edit) {
-            $status = 200;
-            $message = 'Anuncio editado correctamente';
+        if (empty($ad)) {
+            return [
+                'status'  => 404,
+                'message' => 'El anuncio no existe'
+            ];
+        }
+
+        $fileUrl = $ad['imagen'] ?? null;
+        $values = [
+            'id'  => $_POST['id']
+        ];
+        // 🗑️ Eliminar registro
+        $delete = $this->deleteAnnouncement($this->util->sql($values, 1));
+
+        if ($delete) {
+            // 🧹 Si hay imagen, eliminar archivo físico
+            if (!empty($fileUrl)) {
+                $path = "../../../../" . ltrim($fileUrl, '/');
+                if (file_exists($path)) {
+                    unlink($path);
+                }
+            }
+
+            $status  = 200;
+            $message = '🗑️ Anuncio eliminado correctamente';
         }
 
         return [
@@ -292,6 +475,8 @@ class ctrl extends mdl {
             'message' => $message
         ];
     }
+
+
 
     function captureResults() {
         $status = 500;

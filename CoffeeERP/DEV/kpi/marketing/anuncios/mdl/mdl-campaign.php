@@ -47,6 +47,15 @@ class mdl extends CRUD {
         ])[0];
     }
 
+    function getAnnouncementsByCampaign($array) {
+        return $this->_Select([
+            'table'  => $this->bd . 'anuncio',
+            'values' => '*',
+            'where'  => 'campaña_id = ?',
+            'data'   => $array
+        ]);
+    }
+
     function createCampaign($array) {
         return $this->_Insert([
             'table'  => $this->bd . 'campaña',
@@ -59,7 +68,7 @@ class mdl extends CRUD {
         return $this->_Update([
             'table'  => $this->bd . 'campaña',
             'values' => $array['values'],
-            'where'  => 'id = ?',
+            'where'  => $array['where'],
             'data'   => $array['data']
         ]);
     }
@@ -70,35 +79,51 @@ class mdl extends CRUD {
         return $result[0]['last_id'] ?? 0;
     }
 
-    // Announcement Methods
-
-    function listAnnouncements($array) {
-        $leftjoin = [
-            $this->bd . 'tipo_anuncio' => 'anuncio.tipo_id = tipo_anuncio.id',
-            $this->bd . 'clasificacion_anuncio' => 'anuncio.clasificacion_id = clasificacion_anuncio.id',
-            $this->bd . 'campaña' => 'anuncio.campaña_id = campaña.id'
-        ];
-
-        return $this->_Select([
-            'table'    => $this->bd . 'anuncio',
-            'values'   => "
-                anuncio.id,
-                anuncio.nombre,
-                DATE_FORMAT(anuncio.fecha_inicio, '%d/%m/%Y') as fecha_inicio,
-                DATE_FORMAT(anuncio.fecha_fin, '%d/%m/%Y') as fecha_fin,
-                anuncio.total_monto,
-                anuncio.total_clics,
+    public function listAnnouncements($campaña_id = null, $udn_id = null, $red_social_id = null) {
+        $query = "
+            SELECT 
+                anuncio.id AS id,
+                anuncio.nombre AS anuncio_nombre,
+                DATE_FORMAT(anuncio.fecha_inicio, '%d/%m/%Y') AS fecha_inicio,
+                DATE_FORMAT(anuncio.fecha_fin, '%d/%m/%Y') AS fecha_fin,
                 anuncio.imagen,
+                campaña.nombre AS campaña_nombre,
+                tipo_anuncio.nombre AS tipo_nombre,
+                clasificacion_anuncio.nombre AS clasificacion_nombre,
                 anuncio.campaña_id,
-                campaña.nombre as campaña_nombre,
-                tipo_anuncio.nombre as tipo,
-                clasificacion_anuncio.nombre as clasificacion
-            ",
-            'leftjoin' => $leftjoin,
-            'where'    => 'anuncio.campaña_id = ?',
-            'order'    => ['DESC' => 'anuncio.id'],
-            'data'     => $array
-        ]);
+                campaña.udn_id,
+                campaña.red_social_id,
+                anuncio.fecha_resultado,
+                anuncio.total_monto,
+                anuncio.total_clics
+            FROM {$this->bd}anuncio
+            LEFT JOIN {$this->bd}tipo_anuncio ON anuncio.tipo_id = tipo_anuncio.id
+            LEFT JOIN {$this->bd}clasificacion_anuncio ON anuncio.clasificacion_id = clasificacion_anuncio.id
+            LEFT JOIN {$this->bd}campaña ON anuncio.campaña_id = campaña.id
+            WHERE 1 = 1
+        ";
+
+        $data = [];
+
+        // if (!empty($campaña_id)) {
+        //     $query .= " AND anuncio.campaña_id = ?";
+        //     $data[] = $campaña_id;
+        // }
+
+        if (!empty($udn_id)) {
+            $query .= " AND campaña.udn_id = ?";
+            $data[] = $udn_id;
+        }
+
+        if (!empty($red_social_id)) {
+            $query .= " AND campaña.red_social_id = ?";
+            $data[] = $red_social_id;
+        }
+
+        $query .= " ORDER BY anuncio.campaña_id DESC, anuncio.id ASC";
+
+        return $this->_Read($query, $data);
+    
     }
 
     function getAnnouncementById($array) {
@@ -122,19 +147,34 @@ class mdl extends CRUD {
         return $this->_Update([
             'table'  => $this->bd . 'anuncio',
             'values' => $array['values'],
-            'where'  => 'id = ?',
+            'where'  => $array['where'],
             'data'   => $array['data']
         ]);
     }
 
-    // Catalog Methods
+    function deleteAnnouncement($array) {
+        return $this->_Delete([
+            'table'  => $this->bd . 'anuncio',
+            'where'  => $array['where'],
+            'data'   => $array['data']
+        ]);
+    }
 
+    function maxAnnouncement() {
+        return $this->_Select([
+            'table'  => $this->bd . 'anuncio',
+            'values' => 'MAX(id) AS id'
+        ])[0]['id'];
+    }
+
+
+    // Catalog lists
     function lsTypes($array = []) {
         return $this->_Select([
             'table'  => $this->bd . 'tipo_anuncio',
             'values' => 'id, nombre as valor',
             'where'  => 'active = 1',
-            'order'  => ['ASC' => 'nombre']
+            'order'  => ['ASC' => 'id']
         ]);
     }
 

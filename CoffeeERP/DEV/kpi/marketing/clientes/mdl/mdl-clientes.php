@@ -1,11 +1,4 @@
 <?php
-/**
- * Modelo de Datos - Gestión de Clientes
- * Sistema: KPI / Marketing - CoffeeSoft ERP
- * 
- * Este modelo maneja todas las operaciones de base de datos
- * relacionadas con clientes y sus domicilios
- */
 
 require_once('../../../../conf/_CRUD.php');
 require_once('../../../../conf/_Utileria.php');
@@ -17,18 +10,9 @@ class mdl extends CRUD {
 
     function __construct() {
         $this->util = new Utileria();
-        $this->bd = "rfwsmqex_kpi.";
+        $this->bd = "rfwsmqex_marketing.";
     }
 
-    // ============================================
-    // CLIENTES - Operaciones CRUD
-    // ============================================
-
-    /**
-     * Lista clientes con filtros opcionales
-     * @param array $params [active, udn_id, vip]
-     * @return array Lista de clientes
-     */
     function lsClientes($params) {
         $leftjoin = [
             'udn' => 'cliente.udn_id = udn.idUDN'
@@ -37,19 +21,16 @@ class mdl extends CRUD {
         $whereClause = "1=1";
         $data = [];
 
-        // Filtro por estatus (activo/inactivo)
         if (isset($params[0]) && $params[0] !== '') {
             $whereClause .= " AND cliente.active = ?";
             $data[] = $params[0];
         }
 
-        // Filtro por unidad de negocio
         if (isset($params[1]) && $params[1] !== '' && $params[1] !== 'all') {
             $whereClause .= " AND cliente.udn_id = ?";
             $data[] = $params[1];
         }
 
-        // Filtro por tipo VIP
         if (isset($params[2]) && $params[2] !== '' && $params[2] !== 'all') {
             $whereClause .= " AND cliente.vip = ?";
             $data[] = $params[2];
@@ -79,13 +60,7 @@ class mdl extends CRUD {
         ]);
     }
 
-    /**
-     * Obtiene un cliente específico por ID con su domicilio
-     * @param int $id ID del cliente
-     * @return array|null Datos del cliente o null si no existe
-     */
     function getClienteById($id) {
-        // Obtener datos del cliente
         $cliente = $this->_Select([
             'table' => "{$this->bd}cliente",
             'values' => '*',
@@ -99,7 +74,6 @@ class mdl extends CRUD {
 
         $clienteData = $cliente[0];
 
-        // Obtener domicilio principal del cliente
         $domicilio = $this->_Select([
             'table' => "{$this->bd}domicilio_cliente",
             'values' => '*',
@@ -107,7 +81,6 @@ class mdl extends CRUD {
             'data' => [$id]
         ]);
 
-        // Agregar domicilio al array del cliente
         if (!empty($domicilio)) {
             $clienteData['domicilio'] = $domicilio[0];
         } else {
@@ -117,11 +90,6 @@ class mdl extends CRUD {
         return $clienteData;
     }
 
-    /**
-     * Crea un nuevo cliente
-     * @param array $data Datos del cliente con prepared statement format
-     * @return bool True si se creó correctamente
-     */
     function createCliente($data) {
         return $this->_Insert([
             'table' => "{$this->bd}cliente",
@@ -130,11 +98,6 @@ class mdl extends CRUD {
         ]);
     }
 
-    /**
-     * Crea un domicilio para un cliente
-     * @param array $data Datos del domicilio con prepared statement format
-     * @return bool True si se creó correctamente
-     */
     function createDomicilio($data) {
         return $this->_Insert([
             'table' => "{$this->bd}domicilio_cliente",
@@ -143,11 +106,6 @@ class mdl extends CRUD {
         ]);
     }
 
-    /**
-     * Actualiza los datos de un cliente
-     * @param array $data Datos del cliente con prepared statement format
-     * @return bool True si se actualizó correctamente
-     */
     function updateCliente($data) {
         return $this->_Update([
             'table' => "{$this->bd}cliente",
@@ -157,11 +115,6 @@ class mdl extends CRUD {
         ]);
     }
 
-    /**
-     * Actualiza el domicilio de un cliente
-     * @param array $data Datos del domicilio con prepared statement format
-     * @return bool True si se actualizó correctamente
-     */
     function updateDomicilio($data) {
         return $this->_Update([
             'table' => "{$this->bd}domicilio_cliente",
@@ -171,12 +124,6 @@ class mdl extends CRUD {
         ]);
     }
 
-    /**
-     * Verifica si existe un cliente con el teléfono especificado
-     * @param string $telefono Teléfono a verificar
-     * @param int|null $excludeId ID del cliente a excluir (para edición)
-     * @return int Cantidad de clientes encontrados
-     */
     function existsClienteByPhone($telefono, $excludeId = null) {
         $query = "
             SELECT COUNT(*) as total
@@ -186,7 +133,6 @@ class mdl extends CRUD {
         
         $params = [$telefono];
 
-        // Si se proporciona un ID, excluirlo de la búsqueda (para edición)
         if ($excludeId !== null) {
             $query .= " AND id != ?";
             $params[] = $excludeId;
@@ -196,11 +142,6 @@ class mdl extends CRUD {
         return isset($result[0]['total']) ? (int)$result[0]['total'] : 0;
     }
 
-    /**
-     * Obtiene el domicilio principal de un cliente
-     * @param int $clienteId ID del cliente
-     * @return array|null Datos del domicilio o null si no existe
-     */
     function getDomicilioPrincipal($clienteId) {
         $result = $this->_Select([
             'table' => "{$this->bd}domicilio_cliente",
@@ -212,14 +153,6 @@ class mdl extends CRUD {
         return !empty($result) ? $result[0] : null;
     }
 
-    // ============================================
-    // CATÁLOGOS - Unidades de Negocio
-    // ============================================
-
-    /**
-     * Lista todas las unidades de negocio activas
-     * @return array Lista de UDN
-     */
     function lsUDN() {
         return $this->_Select([
             'table' => "udn",
@@ -229,15 +162,6 @@ class mdl extends CRUD {
         ]);
     }
 
-    // ============================================
-    // REPORTES Y ESTADÍSTICAS
-    // ============================================
-
-    /**
-     * Obtiene el total de clientes activos
-     * @param int|null $udnId Filtrar por unidad de negocio (opcional)
-     * @return int Total de clientes activos
-     */
     function getTotalClientesActivos($udnId = null) {
         $whereClause = "active = 1";
         $params = [];
@@ -257,11 +181,6 @@ class mdl extends CRUD {
         return isset($result[0]['total']) ? (int)$result[0]['total'] : 0;
     }
 
-    /**
-     * Obtiene el total de clientes VIP activos
-     * @param int|null $udnId Filtrar por unidad de negocio (opcional)
-     * @return int Total de clientes VIP
-     */
     function getTotalClientesVIP($udnId = null) {
         $whereClause = "active = 1 AND vip = 1";
         $params = [];
@@ -281,11 +200,6 @@ class mdl extends CRUD {
         return isset($result[0]['total']) ? (int)$result[0]['total'] : 0;
     }
 
-    /**
-     * Obtiene clientes con cumpleaños en el mes actual
-     * @param int|null $udnId Filtrar por unidad de negocio (opcional)
-     * @return array Lista de clientes con cumpleaños
-     */
     function getClientesCumpleañosMes($udnId = null) {
         $whereClause = "active = 1 AND MONTH(fecha_cumpleaños) = MONTH(CURDATE())";
         $params = [];
