@@ -369,17 +369,20 @@ class ctrl extends mdl {
     }
 
     function addCapture() {
-        $status = 500;
+        $status  = 500;
         $message = 'No se pudo guardar la captura';
 
-        $month = $_POST['month'];
-        $year = $_POST['year'];
+        $month   = $_POST['month'];
+        $year    = $_POST['year'];
+        $udn     = $_POST['udn'];
+        $socialNetwork     = $_POST['social_network_id'];
         $metrics = json_decode($_POST['metrics'], true);
 
         $exists = $this->existsCapture([
-            $_SESSION['SUB'],
+            $udn,
             $year,
-            $month
+            $month,
+            $socialNetwork
         ]);
 
         if ($exists) {
@@ -390,32 +393,45 @@ class ctrl extends mdl {
         }
 
         $captureData = [
-            'udn_id' => $_SESSION['SUB'],
-            'año' => $year,
-            'mes' => $month,
+            'udn_id'         => $udn,
+            'año'            => $year,
+            'mes'            => $month,
             'fecha_creacion' => date('Y-m-d H:i:s'),
-            'active' => 1
+            'active'         => 1
         ];
 
         $captureId = $this->createCapture($this->util->sql($captureData));
+        $history   = $this->getHistoryNetworkByID([  $udn,   $year,  $month ]);
 
-        if ($captureId) {
+        // if ($captureId) {
+
+        $data = [];
+
             foreach ($metrics as $metric) {
-                $movementData = [
-                    'historial_id' => $captureId,
-                    'metrica_id' => $metric['metric_id'],
-                    'cantidad' => $metric['value']
+                $data[] = [
+                      'historial_id' => $history['id'],
+                    'metrica_id'   => $metric['metric_id'],
+                    'cantidad'     => $metric['value']
                 ];
-                $this->createMetricMovement($this->util->sql($movementData));
+
+                $movementData = [
+
+                    'historial_id' => $history['id'],
+                    'metrica_id'   => $metric['metric_id'],
+                    'cantidad'     => $metric['value']
+                ];
+
+              $success =  $this->createMetricMovement($this->util->sql($movementData));
             }
 
             $status = 200;
             $message = 'Captura guardada correctamente';
-        }
+        // }
 
         return [
             'status' => $status,
-            'message' => $message
+            'message' => $message,
+          $data
         ];
     }
 
@@ -520,8 +536,9 @@ class ctrl extends mdl {
     }
 
     function apiGetHistoryMetrics() {
-        $udn = $_SESSION['SUB'];
-        $data = $this->getHistoryMetrics([$udn]);
+        $udn     = $_POST['udn'];
+        $year    = isset($_POST['year']) ? $_POST['year'] : date('Y');
+        $data    = $this->getHistoryMetrics([$udn, $year]);
         $history = [];
 
         foreach ($data as $item) {
@@ -542,18 +559,19 @@ class ctrl extends mdl {
             $history[] = [
                 'id' => $item['id'],
                 'network' => $item['social_network_name'],
-                'icon' => $item['social_network_icon'],
-                'color' => $item['social_network_color'],
-                'date' => formatSpanishDate($item['fecha_creacion']),
-                'year' => $item['año'],
-                'month' => $item['mes'],
+                'icon'    => $item['social_network_icon'],
+                'color'   => $item['social_network_color'],
+                'date'    => formatSpanishDate($item['fecha_creacion']),
+                'year'    => $item['year'],
+                'month'   => $item['month'],
                 'metrics' => $metrics
             ];
         }
 
         return [
             'status' => 200,
-            'data' => $history
+            'data' => $history,
+            $data
         ];
     }
 
@@ -561,9 +579,9 @@ class ctrl extends mdl {
         $status = 500;
         $message = 'No se pudo eliminar la captura';
 
-        $update = $this->updateCapture($this->util->sql(['active' => 0, 'id' => $_POST['id']], 1));
+        $delete = $this->deleteCaptureById($this->util->sql(['id'=>$_POST['id']],1));
 
-        if ($update) {
+        if ($delete) {
             $status = 200;
             $message = 'Captura eliminada correctamente';
         }

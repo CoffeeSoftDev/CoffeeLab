@@ -393,7 +393,7 @@ class mdl extends CRUD {
      * @param int|null $udnId Filtrar por unidad de negocio
      * @return array Lista de top clientes
      */
-    function getTopClientes($limit = 10, $udnId = null) {
+    function getTopClient($limit = 10, $udnId = null) {
         $whereClause = "c.active = 1";
         $params = [];
 

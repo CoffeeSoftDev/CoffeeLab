@@ -203,83 +203,9 @@ class ctrl extends mdl {
             ]
         ];
     }
-}
 
-function renderStatus($status) {
-    switch ($status) {
-        case 1:
-            return '<span class="inline-flex items-center gap-2 px-4 py-1 rounded text-sm font-medium bg-green-100 text-green-700">
-                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                        Activo
-                    </span>';
-        case 0:
-            return '<span class="inline-flex items-center gap-2 px-4 py-1 rounded text-sm font-medium bg-red-100 text-red-700">
-                        <span class="w-2 h-2 bg-red-500 rounded-full"></span>
-                        Inactivo
-                    </span>';
-        default:
-            return '<span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
-                        <span class="w-2 h-2 bg-gray-500 rounded-full"></span>
-                        Desconocido
-                    </span>';
-    }
-}
-
-function formatSpanishDate($date) {
-    if (empty($date)) return '-';
-    $timestamp = strtotime($date);
-    $months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    return date('d', $timestamp) . ' ' . $months[date('n', $timestamp) - 1] . ' ' . date('Y', $timestamp);
-}
-
-$obj = new ctrl();
-echo json_encode($obj->{$_POST['opc']}());
-
-
-    // ============================================
-    // COMPORTAMIENTO DE CLIENTES
-    // ============================================
-
-    /**
-     * Obtiene el comportamiento detallado de un cliente específico
-     * @return array Status, mensaje y datos de comportamiento
-     */
-    function getComportamiento() {
-        $status = 500;
-        $message = 'Error al obtener comportamiento del cliente';
-        $data = null;
-
-        if (empty($_POST['id'])) {
-            return [
-                'status' => 400,
-                'message' => 'ID de cliente no proporcionado'
-            ];
-        }
-
-        $comportamiento = $this->getComportamientoCliente($_POST['id']);
-        $historial = $this->getHistorialPedidos($_POST['id'], 10);
-
-        if ($comportamiento) {
-            $status = 200;
-            $message = 'Comportamiento obtenido correctamente';
-            $data = [
-                'cliente' => $comportamiento,
-                'historial' => $historial
-            ];
-        }
-
-        return [
-            'status' => $status,
-            'message' => $message,
-            'data' => $data
-        ];
-    }
-
-    /**
-     * Lista clientes con análisis de comportamiento
-     * @return array Filas formateadas y datos originales
-     */
-    function listComportamiento() {
+    // Comportamient.
+        function listComportamiento() {
         $__row = [];
         
         $active = isset($_POST['active']) ? $_POST['active'] : 1;
@@ -342,10 +268,7 @@ echo json_encode($obj->{$_POST['opc']}());
         ];
     }
 
-    /**
-     * Obtiene clientes por frecuencia específica
-     * @return array Lista de clientes filtrados
-     */
+   
     function listPorFrecuencia() {
         $frecuencia = $_POST['frecuencia'] ?? 'activo';
         $udnId = isset($_POST['udn_id']) && $_POST['udn_id'] !== 'all' ? $_POST['udn_id'] : null;
@@ -358,19 +281,82 @@ echo json_encode($obj->{$_POST['opc']}());
         ];
     }
 
-    /**
-     * Obtiene top clientes por monto
-     * @return array Top clientes
-     */
     function getTopClientes() {
         $limit = $_POST['limit'] ?? 10;
         $udnId = isset($_POST['udn_id']) && $_POST['udn_id'] !== 'all' ? $_POST['udn_id'] : null;
 
-        $ls = $this->getTopClientes($limit, $udnId);
+        $ls = $this->getTopClient($limit, $udnId);
 
         return [
             'status' => 200,
             'data' => $ls
         ];
     }
+
+      function getComportamiento() {
+        $status = 500;
+        $message = 'Error al obtener comportamiento del cliente';
+        $data = null;
+
+        if (empty($_POST['id'])) {
+            return [
+                'status' => 400,
+                'message' => 'ID de cliente no proporcionado'
+            ];
+        }
+
+        $comportamiento = $this->getComportamientoCliente($_POST['id']);
+        $historial = $this->getHistorialPedidos($_POST['id'], 10);
+
+        if ($comportamiento) {
+            $status = 200;
+            $message = 'Comportamiento obtenido correctamente';
+            $data = [
+                'cliente' => $comportamiento,
+                'historial' => $historial
+            ];
+        }
+
+        return [
+            'status' => $status,
+            'message' => $message,
+            'data' => $data
+        ];
+    }
+
+
 }
+
+function renderStatus($status) {
+    switch ($status) {
+        case 1:
+            return '<span class="inline-flex items-center gap-2 px-4 py-1 rounded text-sm font-medium bg-green-100 text-green-700">
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Activo
+                    </span>';
+        case 0:
+            return '<span class="inline-flex items-center gap-2 px-4 py-1 rounded text-sm font-medium bg-red-100 text-red-700">
+                        <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                        Inactivo
+                    </span>';
+        default:
+            return '<span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
+                        <span class="w-2 h-2 bg-gray-500 rounded-full"></span>
+                        Desconocido
+                    </span>';
+    }
+}
+
+function formatSpanishDate($date) {
+    if (empty($date)) return '-';
+    $timestamp = strtotime($date);
+    $months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    return date('d', $timestamp) . ' ' . $months[date('n', $timestamp) - 1] . ' ' . date('Y', $timestamp);
+}
+
+$obj = new ctrl();
+echo json_encode($obj->{$_POST['opc']}());
+
+
+   
+
