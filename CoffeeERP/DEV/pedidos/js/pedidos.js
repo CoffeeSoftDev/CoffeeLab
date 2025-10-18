@@ -18,10 +18,10 @@ $(async () => {
     pedidos.render();
 
     canales = new Canales(apiCanales, 'root');
-    // canales.render();
+  //  canales.render();
 
     productos = new Productos(apiProductos, 'root');
-        productos.render();
+   // productos.render();
 });
 
 class Pedidos extends Templates {
