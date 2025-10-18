@@ -61,6 +61,7 @@ class mdl extends CRUD {
             'data' => [1]
         ]);
     }
+    
     // Pedidos
 
     function listPedidos($array) {
