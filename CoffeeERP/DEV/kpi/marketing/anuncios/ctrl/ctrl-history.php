@@ -2,8 +2,6 @@
 
 if (empty($_POST['opc'])) exit(0);
 
-
-
 require_once '../mdl/mdl-history.php';
 
 class ctrl extends mdl {
@@ -111,9 +109,9 @@ class ctrl extends mdl {
     }
 }
 
-// function evaluar($value) {
-//     return '$' . number_format($value, 2, '.', ',');
-// }
+function evaluar($value) {
+    return '$' . number_format($value, 2, '.', ',');
+}
 
 $obj = new ctrl();
 echo json_encode($obj->{$_POST['opc']}());

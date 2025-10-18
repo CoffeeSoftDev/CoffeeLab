@@ -380,7 +380,7 @@ class CampaignDashboard extends Templates {
         <div id="${opts.id}" class="w-full min-h-screen ${themeClasses.text} ${themeClasses.containerBg}">
             <div class="p-6 ${themeClasses.headerBg}">
                 <div class="mx-auto">
-                    <h1 class="text-2xl font-bold">${opts.title}</h1>
+                    <h1 class="text-2xl font-semibold   ">${opts.title}</h1>
                     <p class="text-sm ${themeClasses.subtext}">${opts.subtitle}</p>
                 </div>
             </div>

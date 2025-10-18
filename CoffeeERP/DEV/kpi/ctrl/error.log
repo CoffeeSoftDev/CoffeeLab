@@ -1,3 +1,351 @@
+[ 2025-10-17 21:13:49 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:49 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:49 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:49 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:49 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS venta FROM rfwsmqex_gvsl_finanzas.ventas_udn  INNER JOIN rfwsmqex_gvsl_finanzas.venta_bitacora ON idUV = id_UV  WHERE id_UDN = 5 AND idUV != 40 AND Stado = 1 AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.ventas_udn' doesn't exist
+
+
+[ 2025-10-17 21:13:48 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS venta FROM rfwsmqex_gvsl_finanzas.ventas_udn  INNER JOIN rfwsmqex_gvsl_finanzas.venta_bitacora ON idUV = id_UV  WHERE id_UDN = 5 AND idUV != 40 AND Stado = 1 AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.ventas_udn' doesn't exist
+
+
+[ 2025-10-17 21:13:48 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:48 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:48 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS venta FROM rfwsmqex_gvsl_finanzas.ventas_udn  INNER JOIN rfwsmqex_gvsl_finanzas.venta_bitacora ON idUV = id_UV  WHERE id_UDN = 1 AND idUV != 6 AND Stado = 1 AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.ventas_udn' doesn't exist
+
+
+[ 2025-10-17 21:13:47 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS venta FROM rfwsmqex_gvsl_finanzas.ventas_udn  INNER JOIN rfwsmqex_gvsl_finanzas.venta_bitacora ON idUV = id_UV  WHERE id_UDN = 1 AND idUV != 6 AND Stado = 1 AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.ventas_udn' doesn't exist
+
+
+[ 2025-10-17 21:13:47 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS venta FROM rfwsmqex_gvsl_finanzas.ventas_udn  INNER JOIN rfwsmqex_gvsl_finanzas.venta_bitacora ON idUV = id_UV  WHERE id_UDN = 5 AND idUV != 40 AND Stado = 1 AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.ventas_udn' doesn't exist
+
+
+[ 2025-10-17 21:13:47 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS venta FROM rfwsmqex_gvsl_finanzas.ventas_udn  INNER JOIN rfwsmqex_gvsl_finanzas.venta_bitacora ON idUV = id_UV  WHERE id_UDN = 5 AND idUV != 40 AND Stado = 1 AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.ventas_udn' doesn't exist
+
+
+[ 2025-10-17 21:13:47 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:47 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:47 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT idUV ,Name_Venta as venta
+                        FROM rfwsmqex_gvsl_finanzas.ventas,rfwsmqex_gvsl_finanzas.ventas_udn
+                        WHERE idVenta = id_Venta AND id_UDN = ? AND Stado = 1 
+                        GROUP BY Name_Venta 
+                        ORDER BY idUV ASC
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.ventas' doesn't exist
+
+
+[ 2025-10-17 21:13:47 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:47 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:47 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT idUV ,Name_Venta as venta
+                        FROM rfwsmqex_gvsl_finanzas.ventas,rfwsmqex_gvsl_finanzas.ventas_udn
+                        WHERE idVenta = id_Venta AND id_UDN = ? AND Stado = 1 
+                        GROUP BY Name_Venta 
+                        ORDER BY idUV ASC
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.ventas' doesn't exist
+
+
+[ 2025-10-17 21:13:46 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:46 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:46 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT idUV ,Name_Venta as venta
+                        FROM rfwsmqex_gvsl_finanzas.ventas,rfwsmqex_gvsl_finanzas.ventas_udn
+                        WHERE idVenta = id_Venta AND id_UDN = ? AND Stado = 1 
+                        GROUP BY Name_Venta 
+                        ORDER BY idUV ASC
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.ventas' doesn't exist
+
+
+[ 2025-10-17 21:13:46 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS venta FROM rfwsmqex_gvsl_finanzas.ventas_udn  INNER JOIN rfwsmqex_gvsl_finanzas.venta_bitacora ON idUV = id_UV  WHERE id_UDN = 1 AND idUV != 6 AND Stado = 1 AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.ventas_udn' doesn't exist
+
+
+[ 2025-10-17 21:13:46 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS venta FROM rfwsmqex_gvsl_finanzas.ventas_udn  INNER JOIN rfwsmqex_gvsl_finanzas.venta_bitacora ON idUV = id_UV  WHERE id_UDN = 1 AND idUV != 6 AND Stado = 1 AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.ventas_udn' doesn't exist
+
+
+[ 2025-10-17 21:13:46 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:46 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:46 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT idUV ,Name_Venta as venta
+                        FROM rfwsmqex_gvsl_finanzas.ventas,rfwsmqex_gvsl_finanzas.ventas_udn
+                        WHERE idVenta = id_Venta AND id_UDN = ? AND Stado = 1 
+                        GROUP BY Name_Venta 
+                        ORDER BY idUV ASC
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.ventas' doesn't exist
+
+
+[ 2025-10-17 21:13:45 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:45 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:45 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:45 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:45 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT idUV ,Name_Venta as venta
+                        FROM rfwsmqex_gvsl_finanzas.ventas,rfwsmqex_gvsl_finanzas.ventas_udn
+                        WHERE idVenta = id_Venta AND id_UDN = ? AND Stado = 1 
+                        GROUP BY Name_Venta 
+                        ORDER BY idUV ASC
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.ventas' doesn't exist
+
+
+[ 2025-10-17 21:13:45 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT Fecha_Venta AS date,DATE_FORMAT(Fecha_Venta,'%d-%m-%Y') AS fecha FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE id_UDN = ?  ORDER BY Fecha_Venta DESC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:45 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT idUV ,Name_Venta as venta
+                        FROM rfwsmqex_gvsl_finanzas.ventas,rfwsmqex_gvsl_finanzas.ventas_udn
+                        WHERE idVenta = id_Venta AND id_UDN = ? AND Stado = 1 
+                        GROUP BY Name_Venta 
+                        ORDER BY idUV ASC
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.ventas' doesn't exist
+
+
+[ 2025-10-17 21:13:45 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT Fecha_Venta AS date,DATE_FORMAT(Fecha_Venta,'%d-%m-%Y') AS fecha FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE id_UDN = ?  ORDER BY Fecha_Venta DESC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:44 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT idUV ,Name_Venta as venta
+                        FROM rfwsmqex_gvsl_finanzas.ventas,rfwsmqex_gvsl_finanzas.ventas_udn
+                        WHERE idVenta = id_Venta AND id_UDN = ? AND Stado = 1 
+                        GROUP BY Name_Venta 
+                        ORDER BY idUV ASC
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.ventas' doesn't exist
+
+
+[ 2025-10-17 21:13:44 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT Fecha_Venta AS date,DATE_FORMAT(Fecha_Venta,'%d-%m-%Y') AS fecha FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE id_UDN = ?  ORDER BY Fecha_Venta DESC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:44 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT idUV ,Name_Venta as venta
+                        FROM rfwsmqex_gvsl_finanzas.ventas,rfwsmqex_gvsl_finanzas.ventas_udn
+                        WHERE idVenta = id_Venta AND id_UDN = ? AND Stado = 1 
+                        GROUP BY Name_Venta 
+                        ORDER BY idUV ASC
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.ventas' doesn't exist
+
+
+[ 2025-10-17 21:13:44 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:44 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT Fecha_Venta AS date,DATE_FORMAT(Fecha_Venta,'%d-%m-%Y') AS fecha FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE id_UDN = ?  ORDER BY Fecha_Venta DESC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:44 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT ROUND( SUM( IFNULL( Cantidad, 0 )), 2 ) AS cantidad FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE Stado = 1 AND id_UDN = ? AND Fecha_Venta BETWEEN ? AND ?   
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:44 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT idUV ,Name_Venta as venta
+                        FROM rfwsmqex_gvsl_finanzas.ventas,rfwsmqex_gvsl_finanzas.ventas_udn
+                        WHERE idVenta = id_Venta AND id_UDN = ? AND Stado = 1 
+                        GROUP BY Name_Venta 
+                        ORDER BY idUV ASC
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.ventas' doesn't exist
+
+
+[ 2025-10-17 21:13:44 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT idUV ,Name_Venta as venta
+                        FROM rfwsmqex_gvsl_finanzas.ventas,rfwsmqex_gvsl_finanzas.ventas_udn
+                        WHERE idVenta = id_Venta AND id_UDN = ? AND Stado = 1 
+                        GROUP BY Name_Venta 
+                        ORDER BY idUV ASC
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.ventas' doesn't exist
+
+
+[ 2025-10-17 21:13:44 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT Fecha_Venta AS date,DATE_FORMAT(Fecha_Venta,'%d-%m-%Y') AS fecha FROM rfwsmqex_gvsl_finanzas.venta_bitacora  INNER JOIN rfwsmqex_gvsl_finanzas.ventas_udn ON id_UV = idUV  WHERE id_UDN = ?  ORDER BY Fecha_Venta DESC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
+[ 2025-10-17 21:13:44 ]
+[ UNIX_USR ] :: nt authority\system
+[ WINDOWS_USR ] :: DESKTOP-O7AOGR9$
+[ INFO ] ::  SELECT YEAR(Fecha_Venta)-1 AS years FROM rfwsmqex_gvsl_finanzas.venta_bitacora    GROUP BY years ORDER BY years DESC 
+[ ERROR READ] :: SQLSTATE[42S02]: Base table or view not found: 1146 Table 'rfwsmqex_gvsl_finanzas.venta_bitacora' doesn't exist
+
+
 [ 2025-10-15 23:52:52 ]
 [ UNIX_USR ] :: nt authority\system
 [ WINDOWS_USR ] :: DESKTOP-O7AOGR9$

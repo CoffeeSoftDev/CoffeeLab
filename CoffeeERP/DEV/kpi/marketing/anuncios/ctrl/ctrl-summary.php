@@ -19,20 +19,20 @@ class ctrl extends mdl {
         $totals         = $this->getCampaignTotals([$udn_id, $red_social_id, $año, $mes]);
         $monthlySummary = $this->getMonthlySummary([$udn_id, $red_social_id, $año, $mes]);
 
-    //     $campaignGroups = [];
-    //     foreach ($data as $item) {
-    //         $campaña_id = $item['campaña_id'];
+        $campaignGroups = [];
+        foreach ($data as $item) {
+            $campaña_id = $item['campaña_id'];
             
-    //         if (!isset($campaignGroups[$campaña_id])) {
-    //             $campaignGroups[$campaña_id] = [
-    //                 'campaña' => $item['campaña'],
-    //                 'estrategia' => $item['estrategia'],
-    //                 'anuncios' => []
-    //             ];
-    //         }
+            if (!isset($campaignGroups[$campaña_id])) {
+                $campaignGroups[$campaña_id] = [
+                    'campaña' => $item['campaña'],
+                    'estrategia' => $item['estrategia'],
+                    'anuncios' => []
+                ];
+            }
             
-    //         $campaignGroups[$campaña_id]['anuncios'][] = $item;
-    //     }
+            $campaignGroups[$campaña_id]['anuncios'][] = $item;
+        }
 
     //     foreach ($campaignGroups as $campaña_id => $group) {
     //         $campaignTotal = null;
