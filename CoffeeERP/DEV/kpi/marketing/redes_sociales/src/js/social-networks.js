@@ -645,72 +645,11 @@ class RegisterSocialNetWork extends Templates {
         $('#btnSaveCapture').off('click').on('click', () => this.saveCapture());
     }
 
-  
+
 
     // show Capture.
 
-    async loadHistory() {
-        const container = $('#history-container');
-        container.html('<p class="text-gray-500 text-center">Cargando historial...</p>');
 
-        const udn = $('#filterBarCapture #udn').val();
-        const year = $('#filterBarCapture #anio').val();
-
-        const response = await useFetch({
-            url: api,
-            data: {
-                opc: "apiGetHistoryMetrics",
-                udn: udn,
-                year: year
-            }
-        });
-
-        if (response.status !== 200) {
-            container.html('<p class="text-red-500 text-center">Error al cargar el historial</p>');
-            return;
-        }
-
-        const history = response.data;
-
-        if (!history || history.length === 0) {
-            container.html('<p class="text-gray-500 text-center">No hay registros en el historial</p>');
-            return;
-        }
-
-        container.empty();
-        history.forEach(item => {
-            const card = $(`
-                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-2">
-                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: ${item.color}20;">
-                                <i class="${item.icon}" style="color: ${item.color}; font-size: 20px;"></i>
-                            </div>
-                            <span class="font-semibold text-gray-800">${item.network}</span>
-                        </div>
-                        <span class="text-sm text-gray-500">${item.date}</span>
-                    </div>
-                    <div class="space-y-2 mb-3">
-                        ${item.metrics.map(m => `
-                            <div class="flex justify-between text-xs">
-                                <span class="text-gray-600">${m.name}:</span>
-                                <span class="font-medium">${m.value}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="flex gap-2">
-                        <button class="flex-1 bg-blue-100 text-blue-600 hover:bg-blue-200 py-2 px-3 rounded text-sm font-medium transition" onclick="registerSocialNetWork.editHistory(${item.id})">
-                            <i class="icon-edit mr-1"></i> Editar
-                        </button>
-                        <button class="flex-1 bg-red-100 text-red-600 hover:bg-red-200 py-2 px-3 rounded text-sm font-medium transition" onclick="registerSocialNetWork.deleteHistory(${item.id})">
-                            <i class="icon-trash mr-1"></i> Eliminar
-                        </button>
-                    </div>
-                </div>
-            `);
-            container.append(card);
-        });
-    }
 
     async saveCapture() {
         const networkId = $('#captureNetwork').val();
@@ -784,7 +723,6 @@ class RegisterSocialNetWork extends Templates {
             },
         });
     }
-
 
     async editCapture(id) {
         const response = await useFetch({
@@ -891,7 +829,69 @@ class RegisterSocialNetWork extends Templates {
         }
     }
 
-   
+    // History.
+    async loadHistory() {
+        const container = $('#history-container');
+        container.html('<p class="text-gray-500 text-center">Cargando historial...</p>');
+
+        const udn = $('#filterBarCapture #udn').val();
+        const year = $('#filterBarCapture #anio').val();
+
+        const response = await useFetch({
+            url: api,
+            data: {
+                opc: "apiGetHistoryMetrics",
+                udn: udn,
+                year: year
+            }
+        });
+
+        if (response.status !== 200) {
+            container.html('<p class="text-red-500 text-center">Error al cargar el historial</p>');
+            return;
+        }
+
+        const history = response.data;
+
+        if (!history || history.length === 0) {
+            container.html('<p class="text-gray-500 text-center">No hay registros en el historial</p>');
+            return;
+        }
+
+        container.empty();
+        history.forEach(item => {
+            const card = $(`
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: ${item.color}20;">
+                                <i class="${item.icon}" style="color: ${item.color}; font-size: 20px;"></i>
+                            </div>
+                            <span class="font-semibold text-gray-800">${item.network}</span>
+                        </div>
+                        <span class="text-sm text-gray-500">${item.date}</span>
+                    </div>
+                    <div class="space-y-2 mb-3">
+                        ${item.metrics.map(m => `
+                            <div class="flex justify-between text-xs">
+                                <span class="text-gray-600">${m.name}:</span>
+                                <span class="font-medium">${m.value}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="flex-1 bg-blue-100 text-blue-600 hover:bg-blue-200 py-2 px-3 rounded text-sm font-medium transition" onclick="registerSocialNetWork.editHistory(${item.id})">
+                            <i class="icon-edit mr-1"></i> Editar
+                        </button>
+                        <button class="flex-1 bg-red-100 text-red-600 hover:bg-red-200 py-2 px-3 rounded text-sm font-medium transition" onclick="registerSocialNetWork.deleteHistory(${item.id})">
+                            <i class="icon-trash mr-1"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            `);
+            container.append(card);
+        });
+    }
 
     editHistory(id) {
         this.editCapture(id);

@@ -27,7 +27,7 @@ class App extends Templates {
     render(options) {
         this.layout();
         // this.filterBar();
-        this.sideBar({theme:'dark'});
+        this.sideBar({theme:'light'});
         this.navBar({ theme:'light'});
         
     }
@@ -42,7 +42,31 @@ class App extends Templates {
             }
         });
 
-        this.renderTabsCostsSys()
+        this.tabLayout({
+            parent: `container${this.PROJECT_NAME}`,
+            id: `tabs${this.PROJECT_NAME}`,
+            theme: "light",
+            class: '',
+            type: "short",
+            json: [
+                {
+                    id: "dashboard",
+                    tab: "Tab 1",
+                    class: "mb-1",
+                    active: true,
+                    onClick: () => dashboardSocialNetwork.renderDashboard()
+                },
+                {
+                    id: "capture",
+                    tab: "Tab 2",
+                   
+                    onClick: () => registerSocialNetWork.render()
+                },
+              
+            ]
+        });
+
+        // this.renderTabsCostsSys()
     }
 
 
