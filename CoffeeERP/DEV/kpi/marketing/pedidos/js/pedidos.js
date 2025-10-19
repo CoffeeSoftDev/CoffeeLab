@@ -3,15 +3,17 @@ const apiDashboard = 'ctrl/ctrl-dashboard.php';
 
 
 let pedidos, dashboard, producto, canal;
-let canales, productos, campanas, lsudn,redes_sociales;
+let canales, productos, campanas, lsudn, udn, redes_sociales, anuncios;
 
 $(async () => {
     const data = await useFetch({ url: api, data: { opc: "init" } });
-    udn          = data.udn;
-    canales        = data.canales;
-    productos      = data.productos;
-    campanas       = data.campanas;
+    udn = data.udn;
+    lsudn = data.udn;
+    canales = data.canales;
+    productos = data.productos;
+    campanas = data.campanas;
     redes_sociales = data.redes_sociales;
+    anuncios = data.anuncios;
 
     app = new App(api, "root");
     pedidos = new Pedidos(api, 'root');
@@ -168,6 +170,10 @@ class Pedidos extends Templates {
     }
 
     filterBar() {
+        const currentDate = new Date();
+        const currentMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const currentYear = String(currentDate.getFullYear());
+
         this.createfilterBar({
             parent: `filterBar${this.PROJECT_NAME}`,
             data: [
@@ -179,11 +185,12 @@ class Pedidos extends Templates {
                     data: udn,
                     onchange: `pedidos.lsPedidos()`,
                 },
-                               {
+                {
                     opc: "select",
                     id: "anio",
                     class: "col-md-2",
                     lbl: "Año",
+                    value: currentYear,
                     data: [
                         { id: "2025", valor: "2025" },
                         { id: "2024", valor: "2024" }
@@ -195,6 +202,7 @@ class Pedidos extends Templates {
                     id: "mes",
                     class: "col-md-2",
                     lbl: "Mes",
+                    value: currentMonth,
                     data: [
                         { id: "01", valor: "Enero" },
                         { id: "02", valor: "Febrero" },
@@ -202,7 +210,12 @@ class Pedidos extends Templates {
                         { id: "04", valor: "Abril" },
                         { id: "05", valor: "Mayo" },
                         { id: "06", valor: "Junio" },
-                        { id: "07", valor: "Julio" }
+                        { id: "07", valor: "Julio" },
+                        { id: "08", valor: "Agosto" },
+                        { id: "09", valor: "Septiembre" },
+                        { id: "10", valor: "Octubre" },
+                        { id: "11", valor: "Noviembre" },
+                        { id: "12", valor: "Diciembre" }
                     ],
                     onchange: "pedidos.lsPedidos()"
                 },
@@ -211,6 +224,7 @@ class Pedidos extends Templates {
                     class: "col-sm-3",
                     id: "btnNewOrder",
                     text: "<i class='icon-plus'></i> Nuevo Pedido",
+                    onClick: () => pedidos.showModalAddPedido()
                 },
             ],
         });
@@ -220,8 +234,8 @@ class Pedidos extends Templates {
         this.createTable({
             parent: "containerPedido",
             idFilterBar: "filterBarPedido",
-            data: { 
-                opc: "ls", 
+            data: {
+                opc: "lsPedido",
                 udn: $("#filterBarPedido #udn_id").val(),
                 anio: $("#filterBarPedido #anio").val(),
                 mes: $("#filterBarPedido #mes").val()
@@ -231,311 +245,695 @@ class Pedidos extends Templates {
             attr: {
                 id: "tbPedidos",
                 theme: 'corporativo',
-                center: [1, 2, 7, 8, 9],
-                right: [6]
+                center: [1, 6, 7, 8, 9],
+                right: [5]
             }
         });
     }
 
-    // addPedido() {
-    //     this.createForm({
-    //         parent: "formCapturaPedido",
-    //         id: "formPedido",
-    //         data: { opc: "addPedido" },
-    //         json: this.jsonPedido(),
-    //         success: (response) => {
-    //             if (response.status === 200) {
-    //                 alert({
-    //                     icon: "success",
-    //                     title: "Pedido creado",
-    //                     text: response.message,
-    //                     btn1: true,
-    //                     btn1Text: "Aceptar"
-    //                 });
-    //                 $("#formPedido")[0].reset();
-    //             } else {
-    //                 alert({
-    //                     icon: "error",
-    //                     text: response.message,
-    //                     btn1: true,
-    //                     btn1Text: "Ok"
-    //                 });
-    //             }
-    //         }
-    //     });
+    showModalAddPedido() {
+        const selectedUdn = $("#filterBarPedido #udn_id").val();
+        let selectedClienteId = null;
 
-    //     $("#lblCliente").addClass("border-b border-gray-600 pb-2 mb-3");
-    //     $("#lblPedido").addClass("border-b border-gray-600 pb-2 mb-3");
-    // }
+        // Generar opciones de anuncios con imágenes
+        let anunciosOptions = '';
+        anuncios.forEach(anuncio => {
+            const imagenUrl = anuncio.imagen ? `https://www.erp-varoch.com/DEV/${anuncio.imagen}` : 'https://sublimac.com/wp-content/uploads/2017/11/default-placeholder.png';
+            anunciosOptions += `
+                <div class="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100" 
+                     data-value="${anuncio.id}" 
+                     data-icon="${imagenUrl}">
+                    <img src="${imagenUrl}" class="w-8 h-8 mr-2 rounded object-cover"> 
+                    ${anuncio.valor}
+                </div>
+            `;
+        });
 
-    // async editPedido(id) {
-    //     const request = await useFetch({ 
-    //         url: this._link, 
-    //         data: { opc: "getPedido", id } 
-    //     });
+        const formHtml = `
+            <form id="formPedidoAdd" class="row">
+                <div class="col-12 fw-bold text-lg mb-3 border-b pb-2">Datos del pedido</div>
+                
+                <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Fecha de pedido</label>
+                    <input type="date" class="form-control" id="fecha_pedido" required>
+                </div>
+                
+                <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Canal</label>
+                    <select class="form-control" id="canal_id" required>
+                        <option value="">Seleccione...</option>
+                        ${canales.map(c => `<option value="${c.id}">${c.valor}</option>`).join('')}
+                    </select>
+                </div>
+                
+                <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Monto</label>
+                    <input type="text" class="form-control" id="monto" required>
+                </div>
+                
+                <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Unidad de Negocio</label>
+                    <select class="form-control" id="udn_id" required>
+                        ${udn.map(u => `<option value="${u.id}" ${u.id == selectedUdn ? 'selected' : ''}>${u.valor}</option>`).join('')}
+                    </select>
+                </div>
+                
+                <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Tipo de entrega</label>
+                    <select class="form-control" id="envio_domicilio" required>
+                        <option value="1">Envío a domicilio</option>
+                        <option value="0">Recoger en establecimiento</option>
+                    </select>
+                </div>
+                  <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Producto o servicio</label>
+                    <select class="form-control" id="producto_id" required multiple>
+                        ${productos.map(r => `<option value="${r.id}">${r.valor}</option>`).join('')}
+                    </select>
+                </div>
+                
+                <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Anuncio (opcional)</label>
+                    <div class="relative">
+                        <button type="button" id="dropdownAnuncioBtn" class="form-control text-left flex items-center justify-between">
+                            <span id="selectedAnuncio" class="flex items-center">
+                                <span class="text-gray-400">Seleccione un anuncio...</span>
+                            </span>
+                            <i class="icon-chevron-down text-gray-500"></i>
+                        </button>
+                        <input type="hidden" id="anuncio_id" value="">
+                        <div id="dropdownAnuncioMenu" class="hidden absolute mt-1 w-full bg-white border rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                            <div class="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100" 
+                                 data-value="" 
+                                 data-icon="">
+                                <span class="text-gray-400">Sin anuncio</span>
+                            </div>
+                            ${anunciosOptions}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Red social</label>
+                    <select class="form-control" id="red_social_id" required>
+                        <option value="">Seleccione...</option>
+                        ${redes_sociales.map(r => `<option value="${r.id}">${r.valor}</option>`).join('')}
+                    </select>
+                </div>
+                
+                <div class="col-12 fw-bold text-lg mb-3 border-b pb-2 mt-3">Información del cliente</div>
+                
+                <div class="col-12 col-lg-6 mb-3">
+                    <label class="form-label">Buscar Cliente</label>
+                    <select class="form-control" id="cliente_select" style="width: 100%">
+                        <option value="">Buscar cliente existente...</option>
+                    </select>
+                    <input type="hidden" id="cliente_id" value="">
+                </div>
+                
+                <div class="col-12 col-lg-6 mb-3">
+                    <label class="form-label">Nombre del cliente</label>
+                    <input type="text" class="form-control" id="cliente_nombre" required>
+                </div>
+                
+                <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Teléfono</label>
+                    <input type="tel" class="form-control" id="cliente_telefono" required>
+                </div>
+                
+                <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Correo electrónico</label>
+                    <input type="email" class="form-control" id="cliente_correo">
+                </div>
+                
+                <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Fecha de cumpleaños</label>
+                    <input type="date" class="form-control" id="cliente_cumpleaños">
+                </div>
+            </form>
+        `;
 
-    //     if (request.status !== 200) {
-    //         alert({
-    //             icon: "error",
-    //             text: request.message,
-    //             btn1: true
-    //         });
-    //         return;
-    //     }
+        bootbox.dialog({
+            title: '📝 Nuevo Pedido',
+            message: formHtml,
+            size: 'large',
+            buttons: {
+                cancel: {
+                    label: 'Cancelar',
+                    className: 'btn-secondary'
+                },
+                ok: {
+                    label: 'Guardar Pedido',
+                    className: 'btn-primary',
+                    callback: async () => {
+                        const formData = {
+                            opc: 'addPedido',
+                            fecha_pedido: $('#fecha_pedido').val(),
+                            canal_id: $('#canal_id').val(),
+                            monto: $('#monto').val(),
+                            udn_id: $('#udn_id').val(),
+                            envio_domicilio: $('#envio_domicilio').val(),
+                            producto_id: $('#producto_id').val(), // Array de productos
+                            anuncio_id: $('#anuncio_id').val() || null,
+                            red_social_id: $('#red_social_id').val()
+                        };
 
-    //     this.createModalForm({
-    //         id: 'formPedidoEdit',
-    //         data: { opc: 'editPedido', id },
-    //         bootbox: {
-    //             title: 'Editar Pedido',
-    //             size: 'large'
-    //         },
-    //         autofill: request.data,
-    //         json: this.jsonPedido(),
-    //         success: (response) => {
-    //             if (response.status === 200) {
-    //                 alert({
-    //                     icon: "success",
-    //                     text: response.message,
-    //                     btn1: true
-    //                 });
-    //                 this.lsPedidos();
-    //             } else {
-    //                 alert({
-    //                     icon: response.status === 403 ? "warning" : "error",
-    //                     title: response.status === 403 ? "Acceso denegado" : "Error",
-    //                     text: response.message,
-    //                     btn1: true
-    //                 });
-    //             }
-    //         }
-    //     });
-    // }
+                        // Si hay un cliente seleccionado, solo enviar el ID
+                        if (selectedClienteId) {
+                            formData.cliente_id = selectedClienteId;
+                        } else {
+                            // Si es un cliente nuevo, enviar todos los datos
+                            formData.cliente_nombre = $('#cliente_nombre').val();
+                            formData.cliente_telefono = $('#cliente_telefono').val();
+                            formData.cliente_correo = $('#cliente_correo').val() || null;
+                            formData.cliente_cumpleaños = $('#cliente_cumpleaños').val() || null;
+                        }
 
-    // verifyTransfer(id) {
-    //     this.swalQuestion({
-    //         opts: {
-    //             title: "¿Verificar transferencia?",
-    //             text: "Se marcará el pago como verificado",
-    //             icon: "question"
-    //         },
-    //         data: { opc: "verifyTransfer", id },
-    //         methods: {
-    //             send: (response) => {
-    //                 if (response.status === 200) {
-    //                     alert({
-    //                         icon: "success",
-    //                         text: response.message,
-    //                         btn1: true
-    //                     });
-    //                     this.lsPedidos();
-    //                 }
-    //             }
-    //         }
-    //     });
-    // }
+                        const response = await useFetch({
+                            url: this._link,
+                            data: formData
+                        });
 
-    // registerArrival(id) {
-    //     bootbox.dialog({
-    //         title: "Registrar Llegada",
-    //         message: `
-    //             <div class="text-center">
-    //                 <p class="mb-4">¿El cliente llegó al establecimiento?</p>
-    //                 <button class="btn btn-success me-2" onclick="pedidos.confirmArrival(${id}, 1)">
-    //                     <i class="icon-check"></i> Sí, llegó
-    //                 </button>
-    //                 <button class="btn btn-danger" onclick="pedidos.confirmArrival(${id}, 0)">
-    //                     <i class="icon-times"></i> No llegó
-    //                 </button>
-    //             </div>
-    //         `,
-    //         buttons: {
-    //             cancel: {
-    //                 label: "Cancelar",
-    //                 className: "btn-secondary"
-    //             }
-    //         }
-    //     });
-    // }
+                        if (response.status === 200) {
+                            alert({
+                                icon: "success",
+                                title: "Pedido creado",
+                                text: response.message,
+                                btn1: true,
+                                btn1Text: "Aceptar"
+                            });
+                            pedidos.lsPedidos();
+                        } else {
+                            alert({
+                                icon: "error",
+                                text: response.message,
+                                btn1: true,
+                                btn1Text: "Ok"
+                            });
+                        }
+                        return false;
+                    }
+                }
+            }
+        });
 
-    // async confirmArrival(id, arrived) {
-    //     bootbox.hideAll();
-        
-    //     const response = await useFetch({
-    //         url: this._link,
-    //         data: { opc: "registerArrival", id, arrived }
-    //     });
+        // Inicializar Select2 y otros componentes
+        setTimeout(() => {
+            // Obtener el contenedor del modal de bootbox
+            const modalContainer = $('.bootbox.modal');
 
-    //     if (response.status === 200) {
-    //         alert({
-    //             icon: "success",
-    //             text: response.message,
-    //             btn1: true
-    //         });
-    //         this.lsPedidos();
-    //     } else {
-    //         alert({
-    //             icon: "error",
-    //             text: response.message,
-    //             btn1: true
-    //         });
-    //     }
-    // }
+            // Inicializar Select2 para productos (múltiple)
+            $('#producto_id').select2({
+                placeholder: 'Seleccione productos...',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: modalContainer
+            });
 
-    // cancelPedido(id) {
-    //     const row = event.target.closest('tr');
-    //     const fecha = row.querySelectorAll('td')[1]?.innerText || '';
+            // Inicializar Select2 para clientes con búsqueda AJAX
+            $('#cliente_select').select2({
+                placeholder: 'Buscar cliente por nombre o teléfono...',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: modalContainer,
+                ajax: {
+                    url: api,
+                    type: 'POST',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            opc: 'apiSearchClientes',
+                            search: params.term || ''
+                 
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data.results || []
+                        };
+                    },
+                    cache: true
+                },
+                minimumInputLength: 2
+            });
 
-    //     this.swalQuestion({
-    //         opts: {
-    //             title: "¿Cancelar pedido?",
-    //             html: `¿Deseas cancelar el pedido del <strong>${fecha}</strong>?<br>
-    //                    Esta acción actualizará el estado a "Cancelado".`,
-    //             icon: "warning"
-    //         },
-    //         data: { opc: "statusPedido", active: 0, id },
-    //         methods: {
-    //             send: (response) => {
-    //                 if (response.status === 200) {
-    //                     alert({
-    //                         icon: "success",
-    //                         title: "Cancelado",
-    //                         text: "El pedido fue cancelado exitosamente.",
-    //                         btn1: true
-    //                     });
-    //                     this.lsPedidos();
-    //                 }
-    //             }
-    //         }
-    //     });
-    // }
+            // Cuando se selecciona un cliente, rellenar los campos
+            $('#cliente_select').on('select2:select', async function (e) {
+                const clienteId = e.params.data.id;
+                selectedClienteId = clienteId;
+                $('#cliente_id').val(clienteId);
 
-    // jsonPedido() {
-    //     return [
-    //         {
-    //             opc: "label",
-    //             id: "lblCliente",
-    //             text: "Información del cliente",
-    //             class: "col-12 fw-bold text-lg mb-2 "
-    //         },
-    //         {
-    //             opc: "input",
-    //             lbl: "Nombre del cliente",
-    //             id: "cliente_nombre",
-    //             tipo: "texto",
-    //             class: "col-12 col-sm-6 col-lg-4 mb-3"
-    //         },
-    //         {
-    //             opc: "input",
-    //             lbl: "Teléfono",
-    //             id: "cliente_telefono",
-    //             tipo: "tel",
-    //             class: "col-12 col-sm-6 col-lg-4 mb-3"
-    //         },
-    //         {
-    //             opc: "input",
-    //             lbl: "Correo electrónico",
-    //             id: "cliente_correo",
-    //             tipo: "email",
-    //             class: "col-12 col-sm-6 col-lg-4 mb-3",
-    //             required: false
-    //         },
-    //         {
-    //             opc: "input",
-    //             lbl: "Fecha de cumpleaños",
-    //             id: "cliente_cumpleaños",
-    //             type: "date",
-    //             class: "col-12 col-sm-6 col-lg-4 mb-3",
-    //             required: false
-    //         },
-    //         {
-    //             opc: "label",
-    //             id: "lblPedido",
-    //             text: "Datos del pedido",
-    //             class: "col-12 fw-bold text-lg mb-2 text-white"
-    //         },
-    //         {
-    //             opc: "input",
-    //             lbl: "Fecha de pedido",
-    //             id: "fecha_pedido",
-    //             type: "date",
-    //             class: "col-12 col-lg-3 mb-3"
-    //         },
-    //         {
-    //             opc: "input",
-    //             lbl: "Hora de entrega",
-    //             id: "hora_entrega",
-    //             type: "time",
-    //             class: "col-12 col-lg-3 mb-3"
-    //         },
-    //         {
-    //             opc: "select",
-    //             id: "canal_id",
-    //             lbl: "Canal de comunicación",
-    //             class: "col-12 col-lg-3 mb-3",
-    //             data: canales
-    //         },
-    //         {
-    //             opc: "input",
-    //             lbl: "Monto",
-    //             id: "monto",
-    //             tipo: "cifra",
-    //             class: "col-12 col-lg-3 mb-3",
-    //             onkeyup: "validationInputForNumber('#monto')"
-    //         },
-    //         {
-    //             opc: "select",
-    //             id: "envio_domicilio",
-    //             lbl: "Tipo de entrega",
-    //             class: "col-12 col-lg-4 mb-3",
-    //             data: [
-    //                 { id: 1, valor: "Envío a domicilio" },
-    //                 { id: 0, valor: "Recoger en establecimiento" }
-    //             ]
-    //         },
-    //         {
-    //             opc: "select",
-    //             id: "campana_id",
-    //             lbl: "Campaña (opcional)",
-    //             class: "col-12 col-lg-4 mb-3",
-    //             data: campanas,
-    //             required: false
-    //         },
-    //         {
-    //             opc: "select",
-    //             id: "red_social_id",
-    //             lbl: "Red social",
-    //             class: "col-12 col-lg-4 mb-3",
-    //             data: redes_sociales
-    //         },
-    //         {
-    //             opc: "textarea",
-    //             id: "notas",
-    //             lbl: "Notas adicionales",
-    //             rows: 3,
-    //             class: "col-12 mb-3",
-    //             required: false
-    //         },
-    //         {
-    //             opc: "btn-submit",
-    //             id: "btnGuardarPedido",
-    //             text: "Guardar Pedido",
-    //             class: "col-12 col-md-3 offset-md-9"
-    //         }
-    //     ];
-    // }
+                // Obtener datos completos del cliente
+                const response = await useFetch({
+                    url: api,
+                    data: { opc: 'getCliente', id: clienteId }
+                });
 
-    // showCapturaForm() {
-    //     $(`#container-captura`).html(`
-    //         <div class="px-6 py-4">
-    //             <div class=" rounded-xl p-6">
-    //                 <h2 class="text-xl font-semibold mb-4">📝 Nuevo Pedido</h2>
-    //                 <form id="formCapturaPedido" novalidate></div>
-    //             </div>
-    //         </div>
-    //     `);
+                if (response.status === 200 && response.data) {
+                    const cliente = response.data;
+                    $('#cliente_nombre').val(cliente.text || '').prop('readonly', true);
+                    $('#cliente_telefono').val(cliente.telefono || '').prop('readonly', true);
+                    $('#cliente_correo').val(cliente.correo || '').prop('readonly', true);
+                    $('#cliente_cumpleaños').val(cliente.fecha_cumpleaños ? cliente.fecha_cumpleaños.split(' ')[0] : '').prop('readonly', true);
+                }
+            });
 
-    //     this.addPedido();
-    // }
+            // Cuando se limpia la selección, habilitar campos para nuevo cliente
+            $('#cliente_select').on('select2:clear', function () {
+                selectedClienteId = null;
+                $('#cliente_id').val('');
+                $('#cliente_nombre').val('').prop('readonly', false);
+                $('#cliente_telefono').val('').prop('readonly', false);
+                $('#cliente_correo').val('').prop('readonly', false);
+                $('#cliente_cumpleaños').val('').prop('readonly', false);
+            });
 
+            // Dropdown de anuncios
+            $('#dropdownAnuncioBtn').on('click', function (e) {
+                e.preventDefault();
+                $('#dropdownAnuncioMenu').toggle();
+            });
+
+            $('#dropdownAnuncioMenu div').on('click', function () {
+                const value = $(this).data('value');
+                const icon = $(this).data('icon');
+                const text = $(this).text().trim();
+
+                $('#anuncio_id').val(value);
+
+                if (icon) {
+                    $('#selectedAnuncio').html(`<img src="${icon}" class="w-6 h-6 mr-2 rounded object-cover"> ${text}`);
+                } else {
+                    $('#selectedAnuncio').html(`<span class="text-gray-400">${text}</span>`);
+                }
+
+                $('#dropdownAnuncioMenu').hide();
+            });
+
+            // Cerrar dropdown al hacer clic fuera
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('#dropdownAnuncioBtn, #dropdownAnuncioMenu').length) {
+                    $('#dropdownAnuncioMenu').hide();
+                }
+            });
+
+            // Validación de número en monto
+            $('#monto').on('keyup', function () {
+                validationInputForNumber('#monto');
+            });
+        }, 100);
+    }
+
+    async editPedido(id) {
+        const request = await useFetch({
+            url: api,
+            data: { opc: "getPedido", id }
+        });
+
+        if (request.status !== 200) {
+            alert({
+                icon: "error",
+                text: request.message,
+                btn1: true
+            });
+            return;
+        }
+
+        const pedido = request.data;
+
+        // Generar opciones de anuncios con imágenes
+        let anunciosOptions = '';
+        anuncios.forEach(anuncio => {
+            const imagenUrl = anuncio.imagen ? `https://www.erp-varoch.com/DEV/${anuncio.imagen}` : 'https://sublimac.com/wp-content/uploads/2017/11/default-placeholder.png';
+            anunciosOptions += `
+                <div class="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100" 
+                     data-value="${anuncio.id}" 
+                     data-icon="${imagenUrl}">
+                    <img src="${imagenUrl}" class="w-8 h-8 mr-2 rounded object-cover"> 
+                    ${anuncio.valor}
+                </div>
+            `;
+        });
+
+        const formHtml = `
+            <form id="formPedidoEdit" class="row">
+                <div class="col-12 fw-bold text-lg mb-3 border-b pb-2">Datos del pedido</div>
+                
+                <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Fecha de pedido</label>
+                    <input type="date" class="form-control" id="fecha_pedido" value="${pedido.fecha_pedido ? pedido.fecha_pedido.split(' ')[0] : ''}" required>
+                </div>
+                
+                <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Canal</label>
+                    <select class="form-control" id="canal_id" required>
+                        ${canales.map(c => `<option value="${c.id}" ${c.id == pedido.canal_id ? 'selected' : ''}>${c.valor}</option>`).join('')}
+                    </select>
+                </div>
+                
+                <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Monto</label>
+                    <input type="text" class="form-control" id="monto" value="${pedido.monto}" required>
+                </div>
+                
+                <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Tipo de entrega</label>
+                    <select class="form-control" id="envio_domicilio" required>
+                        <option value="1" ${pedido.envio_domicilio == 1 ? 'selected' : ''}>Envío a domicilio</option>
+                        <option value="0" ${pedido.envio_domicilio == 0 ? 'selected' : ''}>Recoger en establecimiento</option>
+                    </select>
+                </div>
+                
+                <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Producto o servicio</label>
+                    <select class="form-control" id="producto_id" required multiple>
+                        ${productos.map(p => `<option value="${p.id}" ${pedido.productos && pedido.productos.includes(p.id) ? 'selected' : ''}>${p.valor}</option>`).join('')}
+                    </select>
+                </div>
+                
+                <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Anuncio (opcional)</label>
+                    <div class="relative">
+                        <button type="button" id="dropdownAnuncioBtn" class="form-control text-left flex items-center justify-between">
+                            <span id="selectedAnuncio" class="flex items-center">
+                                <span class="text-gray-400">Seleccione un anuncio...</span>
+                            </span>
+                            <i class="icon-chevron-down text-gray-500"></i>
+                        </button>
+                        <input type="hidden" id="anuncio_id">
+                        <div id="dropdownAnuncioMenu" class="hidden absolute mt-1 w-full bg-white border rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                            <div class="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100" data-value="" data-icon="">
+                                <span class="text-gray-400">Sin anuncio</span>
+                            </div>
+                            ${anunciosOptions}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Red social</label>
+                    <select class="form-control" id="red_social_id" required>
+                        ${redes_sociales.map(r => `<option value="${r.id}" ${r.id == pedido.red_social_id ? 'selected' : ''}>${r.valor}</option>`).join('')}
+                    </select>
+                </div>
+                
+                <div class="col-12 fw-bold text-lg mb-3 border-b pb-2 mt-3">Información del cliente</div>
+                
+                <div class="col-12 col-lg-6 mb-3">
+                    <label class="form-label">Buscar Cliente</label>
+                    <select class="form-control" id="cliente_select_edit" style="width: 100%">
+                        <option value="">Buscar otro cliente...</option>
+                    </select>
+                    <input type="hidden" id="cliente_id_edit" value="${pedido.cliente_id}">
+                </div>
+                
+                <div class="col-12 col-lg-6 mb-3">
+                    <label class="form-label">Cliente Actual</label>
+                    <input type="text" class="form-control" value="${pedido.cliente_nombre || ''}" readonly>
+                    <small class="text-muted">Tel: ${pedido.cliente_telefono || 'N/A'}</small>
+                </div>
+            </form>
+        `;
+
+        bootbox.dialog({
+            title: '✏️ Editar Pedido',
+            message: formHtml,
+            size: 'large',
+            buttons: {
+                cancel: {
+                    label: 'Cancelar',
+                    className: 'btn-secondary'
+                },
+                ok: {
+                    label: 'Guardar Cambios',
+                    className: 'btn-primary',
+                    callback: async () => {
+                        const formData = {
+                            opc: 'editPedido',
+                            id: id,
+                            fecha_pedido: $('#fecha_pedido').val(),
+                            canal_id: $('#canal_id').val(),
+                            monto: $('#monto').val(),
+                            envio_domicilio: $('#envio_domicilio').val(),
+                            producto_id: $('#producto_id').val(),
+                            anuncio_id: $('#anuncio_id').val() || null,
+                            red_social_id: $('#red_social_id').val(),
+                            cliente_id: $('#cliente_id_edit').val()
+                        };
+
+                        const response = await useFetch({
+                            url: api,
+                            data: formData
+                        });
+
+                        if (response.status === 200) {
+                            alert({
+                                icon: "success",
+                                text: response.message,
+                                btn1: true
+                            });
+                            pedidos.lsPedidos();
+                        } else {
+                            alert({
+                                icon: response.status === 403 ? "warning" : "error",
+                                title: response.status === 403 ? "Acceso denegado" : "Error",
+                                text: response.message,
+                                btn1: true
+                            });
+                        }
+                        return false;
+                    }
+                }
+            }
+        });
+
+        // Inicializar Select2 y dropdown
+        setTimeout(() => {
+            const modalContainer = $('.bootbox.modal');
+
+            $('#producto_id').select2({
+                placeholder: 'Seleccione productos...',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: modalContainer
+            });
+
+            // Inicializar Select2 para cambiar cliente
+            $('#cliente_select_edit').select2({
+                placeholder: 'Buscar otro cliente...',
+                allowClear: true,
+                width: '100%',
+                dropdownParent: modalContainer,
+                ajax: {
+                    url: api,
+                    type: 'POST',
+                    dataType: 'json',
+                    delay: 250,
+                    data: function (params) {
+                        return {
+                            opc: 'apiSearchClientes',
+                            search: params.term || ''
+                        };
+                    },
+                    processResults: function (data) {
+                        return {
+                            results: data.results || []
+                        };
+                    },
+                    cache: true
+                },
+                minimumInputLength: 2
+            });
+
+            // Cuando se selecciona otro cliente
+            $('#cliente_select_edit').on('select2:select', function (e) {
+                const clienteId = e.params.data.id;
+                $('#cliente_id_edit').val(clienteId);
+            });
+
+            $('#dropdownAnuncioBtn').on('click', function (e) {
+                e.preventDefault();
+                $('#dropdownAnuncioMenu').toggle();
+            });
+
+            $('#dropdownAnuncioMenu div').on('click', function () {
+                const value = $(this).data('value');
+                const icon = $(this).data('icon');
+                const text = $(this).text().trim();
+
+                $('#anuncio_id').val(value);
+
+                if (icon) {
+                    $('#selectedAnuncio').html(`<img src="${icon}" class="w-6 h-6 mr-2 rounded object-cover"> ${text}`);
+                } else {
+                    $('#selectedAnuncio').html(`<span class="text-gray-400">${text}</span>`);
+                }
+
+                $('#dropdownAnuncioMenu').hide();
+            });
+
+            $('#monto').on('keyup', function () {
+                validationInputForNumber('#monto');
+            });
+
+            // Establecer el anuncio seleccionado si existe
+            if (pedido.anuncio_id) {
+                $('#anuncio_id').val(pedido.anuncio_id);
+                const anuncioSeleccionado = anuncios.find(a => a.id == pedido.anuncio_id);
+                if (anuncioSeleccionado) {
+                    const imagenUrl = anuncioSeleccionado.imagen ? `https://www.erp-varoch.com/DEV/${anuncioSeleccionado.imagen}` : 'https://sublimac.com/wp-content/uploads/2017/11/default-placeholder.png';
+                    $('#selectedAnuncio').html(`<img src="${imagenUrl}" class="w-6 h-6 mr-2 rounded object-cover"> ${anuncioSeleccionado.valor}`);
+                }
+            }
+
+        }, 100);
+    }
+
+    verifyTransfer(id) {
+        bootbox.confirm({
+            title: "💰 Verificar Pago",
+            message: "¿Confirmas que el pago de este pedido ha sido verificado?",
+            buttons: {
+                confirm: {
+                    label: 'Sí, verificar',
+                    className: 'btn-success'
+                },
+                cancel: {
+                    label: 'Cancelar',
+                    className: 'btn-secondary'
+                }
+            },
+            callback: async (result) => {
+                if (result) {
+                    const response = await useFetch({
+                        url: api,
+                        data: { opc: "verifyTransfer", id }
+                    });
+
+                    if (response.status === 200) {
+                        alert({
+                            icon: "success",
+                            text: response.message,
+                            btn1: true
+                        });
+                        pedidos.lsPedidos();
+                    } else {
+                        alert({
+                            icon: "error",
+                            text: response.message,
+                            btn1: true
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+    registerArrival(id) {
+        bootbox.dialog({
+            title: "📍 Registrar Llegada",
+            message: `
+                <div class="text-center">
+                    <p class="mb-4">¿El cliente llegó al establecimiento?</p>
+                    <button class="btn btn-success me-2" onclick="pedidos.confirmArrival(${id}, 1)">
+                        <i class="icon-check"></i> Sí, llegó
+                    </button>
+                    <button class="btn btn-danger" onclick="pedidos.confirmArrival(${id}, 0)">
+                        <i class="icon-times"></i> No llegó
+                    </button>
+                </div>
+            `,
+            buttons: {
+                cancel: {
+                    label: "Cancelar",
+                    className: "btn-secondary"
+                }
+            }
+        });
+    }
+
+    async confirmArrival(id, arrived) {
+        bootbox.hideAll();
+
+        const response = await useFetch({
+            url: api,
+            data: { opc: "registerArrival", id, arrived }
+        });
+
+        if (response.status === 200) {
+            alert({
+                icon: "success",
+                text: response.message,
+                btn1: true
+            });
+            pedidos.lsPedidos();
+        } else {
+            alert({
+                icon: "error",
+                text: response.message,
+                btn1: true
+            });
+        }
+    }
+
+    cancelPedido(id) {
+        bootbox.confirm({
+            title: "❌ Cancelar Pedido",
+            message: "¿Estás seguro de que deseas cancelar este pedido? Esta acción no se puede deshacer.",
+            buttons: {
+                confirm: {
+                    label: 'Sí, cancelar',
+                    className: 'btn-danger'
+                },
+                cancel: {
+                    label: 'No, mantener',
+                    className: 'btn-secondary'
+                }
+            },
+            callback: async (result) => {
+                if (result) {
+                    const response = await useFetch({
+                        url: api,
+                        data: { opc: "cancelPedido", id }
+                    });
+
+                    if (response.status === 200) {
+                        alert({
+                            icon: "success",
+                            title: "Cancelado",
+                            text: response.message,
+                            btn1: true
+                        });
+                        pedidos.lsPedidos();
+                    } else {
+                        alert({
+                            icon: "error",
+                            text: response.message,
+                            btn1: true
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+}
+
+function validationInputForNumber(selector) {
+    const value = $(selector).val();
+    const regex = /^\d*\.?\d*$/; // Permite solo números y un punto decimal 
+    if (!regex.test(value)) {
+        $(selector).val(value.slice(0, -1)); // Elimina el último carácter inválido
+    }
+
+    // Calcular CPC automáticamente si ambos campos están llenos
+    const totalMonto = parseFloat($('#total_monto').val()) || 0;
+    const totalClics = parseInt($('#total_clics').val()) || 0;
+    if (totalMonto > 0 && totalClics > 0) {
+        const cpc = totalMonto / totalClics;
+        $('#cpc').val(cpc.toFixed(2));
+    } else {
+        $('#cpc').val('');
+    }
 }
