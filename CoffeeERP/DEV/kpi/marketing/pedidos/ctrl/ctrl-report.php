@@ -6,8 +6,8 @@ header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 
-require_once '../mdl/mdl-reportes.php';
-require_once '../../../conf/coffeSoft.php';
+require_once '../mdl/mdl-report.php';
+require_once '../../../../conf/coffeSoft.php';
 
 class ctrl extends mdl {
 

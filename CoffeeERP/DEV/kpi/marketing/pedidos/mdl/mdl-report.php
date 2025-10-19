@@ -1,6 +1,6 @@
 <?php
-require_once '../../../conf/_CRUD.php';
-require_once '../../../conf/_Utileria.php';
+require_once '../../../../conf/_CRUD.php';
+require_once '../../../../conf/_Utileria.php';
 session_start();
 
 class mdl extends CRUD {

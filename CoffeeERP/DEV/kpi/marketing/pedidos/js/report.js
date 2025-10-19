@@ -1,4 +1,4 @@
-let api = 'ctrl/ctrl-reportes.php';
+let api_report = 'ctrl/ctrl-report.php';
 let app, report;
 let lsUDN, lsCanales, lsAños;
 
@@ -8,13 +8,13 @@ $(async () => {
     lsCanales = data.canales;
     lsAños = data.años;
 
-    app = new App(api, "root");
-    report = new Report(api, "root");
-    app.render();
+    // app = new AppTemporal(api_report, "root");
+    report = new Report(api_report, "root");
     report.render();
+    // app.render();
 });
 
-class App extends Templates {
+class AppTemporal extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "Reportes";
@@ -63,21 +63,10 @@ class App extends Templates {
                     tab: "Resumen Ventas",
                     onClick: () => this.changeReportType("ventas")
                 },
-                {
-                    id: "bitacora",
-                    tab: "Bitácora Ingresos",
-                    onClick: () => this.changeReportType("bitacora")
-                },
-                {
-                    id: "dashboard",
-                    tab: "KPIs & Gráficas",
-                    onClick: () => this.changeReportType("dashboard")
-                }
+               
             ]
         });
     }
-
-
 
     headerBar(options) {
         const defaults = {
@@ -86,40 +75,42 @@ class App extends Templates {
             subtitle: "Subtítulo por defecto",
             icon: "icon-home",
             textBtn: "Inicio",
-            classBtn: "bg-[#103B60] hover:bg-blue-800",
-            onClick: null
+            classBtn: "border-1 border-blue-700 text-blue-600 hover:bg-blue-700 hover:text-white transition-colors duration-200",
+            onClick: null,
         };
 
         const opts = Object.assign({}, defaults, options);
 
         const container = $("<div>", {
-            class: "flex justify-between items-center px-4 pt-4 pb-3"
+            class: "relative flex justify-center items-center px-2 pt-3 pb-3"
         });
 
-        const leftSection = $("<div>").append(
+        // 🔵 Botón alineado a la izquierda (posición absoluta)
+        const leftSection = $("<div>", {
+            class: "absolute left-0"
+        }).append(
+            $("<button>", {
+                class: `${opts.classBtn} font-semibold px-4 py-2 rounded transition flex items-center`,
+                html: `<i class="${opts.icon} mr-2"></i>${opts.textBtn}`,
+                click: () => typeof opts.onClick === "function" && opts.onClick()
+            })
+        );
+
+        // 📜 Texto centrado
+        const centerSection = $("<div>", {
+            class: "text-center"
+        }).append(
             $("<h2>", {
-                class: "text-2xl font-semibold text-[#103B60]",
+                class: "text-2xl font-bold",
                 text: opts.title
             }),
             $("<p>", {
-                class: "text-gray-500",
+                class: "text-gray-400",
                 text: opts.subtitle
             })
         );
 
-        const rightSection = $("<div>").append(
-            $("<button>", {
-                class: `${opts.classBtn} text-white font-semibold px-4 py-2 rounded-lg transition flex items-center gap-2`,
-                html: `<i class="${opts.icon}"></i>${opts.textBtn}`,
-                click: () => {
-                    if (typeof opts.onClick === "function") {
-                        opts.onClick();
-                    }
-                }
-            })
-        );
-
-        container.append(leftSection, rightSection);
+        container.append(leftSection, centerSection);
         $(`#${opts.parent}`).html(container);
     }
 }
