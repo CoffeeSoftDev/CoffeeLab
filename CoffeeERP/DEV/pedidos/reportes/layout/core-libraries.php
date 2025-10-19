@@ -2,8 +2,8 @@
 <script src="../../src/plugin/jquery/jquery-3.7.0.min.js"></script>
 
 <!-- Bootstrap -->
-<script src="../../../src/plugin/bootstrap-5/js/bootstrap.min.js"></script>
-<script src="../../../src/plugin/bootstrap-5/js/bootstrap.bundle.js"></script>
+<script src="../../src/plugin/bootstrap-5/js/bootstrap.min.js"></script>
+<script src="../../src/plugin/bootstrap-5/js/bootstrap.bundle.js"></script>
 
 <!-- UI Plugins -->
 <script src="../../src/plugin/select2/bootstrap/select2.min.js"></script>
