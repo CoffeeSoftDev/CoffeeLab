@@ -51,6 +51,7 @@ class mdl extends CRUD {
                 cliente.udn_id,
                 cliente.active,
                 udn.UDN as udn_nombre,
+                udn.color,
                 udn.Abreviatura as udn_abreviatura
             ",
             'leftjoin' => $leftjoin,
@@ -314,6 +315,7 @@ class mdl extends CRUD {
                 c.vip,
                 c.telefono,
                 u.UDN as udn_nombre,
+                u.color,
                 COUNT(p.id) as total_pedidos,
                 SUM(p.monto) as monto_total,
                 AVG(p.monto) as ticket_promedio,

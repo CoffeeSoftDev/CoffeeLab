@@ -1,5 +1,5 @@
 
-let clientes,analitycs;
+let app, clientes, analitycs;
 let udnData = [];
 
 const api = "ctrl/ctrl-clientes.php";
@@ -8,26 +8,25 @@ $(async () => {
     const data = await useFetch({ url: api, data: { opc: "init" } });
     udnData = data.udn;
 
-    clientes  = new Clientes(api, "root");
+    app = new App(api, "root");
+    clientes = new Clientes(api, "root");
     analitycs = new Analitycs(api, "root");
 
+    app.render();
     clientes.render();
     analitycs.render();
 
 });
 
-class Clientes extends Templates {
-
+class App extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
-        this.PROJECT_NAME = "Clientes";
+        this.PROJECT_NAME = "Gestion";
     }
 
 
     render() {
         this.layout();
-        // this.filterBar();
-        // this.ls();
     }
 
 
@@ -39,7 +38,7 @@ class Clientes extends Templates {
             class: '',
             card: {
                 filterBar: { class: 'w-full my-2', id: 'filterBar' + this.PROJECT_NAME },
-                container: { class: 'w-full h-full border rounded p-3', id: 'container' + this.PROJECT_NAME }
+                container: { class: 'w-full h-full p-2', id: 'container' + this.PROJECT_NAME }
             }
         });
 
@@ -54,29 +53,42 @@ class Clientes extends Templates {
             parent: `container${this.PROJECT_NAME}`,
             id: `tabs${this.PROJECT_NAME}`,
             theme: "light",
-            class: '',
             type: "short",
             json: [
-               
+
                 {
-                    id     : "capture",
-                    tab    : "Captura de información",
-                    active : true,
-                    onClick: () => registerSocialNetWork.render()
+                    id: "capture",
+                    tab: "Captura de información",
+                    active: true,
+                    onClick: () => clientes.ls()
                 },
                 {
-                    id     : "analitycs",
-                    tab    : "Analisis",
-                    class  : "mb-1",
-                    onClick: () => dashboardSocialNetwork.renderDashboard()
+                    id: "analitycs",
+                    tab: "Estadisticas de clientes",
+                    class: "mb-1",
+                    onClick: () => analitycs.ls()
                 },
-              
+
             ]
         });
 
 
-        // $('#content-tabs' + this.PROJECT_NAME).removeClass('h-screen');
+        $('#content-tabs' + this.PROJECT_NAME).removeClass('h-screen');
     }
+}
+
+class Clientes extends Templates {
+    constructor(link, div_modulo) {
+        super(link, div_modulo);
+        this.PROJECT_NAME = "Clientes";
+    }
+
+    render() {
+        this.layoutClients();
+        this.filterBar();
+        this.ls();
+    }
+
 
     layoutClients() {
 
@@ -86,10 +98,10 @@ class Clientes extends Templates {
             class: '',
             card: {
                 filterBar: { class: 'w-full my-2', id: 'filterBar' + this.PROJECT_NAME },
-                container: { class: 'w-full h-full border rounded p-3', id: 'container' + this.PROJECT_NAME }
+                container: { class: 'w-full h-full ', id: 'container' + this.PROJECT_NAME }
             }
         });
-    
+
     }
 
     filterBar() {
@@ -100,7 +112,7 @@ class Clientes extends Templates {
                     opc: "select",
                     id: "udn_id",
                     lbl: "Unidad de Negocio",
-                    class: "col-12 col-md-3",
+                    class: "col-12 col-md-2",
                     data: [
                         { id: "all", valor: "Todas las unidades" },
                         ...udnData
@@ -152,10 +164,12 @@ class Clientes extends Templates {
                 id: "tbClientes",
                 theme: 'corporativo',
                 right: [7],
-                center: [5, 6]
+                center: [5, 6, 7]
             }
         });
     }
+
+    // Clients.
 
     addCliente() {
         this.createModalForm({
@@ -357,18 +371,12 @@ class Analitycs extends Templates {
             id: this.PROJECT_NAME,
             class: '',
             card: {
-                filterBar: { class: 'w-full my-3', id: 'filterBar' + this.PROJECT_NAME },
-                container: { class: 'w-full my-3 h-full rounded-lg p-3', id: 'container' + this.PROJECT_NAME }
+                filterBar: { class: 'w-full ', id: 'filterBar' + this.PROJECT_NAME },
+                container: { class: 'w-full h-full ', id: 'container' + this.PROJECT_NAME }
             }
         });
 
-        // Agregar título y descripción
-        $("#filterBar" + this.PROJECT_NAME).before(`
-            <div class="px-4 pt-3 pb-3">
-                <h2 class="text-2xl font-semibold">📊 Comportamiento de Clientes</h2>
-                <p class="text-gray-400">Análisis de frecuencia de compra, última visita y patrones de consumo.</p>
-            </div>
-        `);
+
     }
 
 
@@ -385,7 +393,7 @@ class Analitycs extends Templates {
                         { id: "all", valor: "Todas las unidades" },
                         ...udnData
                     ],
-                    onchange: 'comportamiento.ls()'
+                    onchange: 'analitycs.ls()'
                 },
                 {
                     opc: "select",
@@ -396,7 +404,7 @@ class Analitycs extends Templates {
                         { id: "1", valor: "Activos" },
                         { id: "0", valor: "Inactivos" }
                     ],
-                    onchange: 'comportamiento.ls()'
+                    onchange: 'analitycs.ls()'
                 },
                 {
                     opc: "button",
@@ -420,15 +428,16 @@ class Analitycs extends Templates {
             attr: {
                 id: "tbComportamiento",
                 theme: 'corporativo',
-                right: [9],  // Columna de acciones
-                center: [3, 7, 8]  // Total Pedidos, Días sin Comprar, Frecuencia
+                title: '📊 Comportamiento de Clientes',
+                subtitle: 'Análisis de frecuencia de compra, última visita y patrones de consumo.',
+                right: [3, 4, 5, 6, 9],                                                                        // Columna de acciones
+                center: [8]                                                                   // Total Pedidos, Días sin Comprar, Frecuencia
             }
         });
     }
 
 
     async verDetalle(id) {
-        // Obtener datos del cliente
         const request = await useFetch({
             url: this._link,
             data: {
@@ -446,121 +455,169 @@ class Analitycs extends Templates {
         const cliente = data.cliente;
         const historial = data.historial;
 
-        // Formatear nombre completo
         const nombreCompleto = `${cliente.nombre} ${cliente.apellido_paterno || ''} ${cliente.apellido_materno || ''}`.trim();
+        const iniciales = this.getInitials(nombreCompleto);
 
-        // Badge VIP
-        const badgeVIP = cliente.vip == 1 ? '<span class="badge bg-warning text-dark ms-2"><i class="icon-star"></i> VIP</span>' : '';
+        const badgeVIP = cliente.vip == 1
+            ? '<span class="px-2 py-1 rounded-md text-xs font-semibold bg-yellow-500 text-white ml-2"><i class="icon-star"></i> VIP</span>'
+            : '';
 
-        // Calcular días como cliente
-        const diasComoCliente = cliente.primera_compra 
-            ? Math.floor((new Date() - new Date(cliente.primera_compra)) / (1000 * 60 * 60 * 24))
-            : 0;
-
-        // Generar HTML del historial
         let historialHTML = '';
         if (historial && historial.length > 0) {
             historial.forEach(pedido => {
                 const fechaPedido = new Date(pedido.fecha_pedido);
-                const fechaFormateada = fechaPedido.toLocaleDateString('es-MX', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
+                const fechaFormateada = fechaPedido.toLocaleDateString('es-MX', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
                 });
-                
+
                 historialHTML += `
-                    <div class="border-bottom pb-2 mb-2">
-                        <div class="d-flex justify-content-between">
-                            <span><strong>Pedido #${pedido.id}</strong></span>
-                            <span class="text-success"><strong>$${parseFloat(pedido.monto).toFixed(2)}</strong></span>
+                    <div class="flex justify-between items-center p-3 border-b border-gray-200 hover:bg-gray-50 transition">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="font-semibold text-gray-800">Pedido #${pedido.id}</span>
+                                <span class="text-xs px-2 py-1 rounded-full ${pedido.envio_domicilio == 1 ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}">
+                                    ${pedido.envio_domicilio == 1 ? '🏠 Domicilio' : '🏪 Recoger'}
+                                </span>
+                            </div>
+                            <div class="text-xs text-gray-500">
+                                ${fechaFormateada} • ${pedido.udn_nombre || 'N/A'}
+                            </div>
                         </div>
-                        <small class="text-muted">
-                            ${fechaFormateada} • ${pedido.udn_nombre || 'N/A'} • 
-                            ${pedido.envio_domicilio == 1 ? '🏠 Domicilio' : '🏪 Recoger'}
-                        </small>
+                        <div class="text-right">
+                            <span class="text-lg font-bold text-green-600">$${parseFloat(pedido.monto).toFixed(2)}</span>
+                        </div>
                     </div>
                 `;
             });
         } else {
-            historialHTML = '<p class="text-muted text-center py-3">No hay pedidos registrados</p>';
+            historialHTML = `
+                <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+                    <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                        <i class="icon-inbox text-3xl"></i>
+                    </div>
+                    <p class="text-sm font-medium">No hay pedidos registrados</p>
+                    <p class="text-xs">Los pedidos del cliente aparecerán aquí</p>
+                </div>
+            `;
         }
 
-        // Crear modal con información detallada
         bootbox.dialog({
-            title: `<h4><i class="icon-chart-line"></i> Comportamiento de Cliente ${badgeVIP}</h4>`,
+            title: `
+             <div class="bg-white">
+                        <div class="flex items-center gap-4">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-blue-800 flex items-center justify-center text-white font-bold text-sm ">
+                                ${iniciales}
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h3 class="text-xl font-bold text-gray-800">${nombreCompleto}</h3>
+                                    ${badgeVIP}
+                                </div>
+                                <div class="flex flex-wrap gap-3 text-sm text-gray-600">
+                                    <span class="flex items-center gap-1">
+                                        <i class="icon-phone "></i>
+                                        ${cliente.telefono}
+                                    </span>
+                                    <span class="flex items-center gap-1">
+                                        <i class="icon-mail "></i>
+                                        ${cliente.correo || 'No registrado'}
+                                    </span>
+                                    <span class="flex items-center gap-1">
+                                        <i class="icon-building "></i>
+                                        ${cliente.udn_nombre}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            `,
             message: `
-                <div class="container-fluid">
-                    <!-- Información del Cliente -->
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <h5 class="border-bottom pb-2">${nombreCompleto}</h5>
-                            <p class="mb-1"><i class="icon-phone"></i> ${cliente.telefono}</p>
-                            <p class="mb-1"><i class="icon-mail"></i> ${cliente.correo || 'No registrado'}</p>
-                            <p class="mb-1"><i class="icon-building"></i> ${cliente.udn_nombre}</p>
-                        </div>
-                    </div>
+                <div class="w-full bg-gray-50">
+                    <!-- Header con Avatar -->
+                   
 
-                    <!-- Métricas Principales -->
-                    <div class="row mb-4">
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="card bg-primary text-white">
-                                <div class="card-body text-center">
-                                    <h3 class="mb-0">${cliente.total_pedidos || 0}</h3>
-                                    <small>Total Pedidos</small>
-                                </div>
+                    <!-- Métricas Grid -->
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 p-6">
+                        <div class="bg-blue-50 rounded p-3 border ">
+                            <div class="flex items-center justify-center w-10 h-10 bg-blue-500 rounded-full mb-3 mx-auto">
+                                <i class="icon-shopping-bag text-white text-sm"></i>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-blue-700">${cliente.total_pedidos || 0}</div>
+                                <div class="text-xs text-blue-600 font-medium mt-1">TOTAL PEDIDOS</div>
                             </div>
                         </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="card bg-success text-white">
-                                <div class="card-body text-center">
-                                    <h3 class="mb-0">$${parseFloat(cliente.monto_total || 0).toFixed(2)}</h3>
-                                    <small>Monto Total</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="card bg-info text-white">
-                                <div class="card-body text-center">
-                                    <h3 class="mb-0">$${parseFloat(cliente.ticket_promedio || 0).toFixed(2)}</h3>
-                                    <small>Ticket Promedio</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3 col-6 mb-3">
-                            <div class="card ${cliente.dias_sin_comprar > 60 ? 'bg-danger' : 'bg-warning'} text-white">
-                                <div class="card-body text-center">
-                                    <h3 class="mb-0">${cliente.dias_sin_comprar || 'N/A'}</h3>
-                                    <small>Días sin Comprar</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Información Adicional -->
-                    <div class="row mb-4">
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-title">📅 Primera Compra</h6>
-                                    <p class="mb-0">${cliente.primera_compra ? new Date(cliente.primera_compra).toLocaleDateString('es-MX') : 'N/A'}</p>
-                                </div>
+                        <div class="bg-green-50 rounded p-3 border border-green-200">
+                            <div class="flex items-center justify-center w-10 h-10 bg-green-500 rounded-full mb-3 mx-auto">
+                                <i class="icon-dollar text-white text-sm"></i>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-green-700">$${parseFloat(cliente.monto_total || 0).toFixed(2)}</div>
+                                <div class="text-xs text-green-600 font-medium mt-1">MONTO TOTAL</div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h6 class="card-title">🕒 Última Compra</h6>
-                                    <p class="mb-0">${cliente.ultima_compra ? new Date(cliente.ultima_compra).toLocaleDateString('es-MX') : 'N/A'}</p>
-                                </div>
+
+                        <div class="bg-cyan-50 rounded p-3 border border-cyan-200">
+                            <div class="flex items-center justify-center w-10 h-10 bg-cyan-500 rounded-full mb-3 mx-auto">
+                                <i class=" icon-user-3 text-white text-sm"></i>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold text-cyan-700">$${parseFloat(cliente.ticket_promedio || 0).toFixed(2)}</div>
+                                <div class="text-xs text-cyan-600 font-medium mt-1">TICKET PROMEDIO</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-orange-50 ${cliente.dias_sin_comprar > 60 ? '' : ''} rounded-xl p-3 border">
+                            <div class="flex items-center justify-center w-10 h-10 ${cliente.dias_sin_comprar > 60 ? 'bg-red-500' : 'bg-orange-500'} rounded-full mb-3 mx-auto">
+                                <i class="icon-clock text-white text-sm"></i>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-2xl font-bold ${cliente.dias_sin_comprar > 60 ? 'text-red-700' : 'text-orange-700'}">${cliente.dias_sin_comprar || 'N/A'}</div>
+                                <div class="text-xs ${cliente.dias_sin_comprar > 60 ? 'text-red-600' : 'text-orange-600'} font-medium mt-1">DÍAS SIN COMPRAR</div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Historial de Pedidos -->
-                    <div class="row">
-                        <div class="col-12">
-                            <h6 class="border-bottom pb-2 mb-3">📋 Últimos 10 Pedidos</h6>
-                            <div style="max-height: 300px; overflow-y: auto;">
+                    <!-- Fechas -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 px-6 pb-6">
+                        <div class="bg-white rounded p-4 border border-gray-200 ">
+                            <div class="flex items-center gap-3">
+                                <div class="flex-shrink-0 w-10 h-10 bg-blue-100 rounded flex items-center justify-center">
+                                    <i class="icon-calendar text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-gray-500 font-medium">🔵 Primera Compra</div>
+                                    <div class="text-sm font-semibold text-gray-800">${cliente.primera_compra ? new Date(cliente.primera_compra).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Sin registro de compras'}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded p-4 border border-gray-200 ">
+                            <div class="flex items-center gap-3">
+                                <div class="flex-shrink-0 w-10 h-10 bg-purple-100 rounded flex items-center justify-center">
+                                    <i class="icon-clock text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <div class="text-xs text-gray-500 font-medium">🟣 Última Compra</div>
+                                    <div class="text-sm font-semibold text-gray-800">${cliente.ultima_compra ? new Date(cliente.ultima_compra).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' }) : 'Sin registro de compras'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Historial -->
+                    <div class="px-6 pb-6">
+                        <div class="bg-white rounded border border-gray-200  overflow-hidden">
+                            <div class="bg-gray-50 px-4 py-3 border-b border-gray-200">
+                                <div class="flex items-center gap-2">
+                                    <i class="icon-list text-gray-600"></i>
+                                    <h6 class="font-semibold text-gray-800">Últimos 10 Pedidos</h6>
+                                </div>
+                            </div>
+                            <div class="max-h-80 overflow-y-auto">
                                 ${historialHTML}
                             </div>
                         </div>
@@ -568,18 +625,24 @@ class Analitycs extends Templates {
                 </div>
             `,
             size: 'large',
+            closeButton: true,
             buttons: {
                 close: {
-                    label: 'Cerrar',
+                    label: '<i class="icon-x mr-1"></i> Cerrar',
                     className: 'btn-secondary'
                 }
             }
         });
     }
 
-    /**
-     * Muestra el top de clientes por monto
-     */
+    getInitials(name) {
+        const nameParts = name.trim().split(' ');
+        if (nameParts.length >= 2) {
+            return (nameParts[0][0] + nameParts[1][0]).toUpperCase();
+        }
+        return name.substring(0, 2).toUpperCase();
+    }
+
     async showTopClientes() {
         const udnId = $("#udn_id").val();
 

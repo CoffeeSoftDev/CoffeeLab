@@ -17,6 +17,8 @@ class ctrl extends mdl {
         ];
     }
 
+    // Clientes.
+
     function listClientes() {
         $__row = [];
         
@@ -30,6 +32,7 @@ class ctrl extends mdl {
             $a = [];
 
             $nombreCompleto = trim($key['nombre'] . ' ' . $key['apellido_paterno'] . ' ' . $key['apellido_materno']);
+            $correo = $key['correo'] ?? '';
 
             $badgeVIP = $key['vip'] == 1 
                 ? '<span class="px-2 py-1 rounded-md text-xs font-semibold bg-orange-400 text-white"><i class="icon-star"></i> VIP</span>' 
@@ -56,14 +59,14 @@ class ctrl extends mdl {
             }
 
             $__row[] = [
-                'id' => $key['id'],
-                'Nombre Completo' => $nombreCompleto,
-                'Teléfono' => $key['telefono'],
-                'Correo' => $key['correo'] ?? '-',
-                'Unidad de Negocio' => $key['udn_nombre'],
-                'Estatus' => renderStatus($key['active']),
-                'VIP' => ['html' => $badgeVIP, 'class' => 'text-center'],
-                'a' => $a
+                'id'                  => $key['id'],
+                'Cliente'             => ['html' => renderUserCard($nombreCompleto, $correo,$key['color']), 'class' => 'align-middle'],
+                'Teléfono'            => $key['telefono'],
+                'Unidad de Negocio'   => $key['udn_nombre'],
+                'Fecha de cumpleaños' => formatSpanishDate($key['fecha_cumpleaños']),
+                'Estatus'             => renderStatus($key['active']),
+                'VIP'                 => ['html' => $badgeVIP, 'class' => 'text-center'],
+                'a'                   => $a
             ];
         }
 
@@ -205,7 +208,7 @@ class ctrl extends mdl {
     }
 
     // Comportamient.
-        function listComportamiento() {
+    function listComportamiento() {
         $__row = [];
         
         $active = isset($_POST['active']) ? $_POST['active'] : 1;
@@ -216,15 +219,16 @@ class ctrl extends mdl {
         foreach ($ls as $key) {
             $a = [];
 
-            // Nombre completo
             $nombreCompleto = trim($key['nombre'] . ' ' . $key['apellido_paterno'] . ' ' . $key['apellido_materno']);
+            $correo = $key['correo'] ?? '';
 
-            // Badge VIP
             $badgeVIP = $key['vip'] == 1 
                 ? '<span class="px-2 py-1 rounded-md text-xs font-semibold bg-yellow-500 text-white"><i class="icon-star"></i> VIP</span>' 
                 : '';
 
-            // Badge de frecuencia
+            $userCard = renderUserCard($nombreCompleto, $correo,$key['color'] );
+            $clienteConBadge = $userCard . ($badgeVIP ? '<div class="mt-1">' . $badgeVIP . '</div>' : '');
+
             $badgeFrecuencia = '';
             switch ($key['frecuencia']) {
                 case 'Activo':
@@ -241,24 +245,23 @@ class ctrl extends mdl {
                     break;
             }
 
-            // Botón de ver detalle
             $a[] = [
                 'class' => 'btn btn-sm btn-info',
                 'html' => '<i class="icon-chart-line"></i>',
-                'onclick' => 'comportamiento.verDetalle(' . $key['id'] . ')'
+                'onclick' => 'analitycs.verDetalle(' . $key['id'] . ')'
             ];
 
             $__row[] = [
-                'id' => $key['id'],
-                'Cliente' => $nombreCompleto . ' ' . $badgeVIP,
-                'UDN' => $key['udn_nombre'],
-                'Total Pedidos' => ['html' => '<strong>' . number_format($key['total_pedidos']) . '</strong>', 'class' => 'text-center'],
-                'Monto Total' => ['html' => '$' . number_format($key['monto_total'], 2), 'class' => 'text-end'],
-                'Ticket Promedio' => ['html' => '$' . number_format($key['ticket_promedio'], 2), 'class' => 'text-end'],
-                'Última Compra' => $key['ultima_compra'] ? formatSpanishDate($key['ultima_compra']) : '-',
-                'Días sin Comprar' => ['html' => $key['dias_sin_comprar'] ?? '-', 'class' => 'text-center'],
-                'Frecuencia' => ['html' => $badgeFrecuencia, 'class' => 'text-center'],
-                'a' => $a
+                'id'               => $key['id'],
+                'Cliente'          => ['html' => $clienteConBadge, 'class' => 'align-middle'],
+                'UDN'              => $key['udn_nombre'],
+                'Total Pedidos'    => ['html' => '<strong>' . number_format($key['total_pedidos']) . '</strong>', 'class' => 'text-center '],
+                'Monto Total'      => ['html' => '$' . number_format($key['monto_total'], 2), 'class' => 'text-end '],
+                'Ticket Promedio'  => ['html' => '$' . number_format($key['ticket_promedio'], 2), 'class' => 'text-end '],
+                'Última Compra'    => $key['ultima_compra'] ? formatSpanishDate($key['ultima_compra']) : '-',
+                'Días sin Comprar' => ['html' => $key['dias_sin_comprar'] ?? '-', 'class' => 'text-center '],
+                'Frecuencia'       => ['html' => $badgeFrecuencia, 'class' => 'text-center '],
+                'a'                => $a
             ];
         }
 
@@ -268,7 +271,6 @@ class ctrl extends mdl {
         ];
     }
 
-   
     function listPorFrecuencia() {
         $frecuencia = $_POST['frecuencia'] ?? 'activo';
         $udnId = isset($_POST['udn_id']) && $_POST['udn_id'] !== 'all' ? $_POST['udn_id'] : null;
@@ -293,7 +295,7 @@ class ctrl extends mdl {
         ];
     }
 
-      function getComportamiento() {
+    function getComportamiento() {
         $status = 500;
         $message = 'Error al obtener comportamiento del cliente';
         $data = null;
@@ -327,20 +329,44 @@ class ctrl extends mdl {
 
 }
 
+function renderUserCard($name, $email = '', $color = '#2563EB') {
+    $initials = '';
+    $nameParts = explode(' ', trim($name));
+    
+    if (count($nameParts) >= 2) {
+        $initials = strtoupper(substr($nameParts[0], 0, 1) . substr($nameParts[1], 0, 1));
+    } else {
+        $initials = strtoupper(substr($name, 0, 2));
+    }
+    
+    return '
+        <div class="flex items-center gap-3">
+            <div class="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm" 
+                 style="background-color: ' . $color . ';">
+                ' . $initials . '
+            </div>
+            <div class="flex flex-col">
+                <span class="text-xs font-semibold text-gray-800">' . htmlspecialchars($name) . '</span>
+                ' . (!empty($email) ? '<span class="text-xs text-gray-500">' . htmlspecialchars($email) . '</span>' : '') . '
+            </div>
+        </div>
+    ';
+}
+
 function renderStatus($status) {
     switch ($status) {
         case 1:
-            return '<span class="inline-flex items-center gap-2 px-4 py-1 rounded text-sm font-medium bg-green-100 text-green-700">
+            return '<span class="inline-flex items-center gap-2 px-4 py-1 rounded text-xs font-medium bg-green-100 text-green-700">
                         <span class="w-2 h-2 bg-green-500 rounded-full"></span>
                         Activo
                     </span>';
         case 0:
-            return '<span class="inline-flex items-center gap-2 px-4 py-1 rounded text-sm font-medium bg-red-100 text-red-700">
+            return '<span class="inline-flex items-center gap-2 px-4 py-1 rounded text-xs font-medium bg-red-100 text-red-700">
                         <span class="w-2 h-2 bg-red-500 rounded-full"></span>
                         Inactivo
                     </span>';
         default:
-            return '<span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
+            return '<span class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
                         <span class="w-2 h-2 bg-gray-500 rounded-full"></span>
                         Desconocido
                     </span>';
