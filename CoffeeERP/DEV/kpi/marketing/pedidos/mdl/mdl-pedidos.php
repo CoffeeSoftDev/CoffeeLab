@@ -61,70 +61,117 @@ class mdl extends CRUD {
             'data' => [1]
         ]);
     }
-    // Pedidos
 
+    function lsAnuncios() {
+        $query = "
+            SELECT 
+                a.id,
+                a.nombre AS valor,
+                a.imagen,
+                a.fecha_inicio,
+                a.fecha_fin,
+                c.nombre AS campana_nombre
+            FROM {$this->bd}anuncio a
+            LEFT JOIN {$this->bd}campaña c ON a.campaña_id = c.id
+            WHERE c.active = 1
+            ORDER BY a.fecha_inicio DESC
+        ";
+        return $this->_Read($query, null);
+    }
+
+    function searchClientes($array) {
+        $query = "
+            SELECT 
+                id,
+                CONCAT(nombre) AS text,
+                nombre,
+                telefono,
+                correo,
+                fecha_cumpleaños,
+                udn_id
+            FROM {$this->bd}cliente
+            WHERE (nombre LIKE ? OR telefono LIKE ?)
+            AND active = 1
+            LIMIT 10
+        ";
+        return $this->_Read($query, $array);
+    }
+
+    function getClienteById($array) {
+        $query = "
+            SELECT 
+                id,
+                 CONCAT(nombre) AS text,
+                nombre,
+                telefono,
+                correo,
+                fecha_cumpleaños,
+                udn_id
+            FROM {$this->bd}cliente
+            WHERE id = ?
+        ";
+        $result = $this->_Read($query, $array);
+        return $result[0] ?? null;
+    }
+
+    // Pedidos
     function listPedidos($array) {
         $query = "
             SELECT 
                 p.id,
                 p.monto,
-                fecha_pedido,
-                DATE_FORMAT(p.fecha_creacion, '%d/%m/%Y %H:%i') AS fecha_creacion,
+                p.fecha_pedido,
+                p.fecha_creacion,
                 p.envio_domicilio,
+                p.pago_verificado,
+                p.llego_establecimiento,
                 p.active,
+                cl.nombre AS cliente_nombre,
+                cl.telefono AS cliente_telefono,
                 c.nombre AS canal_nombre,
                 rs.nombre AS red_social_nombre,
                 rs.color AS red_social_color,
-                ca.nombre AS campana_nombre,
-                ca.estrategia AS campana_estrategia
+                rs.icono AS red_social_icono,
+                p.udn_id
             FROM {$this->bd}pedido p
+            LEFT JOIN {$this->bd}cliente cl ON p.cliente_id = cl.id
             LEFT JOIN {$this->bd}canal c ON p.canal_id = c.id
             LEFT JOIN {$this->bd}red_social rs ON p.red_social_id = rs.id
-            LEFT JOIN {$this->bd}campaña ca ON p.campaña_id = ca.id
-           
+            WHERE p.udn_id = ?
+            AND p.active = 1
+            AND p.fecha_pedido IS NOT NULL
+            AND YEAR(p.fecha_pedido) = ?
+            AND MONTH(p.fecha_pedido) = ?
+            ORDER BY p.fecha_creacion DESC
         ";
-        return $this->_Read($query, null);
+        return $this->_Read($query, $array);
     }
 
-    function getPedidoById($array) {
-        $leftjoin = [
-            $this->bd . 'cliente' => 'pedido.cliente_id = cliente.id',
-            $this->bd . 'canal' => 'pedido.canal_id = canal.id',
-            $this->bd . 'campana' => 'pedido.campana_id = campana.id'
-        ];
+    function createCliente($array) {
+        return $this->_Insert([
+            'table' => $this->bd . 'cliente',
+            'values' => $array['values'],
+            'data' => $array['data']
+        ]);
+    }
 
+    function maxCliente() {
+        $query = "
+            SELECT MAX(id) AS max_id
+            FROM {$this->bd}cliente
+        ";
+        $result = $this->_Read($query, null);
+        return $result[0]['max_id'] ?? 0;
+    }
+
+    function getClienteByPhone($array) {
         $result = $this->_Select([
-            'table' => $this->bd . 'pedido',
-            'values' => "
-                pedido.*,
-                cliente.nombre AS cliente_nombre,
-                cliente.telefono AS cliente_telefono,
-                cliente.correo AS cliente_correo,
-                cliente.fecha_cumpleaños AS cliente_cumpleaños,
-                canal.nombre AS canal_nombre,
-                campana.nombre AS campana_nombre
-            ",
-            'leftjoin' => $leftjoin,
-            'where' => 'pedido.id = ?',
+            'table' => $this->bd . 'cliente',
+            'values' => '*',
+            'where' => 'telefono = ?',
             'data' => $array
         ]);
         return $result[0] ?? null;
-    }
-
-    function listPedidosByCliente($array) {
-        return $this->_Select([
-            'table' => $this->bd . 'pedido',
-            'values' => "
-                id,
-                monto,
-                fecha_pedido,
-                fecha_creacion,
-                active
-            ",
-            'where' => 'cliente_id = ? AND active = 1',
-            'order' => ['DESC' => 'fecha_creacion'],
-            'data' => $array
-        ]);
     }
 
     function createPedido($array) {
@@ -135,12 +182,62 @@ class mdl extends CRUD {
         ]);
     }
 
+    function maxPedido() {
+        $query = "
+            SELECT MAX(id) AS max_id
+            FROM {$this->bd}pedido
+        ";
+        $result = $this->_Read($query, null);
+        return $result[0]['max_id'] ?? 0;
+    }
+
+    function createProductoPedido($array) {
+        return $this->_Insert([
+            'table' => $this->bd . 'producto_pedido',
+            'values' => $array['values'],
+            'data' => $array['data']
+        ]);
+    }
+
+    function getPedidoById($array) {
+        $query = "
+            SELECT 
+                p.*,
+                cl.nombre AS cliente_nombre,
+                cl.telefono AS cliente_telefono,
+                cl.correo AS cliente_correo,
+                cl.fecha_cumpleaños AS cliente_cumpleaños
+            FROM {$this->bd}pedido p
+            LEFT JOIN {$this->bd}cliente cl ON p.cliente_id = cl.id
+            WHERE p.id = ?
+        ";
+        $result = $this->_Read($query, $array);
+        return $result[0] ?? null;
+    }
+
+    function getProductosByPedido($array) {
+        $query = "
+            SELECT producto_id
+            FROM {$this->bd}producto_pedido
+            WHERE pedido_id = ?
+        ";
+        return $this->_Read($query, $array);
+    }
+
     function updatePedido($array) {
         return $this->_Update([
             'table' => $this->bd . 'pedido',
             'values' => $array['values'],
             'where' => 'id = ?',
             'data' => $array['data']
+        ]);
+    }
+
+    function deleteProductosPedido($array) {
+        return $this->_Delete([
+            'table' => $this->bd . 'producto_pedido',
+            'where' => 'pedido_id = ?',
+            'data' => $array
         ]);
     }
 
@@ -164,116 +261,5 @@ class mdl extends CRUD {
             'valid' => $dias <= 7,
             'dias' => $dias
         ];
-    }
-
-    function getDashboardMetrics($array) {
-        $query = "
-            SELECT 
-                COUNT(*) AS total_pedidos,
-                SUM(monto) AS ingresos_totales,
-                AVG(monto) AS cheque_promedio,
-                SUM(CASE WHEN pago_verificado = 1 THEN 1 ELSE 0 END) AS pagos_verificados,
-                SUM(CASE WHEN llego_establecimiento = 1 THEN 1 ELSE 0 END) AS llegadas_confirmadas
-            FROM {$this->bd}pedido
-            WHERE udn_id = ?
-            AND YEAR(fecha_pedido) = ?
-            AND MONTH(fecha_pedido) = ?
-            AND active = 1
-        ";
-        $result = $this->_Read($query, $array);
-        return $result[0] ?? [
-            'total_pedidos' => 0,
-            'ingresos_totales' => 0,
-            'cheque_promedio' => 0,
-            'pagos_verificados' => 0,
-            'llegadas_confirmadas' => 0
-        ];
-    }
-
-    function getMonthlyReport($array) {
-        $query = "
-            SELECT 
-                c.nombre AS canal_nombre,
-                COUNT(p.id) AS total_pedidos,
-                SUM(p.monto) AS total_ventas
-            FROM {$this->bd}pedido p
-            LEFT JOIN {$this->bd}canal c ON p.canal_id = c.id
-            WHERE p.udn_id = ?
-            AND YEAR(p.fecha_pedido) = ?
-            AND MONTH(p.fecha_pedido) = ?
-            AND p.active = 1
-            GROUP BY c.id, c.nombre
-            ORDER BY total_ventas DESC
-        ";
-        return $this->_Read($query, $array);
-    }
-
-    function getAnnualReport($array) {
-        $query = "
-            SELECT 
-                c.nombre AS canal_nombre,
-                MONTH(p.fecha_pedido) AS mes,
-                COUNT(p.id) AS total_pedidos,
-                SUM(p.monto) AS total_ventas
-            FROM {$this->bd}pedido p
-            LEFT JOIN {$this->bd}canal c ON p.canal_id = c.id
-            WHERE p.udn_id = ?
-            AND YEAR(p.fecha_pedido) = ?
-            AND p.active = 1
-            GROUP BY c.id, c.nombre, MONTH(p.fecha_pedido)
-            ORDER BY c.nombre, mes
-        ";
-        return $this->_Read($query, $array);
-    }
-
-    function getChannelPerformance($array) {
-        $query = "
-            SELECT 
-                c.nombre AS canal_nombre,
-                c.icono AS canal_icono,
-                c.color AS canal_color,
-                COUNT(p.id) AS total_pedidos,
-                SUM(p.monto) AS total_ingresos,
-                AVG(p.monto) AS cheque_promedio,
-                SUM(CASE WHEN p.campana_id IS NOT NULL THEN 1 ELSE 0 END) AS pedidos_con_campana
-            FROM {$this->bd}pedido p
-            LEFT JOIN {$this->bd}canal c ON p.canal_id = c.id
-            WHERE p.udn_id = ?
-            AND p.fecha_pedido BETWEEN ? AND ?
-            AND p.active = 1
-            GROUP BY c.id, c.nombre, c.icono, c.color
-            ORDER BY total_ingresos DESC
-        ";
-        return $this->_Read($query, $array);
-    }
-
-    function existsPedidoByDate($array) {
-        $query = "
-            SELECT id
-            FROM {$this->bd}pedido
-            WHERE fecha_pedido = ?
-            AND udn_id = ?
-            AND active = 1
-        ";
-        $exists = $this->_Read($query, $array);
-        return count($exists) > 0;
-    }
-
-    function createCliente($array) {
-        return $this->_Insert([
-            'table' => $this->bd . 'cliente',
-            'values' => $array['values'],
-            'data' => $array['data']
-        ]);
-    }
-
-    function getClienteByPhone($array) {
-        $result = $this->_Select([
-            'table' => $this->bd . 'cliente',
-            'values' => '*',
-            'where' => 'telefono = ? AND udn_id = ?',
-            'data' => $array
-        ]);
-        return $result[0] ?? null;
     }
 }

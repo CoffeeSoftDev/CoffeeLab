@@ -11,74 +11,74 @@ require_once '../mdl/mdl-pedidos.php';
 class ctrl extends mdl {
 
     function init() {
+        $udn = $_POST['udn'] ?? 4;
 
         return [
             'udn'            => $this-> lsUDN(),
             'canales'        => $this-> lsCanales([1]),
             'productos'      => $this-> lsProductos([1]),
             'campanas'       => $this-> lsCampanas([1]),
-            'redes_sociales' => $this-> lsSocialNetworks([])
+            'redes_sociales' => $this-> lsSocialNetworks([]),
+            'anuncios'       => $this-> lsAnuncios()
         ];
     }
 
-    function ls() {
+    function apiSearchClientes() {
+        $search = '%' . $_POST['search'] . '%';
+        
+        $clientes = $this->searchClientes([$search, $search]); 
+        
+        return [
+            'results' => $clientes
+        ];
+    }
+
+    function getCliente() {
+        $cliente = $this->getClienteById([$_POST['id']]);
+        
+        return [
+            'status' => $cliente ? 200 : 404,
+            'data' => $cliente
+        ];
+    }
+
+    function lsPedido() {
         $__row = [];
         $udn = $_POST['udn'];
         $anio = $_POST['anio'];
         $mes = $_POST['mes'];
         
-        $ls = $this->listPedidos([$udn]);
+        $ls = $this->listPedidos([$udn, $anio, $mes]);
         
         foreach ($ls as $key) {
-            // $diasTranscurridos = (strtotime(date('Y-m-d')) - strtotime($key['fecha_creacion'])) / 86400;
-            $diasTranscurridos = 4;
+            $diasTranscurridos = (strtotime(date('Y-m-d')) - strtotime($key['fecha_creacion'])) / 86400;
             $puedeEditar       = $diasTranscurridos <= 7;
             
             $__row[] = [
                 'id'       => $key['id'],
-                'Fecha'    => formatSpanishDate($key['fecha_creacion']),
-                'Hora'     => $key['hora_entrega'],
+                'Fecha'    => date('d/m/Y', strtotime($key['fecha_pedido'])),
                 'Cliente'  => $key['cliente_nombre'],
                 'Teléfono' => $key['cliente_telefono'],
                 
                 'Canal'    => [
                     'html' => '<div class="flex items-center gap-2">
-                                <i class = "' . $key['red_social_icono'] . '" style = "color:' . $key['red_social_color'] . '"></i>
-                                <span>' . $key['canal_nombre'] . '</span>
+                                <i class = "' . ($key['red_social_icono'] ?? '') . '" style = "color:' . ($key['red_social_color'] ?? '#000') . '"></i>
+                                <span>' . ($key['canal_nombre'] ?? 'N/A') . '</span>
                               </div>',
                     'class' => 'text-left'
                 ],
 
                 'Monto'    => evaluar($key['monto']),
-                'Envío'    => $key['envio_domicilio'] ? 'Domicilio' : 'Recoger',
-                'Pago'     => renderPaymentStatus($key['pago_verificado']),
-                'Llegada'  => renderArrivalStatus($key['llego_establecimiento']),
-                'Estado'   => renderStatus($key['active']),
-                'dropdown' => dropdown($key['id'], $key['active'], $puedeEditar,1)
+                'Llegada'  => renderArrivalStatus($key['llego_establecimiento'], $key['udn_id']),
+                'Envío'    => renderEnvio($key['envio_domicilio']),
+                'Pago'   => renderStatus($key['pago_verificado']),
+                'dropdown' => dropdown($key['id'], $key['active'], $puedeEditar, $key['pago_verificado'])
             ];
         }
         
         return [
             'row' => $__row,
-            'ls' => $ls
-        ];
-    }
-
-    function getPedido() {
-        $status = 500;
-        $message = 'Error al obtener pedido';
-        
-        $pedido = $this->getPedidoById([$_POST['id']]);
-        
-        if ($pedido) {
-            $status = 200;
-            $message = 'Pedido obtenido correctamente';
-        }
-        
-        return [
-            'status' => $status,
-            'message' => $message,
-            'data' => $pedido
+            'ls' => $ls,
         ];
     }
 
@@ -86,54 +86,108 @@ class ctrl extends mdl {
         $status = 500;
         $message = 'Error al crear pedido';
         
-        $_POST['fecha_creacion'] = date('Y-m-d H:i:s');
-        $_POST['udn_id'] = 4;
-        $_POST['active'] = 1;
-        $_POST['pago_verificado'] = 0;
-        
-        $clienteExiste = $this->getClienteByPhone([$_POST['cliente_telefono'], 4]);
-        
-        if (!$clienteExiste) {
-            $clienteData = [
-                'nombre'           => $_POST['cliente_nombre'],
-                'telefono'         => $_POST['cliente_telefono'],
-                'correo'           => $_POST['cliente_correo'] ?? null,
-                'fecha_cumpleaños' => $_POST['cliente_cumpleaños'] ?? null,
-                'fecha_creacion'   => date('Y-m-d H:i:s'),
-                'udn_id'           => 4,
+        try {
+            // Configuración inicial del pedido
+            $fecha_creacion = date('Y-m-d H:i:s');
+            $udn_id = $_POST['udn_id'] ?? 4;
+            
+            // Determinar el cliente_id
+            $clienteId = null;
+            $clienteData = [];
+            // Si viene cliente_id, es un cliente existente
+            if (!empty($_POST['cliente_id'])) {
+                $clienteId = $_POST['cliente_id'];
+            } else if (!empty($_POST['cliente_nombre'])) {
+                    // Si no viene cliente_id, crear un nuevo cliente
+                    // 🧩 Limpiar valores y convertir 'null' o vacío a NULL real
+                    $clienteData = [
+                        'nombre'           => $this->sanitize($_POST['cliente_nombre'] ?? null),
+                        'telefono'         => $this->sanitize($_POST['cliente_telefono'] ?? null),
+                        'correo'           => $this->sanitize($_POST['cliente_correo'] ?? null),
+                        'fecha_cumpleaños' => $this->sanitize($_POST['cliente_cumpleaños'] ?? null),
+                        'fecha_creacion'   => date('Y-m-d H:i:s'),
+                        'udn_id'           => $_POST['udn_id']
+                    ];
+
+                    $clientecito = $this->createCliente($this->util->sql($clienteData));
+                    $clienteId = $this->maxCliente(); // o $this->_LastID()
+            } else {
+                return [
+                    'status' => 400,
+                    'message' => 'Debe proporcionar un cliente existente o los datos para crear uno nuevo'
+                ];
+            }
+
+            // Crear el pedido
+            $pedidoData = [
+                'monto'            => $_POST['monto'],
+                'envio_domicilio'  => $_POST['envio_domicilio'],
+                'fecha_pedido'     => $_POST['fecha_pedido'],
+                'fecha_creacion'   => $fecha_creacion,
+                'canal_id'         => $_POST['canal_id'],
+                'cliente_id'       => $clienteId,
+                'udn_id'           => $udn_id,
+                'red_social_id'    => $_POST['red_social_id'],
+                'anuncio_id'       => $_POST['anuncio_id'] ?? null,
+                'pago_verificado'  => 0,
                 'active'           => 1
             ];
             
-            $clienteId = $this->createCliente($this->util->sql($clienteData));
-            $_POST['cliente_id'] = $clienteId;
-        } else {
-            $_POST['cliente_id'] = $clienteExiste['id'];
+            $values = $this->util->sql($pedidoData);
+            $create = $this->createPedido($values);
+            
+            if ($create) {
+                $pedidoId = $this->maxPedido();
+                
+                // 📜 Guardar productos si vienen
+                if (!empty($_POST['producto_id'])) {
+
+                    // 🔵 Asegurar que siempre sea un array
+                    $productos = is_array($_POST['producto_id'])
+                        ? $_POST['producto_id']
+                        : [$_POST['producto_id']];
+
+                    // 📌 Recorrer y guardar cada producto asociado al pedido
+                    foreach ($productos as $productoId) {
+                        if (!empty($productoId)) {
+                            $this->createProductoPedido($this->util->sql([
+                                'producto_id' => $productoId,
+                                'pedido_id'   => $pedidoId
+                            ]));
+                        }
+                    }
+                }
+
+                $status = 200;
+                $message = 'Pedido creado correctamente';
+            }
+            
+        } catch (Exception $e) {
+            $message = 'Error al crear pedido';
         }
-
-        $values = $this->util->sql([
-            'monto'            => $_POST['monto'],
-            'envio_domicilio'  => $_POST['envio_domicilio'],
-            'fecha_pedido'     => $_POST['fecha_pedido'],
-
-            'campaña_id'       => $_POST['campana_id'],
-            'canal_id'         => $_POST['canal_id'],
-            'cliente_id'       => $_POST['cliente_id'],
-            'udn_id'           => $_POST['udn_id'],
-            'red_social_id'    => $_POST['red_social_id'],
-            'active'           => $_POST['active'],
-        ]);
+       
+        return [
+            'status' => $status,
+            'message' =>$message,
+           
+        ];
         
-        $create = $this->createPedido($values);
+    }
+
+
+    function getPedido() {
+        $pedido = $this->getPedidoById([$_POST['id']]);
         
-        if ($create) {
-            $status = 200;
-            $message = 'Pedido creado correctamente';
+        if ($pedido) {
+            // Obtener productos del pedido
+            $productos = $this->getProductosByPedido([$_POST['id']]);
+            $pedido['productos'] = array_column($productos, 'producto_id');
         }
         
         return [
-            'status' => $status,
-            'message' => $message,
-            $values
+            'status' => $pedido ? 200 : 404,
+            'message' => $pedido ? 'Pedido obtenido' : 'Pedido no encontrado',
+            'data' => $pedido
         ];
     }
 
@@ -141,37 +195,57 @@ class ctrl extends mdl {
         $status = 500;
         $message = 'Error al editar pedido';
         
-        $validation = $this->validatePedidoAge([$_POST['id']]);
-        
-        if (!$validation['valid']) {
-            return [
-                'status' => 403,
-                'message' => 'No se puede editar pedidos con más de 7 días de antigüedad. Este pedido tiene ' . $validation['dias'] . ' días.'
+        try {
+            // Validar antigüedad del pedido (máximo 7 días)
+            $validation = $this->validatePedidoAge([$_POST['id']]);
+            
+            if (!$validation['valid']) {
+                return [
+                    'status' => 403,
+                    'message' => 'No se puede editar pedidos con más de 7 días de antigüedad. Este pedido tiene ' . $validation['dias'] . ' días.'
+                ];
+            }
+            
+            // Actualizar datos del pedido
+            $pedidoData = [
+                'monto' => $_POST['monto'],
+                'envio_domicilio' => $_POST['envio_domicilio'],
+                'fecha_pedido' => $_POST['fecha_pedido'],
+                'canal_id' => $_POST['canal_id'],
+                'red_social_id' => $_POST['red_social_id'],
+                'anuncio_id' => $_POST['anuncio_id'] ?? null
             ];
-        }
-        
-        $edit = $this->updatePedido($this->util->sql($_POST, 1));
-        
-        if ($edit) {
-            $status = 200;
-            $message = 'Pedido editado correctamente';
-        }
-        
-        return [
-            'status' => $status,
-            'message' => $message
-        ];
-    }
+            
+            // Actualizar cliente si viene un nuevo cliente_id
+            if (!empty($_POST['cliente_id'])) {
+                $pedidoData['cliente_id'] = $_POST['cliente_id'];
+            }
 
-    function statusPedido() {
-        $status = 500;
-        $message = 'Error al cambiar estado';
-        
-        $update = $this->updatePedido($this->util->sql($_POST, 1));
-        
-        if ($update) {
-            $status = 200;
-            $message = 'Estado actualizado correctamente';
+            $pedidoData['id'] = $_POST['id'];
+
+            $update = $this->updatePedido($this->util->sql($pedidoData, 1));
+            
+            if ($update) {
+                // Actualizar productos si vienen
+                if (isset($_POST['producto_id']) && is_array($_POST['producto_id'])) {
+                    // Eliminar productos anteriores
+                    $this->deleteProductosPedido([$_POST['id']]);
+                    
+                    // Insertar nuevos productos
+                    foreach ($_POST['producto_id'] as $productoId) {
+                        $this->createProductoPedido($this->util->sql([
+                            'producto_id' => $productoId,
+                            'pedido_id' => $_POST['id']
+                        ]));
+                    }
+                }
+                
+                $status = 200;
+                $message = 'Pedido editado correctamente';
+            }
+            
+        } catch (Exception $e) {
+            $message = 'Error al editar pedido: ' . $e->getMessage();
         }
         
         return [
@@ -182,17 +256,25 @@ class ctrl extends mdl {
 
     function verifyTransfer() {
         $status = 500;
-        $message = 'Error al verificar transferencia';
+        $message = 'Error al verificar pago';
         
-        $_POST['fecha_verificacion'] = date('Y-m-d H:i:s');
-        $_POST['usuario_verificacion'] = $_SESSION['USER_ID'];
-        $_POST['pago_verificado'] = 1;
-        
-        $update = $this->updatePedido($this->util->sql($_POST, 1));
-        
-        if ($update) {
-            $status = 200;
-            $message = 'Transferencia verificada correctamente';
+        try {
+            $pedidoData = [
+                'pago_verificado' => 1,
+                'fecha_pagado' => date('Y-m-d H:i:s'),
+                'user_id' => $_SESSION['USER_ID'] ?? 0,
+                'id' => $_POST['id']
+            ];
+            
+            $update = $this->updatePedido($this->util->sql($pedidoData, 1));
+            
+            if ($update) {
+                $status = 200;
+                $message = 'Pago verificado correctamente';
+            }
+            
+        } catch (Exception $e) {
+            $message = 'Error al verificar pago: ' . $e->getMessage();
         }
         
         return [
@@ -205,14 +287,21 @@ class ctrl extends mdl {
         $status = 500;
         $message = 'Error al registrar llegada';
         
-        $_POST['fecha_llegada'] = date('Y-m-d H:i:s');
-        $_POST['llego_establecimiento'] = $_POST['arrived'];
-        
-        $update = $this->updatePedido($this->util->sql($_POST, 1));
-        
-        if ($update) {
-            $status = 200;
-            $message = 'Llegada registrada correctamente';
+        try {
+            $pedidoData = [
+                'llego_establecimiento' => $_POST['arrived'],
+                'id' => $_POST['id']
+            ];
+            
+            $update = $this->updatePedido($this->util->sql($pedidoData, 1));
+            
+            if ($update) {
+                $status = 200;
+                $message = $_POST['arrived'] == 1 ? 'Cliente llegó al establecimiento' : 'Cliente no llegó al establecimiento';
+            }
+            
+        } catch (Exception $e) {
+            $message = 'Error al registrar llegada: ' . $e->getMessage();
         }
         
         return [
@@ -221,81 +310,37 @@ class ctrl extends mdl {
         ];
     }
 
-    function apiDashboardMetrics() {
-        $udn = $_POST['udn'] ?? $_SESSION['SUB'];
-        $month = $_POST['mes'];
-        $year = $_POST['anio'];
-
-        $metrics = $this->getDashboardMetrics([$udn, $year, $month]);
-        $monthlyReport = $this->getMonthlyReport([$udn, $year, $month]);
+    function cancelPedido() {
+        $status = 500;
+        $message = 'Error al cancelar pedido';
         
-        $labels = [];
-        $data = [];
-        foreach ($monthlyReport as $item) {
-            $labels[] = $item['canal_nombre'];
-            $data[] = $item['total_ventas'];
+        try {
+            $pedidoData = [
+                'active' => '0',
+                'id' => $_POST['id']
+            ];
+            
+            $update = $this->updatePedido($this->util->sql($pedidoData, 1));
+            
+            if ($update) {
+                $status = 200;
+                $message = 'Pedido cancelado correctamente';
+            }
+            
+        } catch (Exception $e) {
+            $message = 'Error al cancelar pedido: ' . $e->getMessage();
         }
-
+        
         return [
-            'dashboard' => [
-                'totalPedidos' => evaluar($metrics['total_pedidos']),
-                'ingresosTotales' => evaluar($metrics['ingresos_totales']),
-                'chequePromedio' => evaluar($metrics['cheque_promedio']),
-                'pagosVerificados' => evaluar($metrics['pagos_verificados']),
-                'llegadasConfirmadas' => evaluar($metrics['llegadas_confirmadas'])
-            ],
-            'chartData' => [
-                'labels' => $labels,
-                'datasets' => [
-                    [
-                        'label' => 'Ventas por Canal',
-                        'data' => $data,
-                        'backgroundColor' => '#103B60',
-                        'borderColor' => '#8CC63F',
-                        'borderWidth' => 2
-                    ]
-                ]
-            ]
+            'status' => $status,
+            'message' => $message
         ];
     }
 
-    function apiAnnualReport() {
-        $__row = [];
-        $udn = $_POST['udn'] ?? $_SESSION['SUB'];
-        $year = $_POST['year'];
-
-        $data = $this->getAnnualReport([$udn, $year]);
-        
-        $canales = [];
-        foreach ($data as $item) {
-            $canal = $item['canal_nombre'];
-            $mes = $item['mes'];
-            
-            if (!isset($canales[$canal])) {
-                $canales[$canal] = [
-                    'Canal' => $canal,
-                    'Enero' => 0, 'Febrero' => 0, 'Marzo' => 0, 'Abril' => 0,
-                    'Mayo' => 0, 'Junio' => 0, 'Julio' => 0, 'Agosto' => 0,
-                    'Septiembre' => 0, 'Octubre' => 0, 'Noviembre' => 0, 'Diciembre' => 0,
-                    'Total' => 0
-                ];
-            }
-            
-            $meses = ['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-            
-            $canales[$canal][$meses[$mes]] = evaluar($item['total_ventas']);
-            $canales[$canal]['Total'] += $item['total_ventas'];
-        }
-        
-        foreach ($canales as $canal) {
-            $canal['Total'] = evaluar($canal['Total']);
-            $__row[] = $canal;
-        }
-
-        return [
-            'row' => $__row
-        ];
+    function sanitize($value) {
+        return (isset($value) && $value !== '' && strtolower(trim($value)) !== 'null')
+            ? $value
+            : null;
     }
 }
 
@@ -319,14 +364,14 @@ function dropdown($id, $active, $puedeEditar, $pagoVerificado) {
     }
     
     $options[] = [
-        'icon' => 'icon-map-marker',
+        'icon' => 'icon-map-pin',
         'text' => 'Registrar Llegada',
         'onclick' => "pedidos.registerArrival($id)"
     ];
     
     if ($active == 1) {
         $options[] = [
-            'icon' => 'icon-ban',
+            'icon' => 'icon-trash',
             'text' => 'Cancelar',
             'onclick' => "pedidos.cancelPedido($id)"
         ];
@@ -340,12 +385,12 @@ function renderStatus($status) {
         case 1:
             return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
                         <span class="w-2 h-2 bg-green-500 rounded-full"></span>
-                        Activo
+                        Pagado
                     </span>';
         case 0:
             return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
                         <span class="w-2 h-2 bg-red-500 rounded-full"></span>
-                        Cancelado
+                        No pagado
                     </span>';
         default:
             return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
@@ -355,37 +400,43 @@ function renderStatus($status) {
     }
 }
 
-function renderPaymentStatus($verified) {
-    if ($verified == 1) {
-        return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+function renderArrivalStatus($arrived, $udn) {
+    if ( $udn == 1) {
+        if ($arrived != null) {
+            return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
                     <i class="icon-check"></i>
-                    Verificado
+                    Llegó
                 </span>';
+           
+        } else {
+            return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                    <i class="icon-times"></i>
+                    No llegó
+                </span>';
+        }
     } else {
-        return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-700">
-                    <i class="icon-clock"></i>
-                    Pendiente
+        return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+                    No aplica
                 </span>';
     }
 }
 
-function renderArrivalStatus($arrived) {
-    if ($arrived === null) {
-        return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
-                    <i class="icon-minus"></i>
-                    N/A
-                </span>';
-    } elseif ($arrived == 1) {
-        return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
-                    <i class="icon-check"></i>
-                    Llegó
+function renderEnvio($envio_domicilio) {
+    if ($envio_domicilio == 1) {
+        return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                    <i class="icon-truck"></i>
+                    Domicilio
                 </span>';
     } else {
-        return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
-                    <i class="icon-times"></i>
-                    No llegó
+        return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                    <i class="icon-shopping-bag"></i>
+                    Recoger
                 </span>';
     }
+}
+
+function evaluar($value) {
+    return '$' . number_format($value, 2, '.', ',');
 }
 
 $obj = new ctrl();
