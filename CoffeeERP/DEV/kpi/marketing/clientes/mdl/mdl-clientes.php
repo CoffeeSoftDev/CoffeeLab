@@ -226,4 +226,207 @@ class mdl extends CRUD {
             'data' => $params
         ]);
     }
+
+    // ============================================
+    // COMPORTAMIENTO DE CLIENTES
+    // ============================================
+
+    /**
+     * Obtiene el comportamiento detallado de un cliente
+     * @param int $clienteId ID del cliente
+     * @return array Datos de comportamiento del cliente
+     */
+    function getComportamientoCliente($clienteId) {
+        $query = "
+            SELECT 
+                c.id,
+                c.nombre,
+                c.apellido_paterno,
+                c.apellido_materno,
+                c.vip,
+                c.telefono,
+                c.correo,
+                c.fecha_creacion,
+                u.UDN as udn_nombre,
+                COUNT(p.id) as total_pedidos,
+                SUM(p.monto) as monto_total,
+                AVG(p.monto) as ticket_promedio,
+                MAX(p.fecha_pedido) as ultima_compra,
+                MIN(p.fecha_pedido) as primera_compra,
+                DATEDIFF(CURDATE(), MAX(p.fecha_pedido)) as dias_sin_comprar
+            FROM {$this->bd}cliente c
+            LEFT JOIN udn u ON c.udn_id = u.idUDN
+            LEFT JOIN {$this->bd}pedido p ON c.id = p.cliente_id
+            WHERE c.id = ?
+            GROUP BY c.id
+        ";
+
+        $result = $this->_Read($query, [$clienteId]);
+        return !empty($result) ? $result[0] : null;
+    }
+
+    /**
+     * Obtiene el historial de pedidos de un cliente
+     * @param int $clienteId ID del cliente
+     * @param int $limit Límite de registros (opcional)
+     * @return array Lista de pedidos del cliente
+     */
+    function getHistorialPedidos($clienteId, $limit = 10) {
+        $query = "
+            SELECT 
+                p.id,
+                p.fecha_pedido,
+                p.monto,
+                p.envio_domicilio,
+                c.nombre as canal_nombre,
+                u.UDN as udn_nombre
+            FROM {$this->bd}pedido p
+            LEFT JOIN {$this->bd}canal c ON p.canal_id = c.id
+            LEFT JOIN udn u ON p.udn_id = u.idUDN
+            WHERE p.cliente_id = ?
+            ORDER BY p.fecha_pedido DESC
+            LIMIT ?
+        ";
+
+        return $this->_Read($query, [$clienteId, $limit]);
+    }
+
+    /**
+     * Obtiene estadísticas de comportamiento de todos los clientes
+     * @param array $params [udn_id, active]
+     * @return array Lista de clientes con estadísticas
+     */
+    function getComportamientoClientes($params) {
+        $whereClause = "c.active = ?";
+        $data = [$params[0]];
+
+        if (isset($params[1]) && $params[1] !== '' && $params[1] !== 'all') {
+            $whereClause .= " AND c.udn_id = ?";
+            $data[] = $params[1];
+        }
+
+        $query = "
+            SELECT 
+                c.id,
+                c.nombre,
+                c.apellido_paterno,
+                c.apellido_materno,
+                c.vip,
+                c.telefono,
+                u.UDN as udn_nombre,
+                COUNT(p.id) as total_pedidos,
+                SUM(p.monto) as monto_total,
+                AVG(p.monto) as ticket_promedio,
+                MAX(p.fecha_pedido) as ultima_compra,
+                DATEDIFF(CURDATE(), MAX(p.fecha_pedido)) as dias_sin_comprar,
+                CASE 
+                    WHEN COUNT(p.id) = 0 THEN 'Sin pedidos'
+                    WHEN DATEDIFF(CURDATE(), MAX(p.fecha_pedido)) <= 30 THEN 'Activo'
+                    WHEN DATEDIFF(CURDATE(), MAX(p.fecha_pedido)) <= 90 THEN 'Regular'
+                    ELSE 'Inactivo'
+                END as frecuencia
+            FROM {$this->bd}cliente c
+            LEFT JOIN udn u ON c.udn_id = u.idUDN
+            LEFT JOIN {$this->bd}pedido p ON c.id = p.cliente_id
+            WHERE {$whereClause}
+            GROUP BY c.id
+            ORDER BY total_pedidos DESC, ultima_compra DESC
+        ";
+
+        return $this->_Read($query, $data);
+    }
+
+    /**
+     * Obtiene clientes por frecuencia de compra
+     * @param string $frecuencia Tipo de frecuencia (activo, regular, inactivo)
+     * @param int|null $udnId Filtrar por unidad de negocio
+     * @return array Lista de clientes
+     */
+    function getClientesPorFrecuencia($frecuencia, $udnId = null) {
+        $whereClause = "c.active = 1";
+        $params = [];
+
+        if ($udnId !== null && $udnId !== 'all') {
+            $whereClause .= " AND c.udn_id = ?";
+            $params[] = $udnId;
+        }
+
+        $havingClause = "";
+        switch ($frecuencia) {
+            case 'activo':
+                $havingClause = "HAVING dias_sin_comprar <= 30";
+                break;
+            case 'regular':
+                $havingClause = "HAVING dias_sin_comprar > 30 AND dias_sin_comprar <= 90";
+                break;
+            case 'inactivo':
+                $havingClause = "HAVING dias_sin_comprar > 90 OR dias_sin_comprar IS NULL";
+                break;
+        }
+
+        $query = "
+            SELECT 
+                c.id,
+                c.nombre,
+                c.apellido_paterno,
+                c.apellido_materno,
+                c.telefono,
+                u.UDN as udn_nombre,
+                COUNT(p.id) as total_pedidos,
+                MAX(p.fecha_pedido) as ultima_compra,
+                DATEDIFF(CURDATE(), MAX(p.fecha_pedido)) as dias_sin_comprar
+            FROM {$this->bd}cliente c
+            LEFT JOIN udn u ON c.udn_id = u.idUDN
+            LEFT JOIN {$this->bd}pedido p ON c.id = p.cliente_id
+            WHERE {$whereClause}
+            GROUP BY c.id
+            {$havingClause}
+            ORDER BY dias_sin_comprar ASC
+        ";
+
+        return $this->_Read($query, $params);
+    }
+
+    /**
+     * Obtiene top clientes por monto total
+     * @param int $limit Cantidad de clientes a retornar
+     * @param int|null $udnId Filtrar por unidad de negocio
+     * @return array Lista de top clientes
+     */
+    function getTopClient($limit = 10, $udnId = null) {
+        $whereClause = "c.active = 1";
+        $params = [];
+
+        if ($udnId !== null && $udnId !== 'all') {
+            $whereClause .= " AND c.udn_id = ?";
+            $params[] = $udnId;
+        }
+
+        $params[] = $limit;
+
+        $query = "
+            SELECT 
+                c.id,
+                c.nombre,
+                c.apellido_paterno,
+                c.apellido_materno,
+                c.vip,
+                c.telefono,
+                u.UDN as udn_nombre,
+                COUNT(p.id) as total_pedidos,
+                SUM(p.monto) as monto_total,
+                AVG(p.monto) as ticket_promedio,
+                MAX(p.fecha_pedido) as ultima_compra
+            FROM {$this->bd}cliente c
+            LEFT JOIN udn u ON c.udn_id = u.idUDN
+            LEFT JOIN {$this->bd}pedido p ON c.id = p.cliente_id
+            WHERE {$whereClause}
+            GROUP BY c.id
+            HAVING total_pedidos > 0
+            ORDER BY monto_total DESC
+            LIMIT ?
+        ";
+
+        return $this->_Read($query, $params);
+    }
 }

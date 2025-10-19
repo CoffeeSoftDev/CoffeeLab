@@ -177,8 +177,7 @@ class mdl extends CRUD {
     }
 
     // Capture.
-
-    function existsCapture($array) {
+     function getHistoryNetworkByID($array) {
         $query = "
             SELECT id
             FROM {$this->bd}historial_red
@@ -186,23 +185,30 @@ class mdl extends CRUD {
             AND año = ?
             AND mes = ?
         ";
-        $exists = $this->_Read($query, [$array[0], $array[1], $array[2]]);
+       return $this->_Read($query, $array)[0];
+      
+    }
+
+
+    public function existsCapture($array) {
+        $query = "
+            SELECT h.id
+            FROM {$this->bd}historial_red h
+            INNER JOIN {$this->bd}metrica_historial_red mh ON h.id = mh.historial_id
+            INNER JOIN {$this->bd}metrica_red m ON mh.metrica_id = m.id
+            WHERE h.udn_id = ?
+            AND h.año = ?
+            AND h.mes = ?
+            AND m.red_social_id = ?
+            AND h.active = 1
+            LIMIT 1
+        ";
+
+        $params = [$array]; 
+        $exists = $this->_Read($query,$array);
         return count($exists) > 0;
     }
 
-    function getHistoryMetricId($array) {
-        $query = "
-            SELECT id
-            FROM {$this->bd}historial_red
-            WHERE udn_id = ?
-            AND año = ?
-            AND mes = ?
-            AND active = 1
-            LIMIT 1
-        ";
-        $result = $this->_Read($query, $array);
-        return $result[0]['id'] ?? null;
-    }
 
     function createCapture($array) {
         return $this->_Insert([
@@ -378,32 +384,45 @@ class mdl extends CRUD {
         return $this->_Read($query, [$array[2], $array[2], $array[0], $array[1]]);
     }
 
-    function getHistoryMetrics($array) {
+   public function getHistoryMetrics($array) {
+        $udn  = $array[0];
+        $year = isset($array[1]) ? $array[1] : null;
+
         $query = "
             SELECT 
                 h.id,
-                h.año,
-                h.mes,
+                h.año AS year,
+                h.mes AS month,
                 h.fecha_creacion,
-                rs.nombre AS social_network_name,
+                IFNULL(rs.nombre, 'Sin red') AS social_network_name,
                 rs.icono AS social_network_icon,
                 rs.color AS social_network_color,
                 GROUP_CONCAT(
-                    CONCAT(m.nombre, ':', mh.cantidad) 
+                    DISTINCT CONCAT(m.nombre, ':', mh.cantidad)
                     SEPARATOR '|'
                 ) AS metrics_data
             FROM {$this->bd}historial_red h
-            LEFT JOIN {$this->bd}red_social rs ON h.red_social_id = rs.id
-            LEFT JOIN {$this->bd}metrica_historial_red mh ON h.id = mh.historial_id
-            LEFT JOIN {$this->bd}metrica_red m ON mh.metrica_id = m.id
+            LEFT JOIN {$this->bd}metrica_historial_red mh 
+                ON h.id = mh.historial_id
+            LEFT JOIN {$this->bd}metrica_red m 
+                ON mh.metrica_id = m.id
+            LEFT JOIN {$this->bd}red_social rs 
+                ON m.red_social_id = rs.id
             WHERE h.udn_id = ?
+            " . ($year ? "AND h.año = ?" : "") . "
             AND h.active = 1
-            GROUP BY h.id, h.año, h.mes, h.fecha_creacion, rs.nombre, rs.icono, rs.color
+            GROUP BY 
+                h.id, h.año, h.mes, h.fecha_creacion,
+                rs.nombre, rs.icono, rs.color
             ORDER BY h.fecha_creacion DESC
             LIMIT 10
+
         ";
-        return $this->_Read($query, $array);
+
+        $params = $year ? [$udn, $year] : [$udn];
+        return $this->_Read($query, $params);
     }
+
 
     function updateCapture($array) {
         return $this->_Update([
@@ -411,6 +430,16 @@ class mdl extends CRUD {
             'values' => $array['values'],
             'where' => 'id = ?',
             'data' => $array['data']
+        ]);
+    }
+
+    function deleteCaptureById($array) {
+        
+
+        return $this->_Delete([
+            'table' => "{$this->bd}historial_red",
+            'where' => $array['where'],
+            'data'  => $array['data'],
         ]);
     }
 

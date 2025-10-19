@@ -517,43 +517,41 @@ class RegisterSocialNetWork extends Templates {
                 {
                     opc: "select",
                     id: "udn",
-                    lbl: "UDN",
-                    class: "col-sm-3",
+                    lbl: "Unidad de Negocio",
+                    class: "col-sm-4",
                     data: lsudn,
-                    onchange: `registerSocialNetWork.updateView()`,
-                },
-                {
-                    opc: "select",
-                    id: "socialNetwork",
-                    lbl: "Red Social",
-                    class: "col-sm-3",
-                    data: socialNetworks,
-                    onchange: `registerSocialNetWork.updateView()`,
+                    onchange: `registerSocialNetWork.reloadCaptureAndHistory()`,
                 },
                 {
                     opc: "select",
                     id: "anio",
                     lbl: "Año",
-                    class: "col-sm-2",
+                    class: "col-sm-3",
                     data: Array.from({ length: 5 }, (_, i) => {
                         const year = moment().year() - i;
                         return { id: year, valor: year.toString() };
                     }),
-                    onchange: `registerSocialNetWork.updateView()`,
+                    onchange: `registerSocialNetWork.reloadCaptureAndHistory()`,
                 },
-
             ],
         });
     }
 
+
+    // Capture Layout.
+
     layoutCaptureForm() {
+        const udnName = $('#filterBarCapture #udn option:selected').text();
+
         $(`#container${this.PROJECT_NAME}`).html(`
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 p-4">
                 <!-- Formulario de Captura -->
                 <div class="bg-white rounded-lg border p-6">
-                    <div class="flex items-center gap-2 mb-4">
-                        <i class="icon-edit text-blue-600 text-xl"></i>
-                        <h3 class="text-lg font-semibold text-gray-800">Capturar Métricas Manualmente</h3>
+                    <div class="mb-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="icon-edit text-blue-600 text-xl"></i>
+                            <h3 class="text-lg font-semibold text-gray-800">Capturar Métricas de ${udnName} </h3>
+                        </div>
                     </div>
 
                     <div id="capture-filters" class="mb-4"></div>
@@ -563,15 +561,16 @@ class RegisterSocialNetWork extends Templates {
                         <i class="icon-check"></i>
                         Actualizar Métrica
                     </button>
-
-
                 </div>
 
                 <!-- Historial de Métricas -->
                 <div class="bg-white rounded-lg border  p-6">
-                    <div class="flex items-center gap-2 mb-4">
-                        <i class="icon-clock text-green-600 text-xl"></i>
-                        <h3 class="text-lg font-semibold text-gray-800">Historial de Métricas</h3>
+                    <div class="mb-4">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="icon-clock text-green-600 text-xl"></i>
+                            <h3 class="text-lg font-semibold text-gray-800">Historial de Métricas</h3>
+                        </div>
+                        <p class="text-sm text-gray-500 ml-8">UDN: <span class="font-semibold text-gray-700">${udnName}</span></p>
                     </div>
                     <div id="history-container" class="space-y-3"></div>
                 </div>
@@ -581,66 +580,6 @@ class RegisterSocialNetWork extends Templates {
         this.createCaptureFilters();
         this.loadHistory();
     }
-
-    async loadHistory() {
-        const container = $('#history-container');
-        container.html('<p class="text-gray-500 text-center">Cargando historial...</p>');
-
-        const response = await useFetch({
-            url: api,
-            data: {
-                opc: "apiGetHistoryMetrics"
-            }
-        });
-
-        if (response.status !== 200) {
-            container.html('<p class="text-red-500 text-center">Error al cargar el historial</p>');
-            return;
-        }
-
-        const history = response.data;
-
-        if (!history || history.length === 0) {
-            container.html('<p class="text-gray-500 text-center">No hay registros en el historial</p>');
-            return;
-        }
-
-        container.empty();
-        history.forEach(item => {
-            const card = $(`
-                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center gap-2">
-                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: ${item.color}20;">
-                                <i class="${item.icon}" style="color: ${item.color}; font-size: 20px;"></i>
-                            </div>
-                            <span class="font-semibold text-gray-800">${item.network}</span>
-                        </div>
-                        <span class="text-sm text-gray-500">${item.date}</span>
-                    </div>
-                    <div class="space-y-2 mb-3">
-                        ${item.metrics.map(m => `
-                            <div class="flex justify-between text-sm">
-                                <span class="text-gray-600">${m.name}:</span>
-                                <span class="font-medium">${m.value}</span>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="flex gap-2">
-                        <button class="flex-1 text-blue-600 hover:bg-blue-50 py-2 px-3 rounded text-sm font-medium transition" onclick="registerSocialNetWork.editHistory(${item.id})">
-                            <i class="icon-edit mr-1"></i> Editar
-                        </button>
-                        <button class="flex-1 text-red-600 hover:bg-red-50 py-2 px-3 rounded text-sm font-medium transition" onclick="registerSocialNetWork.deleteHistory(${item.id})">
-                            <i class="icon-trash mr-1"></i> Eliminar
-                        </button>
-                    </div>
-                </div>
-            `);
-            container.append(card);
-        });
-    }
-
-
 
     createCaptureFilters() {
         const container = $('#capture-filters');
@@ -706,9 +645,77 @@ class RegisterSocialNetWork extends Templates {
         $('#btnSaveCapture').off('click').on('click', () => this.saveCapture());
     }
 
+  
+
+    // show Capture.
+
+    async loadHistory() {
+        const container = $('#history-container');
+        container.html('<p class="text-gray-500 text-center">Cargando historial...</p>');
+
+        const udn = $('#filterBarCapture #udn').val();
+        const year = $('#filterBarCapture #anio').val();
+
+        const response = await useFetch({
+            url: api,
+            data: {
+                opc: "apiGetHistoryMetrics",
+                udn: udn,
+                year: year
+            }
+        });
+
+        if (response.status !== 200) {
+            container.html('<p class="text-red-500 text-center">Error al cargar el historial</p>');
+            return;
+        }
+
+        const history = response.data;
+
+        if (!history || history.length === 0) {
+            container.html('<p class="text-gray-500 text-center">No hay registros en el historial</p>');
+            return;
+        }
+
+        container.empty();
+        history.forEach(item => {
+            const card = $(`
+                <div class="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background-color: ${item.color}20;">
+                                <i class="${item.icon}" style="color: ${item.color}; font-size: 20px;"></i>
+                            </div>
+                            <span class="font-semibold text-gray-800">${item.network}</span>
+                        </div>
+                        <span class="text-sm text-gray-500">${item.date}</span>
+                    </div>
+                    <div class="space-y-2 mb-3">
+                        ${item.metrics.map(m => `
+                            <div class="flex justify-between text-xs">
+                                <span class="text-gray-600">${m.name}:</span>
+                                <span class="font-medium">${m.value}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="flex gap-2">
+                        <button class="flex-1 bg-blue-100 text-blue-600 hover:bg-blue-200 py-2 px-3 rounded text-sm font-medium transition" onclick="registerSocialNetWork.editHistory(${item.id})">
+                            <i class="icon-edit mr-1"></i> Editar
+                        </button>
+                        <button class="flex-1 bg-red-100 text-red-600 hover:bg-red-200 py-2 px-3 rounded text-sm font-medium transition" onclick="registerSocialNetWork.deleteHistory(${item.id})">
+                            <i class="icon-trash mr-1"></i> Eliminar
+                        </button>
+                    </div>
+                </div>
+            `);
+            container.append(card);
+        });
+    }
+
     async saveCapture() {
         const networkId = $('#captureNetwork').val();
         const captureDate = $('#captureDate').val();
+        const udn = $('#filterBarCapture #udn').val();
 
         if (!networkId || !captureDate) {
             alert({ icon: "warning", text: "Por favor selecciona una red social y fecha" });
@@ -718,6 +725,8 @@ class RegisterSocialNetWork extends Templates {
         const date = moment(captureDate);
         const month = date.month() + 1;
         const year = date.year();
+
+
 
         const metrics = [];
         $('.metric-input').each(function () {
@@ -742,6 +751,7 @@ class RegisterSocialNetWork extends Templates {
                 social_network_id: networkId,
                 month: month,
                 year: year,
+                udn: udn,
                 metrics: JSON.stringify(metrics)
             }
         });
@@ -755,6 +765,25 @@ class RegisterSocialNetWork extends Templates {
         }
     }
 
+    deleteCapture(id) {
+        this.swalQuestion({
+            opts: {
+                title: "¿Eliminar esta captura?",
+                text: "Esta acción no se puede deshacer",
+                icon: "warning",
+            },
+            data: {
+                opc: "deleteCapture",
+                id: id,
+            },
+            methods: {
+                send: () => {
+                    alert({ icon: "success", text: "Captura eliminada correctamente" });
+                    this.loadHistory();
+                },
+            },
+        });
+    }
 
 
     async editCapture(id) {
@@ -862,25 +891,7 @@ class RegisterSocialNetWork extends Templates {
         }
     }
 
-    deleteCapture(id) {
-        this.swalQuestion({
-            opts: {
-                title: "¿Eliminar esta captura?",
-                text: "Esta acción no se puede deshacer",
-                icon: "warning",
-            },
-            data: {
-                opc: "deleteCapture",
-                id: id,
-            },
-            methods: {
-                send: () => {
-                    alert({ icon: "success", text: "Captura eliminada correctamente" });
-                    this.loadHistory();
-                },
-            },
-        });
-    }
+   
 
     editHistory(id) {
         this.editCapture(id);
@@ -888,6 +899,11 @@ class RegisterSocialNetWork extends Templates {
 
     deleteHistory(id) {
         this.deleteCapture(id);
+    }
+
+    reloadCaptureAndHistory() {
+        this.layoutCaptureForm();
+        this.loadHistory();
     }
 }
 

@@ -674,7 +674,7 @@ class Client extends Templates {
 
         function listProductos() {
             $active = $_POST['estado-productos'];
-            $data   = $this->lsProductos([$active,$_SESSION['SUB']]);
+            $data   = $this->lsProductos([$active,$_POST['udn']]);
             $rows   = [];
 
             foreach ($data as $item) {

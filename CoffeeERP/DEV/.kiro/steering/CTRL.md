@@ -17,6 +17,11 @@ Quiero que generes un **Controlador PHP** siguiendo esta estructura:
 - extiende de `mdl` (nombre base de la clase modelo).
 - Respeta las reglas establecidas
 
+**IMPORTANTE - Variables de Sesión:**
+- Usar `$_POST['udn']` para identificar la unidad de negocio en lugar de variables de sesión
+- Solo usar variables de sesión cuando el contexto del proyecto lo requiera explícitamente
+- En pivotes específicos, seguir el patrón establecido con `$_POST['udn']`
+
 ```PHP
  class ctrl extends mdl {}
 ```
@@ -209,7 +214,6 @@ Ejemplos:
            $status = 500;
            $message = 'No se pudo agregar el producto';
            $_POST['date_creation'] = date('Y-m-d H:i:s');
-           $_POST['subsidiaries_id'] = $_SESSION['SUB'];
 
            $exists = $this->exists['Entidad']ByName([$_POST['name']]);
 

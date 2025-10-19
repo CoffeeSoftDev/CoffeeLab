@@ -1,8 +1,11 @@
 <?php
-    require_once('layout/head.php');
-    require_once('layout/core-libraries.php');
+/**
+ * Vista - Comportamiento de Clientes
+ * Sistema: KPI / Marketing - CoffeeSoft ERP
+ */
+require_once('layout/head.php');
+require_once('layout/core-libraries.php');
 ?>
-
 
 <!-- CoffeeSoft Framework -->
 <script src="https://erp-varoch.com/ERP24/gestor-de-actividades/src/js/CoffeeSoft.js"></script>
@@ -19,19 +22,16 @@
             <nav aria-label='breadcrumb'>
                 <ol class='breadcrumb'>
                     <li class='breadcrumb-item text-uppercase text-muted'>KPI</li>
-                    <li class='breadcrumb-item fw-bold active'>Pedidos</li>
+                    <li class='breadcrumb-item text-uppercase text-muted'>Marketing</li>
+                    <li class='breadcrumb-item fw-bold active'>Comportamiento de Clientes</li>
                 </ol>
             </nav>
 
-            <div class=" main-container" id="root"></div>
+            <div class="bg-[#DBDBDC] main-container" id="root"></div>
 
-          <!-- Módulos del Sistema -->
-            <script src="js/pedidos.js?t=<?php echo time(); ?>"></script>
-            <script src="js/dashboard.js?t=<?php echo time(); ?>"></script>
-            <script src="js/productos.js?t=<?php echo time(); ?>"></script>
-            <script src="js/canales.js?t=<?php echo time(); ?>"></script>
+            <!-- Module Script -->
+            <script src='js/comportamiento.js?t=<?php echo time(); ?>'></script>
         </div>
     </main>
 </body>
 </html>
-

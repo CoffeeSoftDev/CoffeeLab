@@ -1,16 +1,3 @@
-let dashboard;
-const apiDashboard = 'ctrl/ctrl-pedidos.php';
-// let udn, lsudn;
-
-// $(async () => {
-//     const data = await useFetch({ url: apiDashboard, data: { opc: "init" } });
-//     udn = data.udn;
-//     lsudn = data.udn;
-
-//     // dashboard = new Dashboard(apiDashboard, 'root');
-//     // dashboard.render();
-// });
-
 class Dashboard extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
