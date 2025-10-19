@@ -397,7 +397,7 @@ class ctrl extends mdl {
             'udn_id'         => $udn,
             'año'            => $year,
             'mes'            => $month,
-            'fecha_creacion' => date('Y-m-d H:i:s'),
+            'fecha_creacion' => $_POST['fecha_creacion'],
             'active'         => 1
         ];
 
@@ -593,13 +593,13 @@ class ctrl extends mdl {
         ];
     }
 
-    function getCaptureById() {
+    function getCapture() {
         $id = $_POST['id'];
         $status = 404;
         $message = 'Captura no encontrada';
         $data = null;
 
-        $capture = $this->_getCaptureById([$id]);
+        $capture = $this->getCaptureById([$id]);
 
         if ($capture) {
             $metrics = $this->getMetricsByHistorialId([$id]);
@@ -614,7 +614,8 @@ class ctrl extends mdl {
         return [
             'status' => $status,
             'message' => $message,
-            'data' => $data
+            'data' => $data,
+            $capture
         ];
     }
 

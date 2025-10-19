@@ -443,21 +443,22 @@ class mdl extends CRUD {
         ]);
     }
 
-    function _getCaptureById($array) {
+    function getCaptureById($array) {
         $query = "
             SELECT 
-                h.id,
-                h.año,
-                h.mes,
-                h.fecha_creacion,
-                h.red_social_id,
-                rs.nombre AS social_network_name,
-                rs.icono AS social_network_icon,
-                rs.color AS social_network_color
-            FROM {$this->bd}historial_red h
-            LEFT JOIN {$this->bd}red_social rs ON h.red_social_id = rs.id
-            WHERE h.id = ?
-            AND h.active = 1
+                hr.id,
+                hr.mes,
+                hr.año,
+                hr.fecha_creacion,
+                hr.udn_id,
+                mr.red_social_id,
+                mr.nombre AS social_network_name,
+                mr.icono AS social_network_icon,
+                mr.color AS social_network_color
+            FROM {$this->bd}historial_red hr
+            LEFT JOIN {$this->bd}metrica_red mr ON hr.id = mr.historial_id
+            WHERE hr.id = ?
+            AND hr.active = 1
         ";
         $result = $this->_Read($query, $array);
         return $result[0] ?? null;
