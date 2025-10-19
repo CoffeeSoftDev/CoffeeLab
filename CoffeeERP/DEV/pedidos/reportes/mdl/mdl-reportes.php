@@ -9,25 +9,25 @@ class mdl extends CRUD {
 
     public function __construct() {
         $this->util = new Utileria;
-        $this->bd = "[name_bd].";
+        $this->bd = "rfwsmqex_marketing.";
     }
 
     // UDN and Filters
 
     function lsUDN() {
-        return $this->_Select([
-            'table'  => "{$this->bd}udn",
-            'values' => 'id, nombre as valor',
-            'where'  => 'active = ?',
-            'order'  => ['ASC' => 'nombre'],
-            'data'   => [1]
-        ]);
+        $query = "
+            SELECT idUDN AS id, UDN AS valor
+            FROM udn
+            WHERE Stado = 1 AND idUDN NOT IN (8, 10, 7)
+            ORDER BY UDN DESC
+        ";
+        return $this->_Read($query, null);
     }
 
     function lsCanales() {
         return $this->_Select([
-            'table'  => "{$this->bd}pedidos_canales",
-            'values' => 'id, nombre as valor, icono, color',
+            'table'  => "{$this->bd}canal",
+            'values' => 'id, nombre as valor',
             'where'  => 'active = ?',
             'order'  => ['ASC' => 'nombre'],
             'data'   => [1]
@@ -49,55 +49,103 @@ class mdl extends CRUD {
     function listPedidosByCanal($filters) {
         $query = "
             SELECT 
-                MONTH(fecha_pedido) as mes,
-                MONTHNAME(fecha_pedido) as mes_nombre,
-                canal_comunicacion,
+                MONTH(p.fecha_pedido) as mes,
+                MONTHNAME(p.fecha_pedido) as mes_nombre,
+                c.nombre as valor,
                 COUNT(*) as cantidad
-            FROM {$this->bd}pedidos_orders
-            WHERE udn_id = ? 
-            AND YEAR(fecha_pedido) = ?
-            AND active = 1
-            GROUP BY MONTH(fecha_pedido), canal_comunicacion
-            ORDER BY MONTH(fecha_pedido)
+            FROM {$this->bd}pedido p
+            LEFT JOIN {$this->bd}canal c ON p.canal_id = c.id
+            WHERE p.udn_id = ? 
+            AND YEAR(p.fecha_pedido) = ?
+            AND p.active = 1
+            GROUP BY MONTH(p.fecha_pedido), c.nombre
+            ORDER BY MONTH(p.fecha_pedido)
         ";
         
         return $this->_Read($query, $filters);
+    }
+
+    function getPedidosByUdnYearCanal($filters) {
+        $query = "
+            SELECT 
+                MONTH(p.fecha_pedido) as mes,
+                COUNT(*) as cantidad
+            FROM {$this->bd}pedido p
+            WHERE p.udn_id = ? 
+            AND MONTH(p.fecha_pedido) = ?
+            AND YEAR(p.fecha_pedido) = ?
+            AND p.canal_id = ?
+            AND p.active = 1
+            GROUP BY MONTH(p.fecha_pedido)
+            ORDER BY MONTH(p.fecha_pedido)
+        ";
+        
+        return $this->_Read($query, $filters)[0];
     }
 
     function listVentasByCanal($filters) {
         $query = "
             SELECT 
-                MONTH(fecha_pedido) as mes,
-                MONTHNAME(fecha_pedido) as mes_nombre,
-                canal_comunicacion,
-                SUM(monto_total) as monto_total,
+                MONTH(p.fecha_pedido) as mes,
+                MONTHNAME(p.fecha_pedido) as mes_nombre,
+                c.nombre as canal_comunicacion,
+                SUM(p.monto) as monto_total,
                 COUNT(*) as cantidad_pedidos
-            FROM {$this->bd}pedidos_orders
-            WHERE udn_id = ? 
-            AND YEAR(fecha_pedido) = ?
-            AND active = 1
-            GROUP BY MONTH(fecha_pedido), canal_comunicacion
-            ORDER BY MONTH(fecha_pedido)
+            FROM {$this->bd}pedido p
+            LEFT JOIN {$this->bd}canal c ON p.canal_id = c.id
+            WHERE p.udn_id = ? 
+            AND YEAR(p.fecha_pedido) = ?
+            AND p.active = 1
+            GROUP BY MONTH(p.fecha_pedido), c.nombre
+            ORDER BY MONTH(p.fecha_pedido)
         ";
         
         return $this->_Read($query, $filters);
     }
 
-    // Ingresos Diarios
+    function getVentasByUdnYearCanal($filters) {
+        $query = "
+            SELECT 
+                MONTH(p.fecha_pedido) as mes,
+                SUM(p.monto) as monto_total
+            FROM {$this->bd}pedido p
+            WHERE p.udn_id = ? 
+            AND YEAR(p.fecha_pedido) = ?
+            AND p.canal_id = ?
+            AND p.active = 1
+            GROUP BY MONTH(p.fecha_pedido)
+            ORDER BY MONTH(p.fecha_pedido)
+        ";
+        
+        return $this->_Read($query, $filters);
+    }
+
+    // Ingresos Diarios - Basado en pedidos reales agrupados por día
 
     function listIngresosDiarios($filters) {
-        return $this->_Select([
-            'table'  => "{$this->bd}pedidos_ingresos_diarios",
-            'values' => 'id, fecha, canal_comunicacion, monto, cantidad_pedidos, DATE_FORMAT(created_at, "%d/%m/%Y") as fecha_creacion',
-            'where'  => 'udn_id = ? AND YEAR(fecha) = ? AND MONTH(fecha) = ? AND active = 1',
-            'order'  => ['DESC' => 'fecha'],
-            'data'   => $filters
-        ]);
+        $query = "
+            SELECT 
+                DATE(p.fecha_pedido) as fecha,
+                c.nombre as canal_comunicacion,
+                SUM(p.monto) as monto,
+                COUNT(*) as cantidad_pedidos,
+                DATE_FORMAT(p.fecha_creacion, '%d/%m/%Y') as fecha_creacion
+            FROM {$this->bd}pedido p
+            LEFT JOIN {$this->bd}canal c ON p.canal_id = c.id
+            WHERE p.udn_id = ? 
+            AND YEAR(p.fecha_pedido) = ? 
+            AND MONTH(p.fecha_pedido) = ? 
+            AND p.active = 1
+            GROUP BY DATE(p.fecha_pedido), c.nombre
+            ORDER BY DATE(p.fecha_pedido) DESC, c.nombre
+        ";
+        
+        return $this->_Read($query, $filters);
     }
 
     function createIngreso($data) {
         return $this->_Insert([
-            'table'  => "{$this->bd}pedidos_ingresos_diarios",
+            'table'  => "{$this->bd}pedido",
             'values' => $data['values'],
             'data'   => $data['data']
         ]);
@@ -105,7 +153,7 @@ class mdl extends CRUD {
 
     function updateIngreso($data) {
         return $this->_Update([
-            'table'  => "{$this->bd}pedidos_ingresos_diarios",
+            'table'  => "{$this->bd}pedido",
             'values' => $data['values'],
             'where'  => 'id = ?',
             'data'   => $data['data']
@@ -114,7 +162,7 @@ class mdl extends CRUD {
 
     function deleteIngresoById($id) {
         return $this->_Update([
-            'table'  => "{$this->bd}pedidos_ingresos_diarios",
+            'table'  => "{$this->bd}pedido",
             'values' => 'active = ?',
             'where'  => 'id = ?',
             'data'   => [0, $id]
@@ -122,22 +170,34 @@ class mdl extends CRUD {
     }
 
     function getIngresoById($id) {
-        return $this->_Select([
-            'table'  => "{$this->bd}pedidos_ingresos_diarios",
-            'values' => '*',
-            'where'  => 'id = ? AND active = 1',
-            'data'   => [$id]
-        ])[0] ?? null;
+        $query = "
+            SELECT 
+                p.id,
+                DATE(p.fecha_pedido) as fecha,
+                c.nombre as canal_comunicacion,
+                p.monto,
+                p.udn_id
+            FROM {$this->bd}pedido p
+            LEFT JOIN {$this->bd}canal c ON p.canal_id = c.id
+            WHERE p.id = ? AND p.active = 1
+        ";
+        
+        $result = $this->_Read($query, [$id]);
+        return $result[0] ?? null;
     }
 
     function existsIngresoByDateAndCanal($filters) {
-        $result = $this->_Select([
-            'table'  => "{$this->bd}pedidos_ingresos_diarios",
-            'values' => 'COUNT(*) as count',
-            'where'  => 'fecha = ? AND canal_comunicacion = ? AND udn_id = ? AND active = 1',
-            'data'   => $filters
-        ]);
+        $query = "
+            SELECT COUNT(*) as count
+            FROM {$this->bd}pedido p
+            LEFT JOIN {$this->bd}canal c ON p.canal_id = c.id
+            WHERE DATE(p.fecha_pedido) = ? 
+            AND c.nombre = ? 
+            AND p.udn_id = ? 
+            AND p.active = 1
+        ";
         
+        $result = $this->_Read($query, $filters);
         return $result[0]['count'] > 0;
     }
 
@@ -147,12 +207,12 @@ class mdl extends CRUD {
         $query = "
             SELECT 
                 COUNT(*) as total_pedidos,
-                SUM(monto_total) as total_ingresos,
-                AVG(monto_total) as cheque_promedio
-            FROM {$this->bd}pedidos_orders
-            WHERE udn_id = ? 
-            AND YEAR(fecha_pedido) = ?
-            AND active = 1
+                SUM(p.monto) as total_ingresos,
+                AVG(p.monto) as cheque_promedio
+            FROM {$this->bd}pedido p
+            WHERE p.udn_id = ? 
+            AND YEAR(p.fecha_pedido) = ?
+            AND p.active = 1
         ";
         
         $kpis = $this->_Read($query, $filters)[0] ?? [];
@@ -160,15 +220,20 @@ class mdl extends CRUD {
         // Porcentaje por canal
         $queryCanales = "
             SELECT 
-                canal_comunicacion,
+                c.nombre as canal_comunicacion,
                 COUNT(*) as cantidad,
-                SUM(monto_total) as monto,
-                (COUNT(*) * 100.0 / (SELECT COUNT(*) FROM {$this->bd}pedidos_orders WHERE udn_id = ? AND YEAR(fecha_pedido) = ? AND active = 1)) as porcentaje
-            FROM {$this->bd}pedidos_orders
-            WHERE udn_id = ? 
-            AND YEAR(fecha_pedido) = ?
-            AND active = 1
-            GROUP BY canal_comunicacion
+                SUM(p.monto) as monto,
+                (COUNT(*) * 100.0 / (
+                    SELECT COUNT(*) 
+                    FROM {$this->bd}pedido 
+                    WHERE udn_id = ? AND YEAR(fecha_pedido) = ? AND active = 1
+                )) as porcentaje
+            FROM {$this->bd}pedido p
+            LEFT JOIN {$this->bd}canal c ON p.canal_id = c.id
+            WHERE p.udn_id = ? 
+            AND YEAR(p.fecha_pedido) = ?
+            AND p.active = 1
+            GROUP BY c.nombre
             ORDER BY cantidad DESC
         ";
         
@@ -186,18 +251,112 @@ class mdl extends CRUD {
         
         $query = "
             SELECT 
-                YEAR(fecha_pedido) as año,
-                canal_comunicacion,
+                YEAR(p.fecha_pedido) as año,
+                c.nombre as canal_comunicacion,
                 COUNT(*) as cantidad,
-                SUM(monto_total) as monto
-            FROM {$this->bd}pedidos_orders
-            WHERE udn_id = ? 
-            AND YEAR(fecha_pedido) IN (?, ?)
-            AND active = 1
-            GROUP BY YEAR(fecha_pedido), canal_comunicacion
-            ORDER BY canal_comunicacion, YEAR(fecha_pedido)
+                SUM(p.monto) as monto
+            FROM {$this->bd}pedido p
+            LEFT JOIN {$this->bd}canal c ON p.canal_id = c.id
+            WHERE p.udn_id = ? 
+            AND YEAR(p.fecha_pedido) IN (?, ?)
+            AND p.active = 1
+            GROUP BY YEAR(p.fecha_pedido), c.nombre
+            ORDER BY c.nombre, YEAR(p.fecha_pedido)
         ";
         
         return $this->_Read($query, [$filters[0], $currentYear, $previousYear]);
+    }
+
+    // Test Methods - Pruebas unitarias de consultas
+
+    function testListPedidosByCanal() {
+        echo "=== TEST: listPedidosByCanal ===\n";
+        $filters = [1, 2024]; // UDN 1, Año 2024
+        $result = $this->listPedidosByCanal($filters);
+        
+        echo "Parámetros: UDN=" . $filters[0] . ", Año=" . $filters[1] . "\n";
+        echo "Resultados encontrados: " . count($result) . "\n";
+        
+        if (!empty($result)) {
+            echo "Ejemplo de resultado:\n";
+            print_r($result[0]);
+        } else {
+            echo "No se encontraron resultados\n";
+        }
+        echo "\n";
+        
+        return $result;
+    }
+
+    function testListVentasByCanal() {
+        echo "=== TEST: listVentasByCanal ===\n";
+        $filters = [1, 2024]; // UDN 1, Año 2024
+        $result = $this->listVentasByCanal($filters);
+        
+        echo "Parámetros: UDN=" . $filters[0] . ", Año=" . $filters[1] . "\n";
+        echo "Resultados encontrados: " . count($result) . "\n";
+        
+        if (!empty($result)) {
+            echo "Ejemplo de resultado:\n";
+            print_r($result[0]);
+        } else {
+            echo "No se encontraron resultados\n";
+        }
+        echo "\n";
+        
+        return $result;
+    }
+
+    function testGetKPIData() {
+        echo "=== TEST: getKPIData ===\n";
+        $filters = [1, 2024]; // UDN 1, Año 2024
+        $result = $this->getKPIData($filters);
+        
+        echo "Parámetros: UDN=" . $filters[0] . ", Año=" . $filters[1] . "\n";
+        echo "KPIs obtenidos:\n";
+        print_r($result['kpis']);
+        echo "Canales encontrados: " . count($result['canales']) . "\n";
+        
+        if (!empty($result['canales'])) {
+            echo "Ejemplo de canal:\n";
+            print_r($result['canales'][0]);
+        }
+        echo "\n";
+        
+        return $result;
+    }
+
+    function testListIngresosDiarios() {
+        echo "=== TEST: listIngresosDiarios ===\n";
+        $filters = [1, 2024, 12]; // UDN 1, Año 2024, Mes 12
+        $result = $this->listIngresosDiarios($filters);
+        
+        echo "Parámetros: UDN=" . $filters[0] . ", Año=" . $filters[1] . ", Mes=" . $filters[2] . "\n";
+        echo "Resultados encontrados: " . count($result) . "\n";
+        
+        if (!empty($result)) {
+            echo "Ejemplo de resultado:\n";
+            print_r($result[0]);
+        } else {
+            echo "No se encontraron resultados\n";
+        }
+        echo "\n";
+        
+        return $result;
+    }
+
+    function runAllTests() {
+        echo "========================================\n";
+        echo "EJECUTANDO PRUEBAS UNITARIAS DEL MODELO\n";
+        echo "========================================\n\n";
+        
+        $this->testListPedidosByCanal();
+        $this->testListVentasByCanal();
+        $this->testGetKPIData();
+        $this->testListIngresosDiarios();
+        
+        echo "========================================\n";
+        echo "PRUEBAS COMPLETADAS\n";
+        echo "========================================\n";
     }
 }

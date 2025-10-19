@@ -25,10 +25,13 @@ Debe respetarse el formato de CoffeeSoft
 - Solo genera un submodulo si se necesita
 - Si se genera un submodulo, debe crear una class aparte no juntar todo en la misma.
 
-
+**Ejemplo.
 
 ```JS
+
     class SubModulo extends App{}
+
+
 ```
 
 - Todos los componentes de coffeeSoft incluyen el parametro parent
@@ -42,9 +45,29 @@ debe llevar la siguiente nomenclatura
 - Los nombres de las funciones deben:
   - Estar en inglés.
   - Usar notación `camelCase`.
+  - Agrega comentario para separar modulos.
+
+### Nomenclatura de Métodos Frontend (JS)
+
+**CRÍTICO:** Los métodos que muestran tablas DEBEN seguir la nomenclatura `ls[Entidad]()`:
+
+✅ **CORRECTO:**
+- `ls()` - Para tabla principal del módulo
+- `lsPedidos()` - Para tabla de pedidos
+- `lsVentas()` - Para tabla de ventas
+- `lsClientes()` - Para tabla de clientes
+- `lsReportes()` - Para tabla de reportes
+
+❌ **INCORRECTO:**
+- `renderPedidos()` - NO usar "render" para tablas
+- `showVentas()` - NO usar "show" para tablas
+- `displayClientes()` - NO usar "display" para tablas
+
+**Excepción:** Métodos complejos como dashboards pueden usar `render[Nombre]()` si no son tablas simples.
 
 **IMPORTANTE:** Asegúrate de que las funciones del backend sigan la nomenclatura correcta:
-- **Controlador (ctrl):** `ls()`, `add[Entidad]()`, `edit[Entidad]()`, `get[Entidad]()`
+- **Frontend (JS):** `ls[Entidad]()` para métodos que muestran tablas
+- **Controlador (ctrl):** `ls[Entidad]()`, `add[Entidad]()`, `edit[Entidad]()`, `get[Entidad]()`
 - **Modelo (mdl):** `list[Entidad]()`, `create[Entidad]()`, `update[Entidad]()`, `get[Entidad]ById()`
 
 
@@ -97,21 +120,21 @@ debe llevar la siguiente nomenclatura
 
 ```
 
-- ls()
+- ls() / ls[Entidad]()
+  - **OBLIGATORIO:** Métodos que muestran tablas DEBEN usar nomenclatura `ls[Entidad]()`
   - Carga datos de la tabla utilizando createTable(), incluyendo paginación y configuración responsiva.
+  - Ejemplos: `ls()`, `lsPedidos()`, `lsVentas()`, `lsClientes()`
 ```javascript
+  // Método principal del módulo
   ls() {
-
         let rangePicker = getDataRangePicker("calendar");
 
         this.createTable({
-
             parent     : `container${this.PROJECT_NAME}`,
             idFilterBar: `filterBar${this.PROJECT_NAME}`,// importante siempre incluirla
-            data: { opc: "list", fi: rangePicker.fi, ff: rangePicker.ff },
+            data: { opc: "ls", fi: rangePicker.fi, ff: rangePicker.ff },
             conf       : { datatable: true, pag: 10 },
             coffeesoft : true,
-
             attr: {
                 id      : `tb${this.PROJECT_NAME}`,
                 theme   : 'shadcdn',
@@ -124,7 +147,24 @@ debe llevar la siguiente nomenclatura
         });
     }
 
-
+  // Ejemplo de método específico para entidad
+  lsPedidos() {
+        this.createTable({
+            parent     : `container-pedidos`,
+            idFilterBar: `filterBar${this.PROJECT_NAME}`,
+            data: { opc: "lsPedidos" },
+            conf       : { datatable: true, pag: 15 },
+            coffeesoft : true,
+            attr: {
+                id      : `tbPedidos`,
+                theme   : 'corporativo',
+                title   : '📊 Lista de Pedidos',
+                subtitle: 'Pedidos registrados en el sistema',
+                center  : [1, 2, 3, 4],
+                right   : [5],
+            },
+        });
+    }
 ```
 
 - add[Entidad]()
@@ -337,5 +377,8 @@ debe llevar la siguiente nomenclatura
 
 
 **Consideraciones Finales**
-- Usa los pivotes , templates para generar las funciones
-
+- Usa los pivotes y templates para generar las funciones
+- **CRÍTICO:** Siempre usar `ls[Entidad]()` para métodos que muestran tablas
+- Mantener consistencia entre Frontend (JS), Controlador (CTRL) y Modelo (MDL)
+- Los métodos `render[Nombre]()` solo para componentes complejos (dashboards, gráficas, etc.)
+- Esta nomenclatura es OBLIGATORIA para mantener la consistencia del framework CoffeeSoft

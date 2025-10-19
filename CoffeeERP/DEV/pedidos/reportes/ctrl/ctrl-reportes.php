@@ -19,10 +19,9 @@ class ctrl extends mdl {
     }
 
     function lsResumenPedidos() {
-        $udn = $_POST['udn'];
-        $año = $_POST['año'];
+        $udn = $_POST['filterUDN'] ?? $_POST['udn'];
+        $año = $_POST['filterAño'] ?? $_POST['año'];
         
-        $data = $this->listPedidosByCanal([$udn, $año]);
         $canales = $this->lsCanales();
         
         // Organizar datos por mes
@@ -42,27 +41,23 @@ class ctrl extends mdl {
             $totalMes = 0;
             
             foreach ($canales as $canal) {
-                $cantidad = 0;
-                
-                foreach ($data as $item) {
-                    if ($item['mes'] == $numMes && $item['canal_comunicacion'] == $canal['valor']) {
-                        $cantidad = $item['cantidad'];
-                        break;
-                    }
-                }
-                
-                $row[$canal['valor']] = $cantidad;
-                $totalMes += $cantidad;
+                // Consulta optimizada por canal específico
+                $pedido                = $this->getPedidosByUdnYearCanal([5,$numMes, 2025, $canal['id']]);
+                $cantidad              = $pedido['cantidad'] ?? '-';
+                $row[$canal['valor']]  = $cantidad;
+                $totalMes             += $pedido['cantidad'];
+            
             }
-            
+
             $row['Total'] = [
-                'html' => '<strong>' . $totalMes . '</strong>',
-                'class' => 'text-center bg-blue-50 font-bold'
+                'html'  => '<strong>' . $totalMes . '</strong>',
+                'class' => 'text-center  '
             ];
-            
             // Resaltar mes actual
+            $row['opc'] =0;
+            
             if ($numMes == date('n')) {
-                $row['class'] = 'bg-yellow-50';
+                $row['opc'] = 2;
             }
             
             $rows[] = $row;
@@ -75,8 +70,8 @@ class ctrl extends mdl {
     }
 
     function lsResumenVentas() {
-        $udn = $_POST['udn'];
-        $año = $_POST['año'];
+        $udn = $_POST['filterUDN'] ?? $_POST['udn'];
+        $año = $_POST['filterAño'] ?? $_POST['año'];
         
         $data = $this->listVentasByCanal([$udn, $año]);
         $canales = $this->lsCanales();
@@ -97,11 +92,14 @@ class ctrl extends mdl {
             $totalMes = 0;
             
             foreach ($canales as $canal) {
+                // Consulta optimizada por canal específico
+                $dataCanal = $this->getVentasByUdnYearCanal([$udn, $año, $canal['id']]);
                 $monto = 0;
                 
-                foreach ($data as $item) {
-                    if ($item['mes'] == $numMes && $item['canal_comunicacion'] == $canal['valor']) {
-                        $monto = $item['monto_total'];
+                // Buscar el mes específico en los resultados
+                foreach ($dataCanal as $item) {
+                    if ((int)$item['mes'] == $numMes) {
+                        $monto = (float)$item['monto_total'];
                         break;
                     }
                 }
@@ -129,36 +127,20 @@ class ctrl extends mdl {
     }
 
     function lsBitacoraIngresos() {
-        $udn = $_POST['udn'];
-        $año = $_POST['año'];
-        $mes = $_POST['mes'] ?? date('n');
+        $udn = $_POST['filterUDN'] ?? $_POST['udn'];
+        $año = $_POST['filterAño'] ?? $_POST['año'];
+        $mes = $_POST['filterMes'] ?? $_POST['mes'] ?? date('n');
         
         $data = $this->listIngresosDiarios([$udn, $año, $mes]);
         $rows = [];
         
         foreach ($data as $item) {
-            $a = [];
-            
-            $a[] = [
-                'class' => 'btn btn-sm btn-primary me-1',
-                'html' => '<i class="icon-pencil"></i>',
-                'onclick' => 'app.editIngreso(' . $item['id'] . ')'
-            ];
-            
-            $a[] = [
-                'class' => 'btn btn-sm btn-danger',
-                'html' => '<i class="icon-trash"></i>',
-                'onclick' => 'app.deleteIngreso(' . $item['id'] . ')'
-            ];
-            
             $rows[] = [
-                'id' => $item['id'],
                 'Fecha' => formatSpanishDate($item['fecha']),
                 'Canal' => ucfirst($item['canal_comunicacion']),
                 'Monto' => evaluar($item['monto']),
                 'Pedidos' => $item['cantidad_pedidos'],
-                'Registrado' => $item['fecha_creacion'],
-                'a' => $a
+                'Registrado' => $item['fecha_creacion']
             ];
         }
         
@@ -239,8 +221,8 @@ class ctrl extends mdl {
     }
 
     function getKPIDashboard() {
-        $udn = $_POST['udn'];
-        $año = $_POST['año'];
+        $udn = $_POST['filterUDN'] ?? $_POST['udn'];
+        $año = $_POST['filterAño'] ?? $_POST['año'];
         
         $kpiData = $this->getKPIData([$udn, $año]);
         $comparativeData = $this->getComparativeData([$udn, $año]);
@@ -252,6 +234,30 @@ class ctrl extends mdl {
                 'kpis' => $kpiData['kpis'],
                 'canales' => $kpiData['canales'],
                 'comparative' => $comparativeData
+            ]
+        ];
+    }
+
+    // Método temporal de debug - REMOVER EN PRODUCCIÓN
+    function debugReportes() {
+        $udn = $_POST['filterUDN'] ?? $_POST['udn'] ?? 1;
+        $año = $_POST['filterAño'] ?? $_POST['año'] ?? 2024;
+        
+        $data = $this->listPedidosByCanal([$udn, $año]);
+        $canales = $this->lsCanales();
+        
+        return [
+            'status' => 200,
+            'message' => 'Debug data',
+            'debug' => [
+                'udn' => $udn,
+                'año' => $año,
+                'data_count' => count($data),
+                'canales_count' => count($canales),
+                'sample_data' => array_slice($data, 0, 3),
+                'sample_canales' => array_slice($canales, 0, 3),
+                'data_structure' => !empty($data) ? array_keys($data[0]) : [],
+                'canales_structure' => !empty($canales) ? array_keys($canales[0]) : []
             ]
         ];
     }

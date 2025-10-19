@@ -1,5 +1,5 @@
 let api = 'ctrl/ctrl-reportes.php';
-let app;
+let app, report;
 let lsUDN, lsCanales, lsAños;
 
 $(async () => {
@@ -9,7 +9,9 @@ $(async () => {
     lsAños = data.años;
 
     app = new App(api, "root");
+    report = new Report(api, "root");
     app.render();
+    report.render();
 });
 
 class App extends Templates {
@@ -21,7 +23,6 @@ class App extends Templates {
 
     render() {
         this.layout();
-        this.filterBar();
         // this.renderCurrentReport();
     }
 
@@ -52,10 +53,10 @@ class App extends Templates {
             type: "short",
             json: [
                 {
-                    id: "pedidos",
+                    id: "report",
                     tab: "Resumen Pedidos",
                     active: true,
-                    onClick: () => this.changeReportType("pedidos")
+                    onClick: () => report.render()
                 },
                 {
                     id: "ventas",
@@ -76,70 +77,8 @@ class App extends Templates {
         });
     }
 
-    filterBar() {
-        const currentYear = new Date().getFullYear();
-        const currentMonth = new Date().getMonth() + 1;
 
-        const months = [
-            { id: 1, valor: "Enero" }, { id: 2, valor: "Febrero" }, { id: 3, valor: "Marzo" },
-            { id: 4, valor: "Abril" }, { id: 5, valor: "Mayo" }, { id: 6, valor: "Junio" },
-            { id: 7, valor: "Julio" }, { id: 8, valor: "Agosto" }, { id: 9, valor: "Septiembre" },
-            { id: 10, valor: "Octubre" }, { id: 11, valor: "Noviembre" }, { id: 12, valor: "Diciembre" }
-        ];
 
-      
-        this.createfilterBar({
-            parent: "content-pedidos",
-            data: [
-                {
-                    opc: "select",
-                    id: "filterUDN",
-                    lbl: "Unidad de Negocio",
-                    class: "col-12 col-md-3",
-                    data: lsUDN,
-                    text: "valor",
-                    value: "id",
-                    onchange: "app.updateReports()"
-                },
-                {
-                    opc: "select",
-                    id: "filterAño",
-                    lbl: "Año",
-                    class: "col-12 col-md-2",
-                    data: lsAños,
-                    text: "valor",
-                    value: "id",
-                    selected: currentYear,
-                    onchange: "app.updateReports()"
-                },
-                {
-                    opc: "select",
-                    id: "filterMes",
-                    lbl: "Mes",
-                    class: "col-12 col-md-2",
-                    data: months,
-                    text: "valor",
-                    value: "id",
-                    selected: currentMonth,
-                    onchange: "app.updateReports()"
-                },
-                {
-                    opc: "button",
-                    id: "btnAddIngreso",
-                    text: "Nuevo Ingreso",
-                    class: "col-12 col-md-2",
-                    color_btn: "success",
-                    icono: "icon-plus",
-                    onClick: () => this.addIngreso(),
-                    style: "display: none;"
-                }
-            ]
-        });
-
-        
-    }
-
-   
     headerBar(options) {
         const defaults = {
             parent: "root",
@@ -187,15 +126,23 @@ class App extends Templates {
 
 
 
-class Resumen extends Templates{
+class Report extends Templates {
 
-    render(){
-
+    constructor(link, div_modulo) {
+        super(link, div_modulo);
+        this.PROJECT_NAME = "Report";
+        this.currentReportType = "pedidos";
     }
-    
+
+
+    render() {
+        this.layout();
+        this.filterBar();
+    }
+
     layout() {
         this.primaryLayout({
-            parent: "root",
+            parent: "container-report",
             id: this.PROJECT_NAME,
             class: "w-full",
             card: {
@@ -204,8 +151,97 @@ class Resumen extends Templates{
             }
         });
 
-       
+
     }
+
+
+    filterBar() {
+        const currentYear = new Date().getFullYear();
+        const currentMonth = new Date().getMonth() + 1;
+
+        const months = [
+            { id: 1, valor: "Enero" }, { id: 2, valor: "Febrero" }, { id: 3, valor: "Marzo" },
+            { id: 4, valor: "Abril" }, { id: 5, valor: "Mayo" }, { id: 6, valor: "Junio" },
+            { id: 7, valor: "Julio" }, { id: 8, valor: "Agosto" }, { id: 9, valor: "Septiembre" },
+            { id: 10, valor: "Octubre" }, { id: 11, valor: "Noviembre" }, { id: 12, valor: "Diciembre" }
+        ];
+
+
+        this.createfilterBar({
+            parent: `filterBar${this.PROJECT_NAME}`,
+            data: [
+                {
+                    opc: "select",
+                    id: "filterUDN",
+                    lbl: "Unidad de Negocio",
+                    class: "col-12 col-md-3",
+                    data: lsUDN,
+                    text: "valor",
+                    value: "id",
+                    onchange: "report.lsResumenPedidos()"
+                },
+                {
+                    opc: "select",
+                    id: "filterAño",
+                    lbl: "Año",
+                    class: "col-12 col-md-2",
+                    data: lsAños,
+                    text: "valor",
+                    value: "id",
+                    selected: currentYear,
+                    onchange: "report.lsResumenPedidos()"
+                },
+                {
+                    opc: "select",
+                    id: "filterMes",
+                    lbl: "Mes",
+                    class: "col-12 col-md-2",
+                    data: months,
+                    text: "valor",
+                    value: "id",
+                    onchange: "report.lsResumenPedidos()"
+                },
+                {
+                    opc: "button",
+                    id: "btnAddIngreso",
+                    text: "Nuevo Ingreso",
+                    class: "col-12 col-md-2",
+                    color_btn: "success",
+                    icono: "icon-plus",
+                    // onClick: () => this.addIngreso(),
+                    onClick: () => this.lsResumenPedidos(),
+                    style: "display: none;"
+                }
+            ]
+        });
+
+
+    }
+
+
+    lsResumenPedidos() {
+        const udnText = $('#filterBarReport #filterUDN option:selected').text();
+        const año = $('#filterBarReport #filterAño').val();
+
+        this.createTable({
+            parent: `container${this.PROJECT_NAME}`,
+            idFilterBar: "filterBarReport",
+            data: { opc: "lsResumenPedidos" },
+            coffeesoft: true,
+            conf: { datatable: false, pag: 12 },
+            attr: {
+                id: "tbResumenPedidos",
+                theme: 'corporativo',
+                title: '📊 Resumen de Pedidos por Canal',
+                subtitle: `Cantidad de órdenes recibidas por mes y canal de comunicación - ${udnText} (${año})`,
+                center: [1, 2, 3, 4, 5, 6, 7, 8],
+                right: [8],
+                color_group: 'bg-gray-200 text-blue-800'
+            }
+        });
+    }
+
+
 
 
 
@@ -229,13 +265,13 @@ class Resumen extends Templates{
     renderCurrentReport() {
         switch (this.currentReportType) {
             case 'pedidos':
-                this.renderResumenPedidos();
+                this.lsResumenPedidos();
                 break;
             case 'ventas':
-                this.renderResumenVentas();
+                this.lsResumenVentas();
                 break;
             case 'bitacora':
-                this.renderBitacoraIngresos();
+                this.lsBitacoraIngresos();
                 break;
             case 'dashboard':
                 this.renderKPIDashboard();
@@ -247,26 +283,10 @@ class Resumen extends Templates{
         this.renderCurrentReport();
     }
 
-    renderResumenPedidos() {
-        this.createTable({
-            parent: `container-pedidos`,
-            idFilterBar: "reportFilters",
-            data: { opc: "lsResumenPedidos" },
-            coffeesoft: true,
-            conf: { datatable: false, pag: 12 },
-            attr: {
-                id: "tbResumenPedidos",
-                theme: 'corporativo',
-                title: '📊 Resumen de Pedidos por Canal',
-                subtitle: 'Cantidad de órdenes recibidas por mes y canal de comunicación',
-                center: [1, 2, 3, 4, 5, 6, 7, 8],
-                right: [8],
-                striped: true
-            }
-        });
-    }
+    lsResumenVentas() {
+        const udnText = $('#reportFilters #filterUDN option:selected').text();
+        const año = $('#reportFilters #filterAño').val();
 
-    renderResumenVentas() {
         this.createTable({
             parent: `container-ventas`,
             idFilterBar: "reportFilters",
@@ -277,7 +297,7 @@ class Resumen extends Templates{
                 id: "tbResumenVentas",
                 theme: 'corporativo',
                 title: '💰 Resumen de Ventas por Canal',
-                subtitle: 'Montos monetarios generados por mes y canal de comunicación',
+                subtitle: `Montos monetarios generados por mes y canal de comunicación - ${udnText} (${año})`,
                 center: [1, 2, 3, 4, 5, 6, 7, 8],
                 right: [8],
                 striped: true
@@ -285,7 +305,11 @@ class Resumen extends Templates{
         });
     }
 
-    renderBitacoraIngresos() {
+    lsBitacoraIngresos() {
+        const udnText = $('#reportFilters #filterUDN option:selected').text();
+        const año = $('#reportFilters #filterAño').val();
+        const mesText = $('#reportFilters #filterMes option:selected').text();
+
         this.createTable({
             parent: `container-bitacora`,
             idFilterBar: "reportFilters",
@@ -296,7 +320,7 @@ class Resumen extends Templates{
                 id: "tbBitacoraIngresos",
                 theme: 'corporativo',
                 title: '📝 Bitácora de Ingresos Diarios',
-                subtitle: 'Registro detallado de ingresos por fecha y canal',
+                subtitle: `Registro detallado de ingresos por fecha y canal - ${udnText} (${mesText} ${año})`,
                 center: [1, 2, 3, 4],
                 right: [3, 6]
             }
