@@ -176,6 +176,8 @@ class mdl extends CRUD {
         ]);
     }
 
+    // Capture.
+
     function existsCapture($array) {
         $query = "
             SELECT id
@@ -184,8 +186,22 @@ class mdl extends CRUD {
             AND año = ?
             AND mes = ?
         ";
-        $exists = $this->_Read($query, [$array[0], $array[2], $array[3]]);
+        $exists = $this->_Read($query, [$array[0], $array[1], $array[2]]);
         return count($exists) > 0;
+    }
+
+    function getHistoryMetricId($array) {
+        $query = "
+            SELECT id
+            FROM {$this->bd}historial_red
+            WHERE udn_id = ?
+            AND año = ?
+            AND mes = ?
+            AND active = 1
+            LIMIT 1
+        ";
+        $result = $this->_Read($query, $array);
+        return $result[0]['id'] ?? null;
     }
 
     function createCapture($array) {

@@ -375,46 +375,64 @@ class ctrl extends mdl {
         $month = $_POST['month'];
         $year = $_POST['year'];
         $metrics = json_decode($_POST['metrics'], true);
+        $udn_id = $_SESSION['SUB'] ?? 5;
 
-        $exists = $this->existsCapture([
-            $_SESSION['SUB'],
+        $historialId = $this->getHistoryMetricId([
+            $udn_id,
             $year,
             $month
         ]);
 
-        if ($exists) {
-            return [
-                'status' => 409,
-                'message' => 'Ya existe una captura para este mes y año'
+        if (!$historialId) {
+     
+            $create = $this->createCapture([
+                $udn_id,
+                $year,
+                $month
+            ]);
+
+            $historialId = $this->getHistoryMetricId([
+                $udn_id,
+                $year,
+                $month
+            ]);
+
+        }
+
+        // $exists = $this->existsCapture([
+        //     $udn_id,
+        //     $year,
+        //     $month
+        // ]);
+
+        // if ($exists) {
+        //     return [
+        //         'status' => 409,
+        //         'message' => 'Ya existe una captura para este mes y año'
+        //     ];
+        // }
+
+        foreach ($metrics as $metric) {
+            $movementData = [
+                'historial_id' => $historialId,
+                'metrica_id'   => $metric['metric_id'],
+                'cantidad'     => $metric['value']
             ];
-        }
-
-        $captureData = [
-            'udn_id' => $_SESSION['SUB'],
-            'año' => $year,
-            'mes' => $month,
-            'fecha_creacion' => date('Y-m-d H:i:s'),
-            'active' => 1
-        ];
-
-        $captureId = $this->createCapture($this->util->sql($captureData));
-
-        if ($captureId) {
-            foreach ($metrics as $metric) {
-                $movementData = [
-                    'historial_id' => $captureId,
-                    'metrica_id' => $metric['metric_id'],
-                    'cantidad' => $metric['value']
+            $created = $this->createMetricMovement($this->util->sql($movementData));
+            
+            if (!$created) {
+                return [
+                    'status'  => 500,
+                    'message' => 'Error al guardar las métricas'
                 ];
-                $this->createMetricMovement($this->util->sql($movementData));
             }
-
-            $status = 200;
-            $message = 'Captura guardada correctamente';
         }
+
+        $status  = 200;
+        $message = 'Captura guardada correctamente';
 
         return [
-            'status' => $status,
+            'status'  => $status,
             'message' => $message
         ];
     }
