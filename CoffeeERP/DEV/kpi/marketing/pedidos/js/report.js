@@ -275,7 +275,7 @@ class Report extends Templates {
                 theme: 'corporativo',
                 title: '💰 Resumen de Ventas por Canal',
                 subtitle: `Montos monetarios generados por mes y canal de comunicación - ${udnText} (${año})`,
-                right: [ 2, 3, 4, 5, 6, 7, 8],
+                right: [2, 3, 4, 5, 6, 7, 8],
 
             }
         });
