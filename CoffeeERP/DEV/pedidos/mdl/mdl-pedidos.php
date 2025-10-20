@@ -61,6 +61,7 @@ class mdl extends CRUD {
             'data' => [1]
         ]);
     }
+
     // Pedidos
 
     function listPedidos($array) {
@@ -76,11 +77,15 @@ class mdl extends CRUD {
                 rs.nombre AS red_social_nombre,
                 rs.color AS red_social_color,
                 ca.nombre AS campana_nombre,
-                ca.estrategia AS campana_estrategia
+                ca.estrategia AS campana_estrategia,
+                a.nombre AS anuncio_nombre,
+                cl.nombre AS cliente_nombre
             FROM {$this->bd}pedido p
             LEFT JOIN {$this->bd}canal c ON p.canal_id = c.id
             LEFT JOIN {$this->bd}red_social rs ON p.red_social_id = rs.id
-            LEFT JOIN {$this->bd}campaña ca ON p.campaña_id = ca.id
+            LEFT JOIN {$this->bd}anuncio a ON p.anuncio_id = a.id
+            LEFT JOIN {$this->bd}campaña ca ON a.campaña_id = ca.id
+            LEFT JOIN {$this->bd}cliente cl ON p.cliente_id = cl.id
             WHERE p.fecha_pedido BETWEEN ? AND ? 
             AND p.udn_id = ? 
             AND p.active = 1

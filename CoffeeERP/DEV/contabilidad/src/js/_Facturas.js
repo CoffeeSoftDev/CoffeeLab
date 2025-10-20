@@ -1,2 +1,0 @@
-class Facturas extends Contabilidad {
-}
