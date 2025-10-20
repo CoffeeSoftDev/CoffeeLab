@@ -13,9 +13,6 @@ $(async () => {
     report = new Report(api_report, "root");
     admin = new Admin(api_canal, "root");
   
-
-    // app.render();
-    // admin.render()
 });
 
 class AppTemporal extends Templates {
@@ -840,7 +837,7 @@ class DashboardOrder extends Templates {
         this.layout();
     }
 
-    async layout() {
+    layout() {
         this.dashboardComponent({
             parent: "container-dashboard",
             id: "dashboardComponent",
@@ -855,10 +852,15 @@ class DashboardOrder extends Templates {
         });
 
         this.filterBarDashboard();
+        this.renderDashboard()
 
-        let udn = $('#filterBarDashboard #udn').val();
+      
+    }
+
+    async renderDashboard(){
+        let udn   = $('#filterBarDashboard #udn').val();
         let month = $('#filterBarDashboard #mes').val();
-        let year = $('#filterBarDashboard #anio').val();
+        let year  = $('#filterBarDashboard #anio').val();
 
         let mkt = await useFetch({
             url: api_dashboard,
@@ -875,6 +877,7 @@ class DashboardOrder extends Templates {
         this.renderBarChart(mkt.barChart);
         this.renderChannelRanking(mkt.channelRanking);
         this.renderMonthlyPerformance(mkt.monthlyPerformance);
+
     }
 
     filterBarDashboard() {
@@ -887,7 +890,7 @@ class DashboardOrder extends Templates {
                     lbl: "UDN",
                     class: "col-sm-3",
                     data: lsudn,
-                    onchange: `salesDashboard.layout()`,
+                    onchange: `dashboardOrder.renderDashboard()`,
                 },
                 {
                     opc: "select",
@@ -895,7 +898,7 @@ class DashboardOrder extends Templates {
                     lbl: "Mes",
                     class: "col-sm-3",
                     data: moment.months().map((m, i) => ({ id: i + 1, valor: m })),
-                    onchange: `salesDashboard.layout()`,
+                    onchange: `dashboardOrder.renderDashboard()`,
                 },
                 {
                     opc: "select",
@@ -906,7 +909,7 @@ class DashboardOrder extends Templates {
                         const year = moment().year() - i;
                         return { id: year, valor: year.toString() };
                     }),
-                    onchange: `salesDashboard.layout()`,
+                    onchange: `dashboardOrder.renderDashboard()`,
                 },
             ],
         });
