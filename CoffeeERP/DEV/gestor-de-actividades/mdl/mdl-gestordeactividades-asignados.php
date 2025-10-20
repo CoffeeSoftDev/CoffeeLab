@@ -131,7 +131,8 @@ class mdl extends CRUD {
           WHERE id_activity = ?
           ORDER BY idAdvance DESC limit 1
         ";
-          return $this->_Read($query, $array)[0];
+        $result = $this->_Read($query, $array);
+        return !empty($result) ? $result[0] : null;
     }
     function getTwoLastAdvance($array){
         $query = "

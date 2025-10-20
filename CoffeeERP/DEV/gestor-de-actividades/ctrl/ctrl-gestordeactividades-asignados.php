@@ -24,7 +24,7 @@ class ctrl extends mdl{
         // Clasificar por avances
         foreach ($ls as $item) {
             $lastAdvance = $this->getLastAdvance([$item['id']]);
-            if ($lastAdvance && $lastAdvance['date_advance']) {
+            if ($lastAdvance && isset($lastAdvance['date_advance']) && $lastAdvance['date_advance']) {
                 $item['__ultimo_avance'] = $lastAdvance['date_advance'];
                 $item['__lastAdvance'] = $lastAdvance; // guardamos completo
                 $conAvance[] = $item;
@@ -173,7 +173,7 @@ class ctrl extends mdl{
                 'date_start'        => formatSpanishDate($key['date_start']),
                 'date_end'          => formatSpanishDate($key['date_end']),
                 'date_seen'         => $key['date_seen'],
-                'date_follow'       => formatSpanishDate($lastAdvance['date_advance']),
+                'date_follow'       => ($lastAdvance && isset($lastAdvance['date_advance'])) ? formatSpanishDate($lastAdvance['date_advance']) : '',
                 'date_finished'     => isset($key['date_finished']) ? formatSpanishDate($key['date_finished']) : '',
                 'feedback'          => $key['feedback'],
                 'average'           => $key['average'],

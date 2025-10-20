@@ -819,6 +819,7 @@ class ctrl extends Gestordeactividades{
 // Complements
 function lsDropdown($idStatus, $idTask,  $idEmployedCreator, $idEmployed, $idUserCreator, $idUserResponsible = null, $rating) {
     $values = [
+        'inProgress' => ['icon' => 'icon-play',    'text' => 'En Proceso', 'onclick' => "gestor.statusTasks(2,{$idTask},{$idEmployedCreator},{$idEmployed})"],
         'finalize'   => ['icon' => 'icon-ok',      'text' => 'Finalizar', 'onclick' => "gestor.statusTasks(4,{$idTask},{$idEmployedCreator},{$idEmployed})"],
         'delete'     => ['icon' => 'icon-cancel',  'text' => 'Cancelar',  'onclick' => "gestor.statusTasks(5,{$idTask})"],
         'edit'       => ['icon' => 'icon-pencil',  'text' => 'Editar',    'onclick' => "gestor.editTaskModal({$idTask})"],
