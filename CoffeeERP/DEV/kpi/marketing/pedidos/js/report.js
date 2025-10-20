@@ -1,5 +1,6 @@
 let api_report = 'ctrl/ctrl-report.php';
-let app, report;
+let api_canal = 'ctrl/ctrl-canal.php';
+let app, report, admin;
 let lsUDN, lsCanales, lsAños;
 
 $(async () => {
@@ -8,10 +9,12 @@ $(async () => {
     lsCanales = data.canales;
     lsAños = data.años;
 
-    // app = new AppTemporal(api_report, "root");
+    app = new AppTemporal(api_report, "root");
     report = new Report(api_report, "root");
-    report.render();
-    // app.render();
+    admin = new Admin(api_canal, "root");
+
+    app.render();
+    admin.render()
 });
 
 class AppTemporal extends Templates {
@@ -23,7 +26,7 @@ class AppTemporal extends Templates {
 
     render() {
         this.layout();
-        // this.renderCurrentReport();
+        report.render();
     }
 
     layout() {
@@ -53,17 +56,23 @@ class AppTemporal extends Templates {
             type: "short",
             json: [
                 {
-                    id: "report",
-                    tab: "Resumen Pedidos",
-                    active: true,
+                    id: "dashboard",
+                    tab: "Dashboard",
                     onClick: () => report.render()
                 },
                 {
-                    id: "ventas",
-                    tab: "Resumen Ventas",
-                    onClick: () => this.changeReportType("ventas")
+                    id: "history",
+                    tab: "Resumen Pedidos",
+                    onClick: () => report.render()
                 },
-               
+                {
+                    id: "admin",
+                    tab: "Administrador",
+                    active: true,
+
+                    onClick: () => admin.lsCanales()
+                },
+
             ]
         });
     }
@@ -115,8 +124,6 @@ class AppTemporal extends Templates {
     }
 }
 
-
-
 class Report extends Templates {
 
     constructor(link, div_modulo) {
@@ -134,7 +141,7 @@ class Report extends Templates {
 
     layout() {
         this.primaryLayout({
-            parent: "container-report",
+            parent: "container-history",
             id: this.PROJECT_NAME,
             class: "w-full",
             card: {
@@ -150,12 +157,6 @@ class Report extends Templates {
     filterBar() {
         const currentMonth = new Date().getMonth() + 1;
 
-        const months = [
-            { id: 1, valor: "Enero" }, { id: 2, valor: "Febrero" }, { id: 3, valor: "Marzo" },
-            { id: 4, valor: "Abril" }, { id: 5, valor: "Mayo" }, { id: 6, valor: "Junio" },
-            { id: 7, valor: "Julio" }, { id: 8, valor: "Agosto" }, { id: 9, valor: "Septiembre" },
-            { id: 10, valor: "Octubre" }, { id: 11, valor: "Noviembre" }, { id: 12, valor: "Diciembre" }
-        ];
 
 
         this.createfilterBar({
@@ -189,7 +190,7 @@ class Report extends Templates {
                     id: "filterMes",
                     lbl: "Mes",
                     class: "col-12 col-md-2",
-                    data: months,
+                    data: moment.months().map((m, i) => ({ id: i + 1, valor: m })),
                     text: "valor",
                     value: "id",
                     onchange: "report.showReport()"
@@ -644,5 +645,190 @@ class Report extends Templates {
             }
         ];
     }
+
+}
+
+class Admin extends Templates {
+    constructor(link, div_modulo) {
+        super(link, div_modulo);
+        this.PROJECT_NAME = "Admin";
+        this.currentReportType = "pedidos";
+    }
+
+
+    render() {
+        this.layout();
+        this.filterBar();
+        this.lsCanales();
+    }
+
+    layout() {
+        this.primaryLayout({
+            parent: "container-admin",
+            id: this.PROJECT_NAME,
+            class: "w-full",
+            card: {
+                filterBar: { class: "w-full ", id: "filterBar" + this.PROJECT_NAME },
+                container: { class: "w-full h-full", id: "container" + this.PROJECT_NAME }
+            }
+        });
+
+
+    }
+
+
+    filterBar() {
+
+        this.createfilterBar({
+            parent: `filterBar${this.PROJECT_NAME}`,
+            data: [
+                {
+                    opc: "select",
+                    id: "active",
+                    lbl: "Estado",
+                    class: "col-sm-3",
+                    data: [
+                        { id: "1", valor: "Activos" },
+                        { id: "0", valor: "Inactivos" }
+                    ],
+                    onchange: `admin.lsCanales()`
+                },
+                {
+                    opc: "button",
+                    class: "col-sm-3",
+                    id: "btnNuevoCanal",
+                    text: "Nuevo Canal",
+                    onClick: () => this.addCanal()
+                }
+            ]
+        });
+
+
+    }
+
+    lsCanales() {
+        this.createTable({
+            parent: "container" + this.PROJECT_NAME,
+            idFilterBar: "filterBarAdmin",
+            data: { opc: "lsCanales" },
+            coffeesoft: true,
+            conf: { datatable: true, pag: 15 },
+            attr: {
+                id: "tbCanales",
+                theme: 'corporativo',
+                center: [2, 3]
+            }
+        });
+    }
+
+    addCanal() {
+        this.createModalForm({
+            id: 'formCanalAdd',
+            data: { opc: 'addCanal' },
+            bootbox: {
+                title: 'Agregar Canal',
+            },
+            json: this.jsonCanal(),
+            success: (response) => {
+                if (response.status === 200) {
+                    alert({
+                        icon: "success",
+                        text: response.message,
+                        btn1: true
+                    });
+                    this.lsCanales();
+                } else {
+                    alert({
+                        icon: response.status === 409 ? "warning" : "error",
+                        title: response.status === 409 ? "Canal duplicado" : "Error",
+                        text: response.message,
+                        btn1: true
+                    });
+                }
+            }
+        });
+    }
+
+    async editCanal(id) {
+        const request = await useFetch({
+            url: this._link,
+            data: { opc: "getCanal", id }
+        });
+
+        if (request.status !== 200) {
+            alert({
+                icon: "error",
+                text: request.message,
+                btn1: true
+            });
+            return;
+        }
+
+        this.createModalForm({
+            id: 'formCanalEdit',
+            data: { opc: 'editCanal', id },
+            bootbox: {
+                title: 'Editar Canal',
+            },
+            autofill: request.data,
+            json: this.jsonCanal(),
+            success: (response) => {
+                if (response.status === 200) {
+                    alert({
+                        icon: "success",
+                        text: response.message,
+                        btn1: true
+                    });
+                    this.lsCanales();
+                } else {
+                    alert({
+                        icon: "error",
+                        text: response.message,
+                        btn1: true
+                    });
+                }
+            }
+        });
+    }
+
+    statusCanal(id, active) {
+        const accion = active === 1 ? "desactivar" : "activar";
+
+        this.swalQuestion({
+            opts: {
+                title: `¿${accion.charAt(0).toUpperCase() + accion.slice(1)} canal?`,
+                text: `Esta acción ${accion === "desactivar" ? "ocultará" : "mostrará"} el canal.`,
+                icon: "warning"
+            },
+            data: { opc: "statusCanal", active: active === 1 ? 0 : 1, id },
+            methods: {
+                send: (response) => {
+                    if (response.status === 200) {
+                        alert({
+                            icon: "success",
+                            text: response.message,
+                            btn1: true
+                        });
+                        this.lsCanales();
+                    }
+                }
+            }
+        });
+    }
+
+    jsonCanal() {
+        return [
+            {
+                opc: "input",
+                id: "nombre",
+                lbl: "Nombre del Canal",
+                class: "col-12 mb-3"
+            }
+        ];
+    }
+
+}
+
+class DashboardAdmin extends Templates {
 
 }

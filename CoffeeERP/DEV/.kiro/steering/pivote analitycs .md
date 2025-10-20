@@ -1,27 +1,74 @@
+# 🧭 Pivote Estratégico — Módulo de Ventas (Sales Module)
+
+---
+
+## 🎯 Propósito General
+El **módulo de ventas** centraliza la administración de **ingresos, estadísticas y comparativas de ventas** dentro del sistema ERP CoffeeSoft.  
+Permite visualizar métricas en tiempo real, generar reportes por unidad de negocio (UDN), comparar ventas mensuales y calcular promedios acumulados, facilitando la toma de decisiones financieras y operativas.
+
+---
+
+## ⚙️ Key Features
+
+- 🔹 **Dashboard de ventas dinámico** con gráficos de desempeño, ventas por día y cheque promedio.  
+- 🔹 **Comparativas mensuales** con vistas interactivas año vs año, incluyendo ventas e ingresos.  
+- 🔹 **Promedios acumulados** con filtros automáticos por año, mes y UDN.  
+- 🔹 **Filtros inteligentes** para seleccionar períodos, tipos de reporte y clasificación de ventas.  
+- 🔹 **Tablas interactivas CoffeeSoft** con paginación, filtros dinámicos y estilos corporativos.  
+- 🔹 **Visualización modular por pestañas (tabs)**: Dashboard, Ventas, Comparativas, Promedios.  
+- 🔹 **Integración con Chart.js** para generar gráficos lineales, de barras y comparativos.  
+- 🔹 **Diseño adaptable y limpio**, optimizado para pantallas corporativas y responsive.
+
+## 🧭 Notas de Diseño
+
+- 🧩 Cada submódulo (Dashboard, Sales, MonthlySales, CumulativeAverages) hereda de la clase base `Templates`, asegurando consistencia visual y lógica.  
+- 💡 Se utiliza el patrón de inicialización modular: cada clase tiene sus propios métodos `render()` y `layout()` con independencia funcional.  
+- 🖌️ Paleta de colores CoffeeSoft:
+  - Azul corporativo: `#103B60`
+  - Verde acción: `#8CC63F`
+  - Gris claro: `#EAEAEA`
+
+## 🧩 Estructura Técnica
+
+| Clase / Archivo | Descripción | Ejemplo / Función |
+|------------------|-------------|--------------------|
+| `App` | Clase principal que define la estructura del módulo, tabs, layout y control global. | `app = new App(api, "root")` |
+| `SalesDashboard` | Renderiza el dashboard de métricas de ventas, incluyendo gráficas comparativas y KPIs. | `salesDashboard.renderDashboard()` |
+| `Sales` | Controla el listado y captura de ventas diarias, con filtros por mes, año y tipo. | `sales.listSales()` |
+| `MonthlySales` | Genera comparativas mensuales de ingresos y promedios año contra año. | `monthlySales.lsComparativa()` |
+| `CumulativeAverages` | Calcula y visualiza los promedios acumulados del año seleccionado. | `cumulativeAverages.ls()` |
+| `ctrl-ingresos.php` | Controlador PHP para consultas de ventas, comparativas y promedios. | `opc: "init", "list", "listComparative"` |
+| `mdl-ingresos.php` | Modelo de base de datos para obtener registros de ventas y métricas. | Métodos de lectura y agregación SQL. |
+
+---
+## Código
+
+### FRONT-JS [analitycs-sales.js]
+
+```javascript 
 let api = 'ctrl/ctrl-ingresos.php';
 let app, sales, salesDashboard, monthlySales, cumulativeAverages;
 
-let udn, lsudn, clasificacion, clasificacionUdn;
+let udn, lsudn, clasificacion;
 
 $(async () => {
     app = new App(api, "root");
 
     const data = await useFetch({ url: api, data: { opc: "init" } });
-    console.log(data)
-    udn           = data.udn;
-    lsudn         = data.lsudn;
-    clasificacion = data.clasification;
+    udn = data.udn;
+    lsudn = data.lsudn;
+    clasification = data.clasification;
 
     // ** Instancias **
     app = new App(api, "root");
 
-    // salesDashboard = new SalesDashboard(api, "root");
 
-    // sales = new Sales(api, "root");
-    // monthlySales = new MonthlySales(api, "root");
-    // cumulativeAverages = new CumulativeAverages(api, "root");
-
-
+    salesDashboard     = new SalesDashboard(api, "root");
+    sales              = new Sales(api, "root");
+    monthlySales       = new MonthlySales(api, "root");
+    cumulativeAverages = new CumulativeAverages(api, "root");
+    
+    
     app.render();
 
 
@@ -36,13 +83,13 @@ class App extends Templates {
 
     render() {
         this.layout();
-
+        
         // init instancias.
 
-        // sales.render();
-        // salesDashboard.render();
-        // monthlySales.render();
-        // cumulativeAverages.render();
+        sales.render();
+        salesDashboard.render();
+        monthlySales.render();
+        cumulativeAverages.render();
 
     }
 
@@ -82,12 +129,14 @@ class App extends Templates {
                     id: "sales",
                     tab: "Módulo ventas",
                     onClick: () => {
+                        // sales.lsIngresos()
                     }
                 },
                 {
                     id: "comparativasMensuales",
                     tab: "Comparativas mensuales",
                     onClick: () => {
+                        // comparativa.lsComparativa()
                     }
                 },
                 // {
@@ -170,88 +219,49 @@ class SalesDashboard extends Templates {
         this.layout();
     }
 
-    layout() {
+    async layout() {
+
         this.dashboardComponent({
             parent: "container-dashboard",
             id: "dashboardComponent",
             title: "📊 Dashboard de Ventas",
-            subtitle: "Análisis comparativo de ventas entre dos períodos",
+            subtitle: "Análisis mensual de productos vendidos y con margen",
             json: [
                 { type: "grafico", id: "containerChequePro" },
-                {
-                    type: "grafico", id: "barProductMargen1", title: "",
-                    content: [
-                        { class: "border px-3 py-2 rounded", type: "div", id: "filterBarProductMargen" },
-                        { class: " mt-2", type: "div", id: "barProductMargen" },
-
-                    ]
-
-
-                },
+                { type: "grafico", id: "barProductMargen", title: "" },
                 { type: "grafico", id: "ventasDiasSemana", title: "Ventas por Día de la Semana" },
                 { type: "grafico", id: "Tendencia", title: "Tendencia de Ventas" },
             ]
         });
 
-        
-        
-        this.createfilterBar({
-            parent: `filterBarProductMargen`,
-            data: [
-                {
-                    opc: "select",
-                    id: "category",
-                    lbl: "Categorias",
-                    class: "col-sm-4",
-                    // data:,
-                    onchange: `salesDashboard.comparativaByCategory()`,
-                },
-
-            ],
-        });
-
         this.filterBarDashboard();
-    }
 
-    async renderDashboard() {
-
-        //filtrar clasificacion x udn 
-        this.handleCategoryChange($('#idFilterBar #udn').val());
 
         let udn = $('#filterBarDashboard #udn').val();
-        let periodo1 = $('#filterBarDashboard #periodo1').val();
-        let [anio1, mes1] = periodo1.split('-');
-        let periodo2 = $('#filterBarDashboard #periodo2').val();
-        let [anio2, mes2] = periodo2.split('-');
-
+        let month = $('#filterBarDashboard #mes').val();
+        let year = $('#filterBarDashboard #anio').val();
         let mkt = await useFetch({
             url: api,
             data: {
                 opc: "apiPromediosDiarios",
                 udn: udn,
-                anio1: anio1,
-                mes1: mes1,
-                anio2: anio2,
-                mes2: mes2,
+                mes: month,
+                anio: year,
             },
         });
 
         this.showCards(mkt.dashboard);
 
-        // Graficos.
+        this.chequeComparativo({ data: mkt.barras });
 
-        this.chequeComparativo({
-            data: mkt.barras.dataset,
-            anioA: mkt.barras.anioA,
-            anioB: mkt.barras.anioB,
+        this.lineChartPromediosDiario({ data: mkt.linear });
 
-        });
+        this.barChart({
+            parent: 'ventasDiasSemana',
+            title: 'Ventas por Día de Semana',
+            ...mkt.barDays
 
-
-        this.comparativaIngresosDiarios({ data: mkt.linear });
-
-        this.ventasPorDiaSemana(mkt.barDays);
-
+        })
 
         this.topDiasSemana({
             parent: "Tendencia",
@@ -264,6 +274,8 @@ class SalesDashboard extends Templates {
 
     }
 
+
+
     filterBarDashboard() {
         this.createfilterBar({
             parent: `filterBarDashboard`,
@@ -272,58 +284,38 @@ class SalesDashboard extends Templates {
                     opc: "select",
                     id: "udn",
                     lbl: "UDN",
-                    class: "col-sm-4",
+                    class: "col-sm-3",
                     data: lsudn,
                     onchange: `salesDashboard.renderDashboard()`,
                 },
                 {
-                    opc: "div",
-                    id: "containerPeriodo1",
-                    lbl: "Consultar con:",
-                    class: "col-lg-3 col-sm-4",
-                    html: `
-                        <input 
-                            type="month" 
-                            id="periodo1" 
-                            class="form-control"
-                            style="width: 100%; min-width: 100%; display: block;"
-                            onchange="salesDashboard.renderDashboard()"
-                        />
-                    `
+                    opc: "select",
+                    id: "mes",
+                    lbl: "Mes",
+                    class: "col-sm-3",
+                    data: moment.months().map((m, i) => ({ id: i + 1, valor: m })),
+                    onchange: `salesDashboard.renderDashboard()`,
                 },
                 {
-                    opc: "div",
-                    id: "containerPeriodo2",
-                    lbl: "Comparar con:",
-                    class: "col-lg-3 col-sm-4 ",
-                    html: `
-                        <input 
-                            type="month" 
-                            id="periodo2" 
-                            class="form-control"
-                            onchange="salesDashboard.renderDashboard()"
-                        />
-                    `
+                    opc: "select",
+                    id: "anio",
+                    lbl: "Año",
+                    class: "col-sm-3",
+                    data: Array.from({ length: 5 }, (_, i) => {
+                        const year = moment().year() - i;
+                        return { id: year, valor: year.toString() };
+                    }),
+                    onchange: `salesDashboard.renderDashboard()`,
                 },
             ],
         });
-
-        const currentYear = moment().year();
-        const currentMonth = moment().month() + 1;
-        const lastYear = currentYear - 1;
-
-        const periodo1 = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
-        const periodo2 = `${lastYear}-${String(currentMonth).padStart(2, '0')}`;
-
-        $('#containerPeriodo1').removeClass('col-lg-3 col-sm-4');
-        $('#containerPeriodo2').removeClass('col-lg-3 col-sm-4');
-
+        const currentMonth = moment().month() + 1; // Mes actual (1-12)
         setTimeout(() => {
-            $(`#filterBarDashboard #periodo1`).val(periodo1).trigger("change");
-            $(`#filterBarDashboard #periodo2`).val(periodo2).trigger("change");
+            // $(`#filterBarDashboard #mes`).val(currentMonth).trigger("change");
         }, 100);
     }
 
+    // graphigs.
     showCards(data) {
         // KPIs visuales
         this.infoCard({
@@ -369,47 +361,47 @@ class SalesDashboard extends Templates {
         });
     }
 
-    // graphigs.
+    lineChartPromediosDiario(options) {
+        let nombreMes = $('#filterBarDashboard #mes option:selected').text();
+        this.linearChart({
+            parent: "barProductMargen",
+            id: "chartLine",
+            title: `📈 Ventas de ${nombreMes} por Categoría`,
+            data: options.data // ← ya contiene labels y datasets reales
+        });
+
+    }
+
+
     chequeComparativo(options) {
         const defaults = {
             parent: "containerChequePro",
             id: "chart",
-            title: "Comparativa por Categorías",
-            class: "border p-4 rounded-xl",
+            title: "",
+            class: " p-4 ",
             data: {},
             json: [],
-            anioA: new Date().getFullYear(),
-            anioB: new Date().getFullYear() - 1,
             onShow: () => { },
         };
         const opts = Object.assign({}, defaults, options);
-
-        const periodo1 = $('#filterBarDashboard #periodo1').val();
-        const [anio1, mesNum1] = periodo1.split('-');
-        const mes1 = moment().month(parseInt(mesNum1) - 1).format('MMMM');
-
-        const periodo2 = $('#filterBarDashboard #periodo2').val();
-        const [anio2, mesNum2] = periodo2.split('-');
-        const mes2 = moment().month(parseInt(mesNum2) - 1).format('MMMM');
-
         const container = $("<div>", { class: opts.class });
         const title = $("<h2>", {
-            class: "text-lg font-bold mb-2",
-            text: `Comparativa: ${mes1} ${anio1} vs ${mes2} ${anio2}`
-        });
-        const canvasWrapper = $("<div>", {
-            class: "w-full",
-            css: { height: "300px" }
+            class: "text-lg font-bold mb-3",
+            text: opts.title
         });
         const canvas = $("<canvas>", {
             id: opts.id,
-            class: "w-full h-full"
+            class: "w-full h-[320px]"
         });
-        canvasWrapper.append(canvas);
-        container.append(title, canvasWrapper);
-
+        container.append(title, canvas);
         $('#' + opts.parent).html(container);
-
+        const anioA = new Date().getFullYear();
+        const anioB = anioA - 1;
+        const dCheque = {
+            labels: ["A&B", "Alimentos", "Bebidas"],
+            A: [673.18, 613.0, 54.6],
+            B: [640.25, 590.5, 49.75]
+        };
         const ctx = document.getElementById(opts.id).getContext("2d");
         if (window._chq) window._chq.destroy();
         window._chq = new Chart(ctx, {
@@ -418,21 +410,19 @@ class SalesDashboard extends Templates {
                 labels: opts.data.labels,
                 datasets: [
                     {
-                        label: `${mes2} ${anio2}`,
-                        data: opts.data.B,
-                        backgroundColor: "#8CC63F"
-                    },
-                    {
-                        label: `${mes1} ${anio1}`,
+                        label: `Año ${anioA}`,
                         data: opts.data.A,
                         backgroundColor: "#103B60"
                     },
-
+                    {
+                        label: `Año ${anioB}`,
+                        data: opts.data.B,
+                        backgroundColor: "#8CC63F"
+                    }
                 ]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
                 animation: {
                     onComplete: function () {
                         const chart = this;
@@ -471,63 +461,95 @@ class SalesDashboard extends Templates {
         });
     }
 
-    comparativaIngresosDiarios(options) {
-        let periodo1 = $('#filterBarDashboard #periodo1').val();
-        let [anio1, mesNum1] = periodo1.split('-');
-        let mes1 = moment().month(parseInt(mesNum1) - 1).format('MMMM');
-
-        let periodo2 = $('#filterBarDashboard #periodo2').val();
-        let [anio2, mesNum2] = periodo2.split('-');
-        let mes2 = moment().month(parseInt(mesNum2) - 1).format('MMMM');
-
-        this.linearChart({
-            parent: "barProductMargen",
-            id: "chartLine",
-            title: `📈 Comparativa de ventas :  ${mes2} ${anio2}  vs ${mes1} ${anio1} `,
-            data: options.data
-        });
-
-    }
-
-    ventasPorDiaSemana(data) {
-        this.barChart({
-            parent: 'ventasDiasSemana',
-            title: 'Ventas por Día de Semana',
-            ...data
-
-        })
-    }
-
-    async comparativaByCategory(){
-        let udn           = $('#filterBarDashboard #udn').val();
-        let periodo1      = $('#filterBarDashboard #periodo1').val();
-        let [anio1, mes1] = periodo1.split('-');
-        let periodo2      = $('#filterBarDashboard #periodo2').val();
-        let [anio2, mes2] = periodo2.split('-');
-
-           let mkt = await useFetch({
-            url: api,
-            data: {
-                opc: "comparativaByCategory",
-                udn: udn,
-                category: $('#category option:selected').text(),
-                anio1: anio1,
-                mes1: mes1,
-                anio2: anio2,
-                mes2: mes2,
+    comparativaCategorias(options) {
+        const defaults = {
+            parent: "containerVentas",
+            id: "chartCategorias",
+            title: "Comparativa de Categorías",
+            class: "bg-white p-4 ",
+            data: {},
+            json: {
+                labels: ["Bebidas", "Snacks", "Frutas"],
+                A: [5000, 3200, 1800],
+                B: [4700, 3000, 1600]
             },
+            anioA: new Date().getFullYear(),
+            anioB: new Date().getFullYear() - 1,
+            onShow: () => { }
+        };
+        const opts = Object.assign({}, defaults, options);
+        const rows = opts.json.labels.length;
+        const canvasHeight = Math.max(rows * 26 + 50, 300);
+        const container = $("<div>", {
+            class: opts.class
         });
-
-        // 👇 IMPRIMIR el contenido recibido del servidor
-            console.log("📦 DATASET RECIBIDO:", mkt);
-
-            this.linearChart({
-                parent: "barProductMargen",
-                id: "barProductMargewn",
-                title: "📈 Comparativa por Categoría",
-                data:mkt
-            });
-
+        const title = $("<h3>", {
+            class: "text-sm font-semibold text-[#103B60] mb-2",
+            text: opts.title
+        });
+        // 🔁 Nuevo wrapper para canvas con altura controlada
+        const canvasWrapper = $("<div>", {
+            class: "relative w-full",
+            css: {
+                height: `${canvasHeight}px`
+            }
+        });
+        const canvas = $("<canvas>", {
+            id: opts.id,
+            class: "w-full"
+        });
+        canvasWrapper.append(canvas);
+        container.append(title, canvasWrapper);
+        $(`#${opts.parent}`).html(container);
+        if (window._cat) window._cat.destroy();
+        window._cat = new Chart(document.getElementById(opts.id).getContext("2d"), {
+            type: "bar",
+            data: {
+                labels: opts.json.labels,
+                datasets: [
+                    {
+                        label: `Año ${opts.anioA}`,
+                        data: opts.json.A,
+                        backgroundColor: "#103B60"
+                    },
+                    {
+                        label: `Año ${opts.anioB}`,
+                        data: opts.json.B,
+                        backgroundColor: "#8CC63F"
+                    }
+                ]
+            },
+            options: {
+                maintainAspectRatio: false,
+                responsive: true,
+                indexAxis: "y",
+                plugins: {
+                    legend: { position: "bottom" },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.dataset.label}: ${formatPrice(ctx.parsed.x)}`
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        ticks: {
+                            callback: (v) => formatPrice(v),
+                            font: { size: 11 }
+                        },
+                        grid: { display: true }
+                    },
+                    y: {
+                        ticks: {
+                            autoSkip: false,
+                            font: { size: 11 }
+                        },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+        if (typeof opts.onShow === "function") opts.onShow();
     }
 
     // components.
@@ -568,14 +590,14 @@ class SalesDashboard extends Templates {
             </section>
 
             <!-- Content -->
-            <section id="content-${opts.id}" class="mx-auto px-4 py-6 grid gap-6 grid-cols-1 md:grid-cols-2"></section>
+            <section id="content-${opts.id}" class=" mx-auto px-4 py-6 grid gap-6 lg:grid-cols-2"></section>
         </div>`);
 
         // Renderizar contenedores desde JSON
         opts.json.forEach(item => {
             let block = $("<div>", {
                 id: item.id,
-                class: "bg-white p-2 rounded-xl shadow-md border border-gray-200 min-h-[200px] w-full"
+                class: "bg-white p-4 rounded-xl shadow-md border border-gray-200 min-h-[200px]"
             });
 
             if (item.title) {
@@ -682,7 +704,7 @@ class SalesDashboard extends Templates {
             parent: "containerLineChart",
             id: "linearChart",
             title: "",
-            class: "border p-4 rounded-xl",
+            class: " rounded-xl",
             data: {},   // <- puede contener { labels: [], datasets: [], tooltip: [] }
             json: [],
             onShow: () => { },
@@ -693,17 +715,12 @@ class SalesDashboard extends Templates {
             class: "text-lg font-bold mb-2",
             text: opts.title
         });
-        const canvasWrapper = $("<div>", {
-            class: "w-full",
-            css: { height: "300px" }
-        });
         const canvas = $("<canvas>", {
             id: opts.id,
-            class: "w-full h-full"
+            class: "w-full h-[150px]"
         });
-        canvasWrapper.append(canvas);
-        container.append(title, canvasWrapper);
-        $('#' + opts.parent).html(container);
+        container.append(title, canvas);
+        $('#' + opts.parent).append(container);
 
         const ctx = document.getElementById(opts.id).getContext("2d");
         if (!window._charts) window._charts = {};
@@ -716,13 +733,14 @@ class SalesDashboard extends Templates {
             data: opts.data,
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
+                aspectRatio: 3,
                 plugins: {
                     legend: { position: "bottom" },
                     tooltip: {
                         callbacks: {
                             title: (items) => {
                                 const index = items[0].dataIndex;
+                                // Si existe "tooltip" en los datos, úsalo. Si no, usa labels.
                                 const tooltips = opts.data.tooltip || opts.data.labels;
                                 return tooltips[index];
                             },
@@ -746,78 +764,56 @@ class SalesDashboard extends Templates {
         const defaults = {
             parent: "containerBarChart",
             id: "chartBar",
-            title: "Comparativa por Categorías",
+            title: "Ventas por Día de Semana",
             class: "border p-4 rounded-xl",
             labels: [],
-            dataA: [], // Año anterior
-            dataB: [], // Año actual
-            yearA: new Date().getFullYear() - 1, // 2024
-            yearB: new Date().getFullYear(),     // 2025
+            dataA: [],
+            dataB: [],
+            yearA: new Date().getFullYear(),
+            yearB: new Date().getFullYear() - 1
         };
 
         const opts = Object.assign({}, defaults, options);
 
-        // 📦 Crear contenedor
+        // Crear contenedor
         const container = $("<div>", { class: opts.class });
         const title = $("<h2>", {
             class: "text-lg font-bold mb-2",
             text: opts.title
         });
-        const canvasWrapper = $("<div>", {
-            class: "w-full",
-            css: { height: "300px" }
-        });
         const canvas = $("<canvas>", {
             id: opts.id,
-            class: "w-full h-full"
+            class: "w-full h-[300px]"
         });
 
-        canvasWrapper.append(canvas);
-        container.append(title, canvasWrapper);
+        container.append(title, canvas);
         $("#" + opts.parent).html(container);
 
         const ctx = document.getElementById(opts.id).getContext("2d");
         if (window._barChart) window._barChart.destroy();
 
-        // 🎨 Colores: Azul para período 1 (consulta), Verde para período 2 (comparación)
-        const colorPeriodo1 = "#103B60"; // Azul oscuro - Período de consulta
-        const colorPeriodo2 = "#8CC63F"; // Verde - Período de comparación
-
-        // 📊 Crear gráfico
+        // Crear gráfico
         window._barChart = new Chart(ctx, {
             type: "bar",
             data: {
                 labels: opts.labels,
                 datasets: [
                     {
-                        label: `Año ${opts.yearA}`, // Período 2 (comparación) - dataB
-                        data: opts.dataB,
-                        backgroundColor: colorPeriodo2
+                        label: opts.yearA,
+                        data: opts.dataA,
+                        backgroundColor: "#2196F3" // Azul fuerte
                     },
                     {
-                        label: `Año ${opts.yearB}`, // Período 1 (consulta) - dataA
-                        data: opts.dataA,
-                        backgroundColor: colorPeriodo1
-                    },
-
+                        label: opts.yearB,
+                        data: opts.dataB,
+                        backgroundColor: "#9E9E9E" // Gris neutro
+                    }
                 ]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false,
                 plugins: {
-                    legend: {
-                        position: "bottom",
-                        labels: {
-                            usePointStyle: true,
-                            padding: 15,
-                            font: {
-                                size: 13,
-                                weight: "600"
-                            },
-                            color: "#333"
-                        }
-                    },
+                    legend: { position: "top" },
                     tooltip: {
                         callbacks: {
                             label: (ctx) =>
@@ -829,18 +825,8 @@ class SalesDashboard extends Templates {
                     y: {
                         beginAtZero: true,
                         ticks: {
-                            callback: (v) => formatPrice(v),
-                            color: "#333",
-                            font: { size: 12 }
-                        },
-                        grid: { color: "rgba(0,0,0,0.05)" }
-                    },
-                    x: {
-                        ticks: {
-                            color: "#333",
-                            font: { size: 12 }
-                        },
-                        grid: { display: false }
+                            callback: (v) => formatPrice(v)
+                        }
                     }
                 }
             }
@@ -967,7 +953,7 @@ class SalesDashboard extends Templates {
             );
             content.append(
                 $("<div>", { class: "text-sm text-gray-600 flex justify-between" })
-                    .append($("<span>", { text: `${item.veces} días con ${item.clientes} clientes` }))
+                    .append($("<span>", { text: `${item.veces} ocurrencias con ${item.clientes} clientes` }))
                     .append($("<span>", { class: "italic", text: rank === 1 ? "⭐ Mejor día" : "" }))
             );
 
@@ -977,19 +963,6 @@ class SalesDashboard extends Templates {
 
         container.append(header, list);
         $("#" + opts.parent).html(container);
-    }
-
-    handleCategoryChange(idudn) {
-        // Filtrar las clasificaciones que coincidan con el idudn
-        let lsclasificacion = clasificacion.filter((item) => item.udn == idudn);
-
-        // Generar options HTML para el select
-        const optionsHtml = lsclasificacion.map(item => 
-            `<option value="${item.id}">${item.valor}</option>`
-        ).join('');
-
-        // Actualizar el select con las opciones
-        $('#category').html(optionsHtml);
     }
 }
 
@@ -1005,7 +978,7 @@ class Sales extends Templates {
         this.listSales()
     }
 
-
+   
 
     layout() {
         this.primaryLayout({
@@ -1163,6 +1136,7 @@ class MonthlySales extends Templates {
                 },
             ],
         });
+        const currentMonth = moment().month() + 1; // Mes actual (1-12)
         setTimeout(() => {
             // $(`#filterBar${this.PROJECT_NAME} #mes`).val(currentMonth).trigger("change");
         }, 100);
@@ -1226,7 +1200,7 @@ class CumulativeAverages extends Templates {
                     lbl: "Seleccionar udn",
                     class: "col-sm-3",
                     data: lsudn,
-                    onchange: `cumulativeAverages.ls()`,
+                    onchange: `acumulados.ls()`,
                 },
                 {
                     opc: "select",
@@ -1237,7 +1211,7 @@ class CumulativeAverages extends Templates {
                         const year = moment().year() - i;
                         return { id: year, valor: year.toString() };
                     }),
-                    onchange: `cumulativeAverages.ls()`,
+                    onchange: `acumulados.ls()`,
                 },
                 {
                     opc: "select",
@@ -1249,13 +1223,13 @@ class CumulativeAverages extends Templates {
                         valor: m,
                         selected: i === currentMonth
                     })),
-                    onchange: `cumulativeAverages.ls()`,
+                    onchange: `acumulados.ls()`,
                 },
             ],
         });
         // initialized.
         setTimeout(() => {
-            // $(`#filterBar${this.PROJECT_NAME} #mes`).val(currentMonth + 1).trigger("change");
+            $(`#filterBar${this.PROJECT_NAME} #mes`).val(currentMonth + 1).trigger("change");
         }, 100);
     }
 
@@ -1269,19 +1243,23 @@ class CumulativeAverages extends Templates {
             </div>
             <div id="container-table-acumulados"></div>
         `);
-        // this.createTable({
-        //     parent: "container-table-acumulados",
-        //     idFilterBar: `filterBar${this.PROJECT_NAME}`,
-        //     data: { opc: 'listAcumulados' },
-        //     coffeesoft: true,
-        //     conf: { datatable: false, pag: 15 },
-        //     attr: {
-        //         id: "tbI",
-        //         theme: 'corporativo',
-        //         center: [1, 2, 3],
-        //         right: [6]
-        //     },
-        // });
+        this.createTable({
+            parent: "container-table-acumulados",
+            idFilterBar: `filterBar${this.PROJECT_NAME}`,
+            data: { opc: 'listAcumulados' },
+            coffeesoft: true,
+            conf: { datatable: false, pag: 15 },
+            attr: {
+                id: "tbI",
+                theme: 'corporativo',
+                center: [1, 2, 3],
+                right: [6]
+            },
+        });
     }
 }
+
+
+
+```
 

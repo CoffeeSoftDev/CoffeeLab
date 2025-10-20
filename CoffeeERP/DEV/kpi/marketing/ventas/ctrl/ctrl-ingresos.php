@@ -8,7 +8,7 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS"); // Métodos permitid
 header("Access-Control-Allow-Headers: Content-Type"); // Encabezados permitidos
 
 require_once '../mdl/mdl-ingresos.php';
-require_once('../../conf/coffeSoft.php');
+require_once('../../../../conf/coffeSoft.php');
 
 class ctrl extends mdl {
 
