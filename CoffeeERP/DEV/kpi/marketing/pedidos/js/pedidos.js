@@ -57,7 +57,7 @@ class App extends Templates {
             parent: `filterBarPedidos`,
             title: "Módulo de Pedidos 🛵",
             subtitle: "Administra tus pedidos de manera eficiente.",
-            onClick: () => app.redirectToHome(),
+            onClick: () => this.redirectToHome(),
         });
 
         this.tabLayout({
@@ -249,8 +249,8 @@ class Pedidos extends Templates {
             attr: {
                 id: "tbPedidos",
                 theme: 'corporativo',
-                center: [1, 6, 7, 8, 9],
-                right: [5]
+                center: [1, 6, 8, 9],
+                right: [7]
             }
         });
     }
@@ -523,7 +523,7 @@ class Pedidos extends Templates {
                 $('#dropdownAnuncioMenu').toggle();
             });
 
-            $('#dropdownAnuncioMenu div').on('click', function () {
+            $(document).on('click', '#dropdownAnuncioMenu div', function () {
                 const value = $(this).data('value');
                 const icon = $(this).data('icon');
                 const text = $(this).text().trim();
