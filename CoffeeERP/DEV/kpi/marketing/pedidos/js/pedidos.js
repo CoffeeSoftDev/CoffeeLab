@@ -71,7 +71,7 @@ class App extends Templates {
                     id: "dashboard",
                     tab: "Dashboard",
                     class: "mb-1",
-                    onClick: () => dashboardOrder.render()
+                    onClick: () => dashboardOrder.renderDashboard()
                 },
                 {
                     id: "pedidos",

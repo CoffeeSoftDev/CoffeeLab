@@ -197,6 +197,70 @@ class mdl extends CRUD {
         return $result[0]['total_pedidos'] ?? 0;
     }
 
+    function getDashboardCardsByYear($array) {
+        $query = "
+            SELECT 
+                (SELECT SUM(monto) FROM {$this->bd}pedido 
+                 WHERE udn_id = ? AND YEAR(fecha_creacion) = ? AND active = 1) as venta_anio,
+                (SELECT COUNT(*) FROM {$this->bd}pedido 
+                 WHERE udn_id = ? AND YEAR(fecha_creacion) = ? AND active = 1) as pedidos_anio,
+                (SELECT COUNT(DISTINCT cliente_id) FROM {$this->bd}pedido 
+                 WHERE udn_id = ? AND YEAR(fecha_creacion) = ? AND active = 1) as clientes,
+                (SELECT AVG(monto) FROM {$this->bd}pedido 
+                 WHERE udn_id = ? AND YEAR(fecha_creacion) = ? AND active = 1) as cheque_promedio,
+                (SELECT c.nombre FROM {$this->bd}pedido p 
+                 JOIN {$this->bd}canal c ON p.canal_id = c.id 
+                 WHERE p.udn_id = ? AND YEAR(p.fecha_creacion) = ? AND p.active = 1 
+                 GROUP BY c.id, c.nombre 
+                 ORDER BY SUM(p.monto) DESC LIMIT 1) as canal_principal
+        ";
+        return $this->_Read($query, $array);
+    }
+
+    function getChannelYearlyData($array) {
+        $query = "
+            SELECT 
+                c.nombre as canal,
+                MONTH(p.fecha_creacion) as mes,
+                SUM(p.monto) as total_monto,
+                COUNT(p.id) as total_pedidos
+            FROM {$this->bd}pedido p
+            JOIN {$this->bd}canal c ON p.canal_id = c.id
+            WHERE p.udn_id = ? 
+            AND YEAR(p.fecha_creacion) = ?
+            AND p.active = 1
+            AND c.active = 1
+            GROUP BY c.id, c.nombre, MONTH(p.fecha_creacion)
+            ORDER BY c.nombre, MONTH(p.fecha_creacion)
+        ";
+        return $this->_Read($query, $array);
+    }
+
+    function getChannelPerformanceByYear($array) {
+        $query = "
+            SELECT 
+                c.nombre as canal,
+                c.id as canal_id,
+                COUNT(p.id) as total_pedidos,
+                SUM(p.monto) as total_monto,
+                AVG(p.monto) as promedio_monto,
+                (SUM(p.monto) / (
+                    SELECT SUM(monto) 
+                    FROM {$this->bd}pedido 
+                    WHERE udn_id = ? AND YEAR(fecha_creacion) = ? AND active = 1
+                )) * 100 as porcentaje
+            FROM {$this->bd}pedido p
+            JOIN {$this->bd}canal c ON p.canal_id = c.id
+            WHERE p.udn_id = ? 
+            AND YEAR(p.fecha_creacion) = ?
+            AND p.active = 1
+            AND c.active = 1
+            GROUP BY c.id, c.nombre
+            ORDER BY total_monto DESC
+        ";
+        return $this->_Read($query, array_merge($array, $array));
+    }
+
     function lsUDN() {
         $query = "
             SELECT idUDN AS id, UDN AS valor
