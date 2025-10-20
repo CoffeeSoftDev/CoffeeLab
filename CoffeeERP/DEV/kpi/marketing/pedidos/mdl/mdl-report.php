@@ -80,7 +80,8 @@ class mdl extends CRUD {
             ORDER BY MONTH(p.fecha_pedido)
         ";
         
-        return $this->_Read($query, $filters)[0];
+        $result = $this->_Read($query, $filters);
+        return $result[0] ?? ['mes' => $filters[1], 'cantidad' => 0];
     }
 
     function listVentasByCanal($filters) {
