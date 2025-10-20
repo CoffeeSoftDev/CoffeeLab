@@ -27,7 +27,6 @@
 
           <!-- Módulos del Sistema -->
             <script src="js/pedidos.js?t=<?php echo time(); ?>"></script>
-            <script src="js/dashboard.js?t=<?php echo time(); ?>"></script>
             <script src="js/productos.js?t=<?php echo time(); ?>"></script>
             <script src="js/canales.js?t=<?php echo time(); ?>"></script>
             <script src="js/report.js?t=<?php echo time(); ?>"></script>

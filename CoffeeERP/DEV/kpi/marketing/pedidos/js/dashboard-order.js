@@ -1,5 +1,5 @@
-let api = 'ctrl/ctrl-dashboard-order.php';
-let app, salesDashboard;
+let apis = 'ctrl/ctrl-dashboard-order.php';
+// let app, salesDashboard;
 let udn, lsudn;
 
 $(async () => {
@@ -34,13 +34,11 @@ $(async () => {
     udn = data.udn;
     lsudn = data.udn;
 
-    app = new App(api, "root");
-    salesDashboard = new SalesDashboard(api, "root");
+    // app = new App(api, "root");
     
-    app.render();
 });
 
-class App extends Templates {
+class AppS extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "dashboardOrder";
@@ -127,7 +125,7 @@ class SalesDashboard extends Templates {
 
     async layout() {
         this.dashboardComponent({
-            parent: "containerDashboard",
+            parent: "container-dashboard",
             id: "dashboardComponent",
             title: "📊 Dashboard de Ventas",
             subtitle: "Análisis anual, por periodo y por hora.",

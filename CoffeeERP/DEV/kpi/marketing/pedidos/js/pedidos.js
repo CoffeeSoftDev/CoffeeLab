@@ -1,8 +1,8 @@
 const api = 'ctrl/ctrl-pedidos.php';
-const apiDashboard = 'ctrl/ctrl-dashboard.php';
+const api_dashboard = 'ctrl/ctrl-dashboard-order.php';
 
 
-let pedidos, dashboard, producto, canal;
+let pedidos, dashboard, producto, canal,dashboardOrder;
 let canales, productos, campanas, lsudn, udn, redes_sociales, anuncios;
 
 $(async () => {
@@ -15,15 +15,19 @@ $(async () => {
     redes_sociales = data.redes_sociales;
     anuncios = data.anuncios;
 
-    app = new App(api, "root");
+    app     = new App(api, "root");
     pedidos = new Pedidos(api, 'root');
-    // dashboard = new Dashboard(api, "root");
-    // history = new AnnualHistory(api, "root");
-    // admin = new Admin(api_admin, "root");
-
-
-
+    report  = new Report(api_report, "root");
+    admin   = new Admin(api_canal, "root");
+    dashboardOrder = new DashboardOrder(api_dashboard, "root");
+    
+    
+    
+    
     app.render();
+    report.render();
+    admin.render()
+    dashboardOrder.render();
 
 });
 
@@ -143,7 +147,6 @@ class App extends Templates {
         $(`#${opts.parent}`).html(container);
     }
 }
-
 
 
 class Pedidos extends Templates {
