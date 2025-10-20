@@ -48,15 +48,6 @@ $(async () => {
             .transform {
                 transform: translateX(var(--tw-translate-x)) translateY(var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
             }
-            
-            .opacity-50 {
-                opacity: 0.5 !important;
-            }
-            
-            select:disabled {
-                background-color: #f3f4f6 !important;
-                cursor: not-allowed !important;
-            }
         </style>
     `);
     $('head').append(loadingStyles);
@@ -914,44 +905,19 @@ class DashboardOrder extends Templates {
 
     }
 
-    onPeriodTypeChange() {
-        const tipoPeriodo = $('#filterBarDashboard #tipoPeriodo').val();
-        const mesSelect = $('#filterBarDashboard #mes');
-
-        if (tipoPeriodo === 'anio') {
-            // Deshabilitar selector de mes cuando se consulta por año
-            mesSelect.prop('disabled', true).addClass('opacity-50');
-        } else {
-            // Habilitar selector de mes cuando se consulta por mes
-            mesSelect.prop('disabled', false).removeClass('opacity-50');
-        }
-
-        // Actualizar dashboard con el nuevo tipo de periodo
-        this.renderDashboard();
-    }
-
     async renderDashboard() {
         let udn = $('#filterBarDashboard #udn').val();
         let month = $('#filterBarDashboard #mes').val();
         let year = $('#filterBarDashboard #anio').val();
-        let tipoPeriodo = $('#filterBarDashboard #tipoPeriodo').val();
-
-        // Preparar datos según el tipo de periodo
-        let requestData = {
-            opc: "apiPromediosDiarios",
-            udn: udn,
-            anio: year,
-            tipoPeriodo: tipoPeriodo
-        };
-
-        // Solo incluir mes si el tipo de periodo es "mes"
-        if (tipoPeriodo === 'mes') {
-            requestData.mes = month;
-        }
 
         let mkt = await useFetch({
             url: api_dashboard,
-            data: requestData,
+            data: {
+                opc: "apiPromediosDiarios",
+                udn: udn,
+                mes: month,
+                anio: year,
+            },
         });
 
         this.showCards(mkt.dashboard);
@@ -970,26 +936,15 @@ class DashboardOrder extends Templates {
                     opc: "select",
                     id: "udn",
                     lbl: "UDN",
-                    class: "col-sm-2",
+                    class: "col-sm-3",
                     data: lsudn,
                     onchange: `dashboardOrder.renderDashboard()`,
                 },
                 {
                     opc: "select",
-                    id: "tipoPeriodo",
-                    lbl: "Tipo de Consulta",
-                    class: "col-sm-2",
-                    data: [
-                        { id: "mes", valor: "🔹 Por mes" },
-                        { id: "anio", valor: "🔹 Por año" }
-                    ],
-                    onchange: `dashboardOrder.onPeriodTypeChange()`,
-                },
-                {
-                    opc: "select",
                     id: "mes",
                     lbl: "Mes",
-                    class: "col-sm-2",
+                    class: "col-sm-3",
                     data: moment.months().map((m, i) => ({ id: i + 1, valor: m })),
                     onchange: `dashboardOrder.renderDashboard()`,
                 },
@@ -997,7 +952,7 @@ class DashboardOrder extends Templates {
                     opc: "select",
                     id: "anio",
                     lbl: "Año",
-                    class: "col-sm-2",
+                    class: "col-sm-3",
                     data: Array.from({ length: 5 }, (_, i) => {
                         const year = moment().year() - i;
                         return { id: year, valor: year.toString() };
@@ -1010,7 +965,6 @@ class DashboardOrder extends Templates {
         const currentMonth = moment().month() + 1;
         setTimeout(() => {
             $(`#filterBarDashboard #mes`).val(currentMonth);
-            $(`#filterBarDashboard #tipoPeriodo`).val("mes");
         }, 100);
     }
 
@@ -1140,33 +1094,11 @@ class DashboardOrder extends Templates {
     }
 
     renderBarChart(data) {
-        const tipoPeriodo = $('#filterBarDashboard #tipoPeriodo').val();
-        const mes = $('#filterBarDashboard #mes option:selected').text();
-        const anio = $('#filterBarDashboard #anio').val();
-
-        // Título dinámico según el tipo de periodo
-        let titleText = "Ventas por Canal";
-        if (tipoPeriodo === 'mes') {
-            titleText = `Ventas por Canal - ${mes} ${anio}`;
-        } else {
-            titleText = `Ventas por Canal - Año ${anio}`;
-        }
-
         const container = $("<div>", { class: "p-4" });
-
-        // Header con título y badge del tipo de consulta
-        const header = $("<div>", { class: "flex justify-between items-center mb-4" });
         const title = $("<h3>", {
-            class: "text-lg font-semibold text-gray-800",
-            text: titleText
+            class: "text-lg font-semibold mb-4 text-gray-800",
+            text: "Ventas por Canal"
         });
-
-        const badge = $("<span>", {
-            class: `px-3 py-1 rounded-full text-xs font-semibold ${tipoPeriodo === 'mes' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`,
-            text: tipoPeriodo === 'mes' ? '📅 Consulta Mensual' : '📊 Consulta Anual'
-        });
-
-        header.append(title, badge);
         const canvasContainer = $("<div>", {
             class: "chart-container"
         });
@@ -1176,7 +1108,7 @@ class DashboardOrder extends Templates {
         });
 
         canvasContainer.append(canvas);
-        container.append(header, canvasContainer);
+        container.append(title, canvasContainer);
         $("#barChartContainer").html(container);
 
         const ctx = document.getElementById("barChart").getContext("2d");

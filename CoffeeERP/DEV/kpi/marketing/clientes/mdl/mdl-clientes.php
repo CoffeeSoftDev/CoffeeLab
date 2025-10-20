@@ -266,12 +266,7 @@ class mdl extends CRUD {
         return !empty($result) ? $result[0] : null;
     }
 
-    /**
-     * Obtiene el historial de pedidos de un cliente
-     * @param int $clienteId ID del cliente
-     * @param int $limit Límite de registros (opcional)
-     * @return array Lista de pedidos del cliente
-     */
+ 
     function getHistorialPedidos($clienteId, $limit = 10) {
         $query = "
             SELECT 
@@ -286,10 +281,10 @@ class mdl extends CRUD {
             LEFT JOIN udn u ON p.udn_id = u.idUDN
             WHERE p.cliente_id = ?
             ORDER BY p.fecha_pedido DESC
-            LIMIT ?
+            LIMIT 10
         ";
 
-        return $this->_Read($query, [$clienteId, $limit]);
+        return $this->_Read($query, [$clienteId]);
     }
 
     /**
@@ -430,5 +425,14 @@ class mdl extends CRUD {
         ";
 
         return $this->_Read($query, $params);
+    }
+
+    function updateClientVipStatus($array) {
+        return $this->_Update([
+            'table' => "{$this->bd}cliente",
+            'values' => $array['values'],
+            'where' => 'id = ?',
+            'data' => $array['data']
+        ]);
     }
 }

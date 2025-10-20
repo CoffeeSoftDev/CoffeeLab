@@ -31,12 +31,10 @@ class ctrl extends mdl {
         foreach ($ls as $key) {
             $a = [];
 
-            $nombreCompleto = trim($key['nombre'] . ' ' . $key['apellido_paterno'] . ' ' . $key['apellido_materno']);
+            $nombreCompleto = $key['nombre'];
             $correo = $key['correo'] ?? '';
 
-            $badgeVIP = $key['vip'] == 1 
-                ? '<span class="px-2 py-1 rounded-md text-xs font-semibold bg-orange-400 text-white"><i class="icon-star"></i> VIP</span>' 
-                : '<span class="px-2 py-1 rounded-md text-xs font-semibold bg-gray-300 text-gray-600">Regular</span>';
+            $badgeVIP = $this->renderVipBadge($key['id'], $key['vip']);
 
             if ($key['active'] == 1) {
                 $a[] = [
@@ -65,7 +63,7 @@ class ctrl extends mdl {
                 'Unidad de Negocio'   => $key['udn_nombre'],
                 'Fecha de cumpleaños' => formatSpanishDate($key['fecha_cumpleaños']),
                 'Estatus'             => renderStatus($key['active']),
-                'VIP'                 => ['html' => $badgeVIP, 'class' => 'text-center'],
+                'VIP'                 => ['html' => $badgeVIP, 'class' => 'text-center '],
                 'a'                   => $a
             ];
         }
@@ -222,9 +220,7 @@ class ctrl extends mdl {
             $nombreCompleto = trim($key['nombre'] . ' ' . $key['apellido_paterno'] . ' ' . $key['apellido_materno']);
             $correo = $key['correo'] ?? '';
 
-            $badgeVIP = $key['vip'] == 1 
-                ? '<span class="px-2 py-1 rounded-md text-xs font-semibold bg-yellow-500 text-white"><i class="icon-star"></i> VIP</span>' 
-                : '';
+            $badgeVIP = $this->renderVipBadge($key['id'], $key['vip']);
 
             $userCard = renderUserCard($nombreCompleto, $correo,$key['color'] );
             $clienteConBadge = $userCard . ($badgeVIP ? '<div class="mt-1">' . $badgeVIP . '</div>' : '');
@@ -324,6 +320,66 @@ class ctrl extends mdl {
             'message' => $message,
             'data' => $data
         ];
+    }
+
+    function updateClientStatus() {
+        $status = 500;
+        $message = 'No se pudo actualizar el estado VIP del cliente';
+
+        if (empty($_POST['id'])) {
+            return [
+                'status' => 400,
+                'message' => 'ID de cliente no proporcionado'
+            ];
+        }
+
+        if (!isset($_POST['vip'])) {
+            return [
+                'status' => 400,
+                'message' => 'Estado VIP no proporcionado'
+            ];
+        }
+
+        $vipStatus = $_POST['vip'] == 1 ? 1 : 0;
+        $clientId = $_POST['id'];
+
+        // Preparar datos para actualización
+        $updateData = [
+            'values' => 'vip = ?',
+            'data' => [$vipStatus, $clientId]
+        ];
+
+        $updated = $this->updateClientVipStatus($updateData);
+
+        if ($updated) {
+            $status = 200;
+            $statusText = $vipStatus == 1 ? 'VIP' : 'Regular';
+            $message = "Cliente actualizado a {$statusText} correctamente";
+        }
+
+        return [
+            'status' => $status,
+            'message' => $message,
+            'new_status' => $vipStatus
+        ];
+    }
+
+    private function renderVipBadge($clientId, $vipStatus) {
+        if ($vipStatus == 1) {
+            return '<span class="vip-badge px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-600 cursor-pointer hover:bg-orange-200 transition-colors" 
+                        data-client-id="' . $clientId . '" 
+                        data-vip-status="1" 
+                        title="Clic para cambiar a Regular">
+                        <i class="icon-star"></i> VIP
+                    </span>';
+        } else {
+            return '<span class="vip-badge px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 cursor-pointer hover:bg-gray-200 transition-colors" 
+                        data-client-id="' . $clientId . '" 
+                        data-vip-status="0" 
+                        title="Clic para cambiar a VIP">
+                        Regular
+                    </span>';
+        }
     }
 
 

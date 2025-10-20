@@ -5,6 +5,31 @@ let udnData = [];
 const api = "ctrl/ctrl-clientes.php";
 
 $(async () => {
+    // Agregar estilos CSS para badges VIP interactivos
+    const vipBadgeStyles = $(`
+        <style>
+            .vip-badge {
+                transition: all 0.2s ease-in-out;
+                user-select: none;
+            }
+            
+            .vip-badge:hover {
+                transform: scale(1.05);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            
+            .vip-badge:active {
+                transform: scale(0.95);
+            }
+            
+            .vip-badge.updating {
+                opacity: 0.6;
+                pointer-events: none;
+            }
+        </style>
+    `);
+    $('head').append(vipBadgeStyles);
+
     const data = await useFetch({ url: api, data: { opc: "init" } });
     udnData = data.udn;
 
@@ -167,6 +192,30 @@ class Clientes extends Templates {
                 center: [5, 6, 7]
             }
         });
+
+        // Agregar event listeners a los badges VIP después de que se renderice la tabla
+        setTimeout(() => {
+            this.attachVipBadgeEvents();
+        }, 500);
+    }
+
+    attachVipBadgeEvents() {
+        // Remover event listeners existentes para evitar duplicados
+        $(document).off('click', '.vip-badge');
+
+        // Agregar event listener para los badges VIP
+        $(document).on('click', '.vip-badge', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const badge = $(event.currentTarget);
+            const clientId = badge.data('client-id');
+            const currentVipStatus = badge.data('vip-status');
+
+            if (clientId) {
+                this.updateClientVipStatus(clientId, currentVipStatus);
+            }
+        });
     }
 
     // Clients.
@@ -270,6 +319,95 @@ class Clientes extends Templates {
                 }
             }
         });
+    }
+
+    updateClientVipStatus(id, currentVipStatus) {
+        const isVip = currentVipStatus == 1;
+        const newStatus = isVip ? 0 : 1;
+        const statusText = isVip ? 'Regular' : 'VIP';
+        const currentStatusText = isVip ? 'VIP' : 'Regular';
+
+        const title = isVip
+            ? '¿Deseas cambiar este cliente a Regular?'
+            : '¿Deseas actualizar este cliente a VIP?';
+
+        const text = isVip
+            ? 'El cliente perderá los beneficios VIP y será tratado como cliente regular.'
+            : 'El cliente obtendrá beneficios especiales y prioridad en el servicio.';
+
+        // Mostrar estado de carga en el badge
+        const badge = $(`[data-client-id="${id}"]`);
+        badge.addClass('updating').html('⏳ Actualizando...');
+
+        this.swalQuestion({
+            opts: {
+                title: title,
+                text: text,
+                icon: "question",
+                confirmButtonText: `Sí, cambiar a ${statusText}`,
+                cancelButtonText: "Cancelar"
+            },
+            data: {
+                opc: "updateClientStatus",
+                id: id,
+                vip: newStatus
+            },
+            methods: {
+                send: (response) => {
+                    if (response.status === 200) {
+                        // Actualizar el badge dinámicamente sin recargar la tabla
+                        this.updateVipBadgeInTable(id, newStatus);
+
+                        alert({
+                            icon: "success",
+                            title: "¡Estado actualizado!",
+                            text: `Cliente cambiado a ${statusText} exitosamente.`
+                        });
+
+                        this.ls()
+                    } else {
+                        // Restaurar el badge al estado anterior en caso de error
+                        this.updateVipBadgeInTable(id, currentVipStatus);
+
+                        alert({
+                            icon: "error",
+                            title: "Error",
+                            text: response.message || "No se pudo actualizar el estado del cliente."
+                        });
+                    }
+                },
+                cancel: () => {
+                    // Restaurar el badge si el usuario cancela
+                    this.updateVipBadgeInTable(id, currentVipStatus);
+                }
+            }
+        });
+    }
+
+    updateVipBadgeInTable(clientId, newVipStatus) {
+        // Buscar el badge en la tabla y actualizarlo
+        const badge = $(`[data-client-id="${clientId}"]`);
+
+        if (badge.length > 0) {
+            // Remover clase de actualización
+            badge.removeClass('updating');
+
+            if (newVipStatus == 1) {
+                // Cambiar a VIP
+                badge.removeClass('bg-gray-100 text-gray-600 hover:bg-gray-200')
+                    .addClass('bg-orange-100 text-yellow-600 hover:bg-orange-200')
+                    .html('<i class="icon-star"></i> VIP')
+                    .attr('data-vip-status', '1')
+                    .attr('title', 'Clic para cambiar a Regular');
+            } else {
+                // Cambiar a Regular
+                badge.removeClass('bg-orange-100 text-yellow-600 hover:bg-orange-200')
+                    .addClass('bg-gray-100 text-gray-600 hover:bg-gray-200')
+                    .html('Regular')
+                    .attr('data-vip-status', '0')
+                    .attr('title', 'Clic para cambiar a VIP');
+            }
+        }
     }
 
     jsonFormCliente() {
@@ -455,7 +593,7 @@ class Analitycs extends Templates {
         const cliente = data.cliente;
         const historial = data.historial;
 
-        const nombreCompleto = `${cliente.nombre} ${cliente.apellido_paterno || ''} ${cliente.apellido_materno || ''}`.trim();
+        const nombreCompleto = `${cliente.nombre} `;
         const iniciales = this.getInitials(nombreCompleto);
 
         const badgeVIP = cliente.vip == 1
@@ -486,7 +624,7 @@ class Analitycs extends Templates {
                             </div>
                         </div>
                         <div class="text-right">
-                            <span class="text-lg font-bold text-green-600">$${parseFloat(pedido.monto).toFixed(2)}</span>
+                            <span class="text-sm font-bold text-gray-600">$${parseFloat(pedido.monto).toFixed(2)}</span>
                         </div>
                     </div>
                 `;
@@ -513,7 +651,7 @@ class Analitycs extends Templates {
                             <div class="flex-1">
                                 <div class="flex items-center gap-2 mb-1">
                                     <h3 class="text-xl font-bold text-gray-800">${nombreCompleto}</h3>
-                                    ${badgeVIP}
+                                   
                                 </div>
                                 <div class="flex flex-wrap gap-3 text-sm text-gray-600">
                                     <span class="flex items-center gap-1">
@@ -527,6 +665,10 @@ class Analitycs extends Templates {
                                     <span class="flex items-center gap-1">
                                         <i class="icon-building "></i>
                                         ${cliente.udn_nombre}
+                                    </span>
+
+                                    <span class"flex items-center gap-1">
+                                     ${badgeVIP}
                                     </span>
                                 </div>
                             </div>
