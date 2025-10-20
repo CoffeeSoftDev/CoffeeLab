@@ -27,7 +27,7 @@ class mdl extends CRUD {
             'table' => "{$this->bd}canal",
             'values' => "id, nombre AS valor",
             'where' => 'active = ?',
-            'order' => ['ASC' => 'nombre'],
+            'order' => ['ASC' => 'id'],
             'data' => $array
         ]);
     }
@@ -35,9 +35,9 @@ class mdl extends CRUD {
     function lsProductos($array) {
         return $this->_Select([
             'table' => "{$this->bd}producto",
-            'values' => "id, nombre AS valor",
+            'values' => "id, nombre AS valor, udn_id",
             'where' => 'active = ?',
-            'order' => ['ASC' => 'nombre'],
+            'order' => ['ASC' => 'id'],
             'data' => $array
         ]);
     }
@@ -70,10 +70,12 @@ class mdl extends CRUD {
                 a.imagen,
                 a.fecha_inicio,
                 a.fecha_fin,
-                c.nombre AS campana_nombre
+                c.nombre AS campana_nombre,
+                c.udn_id
             FROM {$this->bd}anuncio a
             LEFT JOIN {$this->bd}campaña c ON a.campaña_id = c.id
             WHERE c.active = 1
+            AND fecha_resultado IS NULL
             ORDER BY a.fecha_inicio DESC
         ";
         return $this->_Read($query, null);
@@ -132,11 +134,14 @@ class mdl extends CRUD {
                 rs.nombre AS red_social_nombre,
                 rs.color AS red_social_color,
                 rs.icono AS red_social_icono,
-                p.udn_id
+                p.udn_id,
+                u.usser AS user_nombre,
+                p.user_id
             FROM {$this->bd}pedido p
             LEFT JOIN {$this->bd}cliente cl ON p.cliente_id = cl.id
             LEFT JOIN {$this->bd}canal c ON p.canal_id = c.id
             LEFT JOIN {$this->bd}red_social rs ON p.red_social_id = rs.id
+            LEFT JOIN usuarios u ON p.user_id = idUser 
             WHERE p.udn_id = ?
             AND p.active = 1
             AND p.fecha_pedido IS NOT NULL

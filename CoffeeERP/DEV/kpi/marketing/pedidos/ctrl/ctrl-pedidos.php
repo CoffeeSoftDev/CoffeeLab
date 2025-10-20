@@ -11,8 +11,6 @@ require_once '../mdl/mdl-pedidos.php';
 class ctrl extends mdl {
 
     function init() {
-        $udn = $_POST['udn'] ?? 4;
-
         return [
             'udn'            => $this-> lsUDN(),
             'canales'        => $this-> lsCanales([1]),
@@ -53,27 +51,31 @@ class ctrl extends mdl {
         foreach ($ls as $key) {
             $diasTranscurridos = (strtotime(date('Y-m-d')) - strtotime($key['fecha_creacion'])) / 86400;
             $puedeEditar       = $diasTranscurridos <= 7;
-            
-            $__row[] = [
+
+            $row = [
                 'id'       => $key['id'],
-                'Fecha'    => date('d/m/Y', strtotime($key['fecha_pedido'])),
+                'Fecha pedido'    => date('d/m/Y', strtotime($key['fecha_pedido'])),
+                'Creado el'  => date('d/m/Y H:i', strtotime($key['fecha_creacion'])),
                 'Cliente'  => $key['cliente_nombre'],
                 'Teléfono' => $key['cliente_telefono'],
-                
                 'Canal'    => [
-                    'html' => '<div class="flex items-center gap-2">
-                                <i class = "' . ($key['red_social_icono'] ?? '') . '" style = "color:' . ($key['red_social_color'] ?? '#000') . '"></i>
-                                <span>' . ($key['canal_nombre'] ?? 'N/A') . '</span>
-                              </div>',
+                    'html' => '<div class="flex items-center gap-2">'
+                        . canalSVG($key['red_social_nombre']) .
+                        '<span>' . ($key['canal_nombre'] ?? 'N/A') . '</span>' .
+                    '</div>',
                     'class' => 'text-left'
                 ],
-
                 'Monto'    => evaluar($key['monto']),
-                'Llegada'  => renderArrivalStatus($key['llego_establecimiento'], $key['udn_id']),
                 'Envío'    => renderEnvio($key['envio_domicilio']),
                 'Pago'   => renderStatus($key['pago_verificado']),
-                'dropdown' => dropdown($key['id'], $key['active'], $puedeEditar, $key['pago_verificado'])
+                'Capturado por' => $key['user_nombre'] ?? '',
+                'dropdown' => dropdown($key['id'], $key['active'], $puedeEditar, $key['pago_verificado'], $key['udn_id'], $key['llego_establecimiento'])
             ];
+            // Solo agregar llegada si udn_id == 1
+            if ($key['udn_id'] == 1) {
+                $row['Llegada'] = renderArrivalStatus($key['llego_establecimiento'], $key['udn_id']);
+            }
+            $__row[] = $row;
         }
         
         return [
@@ -90,6 +92,8 @@ class ctrl extends mdl {
             // Configuración inicial del pedido
             $fecha_creacion = date('Y-m-d H:i:s');
             $udn_id = $_POST['udn_id'] ?? 4;
+            $idUser = isset($_COOKIE['IDU']) ? $_COOKIE['IDU'] : null;
+
             
             // Determinar el cliente_id
             $clienteId = null;
@@ -126,16 +130,18 @@ class ctrl extends mdl {
                 'fecha_creacion'   => $fecha_creacion,
                 'canal_id'         => $_POST['canal_id'],
                 'cliente_id'       => $clienteId,
+                'user_id'          => $idUser,
                 'udn_id'           => $udn_id,
-                'red_social_id'    => $_POST['red_social_id'],
-                'anuncio_id'       => $_POST['anuncio_id'] ?? null,
+                'red_social_id'    => $this->sanitize($_POST['red_social_id'] ?? null),
+                'anuncio_id'       => $this->sanitize($_POST['anuncio_id'] ?? null),
                 'pago_verificado'  => 0,
                 'active'           => 1
             ];
+    
             
             $values = $this->util->sql($pedidoData);
             $create = $this->createPedido($values);
-            
+
             if ($create) {
                 $pedidoId = $this->maxPedido();
                 
@@ -344,7 +350,7 @@ class ctrl extends mdl {
     }
 }
 
-function dropdown($id, $active, $puedeEditar, $pagoVerificado) {
+function dropdown($id, $active, $puedeEditar, $pagoVerificado, $udn, $llego){
     $options = [];
     
     if ($puedeEditar && $active == 1) {
@@ -362,12 +368,13 @@ function dropdown($id, $active, $puedeEditar, $pagoVerificado) {
             'onclick' => "pedidos.verifyTransfer($id)"
         ];
     }
-    
-    $options[] = [
-        'icon' => 'icon-map-pin',
-        'text' => 'Registrar Llegada',
-        'onclick' => "pedidos.registerArrival($id)"
-    ];
+    if ($udn == 1 && $llego != 1 && $llego != null) {
+        $options[] = [
+            'icon' => 'icon-map-pin',
+            'text' => 'Registrar Llegada',
+            'onclick' => "pedidos.registerArrival($id)"
+        ];
+    }
     
     if ($active == 1) {
         $options[] = [
@@ -402,7 +409,7 @@ function renderStatus($status) {
 
 function renderArrivalStatus($arrived, $udn) {
     if ( $udn == 1) {
-        if ($arrived != null) {
+        if ($arrived != null && $arrived != 0) {
             return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
                     <i class="icon-check"></i>
                     Llegó
@@ -437,6 +444,16 @@ function renderEnvio($envio_domicilio) {
 
 function evaluar($value) {
     return '$' . number_format($value, 2, '.', ',');
+}
+
+function canalSVG($canalNombre) {
+    if (!$canalNombre) return '';
+    $nombre = strtolower(trim($canalNombre));
+    $nombre = preg_replace('/[^a-z0-9_-]/', '', $nombre); // solo letras, números, guion y guion bajo
+    $svgPath = '../../marketing/img/' .  $nombre . '.svg';
+   
+        return '<img src="' . $svgPath . '" class="w-6 h-6 object-contain">';
+ 
 }
 
 $obj = new ctrl();
