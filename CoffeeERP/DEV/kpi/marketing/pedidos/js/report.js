@@ -4,6 +4,54 @@ let app, report, admin;
 let lsUDN, lsCanales, lsAños;
 
 $(async () => {
+    // Agregar estilos CSS para animaciones de carga
+    const loadingStyles = $(`
+        <style>
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.5; }
+            }
+            
+            .animate-pulse {
+                animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+            
+            .transition-all {
+                transition-property: all;
+                transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            
+            .duration-500 {
+                transition-duration: 500ms;
+            }
+            
+            .ease-out {
+                transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+            }
+            
+            .opacity-0 {
+                opacity: 0;
+            }
+            
+            .opacity-100 {
+                opacity: 1;
+            }
+            
+            .translate-y-4 {
+                transform: translateY(1rem);
+            }
+            
+            .translate-y-0 {
+                transform: translateY(0);
+            }
+            
+            .transform {
+                transform: translateX(var(--tw-translate-x)) translateY(var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+            }
+        </style>
+    `);
+    $('head').append(loadingStyles);
+
     const data = await useFetch({ url: api, data: { opc: "init" } });
     lsUDN = data.udn;
     lsCanales = data.canales;
@@ -12,7 +60,7 @@ $(async () => {
     app = new AppTemporal(api_report, "root");
     report = new Report(api_report, "root");
     admin = new Admin(api_canal, "root");
-  
+
 });
 
 class AppTemporal extends Templates {
@@ -854,13 +902,13 @@ class DashboardOrder extends Templates {
         this.filterBarDashboard();
         this.renderDashboard()
 
-      
+
     }
 
-    async renderDashboard(){
-        let udn   = $('#filterBarDashboard #udn').val();
+    async renderDashboard() {
+        let udn = $('#filterBarDashboard #udn').val();
         let month = $('#filterBarDashboard #mes').val();
-        let year  = $('#filterBarDashboard #anio').val();
+        let year = $('#filterBarDashboard #anio').val();
 
         let mkt = await useFetch({
             url: api_dashboard,
@@ -1317,42 +1365,82 @@ class DashboardOrder extends Templates {
             : "bg-white text-gray-800 rounded-xl shadow";
         const titleColor = isDark ? "text-gray-300" : "text-gray-600";
 
-        const renderCard = (card, i = "") => {
-            const box = $("<div>", {
-                id: `${opts.id}_${i}`,
-                class: `${cardBase} p-4`
-            });
-
-            const title = $("<p>", {
-                class: `text-sm ${titleColor}`,
-                text: card.title
-            });
-
-            const value = $("<p>", {
-                id: card.id || "",
-                class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
-                text: card.data?.value
-            });
-
-            const description = $("<p>", {
-                class: `text-xs mt-1 ${card.data?.description?.includes('↑') ? 'text-green-600' : card.data?.description?.includes('↓') ? 'text-red-600' : 'text-gray-500'}`,
-                text: card.data?.description || ""
-            });
-
-            box.append(title, value, description);
-            return box;
-        };
-
+        // Mostrar skeleton loading primero
         const container = $("<div>", {
             id: opts.id,
             class: `grid grid-cols-2 md:grid-cols-4 gap-4 ${opts.class}`
         });
 
-        opts.json.forEach((item, i) => {
-            container.append(renderCard(item, i));
-        });
+        // Crear skeleton cards
+        for (let i = 0; i < 4; i++) {
+            const skeletonCard = $("<div>", {
+                class: `${cardBase} p-4 animate-pulse`
+            });
+
+            const skeletonTitle = $("<div>", {
+                class: "h-4 bg-gray-300 rounded w-3/4 mb-3"
+            });
+
+            const skeletonValue = $("<div>", {
+                class: "h-8 bg-gray-300 rounded w-1/2 mb-2"
+            });
+
+            const skeletonDesc = $("<div>", {
+                class: "h-3 bg-gray-300 rounded w-2/3"
+            });
+
+            skeletonCard.append(skeletonTitle, skeletonValue, skeletonDesc);
+            container.append(skeletonCard);
+        }
 
         $(`#${opts.parent}`).html(container);
+
+        // Después de un breve delay, mostrar las tarjetas reales con animación
+        setTimeout(() => {
+            const renderCard = (card, i = "") => {
+                const box = $("<div>", {
+                    id: `${opts.id}_${i}`,
+                    class: `${cardBase} p-4 opacity-0 transform  transition-all duration-500 ease-out`,
+                    style: `animation-delay: ${i * 100}ms`
+                });
+
+                const title = $("<p>", {
+                    class: `text-sm ${titleColor}`,
+                    text: card.title
+                });
+
+                const value = $("<p>", {
+                    id: card.id || "",
+                    class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
+                    text: card.data?.value
+                });
+
+                const description = $("<p>", {
+                    class: `text-xs mt-1 ${card.data?.description?.includes('↑') ? 'text-green-600' : card.data?.description?.includes('↓') ? 'text-red-600' : 'text-gray-500'}`,
+                    text: card.data?.description || ""
+                });
+
+                box.append(title, value, description);
+
+                // Animar entrada después de un pequeño delay
+                setTimeout(() => {
+                    box.removeClass('opacity-0 translate-y-4').addClass('opacity-100 translate-y-0');
+                }, 50);
+
+                return box;
+            };
+
+            const newContainer = $("<div>", {
+                id: opts.id,
+                class: `grid grid-cols-2 md:grid-cols-4 gap-4 ${opts.class}`
+            });
+
+            opts.json.forEach((item, i) => {
+                newContainer.append(renderCard(item, i));
+            });
+
+            $(`#${opts.parent}`).html(newContainer);
+        }, 800);
     }
 
     linearChart(options) {
