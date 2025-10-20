@@ -150,6 +150,7 @@ class Pedidos extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "Pedido";
+        this.productosFiltrados =  [];
     }
 
     render() {
@@ -255,9 +256,13 @@ class Pedidos extends Templates {
         const selectedUdn = $("#filterBarPedido #udn_id").val();
         let selectedClienteId = null;
 
-        // Generar opciones de anuncios con imágenes
+        // Filtrar productos por unidad de negocio seleccionada
+        pedidos.productosFiltrados = productos.filter(p => p.udn_id == selectedUdn);
+
+        // Filtrar anuncios por unidad de negocio seleccionada
+        const anunciosFiltrados = anuncios.filter(a => a.udn_id == selectedUdn);
         let anunciosOptions = '';
-        anuncios.forEach(anuncio => {
+        anunciosFiltrados.forEach(anuncio => {
             const imagenUrl = anuncio.imagen ? `https://www.erp-varoch.com/DEV/${anuncio.imagen}` : 'https://sublimac.com/wp-content/uploads/2017/11/default-placeholder.png';
             anunciosOptions += `
                 <div class="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100" 
@@ -293,7 +298,7 @@ class Pedidos extends Templates {
                 
                 <div class="col-12 col-lg-4 mb-3">
                     <label class="form-label">Unidad de Negocio</label>
-                    <select class="form-control" id="udn_id" required>
+                    <select class="form-control" id="udn_id" required onchange="updateProductosByUdnAdd(this.value)">
                         ${udn.map(u => `<option value="${u.id}" ${u.id == selectedUdn ? 'selected' : ''}>${u.valor}</option>`).join('')}
                     </select>
                 </div>
@@ -308,7 +313,7 @@ class Pedidos extends Templates {
                   <div class="col-12 col-lg-4 mb-3">
                     <label class="form-label">Producto o servicio</label>
                     <select class="form-control" id="producto_id" required multiple>
-                        ${productos.map(r => `<option value="${r.id}">${r.valor}</option>`).join('')}
+                        ${pedidos.productosFiltrados.map(r => `<option value="${r.id}">${r.valor}</option>`).join('')}
                     </select>
                 </div>
                 
@@ -542,6 +547,33 @@ class Pedidos extends Templates {
             $('#monto').on('keyup', function () {
                 validationInputForNumber('#monto');
             });
+
+            window.updateProductosByUdnAdd = function(udnId) {
+                // Actualizar productos
+                pedidos.productosFiltrados = productos.filter(p => p.udn_id == udnId);
+                const options = pedidos.productosFiltrados.map(r => `<option value="${r.id}">${r.valor}</option>`).join('');
+                $('#producto_id').html(options).trigger('change');
+
+                // Actualizar anuncios
+                const anunciosFiltrados = anuncios.filter(a => a.udn_id == udnId);
+                let anunciosOptions = '<div class="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100" data-value="" data-icon=""><span class="text-gray-400">Sin anuncio</span></div>';
+                anunciosFiltrados.forEach(anuncio => {
+                    const imagenUrl = anuncio.imagen ? `https://www.erp-varoch.com/DEV/${anuncio.imagen}` : 'https://sublimac.com/wp-content/uploads/2017/11/default-placeholder.png';
+                    anunciosOptions += `
+                        <div class="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100" 
+                             data-value="${anuncio.id}" 
+                             data-icon="${imagenUrl}">
+                            <img src="${imagenUrl}" class="w-8 h-8 mr-2 rounded object-cover"> 
+                            ${anuncio.valor}
+                        </div>
+                    `;
+                });
+                $('#dropdownAnuncioMenu').html(anunciosOptions);
+                // Reiniciar selección de anuncio
+                $('#anuncio_id').val('');
+                $('#selectedAnuncio').html('<span class="text-gray-400">Seleccione un anuncio...</span>');
+            };
+        
         }, 100);
     }
 
@@ -562,9 +594,13 @@ class Pedidos extends Templates {
 
         const pedido = request.data;
 
-        // Generar opciones de anuncios con imágenes
+        // Filtrar productos por unidad de negocio del pedido
+        const productosFiltrados = productos.filter(p => p.udn_id == pedido.udn_id);
+
+        // Filtrar anuncios por unidad de negocio del pedido
+        const anunciosFiltrados = anuncios.filter(a => a.udn_id == pedido.udn_id);
         let anunciosOptions = '';
-        anuncios.forEach(anuncio => {
+        anunciosFiltrados.forEach(anuncio => {
             const imagenUrl = anuncio.imagen ? `https://www.erp-varoch.com/DEV/${anuncio.imagen}` : 'https://sublimac.com/wp-content/uploads/2017/11/default-placeholder.png';
             anunciosOptions += `
                 <div class="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100" 
@@ -598,6 +634,13 @@ class Pedidos extends Templates {
                 </div>
                 
                 <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Unidad de Negocio</label>
+                    <select class="form-control" id="udn_id_edit" required onchange="updateProductosByUdnEdit()">
+                        ${udn.map(u => `<option value="${u.id}" ${u.id == pedido.udn_id ? 'selected' : ''}>${u.valor}</option>`).join('')}
+                    </select>
+                </div>
+                
+                <div class="col-12 col-lg-4 mb-3">
                     <label class="form-label">Tipo de entrega</label>
                     <select class="form-control" id="envio_domicilio" required>
                         <option value="1" ${pedido.envio_domicilio == 1 ? 'selected' : ''}>Envío a domicilio</option>
@@ -608,7 +651,7 @@ class Pedidos extends Templates {
                 <div class="col-12 col-lg-4 mb-3">
                     <label class="form-label">Producto o servicio</label>
                     <select class="form-control" id="producto_id" required multiple>
-                        ${productos.map(p => `<option value="${p.id}" ${pedido.productos && pedido.productos.includes(p.id) ? 'selected' : ''}>${p.valor}</option>`).join('')}
+                        ${productosFiltrados.map(p => `<option value="${p.id}" ${pedido.productos && pedido.productos.includes(p.id) ? 'selected' : ''}>${p.valor}</option>`).join('')}
                     </select>
                 </div>
                 
@@ -675,6 +718,7 @@ class Pedidos extends Templates {
                             fecha_pedido: $('#fecha_pedido').val(),
                             canal_id: $('#canal_id').val(),
                             monto: $('#monto').val(),
+                            udn_id: $('#udn_id_edit').val(),
                             envio_domicilio: $('#envio_domicilio').val(),
                             producto_id: $('#producto_id').val(),
                             anuncio_id: $('#anuncio_id').val() || null,
@@ -786,6 +830,34 @@ class Pedidos extends Templates {
                     $('#selectedAnuncio').html(`<img src="${imagenUrl}" class="w-6 h-6 mr-2 rounded object-cover"> ${anuncioSeleccionado.valor}`);
                 }
             }
+
+            window.updateProductosByUdnEdit = function() {
+                const udnId = $('#udn_id_edit').val();
+                // Actualizar productos
+                const productosFiltrados = productos.filter(p => p.udn_id == udnId);
+                const selected = $('#producto_id').val() || [];
+                const options = productosFiltrados.map(p => `<option value="${p.id}" ${selected.includes(p.id.toString()) ? 'selected' : ''}>${p.valor}</option>`).join('');
+                $('#producto_id').html(options).trigger('change');
+
+                // Actualizar anuncios
+                const anunciosFiltrados = anuncios.filter(a => a.udn_id == udnId);
+                let anunciosOptions = '<div class="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100" data-value="" data-icon=""><span class="text-gray-400">Sin anuncio</span></div>';
+                anunciosFiltrados.forEach(anuncio => {
+                    const imagenUrl = anuncio.imagen ? `https://www.erp-varoch.com/DEV/${anuncio.imagen}` : 'https://sublimac.com/wp-content/uploads/2017/11/default-placeholder.png';
+                    anunciosOptions += `
+                        <div class="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100" 
+                             data-value="${anuncio.id}" 
+                             data-icon="${imagenUrl}">
+                            <img src="${imagenUrl}" class="w-8 h-8 mr-2 rounded object-cover"> 
+                            ${anuncio.valor}
+                        </div>
+                    `;
+                });
+                $('#dropdownAnuncioMenu').html(anunciosOptions);
+                // Reiniciar selección de anuncio
+                $('#anuncio_id').val('');
+                $('#selectedAnuncio').html('<span class="text-gray-400">Seleccione un anuncio...</span>');
+            };
 
         }, 100);
     }
