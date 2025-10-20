@@ -18,13 +18,24 @@ class ctrl extends mdl {
 
     function apiPromediosDiarios() {
         $udn = $_POST['udn'];
-        $mes = $_POST['mes'];
+        $mes = isset($_POST['mes']) ? $_POST['mes'] : null;
         $anio = $_POST['anio'];
+        $tipoPeriodo = isset($_POST['tipoPeriodo']) ? $_POST['tipoPeriodo'] : 'mes';
 
-        $dashboard = $this->getDashboardData($udn, $mes, $anio);
+        // Ajustar datos según el tipo de periodo
+        if ($tipoPeriodo === 'anio') {
+            // Consulta por año completo
+            $dashboard = $this->getDashboardDataByYear($udn, $anio);
+            $barChart = $this->getBarChartDataByYear($udn, $anio);
+            $channelRanking = $this->getChannelRankingDataByYear($udn, $anio);
+        } else {
+            // Consulta por mes específico
+            $dashboard = $this->getDashboardData($udn, $mes, $anio);
+            $barChart = $this->getBarChartData($udn, $anio);
+            $channelRanking = $this->getChannelRankingData($udn, $mes, $anio);
+        }
+
         $lineChart = $this->getLineChartData($udn, $anio);
-        $barChart = $this->getBarChartData($udn, $anio);
-        $channelRanking = $this->getChannelRankingData($udn, $mes, $anio);
         $monthlyPerformance = $this->getMonthlyPerformanceData($udn, $anio);
 
         return [
@@ -32,7 +43,8 @@ class ctrl extends mdl {
             'lineChart' => $lineChart,
             'barChart' => $barChart,
             'channelRanking' => $channelRanking,
-            'monthlyPerformance' => $monthlyPerformance
+            'monthlyPerformance' => $monthlyPerformance,
+            'tipoPeriodo' => $tipoPeriodo
         ];
     }
 
@@ -180,6 +192,76 @@ class ctrl extends mdl {
         }
         
         return $performance;
+    }
+
+    private function getDashboardDataByYear($udn, $anio) {
+        $cards = $this->getDashboardCardsByYear([$udn, $anio]);
+        
+        if (empty($cards)) {
+            return [
+                'ventaDia' => '$0.00',
+                'ventaMes' => '$0.00',
+                'Clientes' => '0',
+                'ChequePromedio' => '$0.00'
+            ];
+        }
+
+        $card = $cards[0];
+        
+        return [
+            'ingresosTotales' => $this->formatPrice($card['venta_anio'] ?? 0),
+            'totalPedidos' => number_format($card['pedidos_anio'] ?? 0),
+            'valorPromedio' => $this->formatPrice($card['cheque_promedio'] ?? 0),
+            'canalPrincipal' => $card['canal_principal'] ?? 'N/A',
+            'variacionIngresos' => '↑ Año completo',
+            'rangeFechas' => "Enero - Diciembre {$anio}"
+        ];
+    }
+
+    private function getBarChartDataByYear($udn, $anio) {
+        $channels = $this->getChannelYearlyData([$udn, $anio]);
+        
+        $months = ['ENE', 'FEB', 'MAR', 'ABR', 'MAY', 'JUN', 'JUL', 'AGO', 'SEP', 'OCT', 'NOV', 'DIC'];
+        $channelData = [];
+        
+        $channelNames = ['WhatsApp', 'Meep', 'Ecommerce', 'Facebook', 'Llamada', 'Uber', 'Otro'];
+        
+        foreach ($channelNames as $channelName) {
+            $monthlyData = array_fill(0, 12, 0);
+            
+            foreach ($channels as $data) {
+                if ($data['canal'] === $channelName) {
+                    $monthIndex = intval($data['mes']) - 1;
+                    $monthlyData[$monthIndex] = floatval($data['total_monto']);
+                }
+            }
+            
+            $channelData[] = [
+                'name' => $channelName,
+                'data' => $monthlyData
+            ];
+        }
+        
+        return [
+            'months' => $months,
+            'channels' => $channelData
+        ];
+    }
+
+    private function getChannelRankingDataByYear($udn, $anio) {
+        $channels = $this->getChannelPerformanceByYear([$udn, $anio]);
+        
+        $ranking = [];
+        foreach ($channels as $channel) {
+            $ranking[] = [
+                'name' => $channel['canal'],
+                'total' => floatval($channel['total_monto']),
+                'orders' => intval($channel['total_pedidos']),
+                'percentage' => number_format(floatval($channel['porcentaje']), 1)
+            ];
+        }
+        
+        return $ranking;
     }
 
     private function formatPrice($amount) {

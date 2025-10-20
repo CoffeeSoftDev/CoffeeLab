@@ -17,13 +17,63 @@ class mdl extends CRUD {
 
     function lsUDN() {
         $query = "
-            SELECT idUDN AS id, UDN AS valor 
-            FROM udn 
+            SELECT idUDN AS id, UDN AS valor
+            FROM udn
             WHERE Stado = 1 AND idUDN NOT IN (8, 10, 7)
-            ORDER BY UDN ASC
+            ORDER BY UDN DESC
         ";
         return $this->_Read($query, null);
     }
+
+    function salesUDN() {
+        $query = "
+            SELECT idUDN AS id, UDN AS valor
+            FROM udn
+            WHERE Stado = 1 AND idUDN NOT IN (1,6,8, 10, 7)
+            ORDER BY UDN asc
+        ";
+        return $this->_Read($query, null);
+    }
+
+     function lsClasificacion(){
+
+        $query= $this->_Select([
+            "table" => "rfwsmqex_gvsl_costsys.clasificacion",
+            "values" => "idClasificacion AS id,Clasificacion AS valor,id_UDN as udn",
+            "where" => "idClasificacion != 7 AND idClasificacion != 9",
+        ],true);
+
+        return $this->_Read($query, null);
+    }
+
+    // Dashboard - Ingresos
+    public function getVentasDelDia($array) {
+        $query = "
+            SELECT
+                FORMAT(SUM(F.monto_productos_vendidos), 2, 'es_MX') AS total
+            FROM {$this->bd}soft_restaurant_ventas V
+            JOIN {$this->bd}soft_folio F ON V.soft_folio = F.id_folio
+            WHERE F.fecha_folio = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+            AND F.id_udn = ?
+        ";
+        return $this->_Read($query, $array)[0]['total'];
+    }
+
+    public function getComparativaChequePromedio($array) {
+        $query = "
+            SELECT
+            SUM(V.AyB) as AyB,
+            SUM(V.alimentos) as Alimentos,
+            SUM(V.bebidas) as Bebidas
+            FROM {$this->bd}soft_restaurant_ventas V
+            JOIN {$this->bd}soft_folio F ON V.soft_folio = F.id_folio
+            WHERE MONTH(F.fecha_folio) = ?
+            AND YEAR(F.fecha_folio) = ?
+            AND F.id_udn = ?
+        ";
+        return $this->_Read($query, $array)[0];
+    }
+
 
 
     function getsoftVentas($array) {
@@ -36,9 +86,9 @@ class mdl extends CRUD {
                 id_venta, noHabitaciones, Hospedaje, AyB, Diversos
             FROM
                 {$this->bd2}soft_folio
-            INNER JOIN {$this->bd2}soft_restaurant_ventas 
+            INNER JOIN {$this->bd2}soft_restaurant_ventas
                 ON soft_restaurant_ventas.soft_folio = soft_folio.id_folio
-            WHERE id_udn = ? 
+            WHERE id_udn = ?
                 AND DATE_FORMAT(fecha_folio,'%Y-%m-%d') = ?
         ";
         $sql = $this->_Read($query, $array);
@@ -55,22 +105,25 @@ class mdl extends CRUD {
                 noHabitaciones,
                 alimentos,
                 bebidas,
+                guarniciones,
+                sales,
+                domicilio,
                  (alimentos + bebidas) as totalGral,
 
-                 CASE 
-                    WHEN noHabitaciones != 0 THEN alimentos / noHabitaciones 
-                    ELSE 0 
-                
+                 CASE
+                    WHEN noHabitaciones != 0 THEN alimentos / noHabitaciones
+                    ELSE 0
+
                 END AS promedio_alimentos,
-                
-                CASE 
-                    WHEN noHabitaciones != 0 THEN bebidas / noHabitaciones 
-                    ELSE 0 
-                
+
+                CASE
+                    WHEN noHabitaciones != 0 THEN bebidas / noHabitaciones
+                    ELSE 0
+
                 END AS promedio_bebidas,
 
-             
-               
+
+
                 (Hospedaje + AyB + Diversos) as total,
 
                 DATE_FORMAT(fecha_folio,'%Y-%m-%d') as fecha,
@@ -78,18 +131,18 @@ class mdl extends CRUD {
             FROM
             {$this->bd}soft_folio
             INNER JOIN {$this->bd}soft_restaurant_ventas ON soft_restaurant_ventas.soft_folio = soft_folio.id_folio
-            WHERE id_udn = ? 
+            WHERE id_udn = ?
             AND YEAR(fecha_folio) = ?
-            AND MONTH(fecha_folio) = ? 
+            AND MONTH(fecha_folio) = ?
             AND DAYOFWEEK(fecha_folio) = ?
             ORDER BY fecha_folio asc
 
-    
+
         ";
 
        return $this->_Read($query, $array);
 
-       
+
     }
 
     function ingresosMensuales($array){
@@ -118,11 +171,11 @@ class mdl extends CRUD {
         return $sql[0];
     }
 
-    
+
     function ingresoPorDia($array){
 
         $query = "
-            SELECT  
+            SELECT
                 SUM(Hospedaje) as totalHospedaje,
                 SUM(alimentos) as totalAlimentos,
                 SUM(bebidas) as totalBebidas,
@@ -135,9 +188,9 @@ class mdl extends CRUD {
             FROM
             {$this->bd}soft_folio
             INNER JOIN {$this->bd}soft_restaurant_ventas ON soft_restaurant_ventas.soft_folio = soft_folio.id_folio
-            WHERE id_udn = ? 
+            WHERE id_udn = ?
 
-            
+
             AND YEAR(fecha_folio)      = ?
             AND MONTH(fecha_folio)     = ?
             AND DAYOFWEEK(fecha_folio) = ?
@@ -157,7 +210,7 @@ class mdl extends CRUD {
                 soft_folio.id_folio,
                 soft_folio.fecha_folio,
                 soft_folio.id_udn,
-                
+
                 alimentos,
                 bebidas,
                 guarniciones,
@@ -165,7 +218,7 @@ class mdl extends CRUD {
 
                 sales,
 
-                
+
                 (alimentos + bebidas) as totalAyB,
 
 
@@ -177,30 +230,30 @@ class mdl extends CRUD {
                 soft_restaurant_ventas.RupturaHabitaciones,
                 soft_restaurant_ventas.costoDiversos,
 
-                CASE 
-                    WHEN noHabitaciones != 0 THEN AyB / noHabitaciones 
-                    ELSE 0 
+                CASE
+                    WHEN noHabitaciones != 0 THEN AyB / noHabitaciones
+                    ELSE 0
                 END AS promedio_total_ayb,
 
-                CASE 
-                    WHEN noHabitaciones != 0 THEN noHabitaciones / 12 
-                    ELSE 0 
+                CASE
+                    WHEN noHabitaciones != 0 THEN noHabitaciones / 12
+                    ELSE 0
                 END AS porcOcupacion,
-                
-                CASE 
-                    WHEN noHabitaciones != 0 THEN alimentos / noHabitaciones 
-                    ELSE 0 
+
+                CASE
+                    WHEN noHabitaciones != 0 THEN alimentos / noHabitaciones
+                    ELSE 0
                 END AS promedio_alimentos,
 
-                CASE 
-                    WHEN noHabitaciones != 0 THEN bebidas / noHabitaciones 
-                    ELSE 0 
+                CASE
+                    WHEN noHabitaciones != 0 THEN bebidas / noHabitaciones
+                    ELSE 0
                 END AS promedio_bebidas
 
             FROM
             {$this->bd2}soft_folio
             INNER JOIN {$this->bd2}soft_restaurant_ventas ON soft_restaurant_ventas.soft_folio = soft_folio.id_folio
-            WHERE id_udn = ? 
+            WHERE id_udn = ?
             AND DATE_FORMAT(fecha_folio,'%Y-%m-%d') = ?
 
             ";

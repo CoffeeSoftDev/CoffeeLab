@@ -15,11 +15,11 @@ $(async () => {
     // ** Instancias **
     app = new App(api, "root");
 
-    // salesDashboard = new SalesDashboard(api, "root");
+    salesDashboard = new SalesDashboard(api, "root");
 
-    // sales = new Sales(api, "root");
-    // monthlySales = new MonthlySales(api, "root");
-    // cumulativeAverages = new CumulativeAverages(api, "root");
+    sales = new Sales(api, "root");
+    monthlySales = new MonthlySales(api, "root");
+    cumulativeAverages = new CumulativeAverages(api, "root");
 
 
     app.render();
@@ -39,10 +39,10 @@ class App extends Templates {
 
         // init instancias.
 
-        // sales.render();
-        // salesDashboard.render();
-        // monthlySales.render();
-        // cumulativeAverages.render();
+        salesDashboard.render();
+        sales.render();
+        monthlySales.render();
+        cumulativeAverages.render();
 
     }
 
@@ -61,7 +61,7 @@ class App extends Templates {
             parent: `filterBarVentas`,
             title: "📊 Módulo de ventas",
             subtitle: "Consulta las métricas de ventas.",
-            onClick: () => app.init(),
+            onClick: () => this.redirectToHome(),
         });
 
         this.tabLayout({
@@ -110,6 +110,10 @@ class App extends Templates {
 
 
     // Components.
+    redirectToHome() {
+        const base = window.location.origin + '/DEV';
+        window.location.href = `${base}/kpi/marketing.php`;
+    }
 
 
     headerBar(options) {
@@ -119,19 +123,33 @@ class App extends Templates {
             subtitle: "Subtítulo por defecto",
             icon: "icon-home",
             textBtn: "Inicio",
-            classBtn: "bg-blue-600 hover:bg-blue-700",
+            classBtn: "border-1 border-blue-700 text-blue-600 hover:bg-blue-700 hover:text-white transition-colors duration-200",
             onClick: null,
         };
 
         const opts = Object.assign({}, defaults, options);
 
         const container = $("<div>", {
-            class: "flex justify-between items-center px-2 pt-3 pb-3"
+            class: "relative flex justify-center items-center px-2 pt-3 pb-3"
         });
 
-        const leftSection = $("<div>").append(
+        // 🔵 Botón alineado a la izquierda (posición absoluta)
+        const leftSection = $("<div>", {
+            class: "absolute left-0"
+        }).append(
+            $("<button>", {
+                class: `${opts.classBtn} font-semibold px-4 py-2 rounded transition flex items-center`,
+                html: `<i class="${opts.icon} mr-2"></i>${opts.textBtn}`,
+                click: () => typeof opts.onClick === "function" && opts.onClick()
+            })
+        );
+
+        // 📜 Texto centrado
+        const centerSection = $("<div>", {
+            class: "text-center"
+        }).append(
             $("<h2>", {
-                class: "text-2xl font-semibold ",
+                class: "text-2xl font-bold",
                 text: opts.title
             }),
             $("<p>", {
@@ -140,19 +158,7 @@ class App extends Templates {
             })
         );
 
-        const rightSection = $("<div>").append(
-            $("<button>", {
-                class: `${opts.classBtn} text-white font-semibold px-4 py-2 rounded transition flex items-center`,
-                html: `<i class="${opts.icon} mr-2"></i>${opts.textBtn}`,
-                click: () => {
-                    if (typeof opts.onClick === "function") {
-                        opts.onClick();
-                    }
-                }
-            })
-        );
-
-        container.append(leftSection, rightSection);
+        container.append(leftSection, centerSection);
         $(`#${opts.parent}`).html(container);
     }
 
@@ -171,6 +177,7 @@ class SalesDashboard extends Templates {
     }
 
     layout() {
+
         this.dashboardComponent({
             parent: "container-dashboard",
             id: "dashboardComponent",
@@ -179,22 +186,17 @@ class SalesDashboard extends Templates {
             json: [
                 { type: "grafico", id: "containerChequePro" },
                 {
-                    type: "grafico", id: "barProductMargen1", title: "",
+                    type   : "grafico", id: "barProductMargen1", title: "",
                     content: [
                         { class: "border px-3 py-2 rounded", type: "div", id: "filterBarProductMargen" },
                         { class: " mt-2", type: "div", id: "barProductMargen" },
-
                     ]
-
-
                 },
                 { type: "grafico", id: "ventasDiasSemana", title: "Ventas por Día de la Semana" },
                 { type: "grafico", id: "Tendencia", title: "Tendencia de Ventas" },
             ]
         });
-
-        
-        
+   
         this.createfilterBar({
             parent: `filterBarProductMargen`,
             data: [
@@ -211,11 +213,12 @@ class SalesDashboard extends Templates {
         });
 
         this.filterBarDashboard();
+        this.renderDashboard();
     }
 
     async renderDashboard() {
 
-        //filtrar clasificacion x udn 
+        // filtrar clasificacion x udn 
         this.handleCategoryChange($('#idFilterBar #udn').val());
 
         let udn = $('#filterBarDashboard #udn').val();
@@ -273,7 +276,7 @@ class SalesDashboard extends Templates {
                     id: "udn",
                     lbl: "UDN",
                     class: "col-sm-4",
-                    data: lsudn,
+                    data: udn,
                     onchange: `salesDashboard.renderDashboard()`,
                 },
                 {
@@ -518,9 +521,7 @@ class SalesDashboard extends Templates {
             },
         });
 
-        // 👇 IMPRIMIR el contenido recibido del servidor
-            console.log("📦 DATASET RECIBIDO:", mkt);
-
+      
             this.linearChart({
                 parent: "barProductMargen",
                 id: "barProductMargewn",
@@ -1269,19 +1270,19 @@ class CumulativeAverages extends Templates {
             </div>
             <div id="container-table-acumulados"></div>
         `);
-        // this.createTable({
-        //     parent: "container-table-acumulados",
-        //     idFilterBar: `filterBar${this.PROJECT_NAME}`,
-        //     data: { opc: 'listAcumulados' },
-        //     coffeesoft: true,
-        //     conf: { datatable: false, pag: 15 },
-        //     attr: {
-        //         id: "tbI",
-        //         theme: 'corporativo',
-        //         center: [1, 2, 3],
-        //         right: [6]
-        //     },
-        // });
+        this.createTable({
+            parent: "container-table-acumulados",
+            idFilterBar: `filterBar${this.PROJECT_NAME}`,
+            data: { opc: 'listAcumulados' },
+            coffeesoft: true,
+            conf: { datatable: false, pag: 15 },
+            attr: {
+                id: "tbI",
+                theme: 'corporativo',
+                center: [1, 2, 3],
+                right: [6]
+            },
+        });
     }
 }
 

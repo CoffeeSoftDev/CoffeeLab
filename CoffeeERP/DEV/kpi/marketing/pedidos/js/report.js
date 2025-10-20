@@ -4,6 +4,63 @@ let app, report, admin;
 let lsUDN, lsCanales, lsAños;
 
 $(async () => {
+    // Agregar estilos CSS para animaciones de carga
+    const loadingStyles = $(`
+        <style>
+            @keyframes pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.5; }
+            }
+            
+            .animate-pulse {
+                animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            }
+            
+            .transition-all {
+                transition-property: all;
+                transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            
+            .duration-500 {
+                transition-duration: 500ms;
+            }
+            
+            .ease-out {
+                transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
+            }
+            
+            .opacity-0 {
+                opacity: 0;
+            }
+            
+            .opacity-100 {
+                opacity: 1;
+            }
+            
+            .translate-y-4 {
+                transform: translateY(1rem);
+            }
+            
+            .translate-y-0 {
+                transform: translateY(0);
+            }
+            
+            .transform {
+                transform: translateX(var(--tw-translate-x)) translateY(var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
+            }
+            
+            .opacity-50 {
+                opacity: 0.5 !important;
+            }
+            
+            select:disabled {
+                background-color: #f3f4f6 !important;
+                cursor: not-allowed !important;
+            }
+        </style>
+    `);
+    $('head').append(loadingStyles);
+
     const data = await useFetch({ url: api, data: { opc: "init" } });
     lsUDN = data.udn;
     lsCanales = data.canales;
@@ -12,7 +69,7 @@ $(async () => {
     app = new AppTemporal(api_report, "root");
     report = new Report(api_report, "root");
     admin = new Admin(api_canal, "root");
-  
+
 });
 
 class AppTemporal extends Templates {
@@ -854,22 +911,47 @@ class DashboardOrder extends Templates {
         this.filterBarDashboard();
         this.renderDashboard()
 
-      
+
     }
 
-    async renderDashboard(){
-        let udn   = $('#filterBarDashboard #udn').val();
+    onPeriodTypeChange() {
+        const tipoPeriodo = $('#filterBarDashboard #tipoPeriodo').val();
+        const mesSelect = $('#filterBarDashboard #mes');
+
+        if (tipoPeriodo === 'anio') {
+            // Deshabilitar selector de mes cuando se consulta por año
+            mesSelect.prop('disabled', true).addClass('opacity-50');
+        } else {
+            // Habilitar selector de mes cuando se consulta por mes
+            mesSelect.prop('disabled', false).removeClass('opacity-50');
+        }
+
+        // Actualizar dashboard con el nuevo tipo de periodo
+        this.renderDashboard();
+    }
+
+    async renderDashboard() {
+        let udn = $('#filterBarDashboard #udn').val();
         let month = $('#filterBarDashboard #mes').val();
-        let year  = $('#filterBarDashboard #anio').val();
+        let year = $('#filterBarDashboard #anio').val();
+        let tipoPeriodo = $('#filterBarDashboard #tipoPeriodo').val();
+
+        // Preparar datos según el tipo de periodo
+        let requestData = {
+            opc: "apiPromediosDiarios",
+            udn: udn,
+            anio: year,
+            tipoPeriodo: tipoPeriodo
+        };
+
+        // Solo incluir mes si el tipo de periodo es "mes"
+        if (tipoPeriodo === 'mes') {
+            requestData.mes = month;
+        }
 
         let mkt = await useFetch({
             url: api_dashboard,
-            data: {
-                opc: "apiPromediosDiarios",
-                udn: udn,
-                mes: month,
-                anio: year,
-            },
+            data: requestData,
         });
 
         this.showCards(mkt.dashboard);
@@ -888,15 +970,26 @@ class DashboardOrder extends Templates {
                     opc: "select",
                     id: "udn",
                     lbl: "UDN",
-                    class: "col-sm-3",
+                    class: "col-sm-2",
                     data: lsudn,
                     onchange: `dashboardOrder.renderDashboard()`,
                 },
                 {
                     opc: "select",
+                    id: "tipoPeriodo",
+                    lbl: "Tipo de Consulta",
+                    class: "col-sm-2",
+                    data: [
+                        { id: "mes", valor: "🔹 Por mes" },
+                        { id: "anio", valor: "🔹 Por año" }
+                    ],
+                    onchange: `dashboardOrder.onPeriodTypeChange()`,
+                },
+                {
+                    opc: "select",
                     id: "mes",
                     lbl: "Mes",
-                    class: "col-sm-3",
+                    class: "col-sm-2",
                     data: moment.months().map((m, i) => ({ id: i + 1, valor: m })),
                     onchange: `dashboardOrder.renderDashboard()`,
                 },
@@ -904,7 +997,7 @@ class DashboardOrder extends Templates {
                     opc: "select",
                     id: "anio",
                     lbl: "Año",
-                    class: "col-sm-3",
+                    class: "col-sm-2",
                     data: Array.from({ length: 5 }, (_, i) => {
                         const year = moment().year() - i;
                         return { id: year, valor: year.toString() };
@@ -917,6 +1010,7 @@ class DashboardOrder extends Templates {
         const currentMonth = moment().month() + 1;
         setTimeout(() => {
             $(`#filterBarDashboard #mes`).val(currentMonth);
+            $(`#filterBarDashboard #tipoPeriodo`).val("mes");
         }, 100);
     }
 
@@ -1046,11 +1140,33 @@ class DashboardOrder extends Templates {
     }
 
     renderBarChart(data) {
+        const tipoPeriodo = $('#filterBarDashboard #tipoPeriodo').val();
+        const mes = $('#filterBarDashboard #mes option:selected').text();
+        const anio = $('#filterBarDashboard #anio').val();
+
+        // Título dinámico según el tipo de periodo
+        let titleText = "Ventas por Canal";
+        if (tipoPeriodo === 'mes') {
+            titleText = `Ventas por Canal - ${mes} ${anio}`;
+        } else {
+            titleText = `Ventas por Canal - Año ${anio}`;
+        }
+
         const container = $("<div>", { class: "p-4" });
+
+        // Header con título y badge del tipo de consulta
+        const header = $("<div>", { class: "flex justify-between items-center mb-4" });
         const title = $("<h3>", {
-            class: "text-lg font-semibold mb-4 text-gray-800",
-            text: "Ventas por Canal"
+            class: "text-lg font-semibold text-gray-800",
+            text: titleText
         });
+
+        const badge = $("<span>", {
+            class: `px-3 py-1 rounded-full text-xs font-semibold ${tipoPeriodo === 'mes' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`,
+            text: tipoPeriodo === 'mes' ? '📅 Consulta Mensual' : '📊 Consulta Anual'
+        });
+
+        header.append(title, badge);
         const canvasContainer = $("<div>", {
             class: "chart-container"
         });
@@ -1060,7 +1176,7 @@ class DashboardOrder extends Templates {
         });
 
         canvasContainer.append(canvas);
-        container.append(title, canvasContainer);
+        container.append(header, canvasContainer);
         $("#barChartContainer").html(container);
 
         const ctx = document.getElementById("barChart").getContext("2d");
@@ -1317,42 +1433,82 @@ class DashboardOrder extends Templates {
             : "bg-white text-gray-800 rounded-xl shadow";
         const titleColor = isDark ? "text-gray-300" : "text-gray-600";
 
-        const renderCard = (card, i = "") => {
-            const box = $("<div>", {
-                id: `${opts.id}_${i}`,
-                class: `${cardBase} p-4`
-            });
-
-            const title = $("<p>", {
-                class: `text-sm ${titleColor}`,
-                text: card.title
-            });
-
-            const value = $("<p>", {
-                id: card.id || "",
-                class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
-                text: card.data?.value
-            });
-
-            const description = $("<p>", {
-                class: `text-xs mt-1 ${card.data?.description?.includes('↑') ? 'text-green-600' : card.data?.description?.includes('↓') ? 'text-red-600' : 'text-gray-500'}`,
-                text: card.data?.description || ""
-            });
-
-            box.append(title, value, description);
-            return box;
-        };
-
+        // Mostrar skeleton loading primero
         const container = $("<div>", {
             id: opts.id,
             class: `grid grid-cols-2 md:grid-cols-4 gap-4 ${opts.class}`
         });
 
-        opts.json.forEach((item, i) => {
-            container.append(renderCard(item, i));
-        });
+        // Crear skeleton cards
+        for (let i = 0; i < 4; i++) {
+            const skeletonCard = $("<div>", {
+                class: `${cardBase} p-4 animate-pulse`
+            });
+
+            const skeletonTitle = $("<div>", {
+                class: "h-4 bg-gray-300 rounded w-3/4 mb-3"
+            });
+
+            const skeletonValue = $("<div>", {
+                class: "h-8 bg-gray-300 rounded w-1/2 mb-2"
+            });
+
+            const skeletonDesc = $("<div>", {
+                class: "h-3 bg-gray-300 rounded w-2/3"
+            });
+
+            skeletonCard.append(skeletonTitle, skeletonValue, skeletonDesc);
+            container.append(skeletonCard);
+        }
 
         $(`#${opts.parent}`).html(container);
+
+        // Después de un breve delay, mostrar las tarjetas reales con animación
+        setTimeout(() => {
+            const renderCard = (card, i = "") => {
+                const box = $("<div>", {
+                    id: `${opts.id}_${i}`,
+                    class: `${cardBase} p-4 opacity-0 transform  transition-all duration-500 ease-out`,
+                    style: `animation-delay: ${i * 100}ms`
+                });
+
+                const title = $("<p>", {
+                    class: `text-sm ${titleColor}`,
+                    text: card.title
+                });
+
+                const value = $("<p>", {
+                    id: card.id || "",
+                    class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
+                    text: card.data?.value
+                });
+
+                const description = $("<p>", {
+                    class: `text-xs mt-1 ${card.data?.description?.includes('↑') ? 'text-green-600' : card.data?.description?.includes('↓') ? 'text-red-600' : 'text-gray-500'}`,
+                    text: card.data?.description || ""
+                });
+
+                box.append(title, value, description);
+
+                // Animar entrada después de un pequeño delay
+                setTimeout(() => {
+                    box.removeClass('opacity-0 translate-y-4').addClass('opacity-100 translate-y-0');
+                }, 50);
+
+                return box;
+            };
+
+            const newContainer = $("<div>", {
+                id: opts.id,
+                class: `grid grid-cols-2 md:grid-cols-4 gap-4 ${opts.class}`
+            });
+
+            opts.json.forEach((item, i) => {
+                newContainer.append(renderCard(item, i));
+            });
+
+            $(`#${opts.parent}`).html(newContainer);
+        }, 800);
     }
 
     linearChart(options) {

@@ -66,7 +66,7 @@ class ctrl extends mdl {
         
         return [
             'row' => $rows,
-            'data' => $data
+            // 'data' => $data
         ];
     }
 
