@@ -14,11 +14,17 @@ class ctrl extends mdl {
 
     function init(){
 
+        $lsClasificacion    = $this->lsClasificacion();
+
+
         return [
-            'udn' => $this -> lsUDN()
+            'udn'           => $this -> lsUDN(),
+            'lsudn'         => $this -> salesUDN(),
+            'clasification' => $lsClasificacion,
         ];
     }
 
+    // Módulo de ingresos diarios.
     function list() {
         $type = $_POST['type'];
 
@@ -32,75 +38,6 @@ class ctrl extends mdl {
             default:
                 return ["error" => "Tipo no reconocido"];
         }
-    }
-
-
-    function lsIngresosCaptura() {
-        $fi = new DateTime($_POST['anio'].'-' . $_POST['mes'] . '-01');
-        $hoy = clone $fi;
-        $hoy->modify('last day of this month');
-
-        $__row = [];
-
-        while ($fi <= $hoy) {
-            $idRow++;
-            $fecha = $fi->format('Y-m-d');
-
-
-            $softVentas = $this->getsoftVentas([$_POST['udn'], $fecha]);
-            $idVentas   = $softVentas['id_venta'];
-
-            $row = [
-                'id'     => $idRow,
-                'fecha'  => $fecha,
-                'dia'    => formatSpanishDay($fecha),
-                'Estado' => $softVentas['id_venta']
-                    ? '<i class="icon-ok-circled-2 text-success"></i>'
-                    : '<i class="icon-info-circled-3 text-orange-500"></i>',
-            ];
-
-            if ($_POST['udn'] == 1) {
-                $total = $softVentas['Hospedaje'] + $softVentas['AyB'] + $softVentas['Diversos'];
-                $grupo = $this->createdGroups(['noHabitaciones', 'Hospedaje', 'AyB', 'Diversos'], $softVentas, $idVentas);
-                $grupo['total'] = evaluar($total);
-                $grupo['opc'] = 0;
-            } elseif ($_POST['udn'] == 5) {
-                $total          = $softVentas['alimentos'] + $softVentas['bebidas'] + $softVentas['guarniciones'] + $softVentas['sales'] + $softVentas['domicilio'];
-                $grupo          = createdGroups(['noHabitaciones', 'alimentos', 'bebidas', 'guarniciones', 'sales', 'domicilio'], $softVentas, $idVentas);
-                $grupo['total'] = evaluar($total);
-                $grupo['opc']   = 0;
-
-            } else {
-                $grupo = [
-                    'alimentos' => createElement('input', [
-                        'name' => 'alimentos',
-                        'value' => number_format($softVentas['alimentos'], 2, '.', ''),
-                        'onkeyup' => "ingresosDiarios.setVentas(event, $idVentas)"
-                    ]),
-                    'bebidas' => createElement('input', [
-                        'name' => 'bebidas',
-                        'value' => number_format($softVentas['bebidas'], 2, '.', ''),
-                        'onkeyup' => "ingresosDiarios.setVentas(event, $idVentas)"
-                    ]),
-                    'No habitaciones' => createElement('input', [
-                        'name' => 'noHabitaciones',
-                        'value' => $softVentas['noHabitaciones'],
-                        'onkeyup' => "ingresosDiarios.setVentas(event, $idVentas)"
-                    ]),
-                    'Total' => evaluar($softVentas['bebidas'] + $softVentas['alimentos']),
-                    'opc' => 0
-                ];
-            }
-
-            $__row[] = array_merge($row, $grupo);
-            $fi->modify('+1 day');
-        }
-
-        return [
-            "row" => $__row,
-            "thead" => '',
-            "frm_head" => "<strong>Conectado a: </strong> {$this->bd}"
-        ];
     }
 
     function resumenIngresosPorDia() {
@@ -228,6 +165,148 @@ class ctrl extends mdl {
         ];
     }
 
+    function lsIngresosCaptura() {
+        $fi = new DateTime($_POST['anio'] . '-' . $_POST['mes'] . '-01');
+        $hoy = clone $fi;
+        $hoy->modify('last day of this month');
+
+        $__row = [];
+        $idRow = 0;
+
+        while ($fi <= $hoy) {
+            $idRow++;
+            $fecha = $fi->format('Y-m-d');
+
+            $softVentas = $this->getsoftVentas([$_POST['udn'], $fecha]);
+            $idVentas   = $softVentas['id_venta'];
+
+           $row = [
+                'id'    => $idRow,
+                'fecha' => $fecha,
+                'dia'   => [
+                    'html'  => formatSpanishDay($fecha),
+                    'class' => 'text-gray-600 text-center '
+                ],
+               'Estado' => [
+                    'html' => $softVentas['id_venta']
+                        ? '<span class="px-3 py-1 w-[150px] mx-auto rounded-full text-xs font-semibold bg-green-200 text-green-800 flex items-center justify-center gap-1"><i class="icon-ok-circled-2 text-green-500"></i> Capturado</span>'
+                        : '<span class="px-3 py-1 w-[150px] mx-auto rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800 flex items-center justify-center gap-1"><i class="icon-info-circled-3 text-yellow-500"></i> Pendiente</span>',
+                    'class' => 'text-center'
+                ]
+            ];
+
+            if ($_POST['udn'] == 1) {
+                $total = $softVentas['Hospedaje'] + $softVentas['AyB'] + $softVentas['Diversos'];
+                $grupo = [
+                    'clientes'   => $softVentas['noHabitaciones'],
+                    'Hospedaje'  => $softVentas['Hospedaje'],
+                    'AyB'        => $softVentas['AyB'],
+                    'Diversos'   => $softVentas['Diversos'],
+                    'total'      => evaluar($total),
+                    'opc'        => 0
+                ];
+            } elseif ($_POST['udn'] == 5) {
+                $total = $softVentas['alimentos'] + $softVentas['bebidas'] + $softVentas['guarniciones'] + $softVentas['sales'] + $softVentas['domicilio'];
+                $grupo = [
+                    'clientes'     => $softVentas['noHabitaciones'],
+                    'alimentos'    => ['html' => evaluar($softVentas['alimentos']),    'class' => 'text-end '],
+                    'bebidas'      => ['html' => evaluar($softVentas['bebidas']),      'class' => 'text-end '],
+                    'guarniciones' => ['html' => evaluar($softVentas['guarniciones']), 'class' => 'text-end '],
+                    'sales'        => ['html' => evaluar($softVentas['sales']),        'class' => 'text-end '],
+                    'domicilio'    => ['html' => evaluar($softVentas['domicilio']),    'class' => 'text-end '],
+                    'total'        => ['html' => evaluar($total),                      'class' => 'text-end font-bold '],
+                    'opc'          => 0
+                ];
+            } else {
+                $grupo = [
+                    'clientes'  => $softVentas['noHabitaciones'],
+                    'alimentos' => ['html' => evaluar($softVentas['alimentos']), 'class' => 'text-end '],
+                    'bebidas'   => ['html' => evaluar($softVentas['bebidas']),   'class' => 'text-end '],
+                    'Total'     => ['html' => evaluar($softVentas['bebidas'] + $softVentas['alimentos']), 'class' => 'text-end font-bold '],
+                    'opc'       => 0
+                ];
+            }
+
+            $__row[] = array_merge($row, $grupo);
+            $fi->modify('+1 day');
+        }
+
+        return [
+            "row"      => $__row,
+            "thead"    => $this->getSalesTitle(),
+            "frm_head" => "<strong>Conectado a: </strong> {$this->bd}"
+        ];
+    }
+
+    function lsIngresosCaptura2() {
+        $fi = new DateTime($_POST['anio'].'-' . $_POST['mes'] . '-01');
+        $hoy = clone $fi;
+        $hoy->modify('last day of this month');
+
+        $__row = [];
+
+        while ($fi <= $hoy) {
+            $idRow++;
+            $fecha = $fi->format('Y-m-d');
+
+
+            $softVentas = $this->getsoftVentas([$_POST['udn'], $fecha]);
+            $idVentas   = $softVentas['id_venta'];
+
+            $row = [
+                'id'     => $idRow,
+                'fecha'  => $fecha,
+                'dia'    => formatSpanishDay($fecha),
+                'Estado' => $softVentas['id_venta']
+                    ? '<i class="icon-ok-circled-2 text-success"></i>'
+                    : '<i class="icon-info-circled-3 text-orange-500"></i>',
+            ];
+
+            if ($_POST['udn'] == 1) {
+                $total = $softVentas['Hospedaje'] + $softVentas['AyB'] + $softVentas['Diversos'];
+                $grupo = $this->createdGroups(['noHabitaciones', 'Hospedaje', 'AyB', 'Diversos'], $softVentas, $idVentas);
+                $grupo['total'] = evaluar($total);
+                $grupo['opc'] = 0;
+            } elseif ($_POST['udn'] == 5) {
+                $total          = $softVentas['alimentos'] + $softVentas['bebidas'] + $softVentas['guarniciones'] + $softVentas['sales'] + $softVentas['domicilio'];
+                $grupo          = createdGroups(['noHabitaciones', 'alimentos', 'bebidas', 'guarniciones', 'sales', 'domicilio'], $softVentas, $idVentas);
+                $grupo['total'] = evaluar($total);
+                $grupo['opc']   = 0;
+
+            } else {
+                $grupo = [
+                     'No habitaciones' => createElement('input', [
+                        'name' => 'noHabitaciones',
+                        'value' => $softVentas['noHabitaciones'],
+                        'onkeyup' => "ingresosDiarios.setVentas(event, $idVentas)"
+                    ]),
+                    'alimentos' => createElement('input', [
+                        'name' => 'alimentos',
+                        'value' => number_format($softVentas['alimentos'], 2, '.', ''),
+                        'onkeyup' => "ingresosDiarios.setVentas(event, $idVentas)"
+                    ]),
+                    'bebidas' => createElement('input', [
+                        'name' => 'bebidas',
+                        'value' => number_format($softVentas['bebidas'], 2, '.', ''),
+                        'onkeyup' => "ingresosDiarios.setVentas(event, $idVentas)"
+                    ]),
+
+                    'Total' => evaluar($softVentas['bebidas'] + $softVentas['alimentos']),
+                    'opc' => 0
+                ];
+            }
+
+            $__row[] = array_merge($row, $grupo);
+            $fi->modify('+1 day');
+        }
+
+        return [
+            "row" => $__row,
+            "thead" => $this->getSalesTitle(),
+            "frm_head" => "<strong>Conectado a: </strong> {$this->bd}"
+        ];
+    }
+
     function PromediosDiarios(){
          # Declarar variables
         $__row        = [];
@@ -299,7 +378,7 @@ class ctrl extends mdl {
                     $meses[$_key] = [
                         'val'   => $value,
                         'text'  => ($key == 'totalHabitaciones') ? $value : evaluar($value),
-                        'class' => 'text-end'
+                        'class' => ' text-end '
                     ];
 
                 endforeach;
@@ -334,6 +413,620 @@ class ctrl extends mdl {
             "row" => $__row,
         ];
     }
+
+   
+
+    function comparativaByCategory() {
+        $anioNow = $_POST['anio1'];
+        $mesNow  = $_POST['mes1'];
+        $anioOld = $_POST['anio2'];
+        $mesOld  = $_POST['mes2'];
+        $udn     = $_POST['udn'];
+        $categoria = strtolower(trim($_POST['category'] ?? 'todas'));
+
+        // Obtener datos filtrados por año y mes
+        $_POST['anio'] = $anioNow;
+        $_POST['mes']  = $mesNow;
+        $_POST['category'] = $categoria;
+        $datosNow = $this->apiIngresosTotales($udn, $anioNow, $mesNow)['data'];
+
+        $_POST['anio'] = $anioOld;
+        $_POST['mes']  = $mesOld;
+        $_POST['category'] = $categoria;
+        $datosOld = $this->apiIngresosTotales($udn, $anioOld, $mesOld)['data'];
+
+        // Formato de etiquetas tipo "01 Oct", "02 Oct", etc.
+        $labels = array_map(function ($d) {
+            return date('d', strtotime($d['fecha']));
+        }, $datosNow);
+
+        $tooltips = array_map(function ($d) {
+            return formatSpanishDay($d['fecha']) . ' ' . date('d', strtotime($d['fecha']));
+        }, $datosNow);
+
+        $valuesNow = array_map(fn($d) => floatval($d['total'] ?? 0), $datosNow);
+        $valuesOld = array_map(fn($d) => floatval($d['total'] ?? 0), $datosOld);
+
+        return [
+            'labels'  => $labels,
+            'tooltip' => $tooltips,
+            'datasets' => [
+                [
+                    'label' => $anioNow,
+                    'data'  => $valuesNow,
+                    'borderColor' => "#3B82F6", // azul
+                    'backgroundColor' => "rgba(59, 130, 246, 0.2)",
+                    'fill' => true,
+                    'tension' => 0.3,
+                    'pointRadius' => 4,
+                    'pointBackgroundColor' => "#3B82F6"
+                ],
+                [
+                    'label' => $anioOld,
+                    'data'  => $valuesOld,
+                    'borderColor' => "#EC4899", // rosa
+                    'backgroundColor' => "rgba(236, 72, 153, 0.2)",
+                    'fill' => true,
+                    'tension' => 0.3,
+                    'pointRadius' => 4,
+                    'pointBackgroundColor' => "#EC4899"
+                ]
+            ]
+        ];
+    }
+
+
+
+    // Api
+    function apiIngresosTotales($udn, $anio, $mes) {
+        $fi = new DateTime($anio . '-' . $mes . '-01');
+        $hoy = clone $fi;
+        $hoy->modify('last day of this month');
+
+        $__row = [];
+        $idRow = 0;
+        
+        // Obtener la categoría seleccionada y normalizarla
+        $categoriaSeleccionada = isset($_POST['category']) ? strtolower(trim($_POST['category'])) : 'todas';
+
+        while ($fi <= $hoy) {
+            $idRow++;
+            $fecha = $fi->format('Y-m-d');
+
+            $softVentas = $this->getsoftVentas([$udn, $fecha]);
+
+            $row = [
+                'id'    => $idRow,
+                'fecha' => $fecha,
+                'estado' => $softVentas['id_venta'] ? 'Capturado' : 'Pendiente'
+            ];
+
+            if ($udn == 1) {
+                $row['clientes'] = $softVentas['noHabitaciones'];
+                
+                // Filtrar por categoría o mostrar todas
+                if ($categoriaSeleccionada == 'todas' || $categoriaSeleccionada == '') {
+                    $row['Hospedaje'] = $softVentas['Hospedaje'];
+                    $row['AyB']       = $softVentas['AyB'];
+                    $row['Diversos']  = $softVentas['Diversos'];
+                    $row['total']     = $softVentas['Hospedaje'] + $softVentas['AyB'] + $softVentas['Diversos'];
+                } elseif ($categoriaSeleccionada == 'hospedaje') {
+                    $row['Hospedaje'] = $softVentas['Hospedaje'];
+                    $row['total']     = $softVentas['Hospedaje'];
+                } elseif ($categoriaSeleccionada == 'ayb') {
+                    $row['AyB']   = $softVentas['AyB'];
+                    $row['total'] = $softVentas['AyB'];
+                } elseif ($categoriaSeleccionada == 'diversos') {
+                    $row['Diversos'] = $softVentas['Diversos'];
+                    $row['total']    = $softVentas['Diversos'];
+                }
+
+            } elseif ($udn == 5) {
+                $row['clientes'] = $softVentas['noHabitaciones'];
+                
+                if ($categoriaSeleccionada == 'todas' || $categoriaSeleccionada == '') {
+                    $row['alimentos']    = $softVentas['alimentos'];
+                    $row['bebidas']      = $softVentas['bebidas'];
+                    $row['guarniciones'] = $softVentas['guarniciones'];
+                    $row['sales']        = $softVentas['sales'];
+                    $row['domicilio']    = $softVentas['domicilio'];
+                    $row['total']        = $softVentas['alimentos'] + $softVentas['bebidas'] + $softVentas['guarniciones'] + $softVentas['sales'] + $softVentas['domicilio'];
+                } elseif ($categoriaSeleccionada == 'alimentos' || $categoriaSeleccionada == 'cortes') {
+                    $row['alimentos'] = $softVentas['alimentos'];
+                    $row['total']     = $softVentas['alimentos'];
+                } elseif ($categoriaSeleccionada == 'bebidas') {
+                    $row['bebidas'] = $softVentas['bebidas'];
+                    $row['total']   = $softVentas['bebidas'];
+                } elseif ($categoriaSeleccionada == 'guarniciones') {
+                    $row['guarniciones'] = $softVentas['guarniciones'];
+                    $row['total']        = $softVentas['guarniciones'];
+                } elseif ($categoriaSeleccionada == 'sales' || $categoriaSeleccionada == 'sales y condimentos') {
+                    $row['sales'] = $softVentas['sales'];
+                    $row['total'] = $softVentas['sales'];
+                }
+
+            } else {
+                $row['clientes'] = $softVentas['noHabitaciones'];
+                
+                if ($categoriaSeleccionada == 'todas' || $categoriaSeleccionada === '') {
+                    $row['alimentos'] = $softVentas['alimentos'];
+                    $row['bebidas']   = $softVentas['bebidas'];
+                    $row['total']     = $softVentas['alimentos'] + $softVentas['bebidas'];
+                } elseif ($categoriaSeleccionada == 'alimentos') {
+                    $row['alimentos'] = $softVentas['alimentos'];
+                    $row['total']     = $softVentas['alimentos'];
+                } elseif ($categoriaSeleccionada == 'bebidas') {
+                    $row['bebidas'] = $softVentas['bebidas'];
+                    $row['total']   = $softVentas['bebidas'];
+                }
+            }
+
+            $__row[] = $row;
+            $fi->modify('+1 day');
+        }
+
+        return ['data' => $__row];
+    }
+
+
+
+
+    // Dashboard -Promedios diarios
+    public function apiPromediosDiarios() {
+        $response = [];
+
+        $anio         = isset($_POST['anio']) ? (int) $_POST['anio'] : date('Y');
+        $anioAnterior = $anio - 1;
+        $mes          = isset($_POST['mes']) ? (int) $_POST['mes'] : date('m');
+        $udn          = isset($_POST['udn']) ? (int) $_POST['udn'] : 1;
+
+        $meses = [
+            'actual'   => ['year' => $anio,        'mes' => $mes],
+            'anterior' => ['year' => $anioAnterior,'mes' => $mes]
+        ];
+
+        if ($udn == 1) {
+            $consultas = [
+                'totalGeneral'              => 'Suma de ingresos',
+                'totalHospedaje'            => 'Ingreso de Hospedaje',
+                'totalAyB'                  => 'Ingreso AyB',
+                'totalDiversos'             => 'Ingreso Diversos',
+                'totalHabitaciones'         => 'Habitaciones',
+                'porcAgrupacion'            => '% Ocupación',
+                'tarifaEfectiva'            => 'Tarifa efectiva acumulada',
+                'chequePromedio'            => 'Cheque Promedio',
+                'chequePromedioHospedaje'   => 'Cheque Promedio Hospedaje',
+                'chequePromedioAyB'         => 'Cheque Promedio AyB',
+                'chequePromedioDiversos'    => 'Cheque Promedio Diversos',
+            ];
+        } else {
+            $consultas = [
+                'totalHabitaciones'         => 'Clientes',
+                'totalGralAyB'              => 'Ventas AyB',
+                'totalAlimentos'            => 'Ventas Alimentos',
+                'totalBebidas'              => 'Ventas Bebidas',
+                'chequePromedioAyB'         => 'Cheque Promedio AyB',
+                'chequePromedioAlimentos'   => 'Cheque Promedio Alimentos',
+                'chequePromedioBebidas'     => 'Cheque Promedio Bebidas',
+            ];
+        }
+
+        foreach ($consultas as $clave => $concepto) {
+            $datos = [
+                'id'         => $clave,
+                'concepto'   => $concepto,
+                'anterior'   => ['valor' => 0, 'formato' => 0],
+                'actual'     => ['valor' => 0, 'formato' => 0],
+                'diferencia' => 0
+            ];
+
+            foreach ($meses as $tipo => $fecha) {
+                $totalDias = cal_days_in_month(CAL_GREGORIAN, $fecha['mes'], $fecha['year']);
+                $ventas    = $this->ingresosMensuales([$udn, $fecha['year'], $fecha['mes']]);
+
+                $valor = $this->getCalculoPorConcepto($clave, $ventas, $totalDias);
+
+                $datos[$tipo] = [
+                    'valor'   => $valor,
+                    'formato' => ($clave === 'totalHabitaciones') ? $valor : evaluar($valor),
+                ];
+            }
+
+            // Validar que existan valores antes de calcular diferencia
+            $valorActual   = isset($datos['actual']['valor']) ? $datos['actual']['valor'] : 0;
+            $valorAnterior = isset($datos['anterior']['valor']) ? $datos['anterior']['valor'] : 0;
+
+            $dif = $valorActual - $valorAnterior;
+            $datos['diferencia'] = ($clave === 'totalHabitaciones') ? $dif : evaluar($dif);
+
+            $response[] = $datos;
+        }
+
+        return [
+            'status'    => 200,
+            'data'      => $response,
+            'dashboard' => $this->apiDashBoard($response, $udn),
+            'barras'    => $this->comparativaChequePromedio(),
+            'linear'    => $this->apiLinearPromediosDiario($anio, $mes, $udn),
+            'barDays'   => $this->apiIngresosComparativoSemana(),
+            'topDays'   => $this->apiTopDiasMes(),
+            'topWeek'   => $this->apiTopDiasSemanaPromedio($anio, $mes, $udn)
+        ];
+    }
+
+    public function apiLinearPromediosDiario($anio = null, $mes = null, $udn = null) {
+        $anio = $anio ?? (isset($_POST['anio']) ? (int) $_POST['anio'] : date('Y'));
+        $mes  = $mes  ?? (isset($_POST['mes'])  ? (int) $_POST['mes']  : date('m'));
+        $udn  = $udn  ?? (isset($_POST['udn'])  ? (int) $_POST['udn']  : 1);
+
+        $diasMes = cal_days_in_month(CAL_GREGORIAN, $mes, $anio);
+        $labels  = [];
+        $tooltip = [];
+        $dataAlimentos = [];
+        $dataBebidas   = [];
+
+        // Días de la semana en español (Lunes = 1 según ISO-8601)
+        $diasSemana = [
+            1 => 'Lunes',
+            2 => 'Martes',
+            3 => 'Miércoles',
+            4 => 'Jueves',
+            5 => 'Viernes',
+            6 => 'Sábado',
+            7 => 'Domingo'
+        ];
+
+        for ($dia = 1; $dia <= $diasMes; $dia++) {
+            $fecha = sprintf('%04d-%02d-%02d', $anio, $mes, $dia);
+
+            // Traer ingresos de ese día
+            $ventas = $this->getsoftVentas([$udn, $fecha]);
+
+            // Labels (solo el número del día)
+            $labels[] = str_pad($dia, 2, "0", STR_PAD_LEFT);
+
+            // Tooltip: "Lunes 09"
+            $fechaObj = new DateTime($fecha);
+            $diaSemana = $diasSemana[(int)$fechaObj->format('N')]; // N = 1 (Lunes) a 7 (Domingo)
+            $tooltip[] = $diaSemana . " " . $fechaObj->format('d');
+
+            // Valores
+            $dataAlimentos[] = isset($ventas['alimentos']) ? (float)$ventas['alimentos'] : 0;
+            $dataBebidas[]   = isset($ventas['bebidas'])   ? (float)$ventas['bebidas']   : 0;
+        }
+
+        return [
+            'labels' => $labels,
+            'tooltip' => $tooltip,
+            'datasets' => [
+                [
+                    'label' => 'Alimentos',
+                    'data'  => $dataAlimentos,
+                    'borderColor' => '#4CAF50',
+                    'backgroundColor' => 'rgba(76, 175, 80, 0.2)',
+                    'fill' => true,
+                    'tension' => 0.3,
+                    'pointRadius' => 4,
+                    'pointBackgroundColor' => '#4CAF50'
+                ],
+                [
+                    'label' => 'Bebidas',
+                    'data'  => $dataBebidas,
+                    'borderColor' => '#2196F3',
+                    'backgroundColor' => 'rgba(33, 150, 243, 0.2)',
+                    'fill' => true,
+                    'tension' => 0.3,
+                    'pointRadius' => 4,
+                    'pointBackgroundColor' => '#2196F3'
+                ]
+            ]
+        ];
+    }
+
+
+    public function apiDashBoard($response, $udn) {
+        // Inicializar variables
+        $ventaMes       = 0;
+        $clientes       = 0;
+        $chequePromedio = 0;
+
+        foreach ($response as $item) {
+            switch ($item['id']) {
+                case 'totalGeneral': // Hotel
+                case 'totalGralAyB': // Restaurantes
+                    $ventaMes = $item['actual']['valor'];
+                    break;
+                case 'totalHabitaciones': // Clientes
+                    $clientes = $item['actual']['valor'];
+                    break;
+                case 'chequePromedio':      // Hotel
+                case 'chequePromedioAyB':   // Restaurante
+                    $chequePromedio = $item['actual']['valor'];
+                    break;
+            }
+        }
+
+         $ventasDia    = $this->getVentasDelDia([$_POST['udn']]);
+
+        return [
+            'ventaMes'       => evaluar($ventaMes),
+            'Clientes'       => $clientes,
+            'ChequePromedio' => evaluar($chequePromedio),
+            'ventaDia'      =>  '$ '.$ventasDia,
+        ];
+    }
+
+    function comparativaChequePromedio() {
+
+        $mesActual = $_POST['mes1'];
+        $yearNow   = $_POST['anio1'];
+        $yearOld   = $_POST['anio2'];
+
+        $dataA = $this->getComparativaChequePromedio([$_POST['mes1'], $yearNow,$_POST['udn']]);
+        $dataB = $this->getComparativaChequePromedio([$_POST['mes2'], $yearOld,$_POST['udn']]);
+
+        $dataset = [
+            'labels' => ['A&B', 'Alimentos', 'Bebidas'],
+            'A' => [
+                (float) $dataA['AyB'],
+                (float) $dataA['Alimentos'],
+                (float) $dataA['Bebidas']
+            ],
+            'B' => [
+                (float) $dataB['AyB'],
+                (float) $dataB['Alimentos'],
+                (float) $dataB['Bebidas']
+            ]
+        ];
+
+
+        return [
+            'dataset' => $dataset,
+            'anioA' => $yearNow,
+            'anioB' => $yearOld,
+        ];
+
+
+       
+    }
+
+
+    public function apiResumenIngresosPorDia($anio = null, $mes = null, $udn = null) {
+        $rows = [];
+        $anio = $anio ?? (isset($_POST['anio']) ? (int) $_POST['anio'] : date('Y'));
+        $mes  = $mes  ?? (isset($_POST['mes'])  ? (int) $_POST['mes']  : date('m'));
+        $udn  = $udn  ?? (isset($_POST['udn'])  ? (int) $_POST['udn']  : 1);
+
+        $days = [
+            2 => 'Lunes',
+            3 => 'Martes',
+            4 => 'Miércoles',
+            5 => 'Jueves',
+            6 => 'Viernes',
+            7 => 'Sábado',
+            1 => 'Domingo'
+        ];
+
+        foreach ($days as $noDia => $dayName) {
+            $lsDays = $this->getIngresosDayOfWeek([$udn, $anio, $mes, $noDia]);
+
+            foreach ($lsDays as $item) {
+                if ($udn == 1) {
+                    $rows[] = [
+                        'id'        => $noDia,
+                        'fecha'     => $item['fecha'],
+                        'dia'       => $dayName,
+                        'Hospedaje' => $item['Hospedaje'],
+                        'AyB'       => $item['AyB'],
+                        'Diversos'  => $item['Diversos'],
+                        'clientes'  => $item['noHabitaciones'],
+                        'total'     => $item['total']
+                    ];
+                } elseif ($udn == 5) {
+                    $rows[] = [
+                        'id'          => $noDia,
+                        'fecha'       => $item['fecha'],
+                        'dia'         => $dayName,
+                        'alimentos'   => $item['alimentos'],
+                        'bebidas'     => $item['bebidas'],
+                        'complementos'=> $item['complementos'],
+                        'total'       => $item['total']
+                    ];
+                } else {
+                    $rows[] = [
+                        'id'        => $noDia,
+                        'fecha'     => $item['fecha'],
+                        'dia'       => $dayName,
+                        'alimentos' => $item['alimentos'],
+                        'bebidas'   => $item['bebidas'],
+                        'clientes'  => $item['noHabitaciones'],
+                        'total'     => $item['totalGral'] ?? $item['total'] // fallback por seguridad
+                    ];
+                }
+            }
+        }
+
+        return [
+            'status' => 200,
+            'data'   => $rows
+        ];
+    }
+
+   public function apiIngresosComparativoSemana($anio1 = null, $mes1 = null, $anio2 = null, $mes2 = null, $udn = null) {
+        $anio1 = $anio1 ?? (isset($_POST['anio1']) ? (int) $_POST['anio1'] : date('Y'));
+        $mes1  = $mes1  ?? (isset($_POST['mes1'])  ? (int) $_POST['mes1']  : date('m'));
+        $anio2 = $anio2 ?? (isset($_POST['anio2']) ? (int) $_POST['anio2'] : (date('Y') - 1));
+        $mes2  = $mes2  ?? (isset($_POST['mes2'])  ? (int) $_POST['mes2']  : date('m'));
+        $udn   = $udn   ?? (isset($_POST['udn'])   ? (int) $_POST['udn']   : 1);
+
+        // Período 1
+        $apiA = $this->apiResumenIngresosPorDia($anio1, $mes1, $udn);
+        $totalesA = [];
+        $conteosA = [];
+        foreach ($apiA['data'] as $row) {
+            $dia = $row['dia'];
+            if (!isset($totalesA[$dia])) {
+                $totalesA[$dia] = 0;
+                $conteosA[$dia] = 0;
+            }
+            $totalesA[$dia] += $row['total'];
+            $conteosA[$dia]++;
+        }
+
+        // Período 2
+        $apiB = $this->apiResumenIngresosPorDia($anio2, $mes2, $udn);
+        $totalesB = [];
+        $conteosB = [];
+        foreach ($apiB['data'] as $row) {
+            $dia = $row['dia'];
+            if (!isset($totalesB[$dia])) {
+                $totalesB[$dia] = 0;
+                $conteosB[$dia] = 0;
+            }
+            $totalesB[$dia] += $row['total'];
+            $conteosB[$dia]++;
+        }
+
+        // Etiquetas en orden fijo
+        $labels = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+        $dataA  = [];
+        $dataB  = [];
+
+        foreach ($labels as $dia) {
+            $promedioA = isset($conteosA[$dia]) && $conteosA[$dia] > 0 
+                ? $totalesA[$dia] / $conteosA[$dia] 
+                : 0;
+            $promedioB = isset($conteosB[$dia]) && $conteosB[$dia] > 0 
+                ? $totalesB[$dia] / $conteosB[$dia] 
+                : 0;
+                
+            $dataA[] = round($promedioA, 2);
+            $dataB[] = round($promedioB, 2);
+        }
+
+        return [
+            'labels' => $labels,
+            'dataA'  => $dataA,
+            'dataB'  => $dataB,
+            'yearA'  => $anio2,
+            'yearB'  => $anio1
+
+        ];
+    }
+
+    public function apiTopDiasMes($anio = null, $mes = null, $udn = null) {
+        $anio = $anio ?? (isset($_POST['anio']) ? (int) $_POST['anio'] : date('Y'));
+        $mes  = $mes  ?? (isset($_POST['mes'])  ? (int) $_POST['mes']  : date('m'));
+        $udn  = $udn  ?? (isset($_POST['udn'])  ? (int) $_POST['udn']  : 1);
+
+        // Obtener todos los registros diarios
+        $apiData = $this->apiResumenIngresosPorDia($anio, $mes, $udn);
+        $rows = $apiData['data'];
+
+        // Ordenar por total descendente
+        usort($rows, function($a, $b) {
+            return $b['total'] <=> $a['total'];
+        });
+
+        // Tomar solo los 5 primeros
+        $top5 = array_slice($rows, 0, 5);
+
+        // Definir notas según ranking
+        $notas = ["Mejor día", "Excelente", "Muy bueno", "Bueno", "Regular"];
+
+        // Armar estructura final
+        $data = [];
+        foreach ($top5 as $i => $item) {
+            $fechaObj = new DateTime($item['fecha']);
+            $data[] = [
+                'fecha'    => $fechaObj->format('d M'),
+                'dia'      => $item['dia'],
+                'clientes' => $item['clientes'],
+                'total'    => $item['total'],
+                'nota'     => $notas[$i] ?? ""
+            ];
+        }
+
+        // Texto del subtítulo
+        $mesTexto = strftime('%B', mktime(0, 0, 0, $mes, 1));
+        $subtitle = ucfirst($mesTexto) . " " . $anio . " - Top 5";
+
+        return $data;
+    }
+
+    public function apiTopDiasSemanaPromedio($anio = null, $mes = null, $udn = null) {
+        $anio = $anio ?? (isset($_POST['anio']) ? (int) $_POST['anio'] : date('Y'));
+        $mes  = $mes  ?? (isset($_POST['mes'])  ? (int) $_POST['mes']  : date('m'));
+        $udn  = $udn  ?? (isset($_POST['udn'])  ? (int) $_POST['udn']  : 1);
+
+        // Obtener todos los registros diarios del mes
+        $apiData = $this->apiResumenIngresosPorDia($anio, $mes, $udn);
+        $rows = $apiData['data'];
+
+        // Agrupar por día de la semana
+        $diasSemana = [
+            1 => 'Lunes',
+            2 => 'Martes',
+            3 => 'Miércoles',
+            4 => 'Jueves',
+            5 => 'Viernes',
+            6 => 'Sábado',
+            7 => 'Domingo'
+        ];
+
+        $acumulados = [];
+        $clientes   = [];
+        $conteos    = [];
+
+        foreach ($rows as $item) {
+            $fechaObj = new DateTime($item['fecha']);
+            $diaNum   = (int)$fechaObj->format('N'); // 1 (Lunes) ... 7 (Domingo)
+
+            $total    = isset($item['total']) ? (float)$item['total'] : 0;
+            $cltes    = isset($item['clientes']) ? (int)$item['clientes'] : 0;
+
+            if (!isset($acumulados[$diaNum])) {
+                $acumulados[$diaNum] = 0;
+                $clientes[$diaNum]   = 0;
+                $conteos[$diaNum]    = 0;
+            }
+
+            $acumulados[$diaNum] += $total;
+            $clientes[$diaNum]   += $cltes;
+            $conteos[$diaNum]    += 1;
+        }
+
+        // Calcular promedios
+        $promedios = [];
+        foreach ($acumulados as $diaNum => $suma) {
+            $promedioTotal    = $conteos[$diaNum] > 0 ? $suma / $conteos[$diaNum] : 0;
+            $promedioClientes = $conteos[$diaNum] > 0 ? $clientes[$diaNum] / $conteos[$diaNum] : 0;
+
+            $promedios[] = [
+                'dia'        => $diasSemana[$diaNum],
+                'promedio'   => round($promedioTotal, 2),
+                'clientes'   => (int)$clientes[$diaNum],
+                'promCltes'  => round($promedioClientes, 2),
+                'veces'      => $conteos[$diaNum]
+            ];
+        }
+
+        // Ordenar por promedio descendente
+        usort($promedios, function($a, $b) {
+            return $b['promedio'] <=> $a['promedio'];
+        });
+
+        return $promedios;
+    }
+
+
+
+
+
+
+
+
+
 
     // Comparativas Mensuales.
 
@@ -580,7 +1273,7 @@ class ctrl extends mdl {
 
 
     // Promedios acomulados.
-      function listAcomulados(){
+    function listAcumulados(){
         $udn = $_POST['udn'];
         # -- variables para fechas
         $fi = new DateTime($_POST['anio'] . '-' . $_POST['mes'] . '-01');
@@ -711,29 +1404,44 @@ class ctrl extends mdl {
 
     }
 
+     function getSalesTitle() {
+        switch ($_POST['udn']) {
+            case 1:
+                return ['Fecha', 'Dia', 'Estado', 'No. Habitaciones','Hospedaje', 'AYB', 'DIVERSOS', 'Total'];
+            case 5:
+                return ['Fecha', 'Dia', 'Estado','Clientes','Alimentos', 'Bebidas', 'Guarniciones','Sales', 'Domicilio','Total'];
+            default:
+                return ['Fecha', 'Dia', 'Estado', 'Clientes','Alimentos', 'Bebidas', 'Total'];
+        }
+
+    }
+
 }
 
 
 // Complements.
 function createdGroups($groups, $ventas, $id) {
-        $row = [];
+    $row = [];
 
-        foreach ($groups as $key => $nameGroup) {
-            $value = evaluar($ventas[$nameGroup] ?? '', '');
-            if ($key == 0) $value = $ventas[$nameGroup];
+    foreach ($groups as $key => $nameGroup) {
+        $value = evaluar($ventas[$nameGroup] ?? '', '');
+        if ($key == 0) $value = $ventas[$nameGroup];
 
-            $row[$nameGroup] = [
-                'html' => createElement('input', [
-                    'name'    => $nameGroup,
-                    'value'   => $value,
-                    'onkeyup' => "ingresosDiarios.setVentas(event, $id)",
-                ]),
-                'style' => 'padding:0; margin:0;'
-            ];
-        }
+        $nameKey = $nameGroup === 'No habitaciones' ? 'clientes' : $nameGroup;
 
-        return $row;
+        $row[$nameKey] = [
+            'html' => createElement('input', [
+                'name'    => $nameKey,
+                'value'   => $value,
+                'onkeyup' => "ingresosDiarios.setVentas(event, $id)",
+            ]),
+            'style' => 'padding:0; margin:0;'
+        ];
+    }
+
+    return $row;
 }
+
 
 function createElement($tag, $attributes = [], $text = null) {
     $defaultAttributes = [

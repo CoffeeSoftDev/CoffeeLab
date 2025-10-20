@@ -15,7 +15,7 @@ $(async () => {
     // ** Instancias **
     app = new App(api, "root");
 
-    // salesDashboard = new SalesDashboard(api, "root");
+    salesDashboard = new SalesDashboard(api, "root");
 
     // sales = new Sales(api, "root");
     // monthlySales = new MonthlySales(api, "root");
@@ -39,8 +39,8 @@ class App extends Templates {
 
         // init instancias.
 
+        salesDashboard.render();
         // sales.render();
-        // salesDashboard.render();
         // monthlySales.render();
         // cumulativeAverages.render();
 
@@ -171,6 +171,7 @@ class SalesDashboard extends Templates {
     }
 
     layout() {
+
         this.dashboardComponent({
             parent: "container-dashboard",
             id: "dashboardComponent",
@@ -179,22 +180,17 @@ class SalesDashboard extends Templates {
             json: [
                 { type: "grafico", id: "containerChequePro" },
                 {
-                    type: "grafico", id: "barProductMargen1", title: "",
+                    type   : "grafico", id: "barProductMargen1", title: "",
                     content: [
                         { class: "border px-3 py-2 rounded", type: "div", id: "filterBarProductMargen" },
                         { class: " mt-2", type: "div", id: "barProductMargen" },
-
                     ]
-
-
                 },
                 { type: "grafico", id: "ventasDiasSemana", title: "Ventas por Día de la Semana" },
                 { type: "grafico", id: "Tendencia", title: "Tendencia de Ventas" },
             ]
         });
-
-        
-        
+   
         this.createfilterBar({
             parent: `filterBarProductMargen`,
             data: [
@@ -211,12 +207,13 @@ class SalesDashboard extends Templates {
         });
 
         this.filterBarDashboard();
+        this.renderDashboard();
     }
 
     async renderDashboard() {
 
         //filtrar clasificacion x udn 
-        this.handleCategoryChange($('#idFilterBar #udn').val());
+        // this.handleCategoryChange($('#idFilterBar #udn').val());
 
         let udn = $('#filterBarDashboard #udn').val();
         let periodo1 = $('#filterBarDashboard #periodo1').val();
@@ -240,25 +237,25 @@ class SalesDashboard extends Templates {
 
         // Graficos.
 
-        this.chequeComparativo({
-            data: mkt.barras.dataset,
-            anioA: mkt.barras.anioA,
-            anioB: mkt.barras.anioB,
+        // this.chequeComparativo({
+        //     data: mkt.barras.dataset,
+        //     anioA: mkt.barras.anioA,
+        //     anioB: mkt.barras.anioB,
 
-        });
-
-
-        this.comparativaIngresosDiarios({ data: mkt.linear });
-
-        this.ventasPorDiaSemana(mkt.barDays);
+        // });
 
 
-        this.topDiasSemana({
-            parent: "Tendencia",
-            title: "📊 Ranking por Promedio Semanal",
-            subtitle: "Promedio de ventas por día de la semana en el mes seleccionado",
-            data: mkt.topWeek
-        });
+        // this.comparativaIngresosDiarios({ data: mkt.linear });
+
+        // this.ventasPorDiaSemana(mkt.barDays);
+
+
+        // this.topDiasSemana({
+        //     parent: "Tendencia",
+        //     title: "📊 Ranking por Promedio Semanal",
+        //     subtitle: "Promedio de ventas por día de la semana en el mes seleccionado",
+        //     data: mkt.topWeek
+        // });
 
 
 
@@ -273,7 +270,7 @@ class SalesDashboard extends Templates {
                     id: "udn",
                     lbl: "UDN",
                     class: "col-sm-4",
-                    data: lsudn,
+                    data: udn,
                     onchange: `salesDashboard.renderDashboard()`,
                 },
                 {
