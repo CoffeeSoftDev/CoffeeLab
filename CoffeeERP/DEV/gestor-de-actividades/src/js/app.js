@@ -442,7 +442,7 @@ class App extends Templates {
         let form = "";
         form = ` <form class="row" id="${opts.form_id}" novalidate>
                     <div class="input-group mb-3">
-                        <input id="${opts.input_id}" class="form-control" required="required" placeholder="Escribe aquí...">
+                        <textarea id="${opts.input_id}" class="form-control" row=5 required="required" placeholder="Escribe aquí..." oninput="this.style.height='auto';this.style.height=(this.scrollHeight)+'px';"></textarea>
                         <button type="submit" class="btn btn-primary">
                             <i class="icon-direction-outline" title="Enviar"></i>
                         </button>
@@ -456,6 +456,9 @@ class App extends Templates {
                         ${mensaje}
                     </div>
                 </div>
+            </div>
+            <div class="d-flex align-items-end mb-2">
+                <a onclick='app.typeOfAnswer()' class='ms-auto cursor-pointer text-blue-600 hover:underline hover:text-blue-800 transition-colors duration-150'>Mejora tu respuesta 💡</a>
             </div>
             ${form}
             `;
@@ -565,6 +568,121 @@ class App extends Templates {
             }
         });
     }
+
+    typeOfAnswer() {
+        bootbox.dialog({
+            title: "💬 ¿Qué tipo de respuesta deseas?",
+            message: `
+                <div class="form-group">
+                    <label for="tipoRespuesta" class="fw-bold mb-2">Selecciona un tipo de respuesta:</label>
+                    <select id="tipoRespuesta" class="form-control">
+                        <option value="">Seleccione una opción...</option>
+                        <option value="formal">Respuesta formal</option>
+                        <option value="casual">Respuesta casual</option>
+                        <option value="tecnica">Respuesta técnica</option>
+                        <option value="colaborativa">Respuesta colaborativa</option>
+                        <option value="seguimiento">Respuesta seguimiento</option>
+                        <option value="propositiva">Respuesta propositiva</option>
+                        <option value="reconocimiento">Respuesta reconocimiento</option>
+                        <option value="compromiso">Respuesta compromiso</option>
+                    </select>
+                </div>
+            `,
+            size: "small",
+            buttons: {
+                cancel: {
+                    label: "Cancelar",
+                    className: "btn-secondary"
+                },
+                ok: {
+                    label: "Aceptar",
+                    className: "btn-primary",
+                    callback: async function () {
+                        const selectedOption = $("#tipoRespuesta").val();
+                        const inputValue = $("#formChat #iptChat").val().trim();
+
+                        if (!inputValue) {
+                            alert({ icon: "warning", text: "Por favor escribe un mensaje antes de mejorar tu respuesta." });
+                            return;
+                        }
+
+                        // 🔵 Descripción contextual según tipo
+                        const tipos = {
+                            formal: "responde con un tono formal y profesional",
+                            casual: "responde de forma cercana, natural y amistosa (puedes usar emojis)",
+                            tecnica: "responde con precisión técnica y terminología especializada",
+                            colaborativa: "responde de forma que invite a la colaboración y al trabajo en equipo",
+                            seguimiento: "responde de forma clara y enfocada en el seguimiento de tareas",
+                            propositiva: "responde de forma constructiva y con orientación a soluciones",
+                            reconocimiento: "responde con tono motivador y de reconocimiento hacia el equipo",
+                            compromiso: "responde con tono persuasivo, mostrando responsabilidad y compromiso"
+                        };
+
+                        const tipoDescripcion = tipos[selectedOption] || "mejora la redacción del mensaje manteniendo su intención original";
+                        // Obtener el archivo .env de carpeta conf y leer la clave API
+                        async function getKey() {
+                            const response = await fetch("../../DEV/conf/getEnv.php");
+                            const data = await response.json();
+                            return data.OPENAI_API_KEY;
+                        }
+
+
+                        // 🧠 Llamada al endpoint de ChatGPT
+                        try {
+                            const apiKey = await getKey(); // <-- ahora sí la obtenemos correctamente
+                            if (!apiKey) {
+                                alert({
+                                    icon: "error",
+                                    text: "No se pudo obtener la API Key. Verifica el archivo getEnv.php o el .env."
+                                });
+                                return;
+                            }
+                            const response = await fetch("https://api.openai.com/v1/chat/completions", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json",
+                                    "Authorization": `Bearer ${apiKey}` // ← Reemplaza con tu clave
+                                },
+                                body: JSON.stringify({
+                                    model: "gpt-4.1",
+                                    messages: [
+                                        {
+                                            role: "system",
+                                            content: "Eres un asistente experto en redacción profesional llamado CoffeeIA, especializado en comunicación de equipos y tono corporativo."
+                                        },
+                                        {
+                                            role: "user",
+                                            content: `Mejora este texto según el siguiente contexto: "${tipoDescripcion}". Texto original: "${inputValue}". Solo dame el texto mejorado, sin explicaciones ni comentarios adicionales.`
+                                        }
+                                    ],
+                                    temperature: 0.7
+                                })
+                            });
+
+                            const data = await response.json();
+
+                            if (data.choices && data.choices.length > 0) {
+                                const mejorado = data.choices[0].message.content.trim();
+                                $("#formChat #iptChat").val(mejorado);
+                            } else {
+                                alert({
+                                    icon: "error",
+                                    text: "No se pudo generar una respuesta mejorada. Intenta nuevamente."
+                                });
+                            }
+                        } catch (error) {
+                            console.error("Error al conectar con ChatGPT:", error);
+                            alert({
+                                icon: "error",
+                                text: "Ocurrió un error al conectarse con ChatGPT."
+                            });
+                        }
+                    }
+                }
+            }
+        });
+    }
+
 
     // AGREGAR A COFFEE SOFT
     getCookie(name) {
@@ -879,7 +997,7 @@ class App extends Templates {
                 badge = `<span class="inline-flex items-center gap-1 bg-orange-500/10 text-orange-700 px-2 py-1 rounded-full text-sm font-semibold shadow-sm">
                             Desempaño con Áreas de Oportunidad
                         </span>`;
-            } else  if (avg >= 1) {
+            } else if (avg >= 1) {
                 badge = `<span class="inline-flex items-center gap-1 bg-red-500/10 text-red-700 px-2 py-1 rounded-full text-sm font-semibold shadow-sm">
                             Bajo Desempeño
                         </span>`;

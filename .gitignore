@@ -3,3 +3,7 @@
 
 # Plugins directory
 CoffeeHuubie/dev/src/plugins/
+
+.env
+
+CoffeeERP/DEV/conf/.env
