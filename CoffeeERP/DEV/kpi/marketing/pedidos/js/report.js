@@ -1,9 +1,6 @@
 let api_report = 'ctrl/ctrl-report.php';
 let api_canal = 'ctrl/ctrl-canal.php';
-// let api_dashboard = 'ctrl/ctrl-dashboard-order.php';
-// let api = 'ctrl/ctrl-report.php'; // API principal para init
-// let app, report, admin, dashboardOrder;
-// let lsUDN, lsCanales, lsAños, lsudn;
+
 
 $(async () => {
 
@@ -16,7 +13,7 @@ $(async () => {
     const dashboardData = await useFetch({ url: api_dashboard, data: { opc: "init" } });
     lsudn = dashboardData.udn;
 
-    app = new AppTemporal(api_report, "root");
+    // app = new AppTemporal(api_report, "root");
     report = new Report(api_report, "root");
     admin = new Admin(api_canal, "root");
     dashboardOrder = new DashboardOrder(api_dashboard, "root");
@@ -846,7 +843,7 @@ class DashboardOrder extends Templates {
                 // { type: "grafico", id: "barChartContainer", title: "Ventas por Canal" },
                 { type: "grafico", id: "barChanelMonth", title: "Ventas por Canal Mensual" },
                 { type: "tabla", id: "channelRankingContainer", title: "Canales con Mejor Rendimiento" },
-                { type: "tabla", id: "monthlyPerformanceContainer", title: "Rendimiento mensual" },
+                { type: "tabla", id: "monthlyPerformanceContainer", class:'p-2', title: "Rendimiento mensual" },
             ]
         });
 
@@ -1209,54 +1206,48 @@ class DashboardOrder extends Templates {
     }
 
     renderMonthlyPerformance(data) {
-        const container = $("<div>", { class: "p-4" });
-        const title = $("<h3>", {
-            class: "text-lg font-semibold mb-4 text-gray-800",
-            text: "📊 Rendimiento mensual"
-        });
-
-        const table = $("<div>", { class: "overflow-x-auto" });
-        const tableElement = $("<table>", { class: "w-full border-collapse" });
-
-        // Header
-        const thead = $("<thead>");
-        const headerRow = $("<tr>", { class: "bg-[#103B60] text-white" });
-        headerRow.append(
-            $("<th>", { class: "px-4 py-3 text-left font-semibold", text: "Mes" }),
-            $("<th>", { class: "px-4 py-3 text-center font-semibold", text: "Pedidos" }),
-            $("<th>", { class: "px-4 py-3 text-right font-semibold", text: "Ventas" }),
-            $("<th>", { class: "px-4 py-3 text-center font-semibold", text: "Crecimiento" })
-        );
-        thead.append(headerRow);
-
-        // Body
-        const tbody = $("<tbody>");
-        data.forEach((month, index) => {
-            const row = $("<tr>", {
-                class: index % 2 === 0 ? "bg-gray-50" : "bg-white"
-            });
-
-            const growthClass = month.growth >= 0 ? "text-green-600" : "text-red-600";
+        
+        const rows = data.map(month => {
+            const growthClass = month.growth >= 0 ? "text-green-500" : "text-red-500";
             const growthIcon = month.growth >= 0 ? "↑" : "↓";
             const growthText = `${growthIcon} ${Math.abs(month.growth)}%`;
 
-            row.append(
-                $("<td>", { class: "px-4 py-3 font-medium", text: month.name }),
-                $("<td>", { class: "px-4 py-3 text-center", text: month.orders }),
-                $("<td>", { class: "px-4 py-3 text-right font-semibold", text: this.formatPrice(month.sales) }),
-                $("<td>", {
-                    class: `px-4 py-3 text-center font-semibold ${growthClass}`,
-                    text: growthText
-                })
-            );
-            tbody.append(row);
+            return {
+                "Mes": month.name,
+                "Pedidos": {
+                    html: month.orders,
+                    class: "text-center"
+                },
+                "Ventas": {
+                    html: this.formatPrice(month.sales),
+                    class: "text-right font-semibold "
+                },
+                "Crecimiento": {
+                    html: growthText,
+                    class: `text-center font-semibold ${growthClass} `
+                }
+            };
         });
 
-        tableElement.append(thead, tbody);
-        table.append(tableElement);
-        container.append(title, table);
-        $("#monthlyPerformanceContainer").html(container);
+        $("#monthlyPerformanceContainer").html('<div id="tbMonthly" class="p-2 mt-2"></div>');
+
+        this.createCoffeTable({
+            parent: "tbMonthly",
+            data: {
+                row: rows,
+                thead: ""
+            },
+           
+                id: "tbMonthlyPerformance",
+                theme: "corporativo",
+                title: "📊 Rendimiento mensual",
+                subtitle: "",
+                center: [1, 3],
+                right: [2],
+                extends:true
+        });
     }
+
 
     dashboardComponent(options) {
         const defaults = {
@@ -1460,20 +1451,20 @@ class DashboardOrder extends Templates {
         let month = $('#filterBarDashboard #mes').val();
         let year = $('#filterBarDashboard #anio').val();
 
-      
-            const response = await useFetch({
-                url: api_dashboard,
-                data: {
-                    opc: "getSales",
-                    udn: udn,
-                    mes: month,
-                    anio: year,
-                },
-            });
 
-           
-            this.renderChannelComparisonChart(response.data);
-          
+        const response = await useFetch({
+            url: api_dashboard,
+            data: {
+                opc: "getSales",
+                udn: udn,
+                mes: month,
+                anio: year,
+            },
+        });
+
+
+        this.renderChannelComparisonChart(response.data);
+
     }
 
     renderChannelComparisonChart(data) {

@@ -7,18 +7,19 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 
 require_once '../mdl/mdl-dashboard-order.php';
-
+require_once '../../../../conf/coffeSoft.php';
 class ctrl extends mdl {
 
     function init() {
+
         return [
             'udn' => $this->lsUDN()
         ];
     }
 
     function apiPromediosDiarios() {
-        $udn = $_POST['udn'];
-        $mes = isset($_POST['mes']) ? $_POST['mes'] : null;
+        $udn  = $_POST['udn'];
+        $mes  = isset($_POST['mes']) ? $_POST['mes'] : null;
         $anio = $_POST['anio'];
         // $tipoPeriodo = isset($_POST['tipoPeriodo']) ? $_POST['tipoPeriodo'] : 'mes';
         $tipoPeriodo = 'mes';
@@ -29,6 +30,7 @@ class ctrl extends mdl {
             $barChart = $this->getBarChartDataByYear($udn, $anio);
             $channelRanking = $this->getChannelRankingDataByYear($udn, $anio);
         } else {
+
             // Consulta por mes específico
             $dashboard      = $this->detailsCard($udn, $mes, $anio);
             $barChart       = $this->getBarChartData($udn, $anio);
@@ -349,8 +351,8 @@ class ctrl extends mdl {
     }
 
     function getSales() {
-        $udn = $_POST['udn'];
-        $mes = $_POST['mes'];
+        $udn  = $_POST['udn'];
+        $mes  = $_POST['mes'];
         $anio = $_POST['anio'];
         
         $data = $this->getSalesByChannel([$udn, $mes, $anio]);
@@ -359,13 +361,13 @@ class ctrl extends mdl {
         $ventaActual = [];
         $ventaAnterior = [];
         $colors = [
-            'WhatsApp' => '#25D366',
-            'Meep' => '#FF6B35', 
+            'WhatsApp'  => '#25D366',
+            'Meep'      => '#FF6B35',
             'Ecommerce' => '#007BFF',
-            'Facebook' => '#1877F2',
-            'Llamada' => '#6C757D',
-            'Uber' => '#000000',
-            'Otro' => '#9E9E9E'
+            'Facebook'  => '#1877F2',
+            'Llamada'   => '#6C757D',
+            'Uber'      => '#000000',
+            'Otro'      => '#9E9E9E'
         ];
         
         foreach ($data as $channel) {
