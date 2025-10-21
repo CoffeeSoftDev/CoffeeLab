@@ -31,17 +31,17 @@ class mdl extends CRUD {
     function getMonthlyOrderTrends($array) {
         $query = "
             SELECT 
-                MONTH(fecha_creacion) as mes,
-                MONTHNAME(fecha_creacion) as nombre_mes,
+                MONTH(fecha_pedido) as mes,
+                MONTHNAME(fecha_pedido) as nombre_mes,
                 COUNT(*) as total_pedidos,
                 SUM(monto) as total_ventas,
                 AVG(monto) as promedio_pedido
             FROM {$this->bd}pedido 
             WHERE udn_id = ? 
-            AND YEAR(fecha_creacion) = ?
+            AND YEAR(fecha_pedido) = ?
             AND active = 1
-            GROUP BY MONTH(fecha_creacion), MONTHNAME(fecha_creacion)
-            ORDER BY MONTH(fecha_creacion)
+            GROUP BY MONTH(fecha_pedido), MONTHNAME(fecha_pedido)
+            ORDER BY MONTH(fecha_pedido)
         ";
         return $this->_Read($query, $array);
     }
@@ -57,13 +57,13 @@ class mdl extends CRUD {
                 (SUM(p.monto) / (
                     SELECT SUM(monto) 
                     FROM {$this->bd}pedido 
-                    WHERE udn_id = ? AND YEAR(fecha_creacion) = ? AND MONTH(fecha_creacion) = ? AND active = 1
+                    WHERE udn_id = ? AND YEAR(fecha_pedido) = ? AND MONTH(fecha_pedido) = ? AND active = 1
                 )) * 100 as porcentaje
             FROM {$this->bd}pedido p
             JOIN {$this->bd}canal c ON p.canal_id = c.id
             WHERE p.udn_id = ? 
-            AND YEAR(p.fecha_creacion) = ? 
-            AND MONTH(p.fecha_creacion) = ?
+            AND YEAR(p.fecha_pedido) = ? 
+            AND MONTH(p.fecha_pedido) = ?
             AND p.active = 1
             AND c.active = 1
             GROUP BY c.id, c.nombre
@@ -113,13 +113,13 @@ class mdl extends CRUD {
         $query = "
             SELECT 
                 (SELECT SUM(monto) FROM {$this->bd}pedido 
-                 WHERE udn_id = ? AND DATE(fecha_creacion) = CURDATE() - INTERVAL 1 DAY AND active = 1) as venta_dia,
+                 WHERE udn_id = ? AND DATE(fecha_pedido) = CURDATE() - INTERVAL 1 DAY AND active = 1) as venta_dia,
                 (SELECT SUM(monto) FROM {$this->bd}pedido 
-                 WHERE udn_id = ? AND YEAR(fecha_creacion) = ? AND MONTH(fecha_creacion) = ? AND active = 1) as venta_mes,
+                 WHERE udn_id = ? AND YEAR(fecha_pedido) = ? AND MONTH(fecha_pedido) = ? AND active = 1) as venta_mes,
                 (SELECT COUNT(DISTINCT cliente_id) FROM {$this->bd}pedido 
-                 WHERE udn_id = ? AND YEAR(fecha_creacion) = ? AND MONTH(fecha_creacion) = ? AND active = 1) as clientes,
+                 WHERE udn_id = ? AND YEAR(fecha_pedido) = ? AND MONTH(fecha_pedido) = ? AND active = 1) as clientes,
                 (SELECT AVG(monto) FROM {$this->bd}pedido 
-                 WHERE udn_id = ? AND YEAR(fecha_creacion) = ? AND MONTH(fecha_creacion) = ? AND active = 1) as cheque_promedio
+                 WHERE udn_id = ? AND YEAR(fecha_pedido) = ? AND MONTH(fecha_pedido) = ? AND active = 1) as cheque_promedio
         ";
         return $this->_Read($query, $array);
     }
@@ -170,17 +170,17 @@ class mdl extends CRUD {
         $query = "
             SELECT 
                 c.nombre as canal,
-                MONTH(p.fecha_creacion) as mes,
+                MONTH(p.fecha_pedido) as mes,
                 SUM(p.monto) as total_monto,
                 COUNT(p.id) as total_pedidos
             FROM {$this->bd}pedido p
             JOIN {$this->bd}canal c ON p.canal_id = c.id
             WHERE p.udn_id = ? 
-            AND YEAR(p.fecha_creacion) = ?
+            AND YEAR(p.fecha_pedido) = ?
             AND p.active = 1
             AND c.active = 1
-            GROUP BY c.id, c.nombre, MONTH(p.fecha_creacion)
-            ORDER BY c.nombre, MONTH(p.fecha_creacion)
+            GROUP BY c.id, c.nombre, MONTH(p.fecha_pedido)
+            ORDER BY c.nombre, MONTH(p.fecha_pedido)
         ";
         return $this->_Read($query, $array);
     }
@@ -259,6 +259,83 @@ class mdl extends CRUD {
             ORDER BY total_monto DESC
         ";
         return $this->_Read($query, array_merge($array, $array));
+    }
+
+    function getTotalMonthOrders($array) {
+        $query = "
+            SELECT COUNT(*) as total_pedidos
+            FROM {$this->bd}pedido 
+            WHERE udn_id = ? 
+            AND MONTH(fecha_pedido) = ?
+            AND YEAR(fecha_pedido) = ?
+            AND active = 1
+        ";
+        $result = $this->_Read($query, $array);
+        return $result ? intval($result[0]['total_pedidos']) : 0;
+    }
+
+    function getSalesByChannel($array) {
+        $udn = $array[0];
+        $mes = $array[1];
+        $anio = $array[2];
+        
+        // Calcular mes anterior
+        $mesAnterior = $mes ;
+        $anioAnterior = $anio-1;
+        // if ($mesAnterior < 1) {
+        //     $mesAnterior = 12;
+        //     $anioAnterior = $anio - 1;
+        // }
+        
+        $query = "
+            SELECT 
+                c.nombre as canal,
+                c.id as canal_id,
+                -- Ventas del mes actual
+                COALESCE((SELECT SUM(p.monto) 
+                         FROM {$this->bd}pedido p 
+                         WHERE p.canal_id = c.id 
+                         AND p.udn_id = ? 
+                         AND MONTH(p.fecha_pedido) = ? 
+                         AND YEAR(p.fecha_pedido) = ? 
+                         AND p.active = 1), 0) as venta_actual,
+                -- Ventas del mes anterior
+                COALESCE((SELECT SUM(p.monto) 
+                         FROM {$this->bd}pedido p 
+                         WHERE p.canal_id = c.id 
+                         AND p.udn_id = ? 
+                         AND MONTH(p.fecha_pedido) = ? 
+                         AND YEAR(p.fecha_pedido) = ? 
+                         AND p.active = 1), 0) as venta_anterior,
+                -- Pedidos del mes actual
+                COALESCE((SELECT COUNT(*) 
+                         FROM {$this->bd}pedido p 
+                         WHERE p.canal_id = c.id 
+                         AND p.udn_id = ? 
+                         AND MONTH(p.fecha_pedido) = ? 
+                         AND YEAR(p.fecha_pedido) = ? 
+                         AND p.active = 1), 0) as pedidos_actual,
+                -- Pedidos del mes anterior
+                COALESCE((SELECT COUNT(*) 
+                         FROM {$this->bd}pedido p 
+                         WHERE p.canal_id = c.id 
+                         AND p.udn_id = ? 
+                         AND MONTH(p.fecha_pedido) = ? 
+                         AND YEAR(p.fecha_pedido) = ? 
+                         AND p.active = 1), 0) as pedidos_anterior
+            FROM {$this->bd}canal c
+            WHERE c.active = 1
+            ORDER BY c.nombre
+        ";
+        
+        $params = [
+            $udn, $mes, $anio,           // Mes actual
+            $udn, $mesAnterior, $anioAnterior,  // Mes anterior
+            $udn, $mes, $anio,           // Pedidos mes actual
+            $udn, $mesAnterior, $anioAnterior   // Pedidos mes anterior
+        ];
+        
+        return $this->_Read($query, $params);
     }
 
     function lsUDN() {

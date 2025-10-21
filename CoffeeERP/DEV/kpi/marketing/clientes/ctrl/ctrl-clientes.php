@@ -34,7 +34,16 @@ class ctrl extends mdl {
             $nombreCompleto = $key['nombre'];
             $correo = $key['correo'] ?? '';
 
-            $badgeVIP = $this->renderVipBadge($key['id'], $key['vip']);
+            //  Filtro unicamente para tabachines
+            if($key['udn_id'] == 1){
+
+                $badgeVIP = $this->renderVipBadge($key['id'], $key['vip']);
+            }else{
+                $badgeVIP = '<span class="vip-badge px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-600 ">Regular</span>';
+            }
+
+
+
 
             if ($key['active'] == 1) {
                 $a[] = [
@@ -217,27 +226,26 @@ class ctrl extends mdl {
         foreach ($ls as $key) {
             $a = [];
 
-            $nombreCompleto = trim($key['nombre'] . ' ' . $key['apellido_paterno'] . ' ' . $key['apellido_materno']);
+            $nombreCompleto = $key['nombre'] ;
             $correo = $key['correo'] ?? '';
 
             $badgeVIP = $this->renderVipBadge($key['id'], $key['vip']);
 
             $userCard = renderUserCard($nombreCompleto, $correo,$key['color'] );
-            $clienteConBadge = $userCard . ($badgeVIP ? '<div class="mt-1">' . $badgeVIP . '</div>' : '');
 
             $badgeFrecuencia = '';
             switch ($key['frecuencia']) {
                 case 'Activo':
-                    $badgeFrecuencia = '<span class="px-2 py-1 rounded-md text-xs font-semibold bg-green-600 text-white">🟢 Activo</span>';
+                    $badgeFrecuencia = '<span class="px-2 py-1 rounded-md text-xs font-semibold bg-green-200 text-green-800 w-20 text-center inline-block">Activo</span>';
                     break;
                 case 'Regular':
-                    $badgeFrecuencia = '<span class="px-2 py-1 rounded-md text-xs font-semibold bg-yellow-600 text-white">🟡 Regular</span>';
+                    $badgeFrecuencia = '<span class="px-2 py-1 rounded-md text-xs font-semibold bg-yellow-200 text-yellow-600 w-20 text-center inline-block">Regular</span>';
                     break;
                 case 'Inactivo':
-                    $badgeFrecuencia = '<span class="px-2 py-1 rounded-md text-xs font-semibold bg-red-600 text-white">🔴 Inactivo</span>';
+                    $badgeFrecuencia = '<span class="px-2 py-1 rounded-md text-xs font-semibold bg-red-200 text-red-600 w-20 text-center inline-block">Inactivo</span>';
                     break;
                 case 'Sin pedidos':
-                    $badgeFrecuencia = '<span class="px-2 py-1 rounded-md text-xs font-semibold bg-gray-500 text-white">⚪ Sin pedidos</span>';
+                    $badgeFrecuencia = '<span class="px-2 py-1 rounded-md text-xs font-semibold bg-gray-200 text-gray-600 w-20 text-center inline-block">Sin pedidos</span>';
                     break;
             }
 
@@ -249,7 +257,7 @@ class ctrl extends mdl {
 
             $__row[] = [
                 'id'               => $key['id'],
-                'Cliente'          => ['html' => $clienteConBadge, 'class' => 'align-middle'],
+                'Cliente'          => ['html' => $userCard, 'class' => 'align-middle'],
                 'UDN'              => $key['udn_nombre'],
                 'Total Pedidos'    => ['html' => '<strong>' . number_format($key['total_pedidos']) . '</strong>', 'class' => 'text-center '],
                 'Monto Total'      => ['html' => '$' . number_format($key['monto_total'], 2), 'class' => 'text-end '],
@@ -283,7 +291,7 @@ class ctrl extends mdl {
         $limit = $_POST['limit'] ?? 10;
         $udnId = isset($_POST['udn_id']) && $_POST['udn_id'] !== 'all' ? $_POST['udn_id'] : null;
 
-        $ls = $this->getTopClient($limit, $udnId);
+        $ls = $this->getTopClient( $udnId);
 
         return [
             'status' => 200,
@@ -366,7 +374,7 @@ class ctrl extends mdl {
 
     private function renderVipBadge($clientId, $vipStatus) {
         if ($vipStatus == 1) {
-            return '<span class="vip-badge px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-600 cursor-pointer hover:bg-orange-200 transition-colors" 
+            return '<span class="vip-badge px-3 py-1 rounded-full text-xs font-semibold bg-orange-100 text-yellow-600 cursor-pointer hover:bg-orange-200 transition-colors" 
                         data-client-id="' . $clientId . '" 
                         data-vip-status="1" 
                         title="Clic para cambiar a Regular">

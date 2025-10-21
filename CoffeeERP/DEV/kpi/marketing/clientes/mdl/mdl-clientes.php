@@ -287,11 +287,7 @@ class mdl extends CRUD {
         return $this->_Read($query, [$clienteId]);
     }
 
-    /**
-     * Obtiene estadísticas de comportamiento de todos los clientes
-     * @param array $params [udn_id, active]
-     * @return array Lista de clientes con estadísticas
-     */
+    
     function getComportamientoClientes($params) {
         $whereClause = "c.active = ?";
         $data = [$params[0]];
@@ -305,10 +301,10 @@ class mdl extends CRUD {
             SELECT 
                 c.id,
                 c.nombre,
-                c.apellido_paterno,
-                c.apellido_materno,
+             
                 c.vip,
                 c.telefono,
+                c.correo,
                 u.UDN as udn_nombre,
                 u.color,
                 COUNT(p.id) as total_pedidos,
@@ -384,23 +380,16 @@ class mdl extends CRUD {
         return $this->_Read($query, $params);
     }
 
-    /**
-     * Obtiene top clientes por monto total
-     * @param int $limit Cantidad de clientes a retornar
-     * @param int|null $udnId Filtrar por unidad de negocio
-     * @return array Lista de top clientes
-     */
-    function getTopClient($limit = 10, $udnId = null) {
-        $whereClause = "c.active = 1";
+    function getTopClient( $udnId = null) {
+        $whereClause = " c.active = 1 ";
         $params = [];
 
         if ($udnId !== null && $udnId !== 'all') {
-            $whereClause .= " AND c.udn_id = ?";
+            $whereClause .= " AND c.udn_id = ? ";
             $params[] = $udnId;
         }
 
-        $params[] = $limit;
-
+        
         $query = "
             SELECT 
                 c.id,
@@ -421,7 +410,7 @@ class mdl extends CRUD {
             GROUP BY c.id
             HAVING total_pedidos > 0
             ORDER BY monto_total DESC
-            LIMIT ?
+            LIMIT 10
         ";
 
         return $this->_Read($query, $params);

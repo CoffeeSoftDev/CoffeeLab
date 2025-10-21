@@ -639,14 +639,14 @@ class ctrl extends Pedidos{
         $efectivo = isset($_POST['efectivo']) && is_numeric($_POST['efectivo']) ? floatval($_POST['efectivo']) : 0;
     
         $data = $this -> util -> sql([
-            'efectivo' => $efectivo,
-            'tdc'      => $tdc,
-            'anticipo' => ($tdc + $efectivo),
-            'Total'    => $_POST['Total'],
-            'discount' => $_POST['descuento'],
-            'Status'   => 2,
+            'efectivo'   => $efectivo,
+            'tdc'        => $tdc,
+            'anticipo'   => ($tdc + $efectivo),
+            'Total'      => $_POST['Total'],
+            'discount'   => $_POST['descuento'],
+            'Status'     => 2,
             'foliofecha' => date('Y-m-d H:i:s'),
-            'idLista'  => $_POST['idFolio']
+            'idLista'    => $_POST['idFolio']
         ], 1);
     
         $res = $this->setTickets($data);

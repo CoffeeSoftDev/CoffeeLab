@@ -82,7 +82,7 @@ class App extends Templates {
                 {
                     id: "history",
                     tab: "Historial Anual",
-                    onClick: () => history.render()
+                    onClick: () => report.lsResumenPedidos()
                 },
                 {
                     id: "admin",

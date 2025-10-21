@@ -1,65 +1,25 @@
 let api_report = 'ctrl/ctrl-report.php';
 let api_canal = 'ctrl/ctrl-canal.php';
-let app, report, admin;
-let lsUDN, lsCanales, lsAños;
+// let api_dashboard = 'ctrl/ctrl-dashboard-order.php';
+// let api = 'ctrl/ctrl-report.php'; // API principal para init
+// let app, report, admin, dashboardOrder;
+// let lsUDN, lsCanales, lsAños, lsudn;
 
 $(async () => {
-    // Agregar estilos CSS para animaciones de carga
-    const loadingStyles = $(`
-        <style>
-            @keyframes pulse {
-                0%, 100% { opacity: 1; }
-                50% { opacity: 0.5; }
-            }
-            
-            .animate-pulse {
-                animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-            }
-            
-            .transition-all {
-                transition-property: all;
-                transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-            }
-            
-            .duration-500 {
-                transition-duration: 500ms;
-            }
-            
-            .ease-out {
-                transition-timing-function: cubic-bezier(0, 0, 0.2, 1);
-            }
-            
-            .opacity-0 {
-                opacity: 0;
-            }
-            
-            .opacity-100 {
-                opacity: 1;
-            }
-            
-            .translate-y-4 {
-                transform: translateY(1rem);
-            }
-            
-            .translate-y-0 {
-                transform: translateY(0);
-            }
-            
-            .transform {
-                transform: translateX(var(--tw-translate-x)) translateY(var(--tw-translate-y)) rotate(var(--tw-rotate)) skewX(var(--tw-skew-x)) skewY(var(--tw-skew-y)) scaleX(var(--tw-scale-x)) scaleY(var(--tw-scale-y));
-            }
-        </style>
-    `);
-    $('head').append(loadingStyles);
 
     const data = await useFetch({ url: api, data: { opc: "init" } });
     lsUDN = data.udn;
     lsCanales = data.canales;
     lsAños = data.años;
 
+    // Obtener datos para dashboard
+    const dashboardData = await useFetch({ url: api_dashboard, data: { opc: "init" } });
+    lsudn = dashboardData.udn;
+
     app = new AppTemporal(api_report, "root");
     report = new Report(api_report, "root");
     admin = new Admin(api_canal, "root");
+    dashboardOrder = new DashboardOrder(api_dashboard, "root");
 
 });
 
@@ -104,7 +64,8 @@ class AppTemporal extends Templates {
                 {
                     id: "dashboard",
                     tab: "Dashboard",
-                    onClick: () => report.render()
+                    active: true,
+                    onClick: () => dashboardOrder.render()
                 },
                 {
                     id: "history",
@@ -114,8 +75,6 @@ class AppTemporal extends Templates {
                 {
                     id: "admin",
                     tab: "Administrador",
-                    active: true,
-
                     onClick: () => admin.lsCanales()
                 },
 
@@ -231,16 +190,7 @@ class Report extends Templates {
                     value: "id",
                     onchange: "report.showReport()"
                 },
-                {
-                    opc: "select",
-                    id: "filterMes",
-                    lbl: "Mes",
-                    class: "col-12 col-md-2",
-                    data: moment.months().map((m, i) => ({ id: i + 1, valor: m })),
-                    text: "valor",
-                    value: "id",
-                    onchange: "report.showReport()"
-                },
+
                 {
                     opc: "select",
                     id: "report",
@@ -889,11 +839,12 @@ class DashboardOrder extends Templates {
         this.dashboardComponent({
             parent: "container-dashboard",
             id: "dashboardComponent",
-            title: "📊 Dashboard de Ventas",
+            title: "📊 Dashboard de Pedidos",
             subtitle: "Análisis anual, por periodo y por hora.",
             json: [
                 { type: "grafico", id: "lineChartContainer", title: "Pedidos por mes del año 2025" },
-                { type: "grafico", id: "barChartContainer", title: "Ventas por Canal" },
+                // { type: "grafico", id: "barChartContainer", title: "Ventas por Canal" },
+                { type: "grafico", id: "barChanelMonth", title: "Ventas por Canal Mensual" },
                 { type: "tabla", id: "channelRankingContainer", title: "Canales con Mejor Rendimiento" },
                 { type: "tabla", id: "monthlyPerformanceContainer", title: "Rendimiento mensual" },
             ]
@@ -922,7 +873,8 @@ class DashboardOrder extends Templates {
 
         this.showCards(mkt.dashboard);
         this.renderLineChart(mkt.lineChart);
-        this.renderBarChart(mkt.barChart);
+        // this.renderBarChart(mkt.barChart);
+        this.renderSalesByChannel(); // Nueva función para el gráfico comparativo
         this.renderChannelRanking(mkt.channelRanking);
         this.renderMonthlyPerformance(mkt.monthlyPerformance);
 
@@ -1501,6 +1453,136 @@ class DashboardOrder extends Templates {
                 }
             }
         });
+    }
+
+    async renderSalesByChannel() {
+        let udn = $('#filterBarDashboard #udn').val();
+        let month = $('#filterBarDashboard #mes').val();
+        let year = $('#filterBarDashboard #anio').val();
+
+      
+            const response = await useFetch({
+                url: api_dashboard,
+                data: {
+                    opc: "getSales",
+                    udn: udn,
+                    mes: month,
+                    anio: year,
+                },
+            });
+
+           
+            this.renderChannelComparisonChart(response.data);
+          
+    }
+
+    renderChannelComparisonChart(data) {
+        const container = $("<div>", { class: "p-4" });
+        const title = $("<h3>", {
+            class: "text-lg font-semibold mb-4 text-gray-800",
+            text: data.title || "Ventas por Canal - Comparativa Mensual"
+        });
+
+        const canvasContainer = $("<div>", {
+            class: "chart-container relative",
+            style: "height: 400px;"
+        });
+
+        const canvas = $("<canvas>", {
+            id: "channelComparisonChart",
+            class: "w-full h-full"
+        });
+
+        canvasContainer.append(canvas);
+        container.append(title, canvasContainer);
+        $("#barChanelMonth").html(container);
+
+        const ctx = document.getElementById("channelComparisonChart").getContext("2d");
+
+        // Destruir gráfico anterior si existe
+        if (window._channelComparisonChart) {
+            window._channelComparisonChart.destroy();
+        }
+
+        window._channelComparisonChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: data.labels,
+                datasets: data.datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: "top",
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            boxWidth: 12
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: "rgba(0, 0, 0, 0.8)",
+                        titleColor: "#fff",
+                        bodyColor: "#fff",
+                        callbacks: {
+                            label: (context) => {
+                                return `${context.dataset.label}: ${this.formatPrice(context.parsed.y)}`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: "rgba(0, 0, 0, 0.1)"
+                        },
+                        ticks: {
+                            color: "#6B7280",
+                            callback: (value) => this.formatPrice(value)
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: "#6B7280",
+                            maxRotation: 45,
+                            minRotation: 0
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1000,
+                    easing: 'easeInOutQuart'
+                }
+            }
+        });
+    }
+
+    showChannelChartError() {
+        const container = $("<div>", { class: "p-4" });
+        const title = $("<h3>", {
+            class: "text-lg font-semibold mb-4 text-gray-800",
+            text: "Ventas por Canal - Comparativa Mensual"
+        });
+
+        const errorMessage = $("<div>", {
+            class: "flex items-center justify-center h-64 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300",
+            html: `
+                <div class="text-center">
+                    <div class="text-4xl text-gray-400 mb-2">📊</div>
+                    <p class="text-gray-500 font-medium">No hay datos disponibles</p>
+                    <p class="text-gray-400 text-sm">Selecciona un período diferente</p>
+                </div>
+            `
+        });
+
+        container.append(title, errorMessage);
+        $("#barChanelMonth").html(container);
     }
 
     formatPrice(amount) {
