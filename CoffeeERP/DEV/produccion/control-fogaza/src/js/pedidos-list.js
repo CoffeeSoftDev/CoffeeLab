@@ -479,10 +479,10 @@ class ListaPedidos extends App {
         let totalGeneral = 0;
 
         productos.forEach(product => {
-            const p = product.data[0] || {};
-            const base = parseFloat(p.importeBase || 0);
-            const oblea = parseFloat(p.importeOblea || 0);
-            const precio = parseFloat(p.total || 0);
+            const p        = product.data[0] || {};
+            const base     = parseFloat(p.importeBase || 0);
+            const oblea    = parseFloat(p.importeOblea || 0);
+            const precio   = parseFloat(product.price || 0);
             const subtotal = base + oblea + precio;
 
             totalGeneral += subtotal;
@@ -537,19 +537,32 @@ class ListaPedidos extends App {
         </div>`;
         });
 
-        const anticipo =
+        const descuento = parseFloat(data.discount || 0);
+        const subtotalConDescuento = totalGeneral - descuento;
 
+        const anticipo =
             parseFloat(data.efectivo || 0) +
             parseFloat(data.tdc || 0);
 
-        const restante = totalGeneral - anticipo;
+        const restante = subtotalConDescuento - anticipo;
 
         containerProducto += `
         <div class="text-sm space-y-2 mt-4">
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <div class="font-semibold">TOTAL GENERAL:</div>
+                    <div class="font-semibold">SUBTOTAL:</div>
                     <div class="text-right me-5">${fmt(totalGeneral)}</div>
+                </div>
+                ${descuento > 0 ? `
+                <div>
+                    <div class="font-semibold">DESCUENTO:</div>
+                    <div class="text-right me-5 text-green-600">-${fmt(descuento)}</div>
+                </div>` : ''}
+            </div>
+            <div class="grid grid-cols-2 gap-4 mt-2">
+                <div>
+                    <div class="font-semibold">TOTAL:</div>
+                    <div class="text-right me-5 font-bold">${fmt(subtotalConDescuento)}</div>
                 </div>
                 <div>
                     <div class="font-semibold">ANTICIPO:</div>

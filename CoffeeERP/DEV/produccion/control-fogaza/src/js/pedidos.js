@@ -183,7 +183,14 @@ class App extends Templates {
 
     async addPayment() {
 
-        let numero = parseFloat($('#total').text().replace('$', ''));
+        let numero = parseFloat($('#total').text().replace(/[$,]/g, ''));
+
+        // const request = await useFetch({
+        //     url: ctrl,
+        //     data: { opc: "getCampaign", id }
+        // });
+
+
 
         this.createModalForm({
             id: "modalRegisterPayment",
@@ -225,6 +232,7 @@ class App extends Templates {
                             </p>
                         </div> `
                 },
+             
 
                 {
                     opc: "input-group",
@@ -232,12 +240,18 @@ class App extends Templates {
                     id: "descuento",
                     tipo: "cifra",
                     icon: "icon-percent",
-                    class: "col-12 py-2",
+                    class: "col-12 pt-2",
                     placeholder: "0.00",
                     required: false,
-                    onkeyup: "calculateWithDiscount()"
+                    onkeyup: "calculateWithDiscount()",
+                    labelPosition: "bottom"
                 },
-
+                {
+                    opc: "div",
+                    id: "descuentoMessage",
+                    class: "col-12",
+                    html: `<span id="spanDescuento" class="text-xs text-gray-400 pl-1 hidden"></span>`
+                },
 
 
                 {
@@ -328,7 +342,7 @@ class App extends Templates {
 
 
     modalPaymentMethod() {
-        let numero = parseFloat($('#total').text().replace('$', ''));
+        let numero = parseFloat($('#total').text().replace(/[$,]/g, ''));
 
         this.createModalForm({
             id: 'modalPayment',
@@ -1225,11 +1239,11 @@ class App extends Templates {
 
     // Pedidos
     addProduct() {
-        
-        let idCard   = event.currentTarget;
-        let costo    = idCard.getAttribute('costo') || '0';
+
+        let idCard = event.currentTarget;
+        let costo = idCard.getAttribute('costo') || '0';
         let idPedido = idCard.getAttribute('id');
-        let nombre   = idCard.querySelector('.fw-semibold')?.textContent.trim() || 'Sin nombre';
+        let nombre = idCard.querySelector('.fw-semibold')?.textContent.trim() || 'Sin nombre';
 
 
         const modal = bootbox.dialog({
@@ -1241,12 +1255,12 @@ class App extends Templates {
                         <h2 class="text-lg font-bold mb-2"> Agregar producto</h2>
                         <p class="text-sm text-gray-700">
                             <i class="icon-doc-text-1"></i> Pastel base: ${nombre} | 
-                            Precio: ${formatPrice(costo) }
+                            Precio: ${formatPrice(costo)}
                         </p>
                     </div>
                 </div>
             `,
-        
+
             message: `<div><form id="containerForm" novalidate></form></div>`
         });
 
@@ -1256,7 +1270,7 @@ class App extends Templates {
             autovalidation: false,
             data: [],
             json: [
-             
+
                 { opc: 'radio', name: 'tipo', value: 1, text: 'Normal', onchange: 'pos.onShowPedidos()', class: 'col-sm-6 col-12 mb3-3', checked: true },
                 { opc: 'radio', name: 'tipo', value: 2, text: 'Personalizado', onchange: 'pos.onShowPedidos({ hide:false })', class: 'col-sm-6 col-12 mb-3' },
                 ...pos.jsonCake(),
@@ -2476,6 +2490,7 @@ function calculateWithDiscount() {
     const discountInput = document.getElementById('descuento');
     const discountAmountElement = document.getElementById('discountAmount');
     const finalPriceElement = document.getElementById('finalPrice');
+    const spanDescuento = document.getElementById('spanDescuento');
 
     if (!originalPriceElement || !discountInput || !discountAmountElement || !finalPriceElement) {
         return;
@@ -2484,11 +2499,28 @@ function calculateWithDiscount() {
     const originalPrice = parseFloat(originalPriceElement.textContent) || 0;
     let discount = parseFloat(discountInput.value) || 0;
 
+    // Controlar visibilidad del span
+    if (discount > 0) {
+        if (spanDescuento) {
+            spanDescuento.classList.remove('hidden');
+            spanDescuento.textContent = `Descuento aplicado: -$${discount.toFixed(2)}`;
+        }
+    } else {
+        if (spanDescuento) {
+            spanDescuento.classList.add('hidden');
+            spanDescuento.textContent = '';
+        }
+    }
+
     // Validar que el descuento no sea negativo
     if (discount < 0) {
         discount = 0;
         discountInput.value = '0.00';
-        showDiscountError('El descuento no puede ser negativo');
+        if (spanDescuento) {
+            spanDescuento.classList.remove('hidden');
+            spanDescuento.classList.add('text-red-500');
+            spanDescuento.textContent = 'El descuento no puede ser negativo';
+        }
         return;
     }
 
@@ -2496,9 +2528,15 @@ function calculateWithDiscount() {
     if (discount > originalPrice) {
         discount = originalPrice;
         discountInput.value = originalPrice.toFixed(2);
-        showDiscountError('El descuento no puede ser mayor al precio del pedido');
+        if (spanDescuento) {
+            spanDescuento.classList.remove('hidden');
+            spanDescuento.classList.add('text-red-500');
+            spanDescuento.textContent = 'El descuento no puede ser mayor al precio del pedido';
+        }
     } else {
-        clearDiscountError();
+        if (spanDescuento) {
+            spanDescuento.classList.remove('text-red-500');
+        }
     }
 
     // Calcular precio final
