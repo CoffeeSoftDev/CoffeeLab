@@ -38,7 +38,7 @@ public function whatsapp($telefono = '',$mensaje){
     $curl = curl_init();
     
     curl_setopt_array($curl, array(
-        CURLOPT_URL => "https://api.ultramsg.com/instance50238/messages/chat",
+        CURLOPT_URL => "",
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => "",
         CURLOPT_MAXREDIRS => 10,
@@ -57,7 +57,7 @@ public function whatsapp($telefono = '',$mensaje){
     curl_close($curl);
     
     if ($err) {
-        $message  =  "[ https://api.ultramsg.com ] ::  WHATSAPP";
+        $message  =  "";
         $message .=  "\n[ ERROR cURL] :: ". $err."\n";
         $this->writeToLog($message); 
 
@@ -94,7 +94,7 @@ public function whatsapp_file($telefono,$mensaje,$ruta,$file){
 
     $curl = curl_init();
     curl_setopt_array($curl, array(
-        CURLOPT_URL => "https://api.ultramsg.com/instance50238/messages/document",
+        CURLOPT_URL => "",
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => "",
         CURLOPT_MAXREDIRS => 10,
@@ -115,7 +115,7 @@ public function whatsapp_file($telefono,$mensaje,$ruta,$file){
     curl_close($curl);
     
     if ($err) {
-        $message  =  "[ https://api.ultramsg.com ] ::  WHATSAPP";
+        $message  =  "";
         $message .=  "\n[ ERROR cURL] :: ". $err."\n";
         $this->writeToLog($message); 
 

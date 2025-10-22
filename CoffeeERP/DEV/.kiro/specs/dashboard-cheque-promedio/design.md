@@ -2,397 +2,201 @@
 
 ## Overview
 
-El Dashboard de Cheque Promedio es un módulo analítico que se integra dentro del sistema de Ventas existente en CoffeeSoft ERP. Utiliza la arquitectura MVC establecida (Modelo-Vista-Controlador) y reutiliza componentes visuales del framework CoffeeSoft para mantener consistencia.
-
-El dashboard se compone de:
-- **4 Cards KPI** con métricas principales y comparativas
-- **Gráfico de barras** para análisis por día de la semana
-- **Gráfico comparativo** de cheque promedio por categoría
-- **FilterBar** para selección de período y UDN
+El Dashboard Analítico de Cheque Promedio es una extensión del módulo existente de Analytics de Ventas que se enfoca específicamente en métricas de cheque promedio y análisis comparativo. El dashboard aprovecha la infraestructura existente del controlador `ctrl-ingresos.php` y las funciones API ya implementadas como `apiPromediosDiarios` y `apiIngresosTotales`, integrándose perfectamente con el ecosistema CoffeeSoft.
 
 ## Architecture
 
-### Estructura de Archivos
-
+### Frontend Architecture
 ```
 kpi/marketing/ventas/
-├── src/js/
-│   └── kpi-ventas.js              # Frontend existente (se extiende)
-├── ctrl/
-│   └── ctrl-ingresos.php          # Controlador existente (se extiende)
-└── mdl/
-    └── mdl-ingresos.php           # Modelo existente (se extiende)
+├── index.php                          # Punto de entrada
+├── src/js/kpi-ventas.js               # Archivo principal existente (se extiende)
+├── ctrl/ctrl-ingresos.php             # Controlador existente (se extiende)
+└── mdl/mdl-ingresos.php               # Modelo existente (se extiende)
 ```
 
-### Patrón de Diseño
-
-**MVC (Model-View-Controller)**
-- **Model (mdl-ingresos.php)**: Consultas a base de datos, cálculos de métricas
-- **Controller (ctrl-ingresos.php)**: Lógica de negocio, formateo de respuestas
-- **View (kpi-ventas.js)**: Renderizado de componentes visuales, interacción usuario
-
-### Flujo de Datos
-
-```mermaid
-sequenceDiagram
-    participant User
-    participant Frontend as kpi-ventas.js
-    participant Controller as ctrl-ingresos.php
-    participant Model as mdl-ingresos.php
-    participant DB as Database
-
-    User->>Frontend: Selecciona filtros (UDN, mes, año)
-    Frontend->>Controller: useFetch({ opc: "getDashboardChequePromedio" })
-    Controller->>Model: ingresosMensuales()
-    Model->>DB: SELECT ventas WHERE...
-    DB-->>Model: Resultados
-    Model-->>Controller: Datos agregados
-    Controller->>Controller: Calcular métricas y comparativas
-    Controller-->>Frontend: JSON con dashboard, cards, gráficos
-    Frontend->>Frontend: Renderizar componentes
-    Frontend-->>User: Dashboard actualizado
+### Class Structure
+```javascript
+// Estructura de clases existente que se mantiene
+App extends Templates                   # Clase principal
+├── SalesDashboard extends Templates    # Dashboard principal (se extiende)
+├── Sales extends Templates             # Módulo de ventas
+├── MonthlySales extends Templates      # Comparativas mensuales
+└── CumulativeAverages extends Templates # Promedios acumulados
 ```
 
 ## Components and Interfaces
 
-### 1. Frontend Components (kpi-ventas.js)
+### 1. Dashboard Principal (SalesDashboard)
 
-#### Clase: `ChequePromedioDashboard extends Templates`
+#### Componentes Visuales:
+- **4 KPI Cards principales**:
+  - Ventas del día anterior
+  - Ventas del mes actual
+  - Total de clientes del mes
+  - Cheque promedio calculado
 
-**Propósito**: Gestionar la renderización del dashboard de cheque promedio
+- **Gráficos analíticos**:
+  - Comparativa de cheque promedio por categorías (barras)
+  - Análisis de ventas por día de la semana (barras)
+  - Tendencia de ventas diarias (líneas)
+  - Ranking de mejores días por promedio semanal
 
-**Métodos principales**:
-
+#### FilterBar Components:
 ```javascript
-class ChequePromedioDashboard extends Templates {
-    constructor(link, div_modulo)
-    render()                          // Inicializa layout y filtros
-    layout()                          // Estructura HTML del dashboard
-    filterBarDashboard()              // Crea barra de filtros
-    renderDashboard()                 // Carga y muestra datos
-    showCards(data)                   // Renderiza 4 cards KPI
-    renderChequePorDia(data)          // Gráfico por día de semana
-    renderChequeCategoria(data)       // Gráfico comparativo categorías
+filterBarDashboard() {
+    // Filtros existentes que se mantienen:
+    // - UDN (Unidad de Negocio)
+    // - Período 1 (mes/año de consulta)
+    // - Período 2 (mes/año de comparación)
+    // - Categoría (filtro dinámico por UDN)
 }
 ```
 
-**Componentes CoffeeSoft utilizados**:
-- `this.primaryLayout()` - Estructura base
-- `this.createfilterBar()` - Barra de filtros
-- `this.infoCard()` - Cards de métricas
-- `this.barChart()` - Gráficos de barras
-- `useFetch()` - Llamadas AJAX
+### 2. API Integration
 
-### 2. Backend Controller (ctrl-ingresos.php)
-
-#### Método: `getDashboardChequePromedio()`
-
-**Entrada**:
+#### Endpoints Existentes (se reutilizan):
 ```php
-$_POST = [
-    'opc'   => 'getDashboardChequePromedio',
-    'udn'   => 1,              // ID de unidad de negocio
-    'mes'   => 10,             // Mes actual
-    'anio'  => 2025,           // Año actual
-]
+// Controlador: ctrl-ingresos.php
+apiPromediosDiarios()    # Dashboard principal con KPIs
+apiIngresosTotales()     # Datos diarios detallados
+comparativaByCategory()  # Comparativas por categoría
+apiIngresosComparativoSemana() # Análisis semanal
+apiTopDiasSemanaPromedio()     # Ranking semanal
 ```
 
-**Salida**:
+#### Nuevos Endpoints (se agregan):
 ```php
-[
-    'status' => 200,
-    'cards' => [
-        'ventaDia'       => '$12,450.00',
-        'ventaMes'       => '$385,200.00',
-        'clientes'       => 1250,
-        'chequePromedio' => '$308.16',
-        'variaciones' => [
-            'ventaMes'       => '+8%',
-            'clientes'       => '+5%',
-            'chequePromedio' => '-2%'
-        ]
-    ],
-    'chequePorDia' => [
-        'labels' => ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
-        'data'   => [320.50, 315.20, 310.80, 325.40, 340.60, 380.20, 390.50]
-    ],
-    'chequePorCategoria' => [
-        'labels'    => ['A&B', 'Alimentos', 'Bebidas'],
-        'actual'    => [673.18, 613.00, 54.60],
-        'anterior'  => [640.25, 590.50, 49.75],
-        'anioActual'   => 2025,
-        'anioAnterior' => 2024
-    ]
-]
-```
-
-**Lógica**:
-1. Obtener datos del mes actual y año anterior
-2. Calcular métricas principales
-3. Calcular variaciones porcentuales
-4. Agrupar datos por día de semana
-5. Calcular cheque promedio por categoría
-6. Formatear respuesta JSON
-
-### 3. Backend Model (mdl-ingresos.php)
-
-#### Métodos a agregar/reutilizar:
-
-```php
-// Reutilizar existente
-ingresosMensuales($array)           // Ya existe
-getsoftVentas($array)               // Ya existe
-getComparativaChequePromedio($array) // Ya existe
-
-// Nuevos métodos
-getVentasDiaAnterior($array)        // Ventas del día anterior
-getChequePorDiaSemana($array)       // Promedio por día de semana
-getChequeCategoriaMes($array)       // Cheque promedio por categoría
+// Extensiones al controlador existente
+apiChequePromedioDashboard() # KPIs específicos de cheque promedio
+apiAnalisisCategorias()      # Análisis detallado por categorías
 ```
 
 ## Data Models
 
-### Estructura de Datos Principal
-
+### 1. KPI Card Data Structure
 ```javascript
-// Objeto de configuración del dashboard
 {
-    udn: 1,                    // ID unidad de negocio
-    mes: 10,                   // Mes seleccionado
-    anio: 2025,                // Año seleccionado
-    mesAnterior: 10,           // Mismo mes año anterior
-    anioAnterior: 2024         // Año anterior
+    ventaDia: "$ 45,230.50",      // Venta del día anterior
+    ventaMes: "$ 1,234,567.89",   // Venta del mes actual
+    Clientes: 1250,               // Total clientes del mes
+    ChequePromedio: "$ 987.65"    // Cheque promedio calculado
 }
 ```
 
-### Modelo de Card KPI
-
+### 2. Comparative Analysis Data
 ```javascript
 {
-    id: "kpiVentaMes",
-    title: "Venta del Mes",
-    data: {
-        value: "$385,200.00",
-        description: "+8% vs año anterior",
-        color: "text-green-800"
-    }
+    labels: ["A&B", "Alimentos", "Bebidas"],
+    A: [673.18, 613.0, 54.6],     // Datos período actual
+    B: [640.25, 590.5, 49.75],    // Datos período comparativo
+    anioA: 2025,
+    anioB: 2024
 }
 ```
 
-### Modelo de Gráfico
-
+### 3. Weekly Analysis Data
 ```javascript
 {
-    labels: ['Lunes', 'Martes', ...],
-    datasets: [
-        {
-            label: 'Cheque Promedio',
-            data: [320.50, 315.20, ...],
-            backgroundColor: '#103B60'
-        }
-    ]
+    labels: ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"],
+    dataA: [1200.50, 1350.75, 1100.25, 1450.80, 1600.90, 1800.45, 1300.60],
+    dataB: [1150.30, 1280.40, 1050.15, 1380.70, 1520.85, 1720.35, 1250.50],
+    yearA: 2024,
+    yearB: 2025
 }
 ```
 
 ## Error Handling
 
-### Frontend
-
+### 1. Data Validation
 ```javascript
-async renderDashboard() {
-    try {
-        const response = await useFetch({
-            url: api,
-            data: { opc: "getDashboardChequePromedio", ... }
-        });
-        
-        if (response.status === 200) {
-            this.showCards(response.cards);
-            this.renderChequePorDia(response.chequePorDia);
-            this.renderChequeCategoria(response.chequePorCategoria);
-        } else {
-            alert({
-                icon: "error",
-                text: "Error al cargar el dashboard"
-            });
-        }
-    } catch (error) {
-        console.error("Error en renderDashboard:", error);
-        alert({
-            icon: "error",
-            text: "Error de conexión con el servidor"
-        });
+// Validación de filtros antes de consultas
+validateFilters() {
+    const udn = $('#filterBarDashboard #udn').val();
+    const periodo1 = $('#filterBarDashboard #periodo1').val();
+    const periodo2 = $('#filterBarDashboard #periodo2').val();
+    
+    if (!udn || !periodo1 || !periodo2) {
+        this.showError("Todos los filtros son requeridos");
+        return false;
     }
+    return true;
 }
 ```
 
-### Backend
-
+### 2. API Error Handling
 ```php
-function getDashboardChequePromedio() {
-    try {
-        $udn  = isset($_POST['udn'])  ? (int)$_POST['udn']  : 1;
-        $mes  = isset($_POST['mes'])  ? (int)$_POST['mes']  : date('m');
-        $anio = isset($_POST['anio']) ? (int)$_POST['anio'] : date('Y');
-        
-        // Validaciones
-        if ($mes < 1 || $mes > 12) {
-            return [
-                'status'  => 400,
-                'message' => 'Mes inválido'
-            ];
-        }
-        
-        // Lógica de negocio...
-        
-        return [
-            'status' => 200,
-            'cards'  => $cards,
-            'chequePorDia' => $chequePorDia,
-            'chequePorCategoria' => $chequePorCategoria
-        ];
-        
-    } catch (Exception $e) {
-        return [
-            'status'  => 500,
-            'message' => 'Error interno del servidor',
-            'error'   => $e->getMessage()
-        ];
-    }
+// Controlador: manejo de errores en APIs
+try {
+    $data = $this->apiPromediosDiarios();
+    return ['status' => 200, 'data' => $data];
+} catch (Exception $e) {
+    return ['status' => 500, 'message' => 'Error al obtener datos: ' . $e->getMessage()];
 }
 ```
 
-### Manejo de Datos Vacíos
-
-```php
-// Si no hay datos para el período
-if (empty($ventas)) {
-    return [
-        'status' => 200,
-        'cards' => [
-            'ventaDia'       => '$0.00',
-            'ventaMes'       => '$0.00',
-            'clientes'       => 0,
-            'chequePromedio' => '$0.00'
-        ],
-        'chequePorDia' => [
-            'labels' => ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'],
-            'data'   => [0, 0, 0, 0, 0, 0, 0]
-        ],
-        'chequePorCategoria' => [
-            'labels'  => ['A&B', 'Alimentos', 'Bebidas'],
-            'actual'  => [0, 0, 0],
-            'anterior' => [0, 0, 0]
-        ]
-    ];
+### 3. Chart Error Handling
+```javascript
+// Manejo de errores en gráficos
+renderChart(data) {
+    if (!data || !data.labels || data.labels.length === 0) {
+        this.showEmptyState("No hay datos disponibles para el período seleccionado");
+        return;
+    }
+    // Renderizar gráfico normal
 }
 ```
 
 ## Testing Strategy
 
-### 1. Pruebas Unitarias (Backend)
+### 1. Unit Testing
+- **Frontend**: Pruebas de componentes individuales (KPI Cards, gráficos)
+- **Backend**: Pruebas de funciones API existentes y nuevas extensiones
+- **Data**: Validación de estructuras de datos y cálculos
 
-**Modelo (mdl-ingresos.php)**:
-- Validar consultas SQL retornan estructura esperada
-- Verificar cálculos de cheque promedio (total/clientes)
-- Probar agrupación por día de semana
-- Validar manejo de divisiones por cero
+### 2. Integration Testing
+- **API Integration**: Pruebas de comunicación frontend-backend
+- **Filter Integration**: Pruebas de filtros dinámicos y actualización de datos
+- **Chart Integration**: Pruebas de renderizado de gráficos con datos reales
 
-**Controlador (ctrl-ingresos.php)**:
-- Verificar formateo de moneda con evaluar()
-- Validar cálculo de variaciones porcentuales
-- Probar respuesta con datos vacíos
-- Verificar estructura JSON de salida
+### 3. Performance Testing
+- **Load Testing**: Pruebas con grandes volúmenes de datos
+- **Response Time**: Medición de tiempos de respuesta de APIs
+- **Memory Usage**: Monitoreo de uso de memoria en gráficos complejos
 
-### 2. Pruebas de Integración
+## Design Decisions and Rationales
 
-**Flujo completo**:
-1. Seleccionar UDN, mes y año en FilterBar
-2. Verificar llamada AJAX correcta
-3. Validar respuesta del backend
-4. Confirmar renderizado de 4 cards
-5. Verificar gráficos se muestran correctamente
-6. Probar cambio de filtros actualiza dashboard
+### 1. Reutilización de Infraestructura Existente
+**Decisión**: Extender el controlador y modelo existentes en lugar de crear nuevos archivos.
+**Rationale**: 
+- Mantiene consistencia con la arquitectura actual
+- Aprovecha las funciones API ya implementadas y probadas
+- Reduce duplicación de código y esfuerzo de desarrollo
 
-### 3. Pruebas de UI
+### 2. Paleta de Colores CoffeeSoft
+**Decisión**: Usar colores corporativos (#103B60, #8CC63F, #EAEAEA)
+**Rationale**:
+- Mantiene consistencia visual con el resto del sistema
+- Facilita la identificación de períodos en comparativas
+- Mejora la experiencia de usuario al mantener familiaridad visual
 
-**Componentes visuales**:
-- Cards muestran valores formateados correctamente
-- Colores de variación (verde +, rojo -)
-- Gráficos usan paleta corporativa
-- Responsive en diferentes resoluciones
-- Tooltips en gráficos funcionan
+### 3. Estructura de Filtros Dinámicos
+**Decisión**: Implementar filtros que se actualizan automáticamente según la UDN seleccionada
+**Rationale**:
+- Mejora la usabilidad al mostrar solo opciones relevantes
+- Reduce errores de usuario al filtrar datos inconsistentes
+- Aprovecha la lógica existente de clasificación por UDN
 
-### 4. Casos de Prueba Específicos
+### 4. Integración con Chart.js
+**Decisión**: Mantener Chart.js como librería de gráficos
+**Rationale**:
+- Consistencia con gráficos existentes en el sistema
+- Amplia funcionalidad para diferentes tipos de visualizaciones
+- Facilidad de personalización con la paleta corporativa
 
-| Caso | Entrada | Resultado Esperado |
-|------|---------|-------------------|
-| Dashboard con datos | UDN=1, mes=10, año=2025 | Muestra 4 cards con valores, 2 gráficos |
-| Período sin datos | UDN=5, mes=2, año=2020 | Muestra valores en $0.00 y gráficos vacíos |
-| Cambio de UDN | Cambiar de UDN 1 a 5 | Actualiza categorías (Hospedaje → Alimentos) |
-| Comparativa año anterior | Año actual vs anterior | Muestra % de variación correcto |
-| División por cero | Clientes = 0 | Cheque promedio = $0.00 (sin error) |
-
-### 5. Pruebas de Rendimiento
-
-- Dashboard debe cargar en < 2 segundos
-- Consultas SQL optimizadas con índices
-- Caché de datos mensuales si es posible
-- Limitar consultas a período específico (no full table scan)
-
-## Design Decisions
-
-### 1. Reutilización vs Nueva Implementación
-
-**Decisión**: Extender clases y métodos existentes en lugar de crear nuevos archivos
-
-**Razón**: 
-- Mantiene consistencia con arquitectura actual
-- Evita duplicación de código
-- Facilita mantenimiento futuro
-- Aprovecha funciones ya probadas (ingresosMensuales, getsoftVentas)
-
-### 2. Estructura de Tabs vs Dashboard Independiente
-
-**Decisión**: Agregar como nueva pestaña en el módulo de ventas existente
-
-**Razón**:
-- Usuario ya está familiarizado con navegación por tabs
-- Comparte FilterBar con otros módulos
-- Mantiene contexto de análisis de ventas
-- Reutiliza layout y estilos
-
-### 3. Cálculo en Backend vs Frontend
-
-**Decisión**: Realizar todos los cálculos en el backend (PHP)
-
-**Razón**:
-- Centraliza lógica de negocio
-- Facilita testing y debugging
-- Reduce carga en navegador del cliente
-- Permite reutilizar cálculos en otros módulos
-
-### 4. Formato de Fechas
-
-**Decisión**: Usar selectores de mes/año separados en lugar de date picker
-
-**Razón**:
-- Consistente con FilterBar existente
-- Análisis mensual (no diario)
-- Más intuitivo para comparativas anuales
-- Reutiliza componente createfilterBar()
-
-### 5. Paleta de Colores
-
-**Decisión**: Usar colores corporativos CoffeeSoft
-
-**Colores**:
-- Azul #103B60: Año actual, datos principales
-- Verde #8CC63F: Año anterior, variaciones positivas
-- Rojo: Variaciones negativas
-- Gris #EAEAEA: Fondos y bordes
-
-**Razón**:
-- Mantiene identidad visual
-- Usuario reconoce patrones de color
-- Accesibilidad (contraste adecuado)
+### 5. Responsive Design
+**Decisión**: Implementar diseño responsive con TailwindCSS
+**Rationale**:
+- Compatibilidad con dispositivos móviles y tablets
+- Consistencia con el framework CSS utilizado en CoffeeSoft
+- Flexibilidad en el layout de dashboard para diferentes resoluciones

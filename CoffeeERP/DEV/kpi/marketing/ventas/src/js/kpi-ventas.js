@@ -1,5 +1,5 @@
 let api = 'ctrl/ctrl-ingresos.php';
-let app, sales, salesDashboard, monthlySales, cumulativeAverages, chequePromedioDashboard;
+let app, sales, salesDashboard, monthlySales, cumulativeAverages, dashboardChequePromedio;
 
 let udn, lsudn, clasificacion, clasificacionUdn;
 
@@ -16,7 +16,7 @@ $(async () => {
     app = new App(api, "root");
 
     salesDashboard = new SalesDashboard(api, "root");
-    chequePromedioDashboard = new ChequePromedioDashboard(api, "root");
+    dashboardChequePromedio = new DashboardChequePromedio(api, "root");
 
     sales = new Sales(api, "root");
     monthlySales = new MonthlySales(api, "root");
@@ -41,7 +41,7 @@ class App extends Templates {
         // init instancias.
 
         salesDashboard.render();
-        chequePromedioDashboard.render();
+        dashboardChequePromedio.render();
         sales.render();
         monthlySales.render();
         cumulativeAverages.render();
@@ -81,10 +81,9 @@ class App extends Templates {
                     onClick: () => salesDashboard.renderDashboard()
                 },
                 {
-                    id: "chequePromedio",
+                    id: "dashboardChequePromedio",
                     tab: "Dashboard Cheque Promedio",
-                    class: "mb-1",
-                    onClick: () => chequePromedioDashboard.renderDashboard()
+                    onClick: () => dashboardChequePromedio.renderDashboard()
                 },
                 {
                     id: "sales",
@@ -219,9 +218,13 @@ class SalesDashboard extends Templates {
     }
 
     async renderDashboard() {
+        // Validar filtros antes de proceder
+        if (!this.validateFilters()) {
+            return;
+        }
 
-        // filtrar clasificacion x udn 
-        this.handleCategoryChange($('#idFilterBar #udn').val());
+        // Filtrar clasificacion x udn 
+        this.handleCategoryChange($('#filterBarDashboard #udn').val());
 
         let udn = $('#filterBarDashboard #udn').val();
         let periodo1 = $('#filterBarDashboard #periodo1').val();
@@ -229,44 +232,114 @@ class SalesDashboard extends Templates {
         let periodo2 = $('#filterBarDashboard #periodo2').val();
         let [anio2, mes2] = periodo2.split('-');
 
-        let mkt = await useFetch({
-            url: api,
-            data: {
-                opc: "apiPromediosDiarios",
-                udn: udn,
-                anio1: anio1,
-                mes1: mes1,
-                anio2: anio2,
-                mes2: mes2,
-            },
-        });
+        try {
+            // Mostrar loading state
+            this.showLoadingState();
 
-        this.showCards(mkt.dashboard);
+            // Obtener datos principales del dashboard
+            let mkt = await useFetch({
+                url: api,
+                data: {
+                    opc: "apiPromediosDiarios",
+                    udn: udn,
+                    anio: anio1,
+                    mes: mes1,
+                    anio1: anio1,
+                    mes1: mes1,
+                    anio2: anio2,
+                    mes2: mes2,
+                },
+            });
 
-        // Graficos.
+            // Obtener datos específicos de cheque promedio
+            let chequeData = await useFetch({
+                url: api,
+                data: {
+                    opc: "apiChequePromedioDashboard",
+                    udn: udn,
+                    anio: anio1,
+                    mes: mes1,
+                },
+            });
 
+            // Combinar datos para el dashboard
+            if (chequeData && chequeData.status === 200) {
+                mkt.dashboard = { ...mkt.dashboard, ...chequeData.data };
+            }
+
+            // Validar respuesta de la API
+            if (!mkt || mkt.status === 500) {
+                this.showError("Error al obtener datos del servidor");
+                return;
+            }
+
+            // Renderizar componentes con datos validados
+            this.showCards(mkt.dashboard);
+            this.renderCharts(mkt);
+
+        } catch (error) {
+            console.error("Error en renderDashboard:", error);
+            this.showError("Error al cargar el dashboard. Por favor, intente nuevamente.");
+        }
+    }
+
+    renderCharts(mkt) {
+        // Gráfico comparativo de cheque promedio por categorías
         this.chequeComparativo({
             data: mkt.barras.dataset,
             anioA: mkt.barras.anioA,
             anioB: mkt.barras.anioB,
-
         });
 
-
+        // Comparativa de ingresos diarios
         this.comparativaIngresosDiarios({ data: mkt.linear });
 
+        // Ventas por día de semana
         this.ventasPorDiaSemana(mkt.barDays);
 
-
+        // Ranking semanal
         this.topDiasSemana({
             parent: "Tendencia",
             title: "📊 Ranking por Promedio Semanal",
             subtitle: "Promedio de ventas por día de la semana en el mes seleccionado",
             data: mkt.topWeek
         });
+    }
 
+    validateFilters() {
+        const udn = $('#filterBarDashboard #udn').val();
+        const periodo1 = $('#filterBarDashboard #periodo1').val();
+        const periodo2 = $('#filterBarDashboard #periodo2').val();
+        
+        if (!udn || !periodo1 || !periodo2) {
+            this.showError("Todos los filtros son requeridos para generar el dashboard");
+            return false;
+        }
+        return true;
+    }
 
+    showLoadingState() {
+        // Mostrar skeleton en KPI cards
+        $('#cardDashboard').html(`
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                ${Array(4).fill().map(() => `
+                    <div class="bg-white rounded-xl shadow p-4 animate-pulse">
+                        <div class="h-4 bg-gray-200 rounded mb-2"></div>
+                        <div class="h-8 bg-gray-200 rounded mb-1"></div>
+                        <div class="h-3 bg-gray-200 rounded w-3/4"></div>
+                    </div>
+                `).join('')}
+            </div>
+        `);
+    }
 
+    showError(message) {
+        $('#cardDashboard').html(`
+            <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
+                <div class="text-red-600 font-semibold mb-2">⚠️ Error</div>
+                <div class="text-red-700">${message}</div>
+            </div>
+        `);
     }
 
     filterBarDashboard() {
@@ -277,7 +350,7 @@ class SalesDashboard extends Templates {
                     opc: "select",
                     id: "udn",
                     lbl: "UDN",
-                    class: "col-sm-4",
+                    class: "col-12 col-sm-6 col-lg-3 mb-3 mb-lg-0",
                     data: udn,
                     onchange: `salesDashboard.renderDashboard()`,
                 },
@@ -285,13 +358,12 @@ class SalesDashboard extends Templates {
                     opc: "div",
                     id: "containerPeriodo1",
                     lbl: "Consultar con:",
-                    class: "col-lg-3 col-sm-4",
+                    class: "col-12 col-sm-6 col-lg-3 mb-3 mb-lg-0",
                     html: `
                         <input 
                             type="month" 
                             id="periodo1" 
-                            class="form-control"
-                            style="width: 100%; min-width: 100%; display: block;"
+                            class="form-control w-100"
                             onchange="salesDashboard.renderDashboard()"
                         />
                     `
@@ -300,14 +372,29 @@ class SalesDashboard extends Templates {
                     opc: "div",
                     id: "containerPeriodo2",
                     lbl: "Comparar con:",
-                    class: "col-lg-3 col-sm-4 ",
+                    class: "col-12 col-sm-6 col-lg-3 mb-3 mb-lg-0",
                     html: `
                         <input 
                             type="month" 
                             id="periodo2" 
-                            class="form-control"
+                            class="form-control w-100"
                             onchange="salesDashboard.renderDashboard()"
                         />
+                    `
+                },
+                {
+                    opc: "div",
+                    id: "containerRefresh",
+                    lbl: "&nbsp;",
+                    class: "col-12 col-sm-6 col-lg-3 d-flex align-items-end",
+                    html: `
+                        <button 
+                            type="button" 
+                            class="btn btn-primary w-100"
+                            onclick="salesDashboard.renderDashboard()"
+                        >
+                            <i class="icon-arrows-cw mr-2"></i>Actualizar
+                        </button>
                     `
                 },
             ],
@@ -330,7 +417,17 @@ class SalesDashboard extends Templates {
     }
 
     showCards(data) {
-        // KPIs visuales
+        // Validar datos antes de renderizar
+        if (!data) {
+            this.showError("No hay datos disponibles para mostrar");
+            return;
+        }
+
+        // Calcular tendencias y variaciones
+        const chequePromedioActual = this.parseNumericValue(data.ChequePromedio);
+        const ventaMesActual = this.parseNumericValue(data.ventaMes);
+        
+        // KPIs visuales con métricas mejoradas
         this.infoCard({
             parent: "cardDashboard",
             theme: "light",
@@ -339,39 +436,91 @@ class SalesDashboard extends Templates {
                     id: "kpiDia",
                     title: "Venta del día de ayer",
                     data: {
-                        value: data.ventaDia,
-                        // description: "+12% vs ayer",
+                        value: data.ventaDia || "$ 0.00",
+                        description: this.getDateDescription(),
                         color: "text-[#8CC63F]",
+                        icon: "📈"
                     },
                 },
                 {
                     id: "kpiMes",
                     title: "Venta del Mes",
                     data: {
-                        value: data.ventaMes,
-                        // description: "+8% vs mes anterior",
+                        value: data.ventaMes || "$ 0.00",
+                        description: this.getMonthDescription(),
                         color: "text-green-800",
+                        icon: "💰"
                     },
                 },
                 {
-                    title: "Clientes",
+                    id: "kpiClientes",
+                    title: "Clientes del Mes",
                     data: {
-                        value: data.Clientes,
-                        // description: "+5% vs período anterior",
+                        value: data.Clientes || "0",
+                        description: "Total de clientes activos",
                         color: "text-[#103B60]",
+                        icon: "👥"
                     },
                 },
                 {
                     id: "kpiCheque",
                     title: "Cheque Promedio",
                     data: {
-                        value: data.ChequePromedio,
-                        // description: "-2% vs período anterior",
-                        color: "text-red-600",
+                        value: data.ChequePromedio || "$ 0.00",
+                        description: this.getChequePromedioTrend(chequePromedioActual, data),
+                        color: this.getChequePromedioColor(chequePromedioActual, data),
+                        icon: "🧾"
                     },
                 },
             ],
         });
+    }
+
+    parseNumericValue(value) {
+        if (!value) return 0;
+        // Remover símbolos de moneda y convertir a número
+        return parseFloat(value.toString().replace(/[$,\s]/g, '')) || 0;
+    }
+
+    getDateDescription() {
+        const yesterday = moment().subtract(1, 'day');
+        return yesterday.format('DD/MM/YYYY');
+    }
+
+    getMonthDescription() {
+        const currentMonth = moment().format('MMMM YYYY');
+        return `Período: ${currentMonth}`;
+    }
+
+    getChequePromedioTrend(valor, data = null) {
+        // Usar datos reales de variación si están disponibles
+        if (data && data.variacionCheque !== undefined) {
+            const variacion = data.variacionCheque;
+            if (variacion > 5) return `↗️ +${variacion.toFixed(1)}% vs año anterior`;
+            if (variacion < -5) return `↘️ ${variacion.toFixed(1)}% vs año anterior`;
+            return `→ ${variacion.toFixed(1)}% vs año anterior`;
+        }
+
+        // Lógica de fallback basada en valor
+        if (valor > 1000) return "↗️ Excelente rendimiento";
+        if (valor > 500) return "→ Rendimiento estable";
+        return "↘️ Oportunidad de mejora";
+    }
+
+    getChequePromedioColor(valor, data = null) {
+        // Usar tendencia real si está disponible
+        if (data && data.tendencia) {
+            switch (data.tendencia) {
+                case 'positiva': return "text-[#8CC63F]"; // Verde
+                case 'negativa': return "text-red-600";   // Rojo
+                default: return "text-[#103B60]";         // Azul
+            }
+        }
+
+        // Lógica de fallback basada en valor
+        if (valor > 1000) return "text-[#8CC63F]"; // Verde para valores altos
+        if (valor > 500) return "text-[#103B60]";  // Azul para valores medios
+        return "text-orange-600";                   // Naranja para valores bajos
     }
 
     // graphigs.
@@ -552,26 +701,29 @@ class SalesDashboard extends Templates {
         const opts = Object.assign(defaults, options);
 
         const container = $(`
-        <div id="${opts.id}" class="w-full ">
+        <div id="${opts.id}" class="w-full min-h-screen bg-gray-50">
             <!-- Header -->
-            <div class="p-6 border-b border-gray-200 ">
-                <div class=" mx-auto">
-                    <h1 class="text-2xl font-bold text-[#103B60]">${opts.title}</h1>
-                    <p class="text-sm text-gray-600">${opts.subtitle}</p>
+            <div class="bg-white shadow-sm border-b border-gray-200">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                    <h1 class="text-2xl sm:text-3xl font-bold text-[#103B60]">${opts.title}</h1>
+                    <p class="text-sm sm:text-base text-gray-600 mt-1">${opts.subtitle}</p>
                 </div>
             </div>
 
             <!-- FilterBar -->
-            <div id="filterBarDashboard" class=" mx-auto px-4 py-4">
-          
+            <div class="bg-white shadow-sm">
+                <div id="filterBarDashboard" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                </div>
             </div>
 
-             <section id="cardDashboard" class=" mx-auto px-4 py-4">
-              
+            <!-- KPI Cards -->
+            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+                <div id="cardDashboard" class="mb-8">
+                </div>
             </section>
 
-            <!-- Content -->
-            <section id="content-${opts.id}" class="mx-auto px-4 py-6 grid gap-6 grid-cols-1 md:grid-cols-2"></section>
+            <!-- Charts Content -->
+            <section id="content-${opts.id}" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 grid gap-6 grid-cols-1 xl:grid-cols-2"></section>
         </div>`);
 
         // Renderizar contenedores desde JSON
@@ -634,42 +786,101 @@ class SalesDashboard extends Templates {
             data: {
                 value: "0",
                 description: "",
-                color: "text-gray-800"
+                color: "text-gray-800",
+                icon: ""
             },
             onClick: () => { }
         };
         const opts = Object.assign({}, defaults, options);
         const isDark = opts.theme === "dark";
         const cardBase = isDark
-            ? "bg-[#1F2A37] text-white rounded-xl shadow"
-            : "bg-white text-gray-800 rounded-xl shadow";
+            ? "bg-[#1F2A37] text-white rounded-xl shadow-lg border border-gray-700"
+            : "bg-white text-gray-800 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200";
         const titleColor = isDark ? "text-gray-300" : "text-gray-600";
         const descColor = isDark ? "text-gray-400" : "text-gray-500";
+        
         const renderCard = (card, i = "") => {
             const box = $("<div>", {
                 id: `${opts.id}_${i}`,
-                class: `${cardBase} p-4`
+                class: `${cardBase} p-4 cursor-pointer`,
+                click: () => typeof opts.onClick === "function" && opts.onClick(card)
             });
-            const title = $("<p>", {
-                class: `text-sm ${titleColor}`,
+
+            // Header con ícono y título
+            const header = $("<div>", {
+                class: "flex items-center justify-between mb-3"
+            });
+
+            const titleSection = $("<div>", {
+                class: "flex items-center gap-2"
+            });
+
+            if (card.data?.icon) {
+                titleSection.append($("<span>", {
+                    class: "text-lg",
+                    text: card.data.icon
+                }));
+            }
+
+            const titleElement = $("<p>", {
+                class: `text-sm font-medium ${titleColor}`,
                 text: card.title
             });
+
+            // Agregar tooltip informativo
+            if (card.id) {
+                const tooltipText = this.getTooltipText(card.id);
+                if (tooltipText) {
+                    titleElement.attr('title', tooltipText);
+                    titleElement.addClass('cursor-help');
+                    titleElement.append($("<i>", {
+                        class: "icon-help-circled ml-1 text-xs opacity-60"
+                    }));
+                }
+            }
+
+            titleSection.append(titleElement);
+
+            header.append(titleSection);
+            
+            // Valor principal
             const value = $("<p>", {
                 id: card.id || "",
-                class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
-                text: card.data?.value
+                class: `text-2xl font-bold ${card.data?.color || "text-gray-800"} mb-2`,
+                text: card.data?.value || "0"
             });
+            
+            // Descripción con mejor formato
             const description = $("<p>", {
-                class: `text-xs mt-1 ${card.data?.color || descColor}`,
-                text: card.data?.description
+                class: `text-xs ${descColor} leading-relaxed`,
+                text: card.data?.description || ""
             });
-            box.append(title, value, description);
+
+            // Indicador visual para cheque promedio
+            if (card.id === "kpiCheque") {
+                const indicator = $("<div>", {
+                    class: "mt-2 h-1 bg-gray-200 rounded-full overflow-hidden"
+                });
+                const progress = $("<div>", {
+                    class: `h-full ${card.data?.color?.includes('8CC63F') ? 'bg-[#8CC63F]' : 
+                           card.data?.color?.includes('103B60') ? 'bg-[#103B60]' : 'bg-orange-400'} 
+                           transition-all duration-500`,
+                    css: { width: this.calculateChequeProgress(card.data?.value) + "%" }
+                });
+                indicator.append(progress);
+                box.append(header, value, description, indicator);
+            } else {
+                box.append(header, value, description);
+            }
+
             return box;
         };
+        
         const container = $("<div>", {
             id: opts.id,
-            class: `grid grid-cols-2 md:grid-cols-4 gap-4 ${opts.class}`
+            class: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 ${opts.class}`
         });
+        
         if (opts.json.length > 0) {
             opts.json.forEach((item, i) => {
                 container.append(renderCard(item, i));
@@ -677,7 +888,40 @@ class SalesDashboard extends Templates {
         } else {
             container.append(renderCard(opts));
         }
+        
         $(`#${opts.parent}`).html(container);
+    }
+
+    calculateChequeProgress(value) {
+        const numericValue = this.parseNumericValue(value);
+        // Calcular progreso basado en rangos típicos (0-2000)
+        return Math.min((numericValue / 2000) * 100, 100);
+    }
+
+    getTooltipText(cardId) {
+        const tooltips = {
+            'kpiDia': 'Total de ventas registradas el día anterior. Se actualiza automáticamente cada día.',
+            'kpiMes': 'Suma total de ventas del mes seleccionado. Incluye todas las categorías de productos.',
+            'kpiClientes': 'Número total de clientes únicos que realizaron compras en el período seleccionado.',
+            'kpiCheque': 'Promedio de gasto por cliente (Total Ventas ÷ Total Clientes). Indicador clave de rentabilidad.'
+        };
+        return tooltips[cardId] || null;
+    }
+
+    showEmptyState(message) {
+        return `
+            <div class="flex flex-col items-center justify-center py-12 text-center">
+                <div class="text-6xl text-gray-300 mb-4">📊</div>
+                <h3 class="text-lg font-semibold text-gray-600 mb-2">Sin datos disponibles</h3>
+                <p class="text-gray-500 max-w-md">${message}</p>
+                <button 
+                    class="mt-4 px-4 py-2 bg-[#103B60] text-white rounded-lg hover:bg-[#0d2f4d] transition-colors"
+                    onclick="salesDashboard.renderDashboard()"
+                >
+                    Intentar nuevamente
+                </button>
+            </div>
+        `;
     }
 
     linearChart(options) {
@@ -1289,223 +1533,7 @@ class CumulativeAverages extends Templates {
 }
 
 
-class ChequePromedioDashboard extends Templates {
+class DashboardChequePromedio extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
-        this.PROJECT_NAME = "chequePromedio";
-    }
-
-    render() {
-        this.layout();
-    }
-
-    layout() {
-        this.dashboardComponent({
-            parent: "container-chequePromedio",
-            id: "dashboardChequePromedio",
-            title: "💰 Dashboard de Cheque Promedio",
-            subtitle: "Análisis de consumo promedio por cliente y comparativas",
-            json: [
-                { type: "grafico", id: "containerChequeDia", title: "Cheque Promedio por Día de Semana" },
-                { type: "grafico", id: "containerChequeCategoria", title: "Comparativa por Categoría" },
-            ]
-        });
-
-        this.filterBarDashboard();
-        this.renderDashboard();
-    }
-
-    filterBarDashboard() {
-        this.createfilterBar({
-            parent: `filterBarDashboard`,
-            data: [
-                {
-                    opc: "select",
-                    id: "udn",
-                    lbl: "UDN",
-                    class: "col-sm-4",
-                    data: udn,
-                    onchange: `chequePromedioDashboard.renderDashboard()`,
-                },
-                {
-                    opc: "select",
-                    id: "mes",
-                    lbl: "Mes",
-                    class: "col-sm-4",
-                    data: moment.months().map((m, i) => ({ id: i + 1, valor: m })),
-                    onchange: `chequePromedioDashboard.renderDashboard()`,
-                },
-                {
-                    opc: "select",
-                    id: "anio",
-                    lbl: "Año",
-                    class: "col-sm-4",
-                    data: Array.from({ length: 5 }, (_, i) => {
-                        const year = moment().year() - i;
-                        return { id: year, valor: year.toString() };
-                    }),
-                    onchange: `chequePromedioDashboard.renderDashboard()`,
-                },
-            ],
-        });
-
-        const currentMonth = moment().month() + 1;
-        setTimeout(() => {
-            $(`#filterBarDashboard #mes`).val(currentMonth).trigger("change");
-        }, 100);
-    }
-
-    async renderDashboard() {
-        try {
-            let udn = $('#filterBarDashboard #udn').val();
-            let mes = $('#filterBarDashboard #mes').val();
-            let anio = $('#filterBarDashboard #anio').val();
-
-            let response = await useFetch({
-                url: api,
-                data: {
-                    opc: "getDashboardChequePromedio",
-                    udn: udn,
-                    mes: mes,
-                    anio: anio,
-                },
-            });
-
-            if (response.status === 200) {
-                this.showCards(response.cards);
-                this.renderChequePorDia(response.chequePorDia);
-                this.renderChequeCategoria(response.chequePorCategoria);
-            } else {
-                alert({
-                    icon: "error",
-                    text: response.message || "Error al cargar el dashboard"
-                });
-            }
-        } catch (error) {
-            console.error("Error en renderDashboard:", error);
-            alert({
-                icon: "error",
-                text: "Error de conexión con el servidor"
-            });
-        }
-    }
-
-    showCards(data) {
-        this.infoCard({
-            parent: "cardDashboard",
-            theme: "light",
-            json: [
-                {
-                    id: "kpiVentaDia",
-                    title: "Venta del día de ayer",
-                    data: {
-                        value: data.ventaDia,
-                        description: data.variaciones?.ventaDia || "",
-                        color: "text-[#8CC63F]",
-                    },
-                },
-                {
-                    id: "kpiVentaMes",
-                    title: "Venta del Mes",
-                    data: {
-                        value: data.ventaMes,
-                        description: data.variaciones?.ventaMes || "",
-                        color: data.variaciones?.ventaMes?.includes('+') ? "text-green-800" : "text-red-600",
-                    },
-                },
-                {
-                    id: "kpiClientes",
-                    title: "Clientes",
-                    data: {
-                        value: data.clientes,
-                        description: data.variaciones?.clientes || "",
-                        color: data.variaciones?.clientes?.includes('+') ? "text-[#103B60]" : "text-red-600",
-                    },
-                },
-                {
-                    id: "kpiChequePromedio",
-                    title: "Cheque Promedio",
-                    data: {
-                        value: data.chequePromedio,
-                        description: data.variaciones?.chequePromedio || "",
-                        color: data.variaciones?.chequePromedio?.includes('+') ? "text-green-800" : "text-red-600",
-                    },
-                },
-            ],
-        });
-    }
-
-    renderChequePorDia(data) {
-        this.barChart({
-            parent: 'containerChequeDia',
-            id: 'chartChequeDia',
-            title: 'Cheque Promedio por Día de Semana',
-            labels: data.labels,
-            dataA: data.data,
-            yearA: '',
-            yearB: '',
-            class: 'border p-4 rounded-xl'
-        });
-    }
-
-    renderChequeCategoria(data) {
-        const container = $("<div>", { class: "border p-4 rounded-xl" });
-        const title = $("<h2>", {
-            class: "text-lg font-bold mb-2",
-            text: `Comparativa por Categoría: ${data.anioActual} vs ${data.anioAnterior}`
-        });
-        const canvasWrapper = $("<div>", {
-            class: "w-full",
-            css: { height: "300px" }
-        });
-        const canvas = $("<canvas>", {
-            id: "chartChequeCategoria",
-            class: "w-full h-full"
-        });
-        canvasWrapper.append(canvas);
-        container.append(title, canvasWrapper);
-
-        $('#containerChequeCategoria').html(container);
-
-        const ctx = document.getElementById("chartChequeCategoria").getContext("2d");
-        if (window._chqCat) window._chqCat.destroy();
-        window._chqCat = new Chart(ctx, {
-            type: "bar",
-            data: {
-                labels: data.labels,
-                datasets: [
-                    {
-                        label: `${data.anioAnterior}`,
-                        data: data.anterior,
-                        backgroundColor: "#8CC63F"
-                    },
-                    {
-                        label: `${data.anioActual}`,
-                        data: data.actual,
-                        backgroundColor: "#103B60"
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: "bottom" },
-                    tooltip: {
-                        callbacks: {
-                            label: (ctx) => `${ctx.dataset.label}: ${formatPrice(ctx.parsed.y)}`
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: (v) => formatPrice(v)
-                        }
-                    }
-                }
-            }
-        });
-    }
-}
+  

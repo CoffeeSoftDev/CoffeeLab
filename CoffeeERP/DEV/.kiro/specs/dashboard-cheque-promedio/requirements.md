@@ -2,100 +2,72 @@
 
 ## Introduction
 
-El Dashboard de Cheque Promedio es un módulo analítico dentro del sistema ERP CoffeeSoft que permite visualizar y comparar métricas clave de ventas, clientes y consumo promedio por cliente. Este dashboard forma parte del módulo de Ventas/Análisis y proporciona insights sobre el desempeño comercial comparando períodos actuales con históricos.
+El Dashboard Analítico de Cheque Promedio es un módulo especializado dentro del sistema CoffeeSoft ERP que permite visualizar y analizar métricas clave de ventas, enfocándose en el cheque promedio por cliente. Este dashboard proporcionará insights comparativos entre períodos, análisis por días de la semana y categorías de productos, facilitando la toma de decisiones estratégicas para optimizar los ingresos por cliente.
 
 ## Glossary
 
-- **Sistema**: Dashboard de Cheque Promedio
-- **UDN**: Unidad de Negocio (restaurante, hotel, etc.)
-- **Cheque Promedio**: Valor promedio de consumo calculado como total_venta / total_clientes
-- **KPI**: Key Performance Indicator (Indicador Clave de Desempeño)
-- **FilterBar**: Barra de filtros para seleccionar mes, año y UDN
-- **Backend**: Controlador PHP que procesa las consultas de datos
-- **Frontend**: Interfaz JavaScript que renderiza los componentes visuales
+- **Dashboard_System**: Sistema de visualización analítica de métricas de ventas integrado en CoffeeSoft ERP
+- **Cheque_Promedio**: Valor promedio de consumo calculado como total_venta dividido entre total_clientes
+- **UDN**: Unidad de Negocio, identificador para filtrar datos por sucursal o punto de venta
+- **KPI_Card**: Componente visual que muestra un indicador clave de rendimiento con valor, tendencia y comparativa
+- **FilterBar_Component**: Barra de filtros que permite seleccionar mes, año y UDN para consultas dinámicas
+- **Comparative_Analysis**: Análisis que compara métricas del período actual contra el mismo período del año anterior
 
 ## Requirements
 
 ### Requirement 1
 
-**User Story:** Como analista de ventas, quiero visualizar las métricas principales de ventas del mes actual, para evaluar el desempeño comercial de la unidad de negocio.
+**User Story:** Como gerente de ventas, quiero visualizar las métricas principales de ventas en un dashboard centralizado, para poder evaluar el rendimiento actual de mi negocio.
 
 #### Acceptance Criteria
 
-1. WHEN el usuario accede al dashboard, THE Sistema SHALL mostrar 4 cards con métricas principales (ventas del día anterior, ventas del mes, total de clientes, cheque promedio)
-2. WHEN se selecciona una UDN en el FilterBar, THE Sistema SHALL actualizar todas las métricas mostradas según la unidad de negocio seleccionada
-3. WHEN se carga el dashboard, THE Sistema SHALL calcular el cheque promedio como total_venta dividido entre total_clientes
-4. WHERE los datos están disponibles, THE Sistema SHALL mostrar el valor formateado con símbolo de moneda y dos decimales
-5. IF no existen datos para el período seleccionado, THEN THE Sistema SHALL mostrar valores en cero sin generar errores
+1. WHEN el usuario accede al dashboard, THE Dashboard_System SHALL mostrar cuatro KPI_Card principales con datos del período seleccionado
+2. THE Dashboard_System SHALL calcular y mostrar las ventas del día anterior con fecha exacta en formato DD/MM/YYYY
+3. THE Dashboard_System SHALL mostrar el total de ventas del mes actual comparado con el mismo mes del año anterior
+4. THE Dashboard_System SHALL calcular el Cheque_Promedio como total_venta dividido entre total_clientes
+5. THE Dashboard_System SHALL mostrar el total de clientes activos del mes con comparativa anual
 
 ### Requirement 2
 
-**User Story:** Como gerente de operaciones, quiero comparar las métricas actuales con el mismo período del año anterior, para identificar tendencias de crecimiento o decrecimiento.
+**User Story:** Como analista de ventas, quiero filtrar los datos por mes, año y unidad de negocio, para poder analizar el rendimiento específico de cada período y ubicación.
 
 #### Acceptance Criteria
 
-1. WHEN se muestran las cards de métricas, THE Sistema SHALL calcular la variación porcentual comparada con el año anterior
-2. WHEN la variación es positiva, THE Sistema SHALL mostrar el porcentaje con símbolo "+" y color verde
-3. WHEN la variación es negativa, THE Sistema SHALL mostrar el porcentaje con símbolo "-" y color rojo
-4. WHERE existe información del año anterior, THE Sistema SHALL incluir un mensaje descriptivo tipo "+5% comparado con el año pasado"
-5. IF no existe información del año anterior, THEN THE Sistema SHALL omitir el mensaje comparativo
+1. THE Dashboard_System SHALL implementar un FilterBar_Component con selectores de mes, año y UDN
+2. WHEN el usuario modifica cualquier filtro, THE Dashboard_System SHALL actualizar automáticamente todos los KPI_Card
+3. THE Dashboard_System SHALL mantener la selección de filtros durante la sesión del usuario
+4. THE Dashboard_System SHALL validar que los filtros seleccionados contengan datos válidos antes de ejecutar consultas
 
 ### Requirement 3
 
-**User Story:** Como analista de ventas, quiero visualizar el cheque promedio por día de la semana, para identificar patrones de consumo según el día.
+**User Story:** Como gerente comercial, quiero ver comparativas visuales del cheque promedio por día de la semana, para identificar patrones de consumo y optimizar estrategias de ventas.
 
 #### Acceptance Criteria
 
-1. WHEN el dashboard se carga, THE Sistema SHALL generar un gráfico de barras o líneas con el cheque promedio agrupado por día de la semana
-2. WHEN se calcula el promedio por día, THE Sistema SHALL agrupar todas las ocurrencias del mismo día (ej: todos los lunes del mes)
-3. WHEN se muestra el gráfico, THE Sistema SHALL ordenar los días de Lunes a Domingo
-4. WHERE existen múltiples registros para un día, THE Sistema SHALL calcular el promedio aritmético de todos los valores
-5. IF un día no tiene registros, THEN THE Sistema SHALL mostrar valor cero en el gráfico
+1. THE Dashboard_System SHALL generar un gráfico de barras mostrando el Cheque_Promedio agrupado por día de la semana
+2. THE Dashboard_System SHALL permitir comparar visualmente días de alto rendimiento versus días de bajo rendimiento
+3. WHEN se selecciona un día específico en el gráfico, THE Dashboard_System SHALL mostrar detalles adicionales del período
+4. THE Dashboard_System SHALL usar la paleta corporativa CoffeeSoft (azul #103B60, verde #8CC63F) en las visualizaciones
 
 ### Requirement 4
 
-**User Story:** Como gerente comercial, quiero comparar el cheque promedio por categoría de producto entre el año actual y el anterior, para evaluar el desempeño de cada línea de negocio.
+**User Story:** Como director de operaciones, quiero analizar el cheque promedio por categoría de productos, para entender qué líneas de productos generan mayor valor por cliente.
 
 #### Acceptance Criteria
 
-1. WHEN el dashboard se renderiza, THE Sistema SHALL mostrar un gráfico comparativo de cheque promedio por categoría
-2. WHEN se consultan las categorías, THE Sistema SHALL incluir al menos: A&B, Alimentos, Bebidas
-3. WHEN se muestra el gráfico, THE Sistema SHALL usar barras de diferentes colores para cada año (azul #103B60 para año actual, verde #8CC63F para año anterior)
-4. WHERE la UDN es tipo hotel (udn=1), THE Sistema SHALL incluir categorías: Hospedaje, A&B, Diversos
-5. IF la UDN es tipo restaurante, THEN THE Sistema SHALL incluir categorías: Alimentos, Bebidas, Complementos
+1. THE Dashboard_System SHALL mostrar un Comparative_Analysis del Cheque_Promedio por categoría de productos
+2. THE Dashboard_System SHALL comparar las categorías del año actual contra el año anterior
+3. THE Dashboard_System SHALL ordenar las categorías por mayor impacto en el Cheque_Promedio
+4. THE Dashboard_System SHALL permitir drill-down en cada categoría para ver productos específicos
 
 ### Requirement 5
 
-**User Story:** Como usuario del sistema, quiero filtrar los datos del dashboard por mes, año y unidad de negocio, para analizar períodos específicos.
+**User Story:** Como usuario del sistema, quiero que el dashboard se integre perfectamente con el ecosistema CoffeeSoft, para mantener consistencia visual y funcional.
 
 #### Acceptance Criteria
 
-1. WHEN el dashboard se carga, THE Sistema SHALL mostrar un FilterBar con selectores de UDN, mes y año
-2. WHEN el usuario cambia cualquier filtro, THE Sistema SHALL recargar automáticamente todos los componentes del dashboard
-3. WHEN se inicializa el FilterBar, THE Sistema SHALL preseleccionar el mes y año actual por defecto
-4. WHERE existen múltiples UDN, THE Sistema SHALL listar todas las unidades de negocio disponibles
-5. IF el usuario selecciona un período sin datos, THEN THE Sistema SHALL mostrar el dashboard con valores en cero
-
-### Requirement 6
-
-**User Story:** Como desarrollador del sistema, quiero que el dashboard utilice la API existente de ingresos, para mantener consistencia con el módulo de ventas actual.
-
-#### Acceptance Criteria
-
-1. WHEN el dashboard solicita datos, THE Sistema SHALL utilizar el endpoint ctrl/ctrl-ingresos.php
-2. WHEN se consultan métricas, THE Sistema SHALL invocar la operación "getDashboardChequePromedio" o reutilizar "apiPromediosDiarios"
-3. WHEN se procesan datos en el backend, THE Sistema SHALL heredar de la clase mdl existente en mdl-ingresos.php
-4. WHERE se requieran nuevas consultas, THE Sistema SHALL agregar métodos al modelo existente sin duplicar lógica
-5. IF se crean nuevas funciones, THEN THE Sistema SHALL seguir la nomenclatura establecida (camelCase, nombres en inglés)
-
-### Requirement 7
-
-**User Story:** Como usuario del sistema, quiero que el dashboard sea visualmente consistente con el módulo de ventas, para mantener una experiencia uniforme.
-
-#### Acceptance Criteria
-
-1. WHEN se renderiza el dashboard, THE Sistema SHALL utilizar la paleta de colores corporativa CoffeeSoft (azul #103B60, verde #8CC63F, gris #EAEAEA)
-2. WHEN se muestran componentes, THE Sistema SHALL usar la clase Templates de CoffeeSoft para mantener consistencia
-3. WHEN se crean gráficos, THE Sistema SHALL utilizar Chart.js con la configuración estándar del módulo
-4. WHERE se requieran cards, THE Sistema SHALL usar el componente infoCard() existente
-5. IF se necesitan tablas, THEN THE Sistema SHALL usar createTable() con theme 'corporativo' o 'light'
+1. THE Dashboard_System SHALL heredar de la clase Templates de CoffeeSoft
+2. THE Dashboard_System SHALL usar componentes nativos como createCard, createChart y createTable
+3. THE Dashboard_System SHALL implementar la estructura MVC con controladores ctrl/ventas.php y modelos mdl/ventas.php
+4. THE Dashboard_System SHALL seguir las convenciones de nomenclatura y arquitectura de CoffeeSoft
+5. THE Dashboard_System SHALL ser responsive y compatible con dispositivos móviles y desktop

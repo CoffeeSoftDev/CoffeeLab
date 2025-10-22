@@ -44,7 +44,7 @@ class ctrl extends mdl {
             foreach ($canales as $canal) {
                 // Consulta optimizada por canal específico
                 $pedido                = $this->getPedidosByUdnYearCanal([$udn,$numMes, $year, $canal['id']]);
-                $cantidad              = $pedido['cantidad'] ?? '-';
+                $cantidad              = formatNumber($pedido['cantidad']);
                 $row[$canal['valor']]  = $cantidad;
                 $totalMes             += $pedido['cantidad'];
             
@@ -191,6 +191,23 @@ class ctrl extends mdl {
 }
 
 
+
+// Complements
+
+function formatNumber($value) {
+    // Validar si el valor es null, vacío, 0 o '0'
+    if ($value === null || $value === '' || $value === 0 || $value === '0') {
+        return '-';
+    }
+    
+    // Si es un número válido, formatearlo con separadores de miles
+    if (is_numeric($value)) {
+        return number_format($value);
+    }
+    
+    // Si no es numérico, devolver el valor original o '-'
+    return $value ?: '-';
+}
 
 $obj = new ctrl();
 echo json_encode($obj->{$_POST['opc']}());

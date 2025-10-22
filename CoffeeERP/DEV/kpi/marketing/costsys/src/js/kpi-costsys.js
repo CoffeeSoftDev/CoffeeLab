@@ -1,17 +1,148 @@
 let api_costsys = 'https://erp-varoch.com/ERP24/costsys/ctrl/ctrl-menu.php';
 let api_costo = 'https://erp-varoch.com/ERP24/costsys/ctrl/ctrl-costo-potencial.php';
 let api_kpi_costsys = 'ctrl/ctrl-kpi-costsys.php';
-let costsys, analitycs_costsys;
 
+
+let api = 'https://erp-varoch.com/DEV/kpi/marketing/ventas/ctrl/ctrl-ingresos.php';
+let udn, lsudn, clasification, mkt;
+let app, costsys, dashboard;
+
+$(async () => {
+    const data = await useFetch({ url: api, data: { opc: "init" } });
+    udn = data.udn;
+    lsudn = data.lsudn;
+    clasification = data.clasification;
+
+    // ** KPI Costsys **
+
+    app       = new App(api_costsys, 'root');
+    costsys   = new Costsys(api_costsys, 'root');
+    dashboard = new AnalyticsCostsys(api_kpi_costsys, 'root');
+
+    app.render()
+
+});
+
+
+class App extends Templates {
+    constructor(link, div_modulo) {
+        super(link, div_modulo);
+        this.PROJECT_NAME = "orders";
+    }
+
+
+    render() {
+        this.layout();
+        dashboard.render();
+        costsys.renderCostoPotencial()
+        costsys.renderDesplazamiento()
+        costsys.renderVentas()
+    }
+
+    layout() {
+        this.primaryLayout({
+            parent: "root",
+            id: this.PROJECT_NAME,
+            class: "w-full",
+            card: {
+                filterBar: { class: "w-full", id: "filterCostsys" },
+                container: { class: "w-full h-full", id: "containerCostsys" },
+            },
+        });
+
+        this.tabLayout({
+            parent: `containerCostsys`,
+            id: "tabsCostsSys",
+            type: "short",
+            json: [
+                { id: "Dashboard", tab: "Dashboard", active: true, onClick: () => { dashboard.renderDashboard() } },
+                { id: "costoPotencial", tab: "Costo Potencial" },
+                { id: "desplazamiento", tab: "Desplazamiento Mensual" },
+                { id: "ventas", tab: "Ventas Mensual" }
+            ]
+        });
+
+        // $('#content-tabsCostsSys').removeClass('h-screen');
+
+        this.headerBar({
+            parent: `filterCostsys`,
+            title: "📊 Panel CostSys",
+            subtitle: "Consulta y visualiza ventas, costos y desplazamientos.",
+            onClick: () => app.redirectToHome(),
+        });
+
+  
+
+
+        $('#content-tabsVentas').removeClass('h-screen');
+    }
+
+    redirectToHome() {
+        const base = window.location.origin + '/DEV';
+        window.location.href = `${base}/kpi/marketing.php`;
+    }
+
+    headerBar(options) {
+        const defaults = {
+            parent: "root",
+            title: "Título por defecto",
+            subtitle: "Subtítulo por defecto",
+            icon: "icon-home",
+            textBtn: "Inicio",
+            classBtn: "border-1 border-blue-700 text-blue-600 hover:bg-blue-700 hover:text-white transition-colors duration-200",
+            onClick: null,
+        };
+
+        const opts = Object.assign({}, defaults, options);
+
+        const container = $("<div>", {
+            class: "relative flex justify-center items-center px-2 pt-3 pb-3"
+        });
+
+        // 🔵 Botón alineado a la izquierda (posición absoluta)
+        const leftSection = $("<div>", {
+            class: "absolute left-0"
+        }).append(
+            $("<button>", {
+                class: `${opts.classBtn} font-semibold px-4 py-2 rounded transition flex items-center`,
+                html: `<i class="${opts.icon} mr-2"></i>${opts.textBtn}`,
+                click: () => typeof opts.onClick === "function" && opts.onClick()
+            })
+        );
+
+        // 📜 Texto centrado
+        const centerSection = $("<div>", {
+            class: "text-center"
+        }).append(
+            $("<h2>", {
+                class: "text-2xl font-bold",
+                text: opts.title
+            }),
+            $("<p>", {
+                class: "text-gray-400",
+                text: opts.subtitle
+            })
+        );
+
+        container.append(leftSection, centerSection);
+        $(`#${opts.parent}`).html(container);
+    }
+}
 
 class Costsys extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "costsys";
     }
+    
 
+    renderCostoPotencial(){
+        this.layout()
+        this.filterBarCostoPotencial()
+        this.lsCostoPotencial()
+    }
 
-    layoutCostoPotencial() {
+    layout() {
         this.primaryLayout({
             parent: `container-costoPotencial`,
             id: this.PROJECT_NAME,
@@ -121,6 +252,12 @@ class Costsys extends Templates {
 
     // tab Desplazamiento por Mes
 
+    renderDesplazamiento(){
+        this.layoutDesplazamiento()
+        this.filterBarDesplazamiento()
+        this.lsDesplazamiento()
+    }
+
     layoutDesplazamiento() {
 
         this.primaryLayout({
@@ -222,6 +359,12 @@ class Costsys extends Templates {
     }
 
     // tab Ventas por mes
+
+    renderVentas(){
+        this.layoutVentas()
+        this.filterBarVentas()
+        this.lsVentas()
+    }
 
     layoutVentas() {
         this.primaryLayout({
@@ -336,7 +479,7 @@ class AnalyticsCostsys extends Templates {
     render() {
         this.layoutDashboard();
         this.filterBarDashboard();
-        this.renderDashboard()
+        // this.renderDashboard()
     }
 
     layoutDashboard() {
@@ -376,7 +519,7 @@ class AnalyticsCostsys extends Templates {
                     id: "UDNs",
                     lbl: "Sucursal",
                     class: "col-sm-3",
-                    onchange: `analitycs_costsys.lsClasificacion()`,
+                    onchange: `dashboard.lsClasificacion()`,
                     data: udn,
                     // data: [{ id: 5, valor: 'Sonoras Meat' }]
                 },
@@ -385,7 +528,7 @@ class AnalyticsCostsys extends Templates {
                     id: "Clasificacion",
                     lbl: "Categoria",
                     class: "col-sm-3",
-                    onchange: `analitycs_costsys.renderDashboard()`,
+                    onchange: `dashboard.renderDashboard()`,
                     // data: clasification
                     // data: [
                     //     { id: 2, valor: "Cortes" },
@@ -399,7 +542,7 @@ class AnalyticsCostsys extends Templates {
                     id: "Mes",
                     lbl: "mes",
                     class: "col-sm-3",
-                    onchange: `analitycs_costsys.renderDashboard()`,
+                    onchange: `dashboard.renderDashboard()`,
                     data: Array.from({ length: 12 }, (_, i) => {
                         const month = moment().month(i); // i = 0 to 11
                         return {
@@ -414,7 +557,7 @@ class AnalyticsCostsys extends Templates {
                     id: "Anio",
                     lbl: "año",
                     class: "col-sm-3",
-                    onchange: `analitycs_costsys.renderDashboard()`,
+                    onchange: `dashboard.renderDashboard()`,
                     data: Array.from({ length: 2 }, (_, i) => {
                         const year = moment().year() - i;
                         return { id: year, valor: year.toString() };
@@ -588,7 +731,7 @@ class AnalyticsCostsys extends Templates {
             parent: "barProductSales",
             id: "chartIngresos",
             title: "TOP 10 - Productos más vendidos",
-            
+
             data: data
         });
 

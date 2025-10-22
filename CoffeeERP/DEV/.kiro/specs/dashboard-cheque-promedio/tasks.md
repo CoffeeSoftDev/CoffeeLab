@@ -1,262 +1,185 @@
 # Implementation Plan
 
-- [x] 1. Configurar estructura base del dashboard
+- [x] 1. Extender funcionalidades del Dashboard existente
 
 
-  - Agregar nueva pestaña "Dashboard Cheque Promedio" en el módulo de ventas existente
-  - Crear contenedor HTML para el dashboard dentro de kpi-ventas.js
-  - Configurar routing y activación de la pestaña
-  - _Requirements: 1.1, 5.1_
+  - Modificar la clase `SalesDashboard` para incluir nuevas métricas de cheque promedio
+  - Implementar cálculos específicos de cheque promedio en los KPI cards
+  - Agregar validaciones de datos antes de renderizar componentes
+  - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
 
 
-- [ ] 2. Implementar clase ChequePromedioDashboard en frontend
-- [ ] 2.1 Crear clase base y constructor
-  - Crear clase `ChequePromedioDashboard extends Templates` en kpi-ventas.js
-  - Implementar constructor con parámetros link y div_modulo
-  - Definir PROJECT_NAME = "chequePromedio"
+- [ ] 1.1 Actualizar método `renderDashboard()` para nuevas métricas
+  - Modificar la llamada a `apiPromediosDiarios` para incluir parámetros de cheque promedio
+  - Implementar lógica de cálculo de cheque promedio (total_venta / total_clientes)
+  - Agregar manejo de errores para datos faltantes o inconsistentes
 
-  - _Requirements: 1.1, 6.3_
+  - _Requirements: 1.1, 1.2_
 
-- [ ] 2.2 Implementar método layout()
-  - Crear estructura HTML del dashboard usando primaryLayout()
-  - Definir contenedores para cards, gráficos y filtros
+- [ ] 1.2 Mejorar método `showCards()` con métricas específicas
+  - Actualizar estructura de KPI cards para mostrar cheque promedio con tendencias
+  - Implementar indicadores visuales de crecimiento/decrecimiento (flechas, colores)
+  - Agregar tooltips informativos en cada card
+  - _Requirements: 1.1, 1.4_
 
-  - Aplicar clases CSS de CoffeeSoft
-  - _Requirements: 1.1, 7.1, 7.2_
+- [ ]* 1.3 Crear tests unitarios para cálculos de cheque promedio
+  - Escribir tests para validar cálculos de cheque promedio
+  - Crear tests para manejo de casos edge (división por cero, datos nulos)
+  - Implementar tests de integración para KPI cards
+  - _Requirements: 1.1, 1.2_
 
-- [ ] 2.3 Implementar filterBarDashboard()
-  - Crear barra de filtros con createfilterBar()
-  - Agregar selectores: UDN, mes, año
+- [ ] 2. Implementar análisis por día de la semana
+  - Crear método `ventasPorDiaSemana()` mejorado con análisis de cheque promedio
+  - Implementar gráfico comparativo de cheque promedio por día de la semana
+  - Agregar funcionalidad de drill-down en días específicos
+  - _Requirements: 3.1, 3.2, 3.3_
 
-  - Configurar valores por defecto (mes y año actual)
-  - Vincular evento onChange a renderDashboard()
+- [ ] 2.1 Desarrollar gráfico de barras para análisis semanal
+  - Modificar método `barChart()` para mostrar cheque promedio por día
+  - Implementar comparativa año actual vs año anterior
+  - Agregar interactividad para mostrar detalles al hacer hover
+  - _Requirements: 3.1, 3.2_
+
+- [ ] 2.2 Crear componente de ranking semanal
+  - Extender método `topDiasSemana()` para incluir métricas de cheque promedio
+  - Implementar ordenamiento por mejor rendimiento de cheque promedio
+  - Agregar indicadores visuales de ranking (colores, íconos)
+  - _Requirements: 3.1, 3.3_
+
+- [ ]* 2.3 Implementar tests para análisis semanal
+  - Crear tests para validar cálculos de promedios semanales
+  - Escribir tests de renderizado de gráficos con datos mock
+  - Implementar tests de interactividad de componentes
+  - _Requirements: 3.1, 3.2, 3.3_
+
+- [ ] 3. Desarrollar análisis por categorías de productos
+  - Crear método `analisisPorCategorias()` para cheque promedio por categoría
+  - Implementar filtros dinámicos que se actualicen según la UDN seleccionada
+  - Agregar funcionalidad de comparativa año actual vs anterior por categoría
+  - _Requirements: 4.1, 4.2, 4.3, 4.4_
+
+- [ ] 3.1 Implementar filtro dinámico de categorías
+  - Modificar método `handleCategoryChange()` para incluir métricas de cheque promedio
+  - Crear lógica de filtrado automático basado en UDN seleccionada
+  - Implementar actualización en tiempo real de gráficos al cambiar categoría
+  - _Requirements: 4.1, 4.2_
+
+- [ ] 3.2 Crear gráfico comparativo por categorías
+  - Extender método `comparativaByCategory()` para análisis de cheque promedio
+  - Implementar visualización de barras con comparativa temporal
+  - Agregar etiquetas de valores en barras para mejor legibilidad
+  - _Requirements: 4.1, 4.3_
+
+- [ ] 3.3 Desarrollar funcionalidad de drill-down
+  - Implementar navegación detallada desde categoría hacia productos específicos
+  - Crear modal o panel lateral con detalles de productos por categoría
+  - Agregar métricas específicas de cheque promedio por producto
+  - _Requirements: 4.4_
+
+- [ ]* 3.4 Crear tests para análisis de categorías
+  - Escribir tests para filtros dinámicos de categorías
+
+
+  - Implementar tests de comparativas temporales
+  - Crear tests de funcionalidad drill-down
+  - _Requirements: 4.1, 4.2, 4.3, 4.4_
+
+- [x] 4. Extender APIs del controlador backend
+
+  - Agregar método `apiChequePromedioDashboard()` al controlador existente
+  - Implementar `apiAnalisisCategorias()` para análisis detallado por categorías
+  - Optimizar consultas existentes para incluir cálculos de cheque promedio
   - _Requirements: 5.1, 5.2, 5.3_
 
 
-- [x] 2.4 Implementar método render()
-
-  - Llamar a layout() para crear estructura
-  - Llamar a filterBarDashboard() para crear filtros
-  - Ejecutar renderDashboard() para cargar datos iniciales
-  - _Requirements: 1.1, 5.1_
-
-- [x] 3. Implementar renderizado de métricas principales
-
-- [ ] 3.1 Crear método showCards()
-  - Recibir objeto data con métricas (ventaDia, ventaMes, clientes, chequePromedio)
-  - Usar componente infoCard() de CoffeeSoft
-  - Configurar 4 cards con títulos, valores y colores
-  - Mostrar variaciones porcentuales con año anterior
-
-  - _Requirements: 1.1, 1.3, 1.4, 2.1, 2.2, 2.3, 2.4_
-
-
-- [ ] 3.2 Implementar formato de valores
-  - Aplicar formatPrice() para valores monetarios
-  - Mostrar clientes como número entero
-  - Agregar símbolo "+" o "-" según variación
-  - Aplicar colores: verde para positivo, rojo para negativo
-  - _Requirements: 1.4, 2.2, 2.3, 7.1_
-
-
-- [ ] 4. Implementar gráfico de cheque promedio por día de semana
-- [ ] 4.1 Crear método renderChequePorDia()
-  - Recibir objeto data con labels y valores por día
-
-  - Usar componente barChart() de CoffeeSoft
-  - Configurar eje X con días de la semana (Lunes a Domingo)
-  - Configurar eje Y con valores de cheque promedio
-
-  - _Requirements: 3.1, 3.3, 7.3_
-
-- [ ] 4.2 Configurar visualización del gráfico
-  - Aplicar color azul #103B60 para las barras
-  - Mostrar tooltips con valores formateados
-  - Agregar título descriptivo al gráfico
-
-  - Hacer responsive el gráfico
-  - _Requirements: 3.1, 7.1, 7.3_
-
-
-- [ ] 5. Implementar gráfico comparativo por categoría
-- [ ] 5.1 Crear método renderChequeCategoria()
-  - Recibir objeto data con categorías, valores actual y anterior
-
-  - Usar componente barChart() de CoffeeSoft
-  - Configurar dos datasets: año actual y año anterior
-  - Mostrar leyenda con años comparados
-  - _Requirements: 4.1, 4.2, 4.3_
-
-
-- [ ] 5.2 Configurar categorías según UDN
-  - Si UDN = 1 (hotel): mostrar Hospedaje, A&B, Diversos
-  - Si UDN = restaurante: mostrar Alimentos, Bebidas, Complementos
-  - Aplicar colores: azul #103B60 (actual), verde #8CC63F (anterior)
-
-  - _Requirements: 4.4, 4.5, 7.1_
-
-
-- [ ] 6. Implementar método principal renderDashboard()
-- [ ] 6.1 Obtener valores de filtros
-  - Leer valores de UDN, mes y año desde FilterBar
-  - Validar que los valores sean correctos
-  - _Requirements: 5.1, 5.2_
-
-- [ ] 6.2 Realizar llamada AJAX al backend
-  - Usar useFetch() para llamar a ctrl-ingresos.php
-  - Enviar parámetros: opc="getDashboardChequePromedio", udn, mes, anio
-  - Manejar respuesta asíncrona con async/await
-  - _Requirements: 6.1, 6.2_
-
-- [-] 6.3 Renderizar componentes con datos
-
-
-  - Llamar a showCards() con response.cards
-  - Llamar a renderChequePorDia() con response.chequePorDia
-  - Llamar a renderChequeCategoria() con response.chequePorCategoria
-  - Manejar errores con alert() de CoffeeSoft
-  - _Requirements: 1.1, 1.5, 5.2, 5.5_
-
-
-- [ ] 7. Implementar backend - Controlador
-- [ ] 7.1 Crear método getDashboardChequePromedio() en ctrl-ingresos.php
-  - Recibir parámetros: udn, mes, anio desde $_POST
-  - Validar parámetros de entrada
-  - Calcular mes y año anterior para comparativas
-
-  - _Requirements: 6.1, 6.2_
-
-- [ ] 7.2 Obtener datos del mes actual
-  - Llamar a ingresosMensuales() del modelo con mes y año actual
-  - Extraer totalGeneral, totalHabitaciones (clientes)
-
-  - Calcular chequePromedio = totalGeneral / totalHabitaciones
-  - Manejar división por cero (retornar 0 si clientes = 0)
-  - _Requirements: 1.3, 1.5_
-
-- [x] 7.3 Obtener datos del año anterior
-
-  - Llamar a ingresosMensuales() con mismo mes del año anterior
-
-  - Extraer mismas métricas que período actual
-  - Calcular chequePromedio del año anterior
-  - _Requirements: 2.1, 2.5_
-
-- [ ] 7.4 Calcular variaciones porcentuales
-  - Calcular variación de ventaMes: ((actual - anterior) / anterior) * 100
-
-  - Calcular variación de clientes
-  - Calcular variación de chequePromedio
-  - Formatear con símbolo "+" o "-" y símbolo "%"
-  - _Requirements: 2.1, 2.2, 2.3_
-
-
-- [x] 7.5 Obtener venta del día anterior
-
-  - Crear o reutilizar método getVentasDelDia() del modelo
-  - Obtener fecha de ayer (date('Y-m-d', strtotime('-1 day')))
-  - Sumar ventas de todas las categorías del día
-  - Formatear con evaluar()
-  - _Requirements: 1.1_
-
-
-- [ ] 7.6 Construir objeto cards para respuesta
-  - Crear array con ventaDia, ventaMes, clientes, chequePromedio
-  - Formatear valores monetarios con evaluar()
-  - Incluir variaciones porcentuales
-  - _Requirements: 1.1, 1.4, 2.4_
-
-- [x] 8. Implementar cálculo de cheque promedio por día de semana
-
-- [ ] 8.1 Crear método getChequePorDiaSemana() en modelo
-  - Recibir parámetros: udn, mes, anio
-
-  - Consultar ventas agrupadas por día de la semana (DAYOFWEEK)
-  - Calcular promedio de cheque para cada día
-  - Retornar array con 7 elementos (Lunes a Domingo)
-
-  - _Requirements: 3.1, 3.2, 3.4_
-
-- [ ] 8.2 Procesar datos en controlador
-  - Llamar a getChequePorDiaSemana() desde getDashboardChequePromedio()
-
-  - Crear array labels con nombres de días en español
-  - Crear array data con valores de cheque promedio
+- [ ] 4.1 Implementar `apiChequePromedioDashboard()`
+  - Crear endpoint específico para métricas de cheque promedio
+  - Implementar cálculos optimizados de cheque promedio por período
+  - Agregar validaciones de parámetros de entrada (UDN, fechas)
+  - _Requirements: 5.1, 5.3_
 
 
 
-  - Manejar días sin datos (asignar 0)
-  - _Requirements: 3.3, 3.5_
+- [ ] 4.2 Desarrollar `apiAnalisisCategorias()`
+  - Crear endpoint para análisis detallado por categorías
+  - Implementar lógica de agrupación por categoría con cálculos de cheque promedio
+  - Agregar soporte para filtros temporales y comparativas
+  - _Requirements: 5.2, 5.3_
+
+- [ ] 4.3 Optimizar consultas de base de datos existentes
+  - Revisar y optimizar consultas en métodos existentes del modelo
 
 
-- [ ] 9. Implementar comparativa de cheque promedio por categoría
-- [ ] 9.1 Reutilizar método getComparativaChequePromedio() del modelo
-  - Llamar con parámetros: mes, año actual, udn
-  - Llamar nuevamente con año anterior
-  - Extraer valores por categoría (A&B, Alimentos, Bebidas)
+  - Implementar índices de base de datos para mejorar performance
+  - Agregar cache para consultas frecuentes de cheque promedio
+  - _Requirements: 5.3, 5.4_
 
-  - _Requirements: 4.1, 4.2, 6.3_
+- [x]* 4.4 Crear tests para APIs del controlador
 
-- [ ] 9.2 Construir estructura de respuesta
-  - Crear array labels con nombres de categorías
-  - Crear array actual con valores del año actual
-  - Crear array anterior con valores del año anterior
 
-  - Incluir anioActual y anioAnterior en respuesta
-  - _Requirements: 4.3, 4.4, 4.5_
+  - Escribir tests unitarios para nuevos métodos del controlador
+  - Implementar tests de integración con el modelo de datos
+  - Crear tests de performance para consultas optimizadas
+  - _Requirements: 5.1, 5.2, 5.3_
 
-- [ ] 10. Construir respuesta JSON completa del backend
-  - Combinar todos los datos calculados en un solo array
-  - Estructura: { status: 200, cards: {...}, chequePorDia: {...}, chequePorCategoria: {...} }
-  - Retornar JSON con json_encode()
-  - _Requirements: 6.2, 6.4_
 
-- [ ] 11. Integrar dashboard en módulo de ventas
-- [ ] 11.1 Agregar pestaña en tabLayout()
-  - Modificar método layout() de clase App en kpi-ventas.js
-  - Agregar nuevo objeto en json de tabLayout()
-  - Configurar id, tab, onClick para activar dashboard
-  - _Requirements: 7.2_
+- [ ] 5. Implementar mejoras de UX y responsive design
+  - Optimizar layout del dashboard para dispositivos móviles
+  - Implementar loading states y skeleton screens durante carga de datos
+  - Agregar tooltips informativos y ayuda contextual
 
-- [ ] 11.2 Instanciar clase ChequePromedioDashboard
-  - Crear instancia global: chequePromedioDashboard
-  - Inicializar en $(async () => {}) con api y "root"
-  - Llamar a render() en el orden correcto
-  - _Requirements: 6.3, 7.2_
 
-- [ ] 12. Validación y manejo de errores
-- [ ] 12.1 Validar parámetros en backend
-  - Verificar que mes esté entre 1 y 12
-  - Verificar que año sea válido (> 2000)
-  - Verificar que udn exista en base de datos
-  - Retornar error 400 si validación falla
-  - _Requirements: 5.5, 6.5_
+  - _Requirements: 5.5_
 
-- [ ] 12.2 Manejar errores en frontend
-  - Implementar try-catch en renderDashboard()
-  - Mostrar alert() con mensaje de error si falla AJAX
-  - Mostrar valores en cero si no hay datos
-  - _Requirements: 1.5, 5.5_
+- [ ] 5.1 Optimizar responsive design
+  - Ajustar grid layout de KPI cards para diferentes resoluciones
+  - Implementar navegación móvil optimizada para filtros
+  - Crear versiones móviles de gráficos complejos
+  - _Requirements: 5.5_
 
-- [ ]* 13. Testing y validación
-- [ ]* 13.1 Probar con diferentes UDN
-  - Verificar que categorías cambien según UDN (hotel vs restaurante)
-  - Validar cálculos de cheque promedio
-  - _Requirements: 4.4, 4.5_
+- [x] 5.2 Implementar estados de carga
 
-- [ ]* 13.2 Probar con períodos sin datos
-  - Seleccionar mes/año sin registros
-  - Verificar que muestre valores en cero sin errores
-  - _Requirements: 1.5, 5.5_
 
-- [ ]* 13.3 Probar comparativas año anterior
-  - Verificar cálculo correcto de variaciones porcentuales
-  - Validar colores (verde +, rojo -)
-  - _Requirements: 2.1, 2.2, 2.3_
+  - Crear skeleton screens para KPI cards durante carga
+  - Implementar spinners para gráficos en proceso de renderizado
+  - Agregar mensajes informativos durante consultas largas
+  - _Requirements: 5.5_
 
-- [ ]* 13.4 Validar responsive y estilos
-  - Probar en diferentes resoluciones
-  - Verificar paleta de colores CoffeeSoft
-  - Validar tooltips en gráficos
-  - _Requirements: 7.1, 7.3_
+
+- [ ] 5.3 Agregar ayuda contextual
+  - Implementar tooltips explicativos para métricas de cheque promedio
+  - Crear guía de usuario integrada en el dashboard
+  - Agregar mensajes de error amigables y sugerencias de solución
+  - _Requirements: 5.5_
+
+
+- [ ]* 5.4 Crear tests de UX y accesibilidad
+  - Implementar tests de usabilidad en diferentes dispositivos
+  - Escribir tests de accesibilidad para componentes del dashboard
+  - Crear tests de performance de carga y renderizado
+  - _Requirements: 5.5_
+
+- [ ] 6. Integración final y testing
+  - Realizar pruebas de integración completa del dashboard
+  - Validar compatibilidad con diferentes navegadores
+  - Ejecutar tests de performance con datos reales
+  - _Requirements: 1.1, 2.1, 3.1, 4.1, 5.1_
+
+- [ ] 6.1 Pruebas de integración completa
+  - Ejecutar tests end-to-end del flujo completo del dashboard
+  - Validar integración entre frontend y backend con datos reales
+  - Probar escenarios de uso típicos y casos edge
+  - _Requirements: 1.1, 2.1, 3.1, 4.1, 5.1_
+
+- [ ] 6.2 Validación cross-browser
+  - Probar funcionalidad en Chrome, Firefox, Safari y Edge
+  - Validar renderizado de gráficos en diferentes navegadores
+  - Verificar compatibilidad de filtros dinámicos
+  - _Requirements: 5.5_
+
+- [ ]* 6.3 Tests de performance con datos reales
+  - Ejecutar pruebas de carga con volúmenes grandes de datos
+  - Medir tiempos de respuesta de APIs con datos históricos
+  - Optimizar consultas basado en resultados de performance
+  - _Requirements: 5.3, 5.4_

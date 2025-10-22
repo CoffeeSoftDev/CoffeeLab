@@ -99,6 +99,24 @@ class mdl extends CRUD {
         return $this->_Read($query, $array);
     }
 
+    function searchClientesByName($array) {
+        $query = "
+            SELECT 
+                id,
+                CONCAT(nombre) AS text,
+                nombre,
+                telefono,
+                correo,
+                fecha_cumpleaños,
+                udn_id
+            FROM {$this->bd}cliente
+            WHERE (nombre LIKE ?)
+            AND active = 1
+            LIMIT 10
+        ";
+        return $this->_Read($query, $array);
+    }
+
     function getClienteById($array) {
         $query = "
             SELECT 
@@ -136,11 +154,13 @@ class mdl extends CRUD {
                 rs.icono AS red_social_icono,
                 p.udn_id,
                 u.usser AS user_nombre,
-                p.user_id
+                p.user_id,
+                a.nombre AS anuncio_nombre
             FROM {$this->bd}pedido p
             LEFT JOIN {$this->bd}cliente cl ON p.cliente_id = cl.id
             LEFT JOIN {$this->bd}canal c ON p.canal_id = c.id
             LEFT JOIN {$this->bd}red_social rs ON p.red_social_id = rs.id
+            LEFT JOIN {$this->bd}anuncio a ON p.anuncio_id = a.id
             LEFT JOIN usuarios u ON p.user_id = idUser 
             WHERE p.udn_id = ?
             AND p.active = 1

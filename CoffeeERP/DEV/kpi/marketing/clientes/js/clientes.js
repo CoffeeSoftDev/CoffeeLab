@@ -5,6 +5,31 @@ let udnData = [];
 const api = "ctrl/ctrl-clientes.php";
 
 $(async () => {
+    // Agregar estilos CSS para badges VIP interactivos
+    const vipBadgeStyles = $(`
+        <style>
+            .vip-badge {
+                transition: all 0.2s ease-in-out;
+                user-select: none;
+            }
+            
+            .vip-badge:hover {
+                transform: scale(1.05);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            
+            .vip-badge:active {
+                transform: scale(0.95);
+            }
+            
+            .vip-badge.updating {
+                opacity: 0.6;
+                pointer-events: none;
+            }
+        </style>
+    `);
+    $('head').append(vipBadgeStyles);
+
     const data = await useFetch({ url: api, data: { opc: "init" } });
     udnData = data.udn;
 
@@ -167,6 +192,30 @@ class Clientes extends Templates {
                 center: [5, 6, 7]
             }
         });
+
+        // Agregar event listeners a los badges VIP después de que se renderice la tabla
+        setTimeout(() => {
+            this.attachVipBadgeEvents();
+        }, 500);
+    }
+
+    attachVipBadgeEvents() {
+        // Remover event listeners existentes para evitar duplicados
+        $(document).off('click', '.vip-badge');
+
+        // Agregar event listener para los badges VIP
+        $(document).on('click', '.vip-badge', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const badge = $(event.currentTarget);
+            const clientId = badge.data('client-id');
+            const currentVipStatus = badge.data('vip-status');
+
+            if (clientId) {
+                this.updateClientVipStatus(clientId, currentVipStatus);
+            }
+        });
     }
 
     // Clients.
@@ -272,6 +321,95 @@ class Clientes extends Templates {
         });
     }
 
+    updateClientVipStatus(id, currentVipStatus) {
+        const isVip = currentVipStatus == 1;
+        const newStatus = isVip ? 0 : 1;
+        const statusText = isVip ? 'Regular' : 'VIP';
+        const currentStatusText = isVip ? 'VIP' : 'Regular';
+
+        const title = isVip
+            ? '¿Deseas cambiar este cliente a Regular?'
+            : '¿Deseas actualizar este cliente a VIP?';
+
+        const text = isVip
+            ? 'El cliente perderá los beneficios VIP y será tratado como cliente regular.'
+            : 'El cliente obtendrá beneficios especiales y prioridad en el servicio.';
+
+        // Mostrar estado de carga en el badge
+        const badge = $(`[data-client-id="${id}"]`);
+        badge.addClass('updating').html('⏳ Actualizando...');
+
+        this.swalQuestion({
+            opts: {
+                title: title,
+                text: text,
+                icon: "question",
+                confirmButtonText: `Sí, cambiar a ${statusText}`,
+                cancelButtonText: "Cancelar"
+            },
+            data: {
+                opc: "updateClientStatus",
+                id: id,
+                vip: newStatus
+            },
+            methods: {
+                send: (response) => {
+                    if (response.status === 200) {
+                        // Actualizar el badge dinámicamente sin recargar la tabla
+                        this.updateVipBadgeInTable(id, newStatus);
+
+                        alert({
+                            icon: "success",
+                            title: "¡Estado actualizado!",
+                            text: `Cliente cambiado a ${statusText} exitosamente.`
+                        });
+
+                        this.ls()
+                    } else {
+                        // Restaurar el badge al estado anterior en caso de error
+                        this.updateVipBadgeInTable(id, currentVipStatus);
+
+                        alert({
+                            icon: "error",
+                            title: "Error",
+                            text: response.message || "No se pudo actualizar el estado del cliente."
+                        });
+                    }
+                },
+                cancel: () => {
+                    // Restaurar el badge si el usuario cancela
+                    this.updateVipBadgeInTable(id, currentVipStatus);
+                }
+            }
+        });
+    }
+
+    updateVipBadgeInTable(clientId, newVipStatus) {
+        // Buscar el badge en la tabla y actualizarlo
+        const badge = $(`[data-client-id="${clientId}"]`);
+
+        if (badge.length > 0) {
+            // Remover clase de actualización
+            badge.removeClass('updating');
+
+            if (newVipStatus == 1) {
+                // Cambiar a VIP
+                badge.removeClass('bg-gray-100 text-gray-600 hover:bg-gray-200')
+                    .addClass('bg-orange-100 text-yellow-600 hover:bg-orange-200')
+                    .html('<i class="icon-star"></i> VIP')
+                    .attr('data-vip-status', '1')
+                    .attr('title', 'Clic para cambiar a Regular');
+            } else {
+                // Cambiar a Regular
+                badge.removeClass('bg-orange-100 text-yellow-600 hover:bg-orange-200')
+                    .addClass('bg-gray-100 text-gray-600 hover:bg-gray-200')
+                    .html('Regular')
+                    .attr('data-vip-status', '0')
+                    .attr('title', 'Clic para cambiar a VIP');
+            }
+        }
+    }
+
     jsonFormCliente() {
         return [
             {
@@ -293,23 +431,10 @@ class Clientes extends Templates {
                 opc: "input",
                 id: "nombre",
                 lbl: "Nombre *",
-                class: "col-12 col-md-4 mb-3",
-                placeholder: "Ej: Juan"
+                class: "col-12 col-md-8 mb-3",
+                placeholder: "Nombre completo"
             },
-            {
-                opc: "input",
-                id: "apellido_paterno",
-                lbl: "Apellido Paterno",
-                class: "col-12 col-md-4 mb-3",
-                placeholder: "Ej: Pérez"
-            },
-            {
-                opc: "input",
-                id: "apellido_materno",
-                lbl: "Apellido Materno",
-                class: "col-12 col-md-4 mb-3",
-                placeholder: "Ej: García"
-            },
+
             {
                 opc: "div",
                 class: "col-12 mb-3 mt-1",
@@ -330,7 +455,8 @@ class Clientes extends Templates {
                 lbl: "Correo Electrónico",
                 tipo: "email",
                 class: "col-12 col-md-4 mb-3",
-                placeholder: "ejemplo@correo.com"
+                placeholder: "ejemplo@correo.com",
+                required: false
             },
             {
                 opc: "input",
@@ -455,7 +581,7 @@ class Analitycs extends Templates {
         const cliente = data.cliente;
         const historial = data.historial;
 
-        const nombreCompleto = `${cliente.nombre} ${cliente.apellido_paterno || ''} ${cliente.apellido_materno || ''}`.trim();
+        const nombreCompleto = `${cliente.nombre} `;
         const iniciales = this.getInitials(nombreCompleto);
 
         const badgeVIP = cliente.vip == 1
@@ -486,7 +612,7 @@ class Analitycs extends Templates {
                             </div>
                         </div>
                         <div class="text-right">
-                            <span class="text-lg font-bold text-green-600">$${parseFloat(pedido.monto).toFixed(2)}</span>
+                            <span class="text-sm font-bold text-gray-600">$${parseFloat(pedido.monto).toFixed(2)}</span>
                         </div>
                     </div>
                 `;
@@ -513,7 +639,7 @@ class Analitycs extends Templates {
                             <div class="flex-1">
                                 <div class="flex items-center gap-2 mb-1">
                                     <h3 class="text-xl font-bold text-gray-800">${nombreCompleto}</h3>
-                                    ${badgeVIP}
+                                   
                                 </div>
                                 <div class="flex flex-wrap gap-3 text-sm text-gray-600">
                                     <span class="flex items-center gap-1">
@@ -527,6 +653,10 @@ class Analitycs extends Templates {
                                     <span class="flex items-center gap-1">
                                         <i class="icon-building "></i>
                                         ${cliente.udn_nombre}
+                                    </span>
+
+                                    <span class"flex items-center gap-1">
+                                     ${badgeVIP}
                                     </span>
                                 </div>
                             </div>
@@ -666,43 +796,105 @@ class Analitycs extends Templates {
         if (topClientes && topClientes.length > 0) {
             topClientes.forEach((cliente, index) => {
                 const nombreCompleto = `${cliente.nombre} ${cliente.apellido_paterno || ''} ${cliente.apellido_materno || ''}`.trim();
-                const badgeVIP = cliente.vip == 1 ? '<span class="badge bg-warning text-dark ms-2"><i class="icon-star"></i> VIP</span>' : '';
-                const medalIcon = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `${index + 1}.`;
+                const badgeVIP = cliente.vip == 1 ? '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-yellow-400 to-yellow-600 text-white shadow-sm"><i class="icon-star mr-1"></i>VIP</span>' : '';
+                const medalIcon = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `<span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-600 font-semibold text-sm">${index + 1}</span>`;
+
+                // Colores de fondo según posición
+                const bgColor = index === 0 ? 'bg-yellow-100 border-yellow-200' :
+                    index === 1 ? 'bg-gray-50  border-gray-200' :
+                        index === 2 ? 'bg-orange-50 border-orange-200' :
+                            'bg-white border-gray-200';
 
                 topHTML += `
-                    <div class="border-bottom pb-3 mb-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <h6 class="mb-1">${medalIcon} ${nombreCompleto} ${badgeVIP}</h6>
-                                <small class="text-muted">
-                                    ${cliente.udn_nombre} • ${cliente.total_pedidos} pedidos • 
-                                    Última compra: ${cliente.ultima_compra ? new Date(cliente.ultima_compra).toLocaleDateString('es-MX') : 'N/A'}
-                                </small>
+                    <div class="relative mb-2 p-2 rounded-xl border-2 ${bgColor} shadow-sm hover:shadow-md transition-all duration-300 transform hover:-translate-y-1">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    ${medalIcon}
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center space-x-2 mb-1">
+                                        <h3 class="text-lg font-bold text-gray-800 truncate">${nombreCompleto}</h3>
+                                        ${badgeVIP}
+                                    </div>
+                                    <div class="flex flex-wrap items-center text-sm text-gray-600 space-x-4">
+                                        <span class="inline-flex items-center">
+                                            <i class="icon-building mr-1 text-blue-500"></i>
+                                            ${cliente.udn_nombre}
+                                        </span>
+                                        <span class="inline-flex items-center">
+                                            <i class="icon-shopping-cart mr-1 text-green-500"></i>
+                                            ${cliente.total_pedidos} pedidos
+                                        </span>
+                                        <span class="inline-flex items-center">
+                                            <i class="icon-calendar mr-1 text-purple-500"></i>
+                                            ${cliente.ultima_compra ? new Date(cliente.ultima_compra).toLocaleDateString('es-MX') : 'N/A'}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="text-end">
-                                <h5 class="mb-0 text-success">$${parseFloat(cliente.monto_total).toFixed(2)}</h5>
-                                <small class="text-muted">Ticket: $${parseFloat(cliente.ticket_promedio).toFixed(2)}</small>
+                            <div class="text-right ml-4">
+                                <div class="text-2xl font-bold text-[#103B60] mb-1">
+                                    $${parseFloat(cliente.monto_total).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                </div>
+                                <div class="text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                                    Ticket: $${parseFloat(cliente.ticket_promedio).toLocaleString('es-MX', { minimumFractionDigits: 2 })}
+                                </div>
                             </div>
                         </div>
+                        ${index < 3 ? '<div class="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center"><i class="icon-star text-white text-xs"></i></div>' : ''}
                     </div>
                 `;
             });
         } else {
-            topHTML = '<p class="text-muted text-center py-3">No hay datos disponibles</p>';
+            topHTML = `
+                <div class="flex flex-col items-center justify-center py-12 text-center">
+                    <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                        <i class="icon-users text-4xl text-gray-400"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-gray-600 mb-2">No hay datos disponibles</h3>
+                    <p class="text-gray-500">Selecciona una unidad de negocio para ver el ranking</p>
+                </div>
+            `;
         }
 
         bootbox.dialog({
-            title: '<h4><i class="icon-trophy"></i> Top 10 Clientes por Monto Total</h4>',
+            title: `
+                <div class="flex items-center space-x-3 p-2">
+                    <div class="w-12 h-12 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center">
+                        <i class="icon-trophy text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-0">Top 10 Clientes</h3>
+                        <p class="text-sm text-gray-600 mb-0">Ranking por monto total de compras</p>
+                    </div>
+                </div>
+            `,
             message: `
-                <div class="container-fluid">
-                    ${topHTML}
+                <div class="bg-gray-50 -mx-4 -mb-4 px-6 py-4">
+                    <div class="max-h-96 overflow-y-auto pr-2" style="scrollbar-width: thin; scrollbar-color: #CBD5E0 #F7FAFC;">
+                        ${topHTML}
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <div class="flex items-center justify-center space-x-6 text-sm text-gray-600">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full"></div>
+                                <span>Top 3 destacados</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full"></div>
+                                <span>Cliente VIP</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `,
             size: 'large',
+            className: 'top-clients-modal',
             buttons: {
                 close: {
-                    label: 'Cerrar',
-                    className: 'btn-secondary'
+                    label: '<i class="icon-check mr-2"></i>Entendido',
+                    className: 'btn btn-primary px-6 py-2 rounded-lg font-semibold'
                 }
             }
         });

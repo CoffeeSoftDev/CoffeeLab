@@ -58,10 +58,11 @@ class ctrl extends mdl {
                 'Creado el'  => date('d/m/Y H:i', strtotime($key['fecha_creacion'])),
                 'Cliente'  => $key['cliente_nombre'],
                 'Teléfono' => $key['cliente_telefono'],
-                'Canal'    => [
+                'Canal'    => $key['canal_nombre'] ?? 'N/A',
+                'Anuncio'    => [
                     'html' => '<div class="flex items-center gap-2">'
                         . canalSVG($key['red_social_nombre']) .
-                        '<span>' . ($key['canal_nombre'] ?? 'N/A') . '</span>' .
+                        '<span>' . ($key['anuncio_nombre'] ?? '<span class="text-gray-500">Sin anuncio</span>') . '</span>' .
                     '</div>',
                     'class' => 'text-left'
                 ],
@@ -103,6 +104,15 @@ class ctrl extends mdl {
                 $clienteId = $_POST['cliente_id'];
             } else if (!empty($_POST['cliente_nombre'])) {
                     // Si no viene cliente_id, crear un nuevo cliente
+                    // Verificar que no exista un cliente con el mismo nombre y teléfono
+                    $clienteExistente = $this->searchClientesByName([$_POST['cliente_nombre']]);
+                    if (!empty($clienteExistente)) {
+                        return [
+                            'status' => 400,
+                            'message' => 'Ya existe un cliente con ese nombre o teléfono'
+                        ];
+                    }
+
                     // 🧩 Limpiar valores y convertir 'null' o vacío a NULL real
                     $clienteData = [
                         'nombre'           => $this->sanitize($_POST['cliente_nombre'] ?? null),
@@ -114,7 +124,7 @@ class ctrl extends mdl {
                     ];
 
                     $clientecito = $this->createCliente($this->util->sql($clienteData));
-                    $clienteId = $this->maxCliente(); // o $this->_LastID()
+                    $clienteId = $this->maxCliente();
             } else {
                 return [
                     'status' => 400,
