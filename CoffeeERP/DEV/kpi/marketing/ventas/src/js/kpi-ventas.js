@@ -1,5 +1,5 @@
 let api = 'ctrl/ctrl-ingresos.php';
-let app, sales, salesDashboard, monthlySales, cumulativeAverages;
+let app, sales, salesDashboard, monthlySales, cumulativeAverages, chequePromedioDashboard;
 
 let udn, lsudn, clasificacion, clasificacionUdn;
 
@@ -16,6 +16,7 @@ $(async () => {
     app = new App(api, "root");
 
     salesDashboard = new SalesDashboard(api, "root");
+    chequePromedioDashboard = new ChequePromedioDashboard(api, "root");
 
     sales = new Sales(api, "root");
     monthlySales = new MonthlySales(api, "root");
@@ -40,6 +41,7 @@ class App extends Templates {
         // init instancias.
 
         salesDashboard.render();
+        chequePromedioDashboard.render();
         sales.render();
         monthlySales.render();
         cumulativeAverages.render();
@@ -79,6 +81,12 @@ class App extends Templates {
                     onClick: () => salesDashboard.renderDashboard()
                 },
                 {
+                    id: "chequePromedio",
+                    tab: "Dashboard Cheque Promedio",
+                    class: "mb-1",
+                    onClick: () => chequePromedioDashboard.renderDashboard()
+                },
+                {
                     id: "sales",
                     tab: "Módulo ventas",
                     onClick: () => {
@@ -90,12 +98,6 @@ class App extends Templates {
                     onClick: () => {
                     }
                 },
-                // {
-                //     id: "promediosDiarios",
-                //     tab: "Promedios diarios",
-                //     onClick: () => {
-                //     }
-                // },
                 {
                     id: "promediosAcumulados",
                     tab: "Promedios acumulados",
@@ -1286,3 +1288,224 @@ class CumulativeAverages extends Templates {
     }
 }
 
+
+class ChequePromedioDashboard extends Templates {
+    constructor(link, div_modulo) {
+        super(link, div_modulo);
+        this.PROJECT_NAME = "chequePromedio";
+    }
+
+    render() {
+        this.layout();
+    }
+
+    layout() {
+        this.dashboardComponent({
+            parent: "container-chequePromedio",
+            id: "dashboardChequePromedio",
+            title: "💰 Dashboard de Cheque Promedio",
+            subtitle: "Análisis de consumo promedio por cliente y comparativas",
+            json: [
+                { type: "grafico", id: "containerChequeDia", title: "Cheque Promedio por Día de Semana" },
+                { type: "grafico", id: "containerChequeCategoria", title: "Comparativa por Categoría" },
+            ]
+        });
+
+        this.filterBarDashboard();
+        this.renderDashboard();
+    }
+
+    filterBarDashboard() {
+        this.createfilterBar({
+            parent: `filterBarDashboard`,
+            data: [
+                {
+                    opc: "select",
+                    id: "udn",
+                    lbl: "UDN",
+                    class: "col-sm-4",
+                    data: udn,
+                    onchange: `chequePromedioDashboard.renderDashboard()`,
+                },
+                {
+                    opc: "select",
+                    id: "mes",
+                    lbl: "Mes",
+                    class: "col-sm-4",
+                    data: moment.months().map((m, i) => ({ id: i + 1, valor: m })),
+                    onchange: `chequePromedioDashboard.renderDashboard()`,
+                },
+                {
+                    opc: "select",
+                    id: "anio",
+                    lbl: "Año",
+                    class: "col-sm-4",
+                    data: Array.from({ length: 5 }, (_, i) => {
+                        const year = moment().year() - i;
+                        return { id: year, valor: year.toString() };
+                    }),
+                    onchange: `chequePromedioDashboard.renderDashboard()`,
+                },
+            ],
+        });
+
+        const currentMonth = moment().month() + 1;
+        setTimeout(() => {
+            $(`#filterBarDashboard #mes`).val(currentMonth).trigger("change");
+        }, 100);
+    }
+
+    async renderDashboard() {
+        try {
+            let udn = $('#filterBarDashboard #udn').val();
+            let mes = $('#filterBarDashboard #mes').val();
+            let anio = $('#filterBarDashboard #anio').val();
+
+            let response = await useFetch({
+                url: api,
+                data: {
+                    opc: "getDashboardChequePromedio",
+                    udn: udn,
+                    mes: mes,
+                    anio: anio,
+                },
+            });
+
+            if (response.status === 200) {
+                this.showCards(response.cards);
+                this.renderChequePorDia(response.chequePorDia);
+                this.renderChequeCategoria(response.chequePorCategoria);
+            } else {
+                alert({
+                    icon: "error",
+                    text: response.message || "Error al cargar el dashboard"
+                });
+            }
+        } catch (error) {
+            console.error("Error en renderDashboard:", error);
+            alert({
+                icon: "error",
+                text: "Error de conexión con el servidor"
+            });
+        }
+    }
+
+    showCards(data) {
+        this.infoCard({
+            parent: "cardDashboard",
+            theme: "light",
+            json: [
+                {
+                    id: "kpiVentaDia",
+                    title: "Venta del día de ayer",
+                    data: {
+                        value: data.ventaDia,
+                        description: data.variaciones?.ventaDia || "",
+                        color: "text-[#8CC63F]",
+                    },
+                },
+                {
+                    id: "kpiVentaMes",
+                    title: "Venta del Mes",
+                    data: {
+                        value: data.ventaMes,
+                        description: data.variaciones?.ventaMes || "",
+                        color: data.variaciones?.ventaMes?.includes('+') ? "text-green-800" : "text-red-600",
+                    },
+                },
+                {
+                    id: "kpiClientes",
+                    title: "Clientes",
+                    data: {
+                        value: data.clientes,
+                        description: data.variaciones?.clientes || "",
+                        color: data.variaciones?.clientes?.includes('+') ? "text-[#103B60]" : "text-red-600",
+                    },
+                },
+                {
+                    id: "kpiChequePromedio",
+                    title: "Cheque Promedio",
+                    data: {
+                        value: data.chequePromedio,
+                        description: data.variaciones?.chequePromedio || "",
+                        color: data.variaciones?.chequePromedio?.includes('+') ? "text-green-800" : "text-red-600",
+                    },
+                },
+            ],
+        });
+    }
+
+    renderChequePorDia(data) {
+        this.barChart({
+            parent: 'containerChequeDia',
+            id: 'chartChequeDia',
+            title: 'Cheque Promedio por Día de Semana',
+            labels: data.labels,
+            dataA: data.data,
+            yearA: '',
+            yearB: '',
+            class: 'border p-4 rounded-xl'
+        });
+    }
+
+    renderChequeCategoria(data) {
+        const container = $("<div>", { class: "border p-4 rounded-xl" });
+        const title = $("<h2>", {
+            class: "text-lg font-bold mb-2",
+            text: `Comparativa por Categoría: ${data.anioActual} vs ${data.anioAnterior}`
+        });
+        const canvasWrapper = $("<div>", {
+            class: "w-full",
+            css: { height: "300px" }
+        });
+        const canvas = $("<canvas>", {
+            id: "chartChequeCategoria",
+            class: "w-full h-full"
+        });
+        canvasWrapper.append(canvas);
+        container.append(title, canvasWrapper);
+
+        $('#containerChequeCategoria').html(container);
+
+        const ctx = document.getElementById("chartChequeCategoria").getContext("2d");
+        if (window._chqCat) window._chqCat.destroy();
+        window._chqCat = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: data.labels,
+                datasets: [
+                    {
+                        label: `${data.anioAnterior}`,
+                        data: data.anterior,
+                        backgroundColor: "#8CC63F"
+                    },
+                    {
+                        label: `${data.anioActual}`,
+                        data: data.actual,
+                        backgroundColor: "#103B60"
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: "bottom" },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) => `${ctx.dataset.label}: ${formatPrice(ctx.parsed.y)}`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: (v) => formatPrice(v)
+                        }
+                    }
+                }
+            }
+        });
+    }
+}

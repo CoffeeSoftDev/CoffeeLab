@@ -954,6 +954,126 @@ class ctrl extends mdl {
         return $data;
     }
 
+    function getDashboardChequePromedio() {
+        try {
+            $udn  = isset($_POST['udn'])  ? (int)$_POST['udn']  : 1;
+            $mes  = isset($_POST['mes'])  ? (int)$_POST['mes']  : date('m');
+            $anio = isset($_POST['anio']) ? (int)$_POST['anio'] : date('Y');
+            
+            if ($mes < 1 || $mes > 12) {
+                return [
+                    'status'  => 400,
+                    'message' => 'Mes inválido'
+                ];
+            }
+            
+            $anioAnterior = $anio - 1;
+            
+            $ventasActual   = $this->ingresosMensuales([$udn, $anio, $mes]);
+            $ventasAnterior = $this->ingresosMensuales([$udn, $anioAnterior, $mes]);
+            
+            $ventaMesActual   = $ventasActual['totalGeneral'] ?? $ventasActual['totalGralAyB'] ?? 0;
+            $ventaMesAnterior = $ventasAnterior['totalGeneral'] ?? $ventasAnterior['totalGralAyB'] ?? 0;
+            
+            $clientesActual   = $ventasActual['totalHabitaciones'] ?? 0;
+            $clientesAnterior = $ventasAnterior['totalHabitaciones'] ?? 0;
+            
+            $chequePromedioActual   = $clientesActual > 0 ? $ventaMesActual / $clientesActual : 0;
+            $chequePromedioAnterior = $clientesAnterior > 0 ? $ventaMesAnterior / $clientesAnterior : 0;
+            
+            $varVentaMes = $ventaMesAnterior > 0 
+                ? round((($ventaMesActual - $ventaMesAnterior) / $ventaMesAnterior) * 100, 1) 
+                : 0;
+            $varClientes = $clientesAnterior > 0 
+                ? round((($clientesActual - $clientesAnterior) / $clientesAnterior) * 100, 1) 
+                : 0;
+            $varCheque = $chequePromedioAnterior > 0 
+                ? round((($chequePromedioActual - $chequePromedioAnterior) / $chequePromedioAnterior) * 100, 1) 
+                : 0;
+            
+            $ventaDia = $this->getVentasDelDia([$udn]);
+            
+            $cards = [
+                'ventaDia'       => '$' . $ventaDia,
+                'ventaMes'       => evaluar($ventaMesActual),
+                'clientes'       => $clientesActual,
+                'chequePromedio' => evaluar($chequePromedioActual),
+                'variaciones' => [
+                    'ventaMes'       => ($varVentaMes >= 0 ? '+' : '') . $varVentaMes . '% vs año anterior',
+                    'clientes'       => ($varClientes >= 0 ? '+' : '') . $varClientes . '% vs año anterior',
+                    'chequePromedio' => ($varCheque >= 0 ? '+' : '') . $varCheque . '% vs año anterior'
+                ]
+            ];
+            
+            $chequePorDia = $this->getChequePorDiaSemana($udn, $anio, $mes);
+            
+            $dataActual   = $this->getComparativaChequePromedio([$mes, $anio, $udn]);
+            $dataAnterior = $this->getComparativaChequePromedio([$mes, $anioAnterior, $udn]);
+            
+            $chequePorCategoria = [
+                'labels'       => ['A&B', 'Alimentos', 'Bebidas'],
+                'actual'       => [
+                    (float)($dataActual['AyB'] ?? 0),
+                    (float)($dataActual['Alimentos'] ?? 0),
+                    (float)($dataActual['Bebidas'] ?? 0)
+                ],
+                'anterior'     => [
+                    (float)($dataAnterior['AyB'] ?? 0),
+                    (float)($dataAnterior['Alimentos'] ?? 0),
+                    (float)($dataAnterior['Bebidas'] ?? 0)
+                ],
+                'anioActual'   => $anio,
+                'anioAnterior' => $anioAnterior
+            ];
+            
+            return [
+                'status'             => 200,
+                'cards'              => $cards,
+                'chequePorDia'       => $chequePorDia,
+                'chequePorCategoria' => $chequePorCategoria
+            ];
+            
+        } catch (Exception $e) {
+            return [
+                'status'  => 500,
+                'message' => 'Error interno del servidor',
+                'error'   => $e->getMessage()
+            ];
+        }
+    }
+
+    function getChequePorDiaSemana($udn, $anio, $mes) {
+        $diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+        $apiData = $this->apiResumenIngresosPorDia($anio, $mes, $udn);
+        $rows = $apiData['data'];
+        
+        $totalesPorDia = [];
+        $conteosPorDia = [];
+        
+        foreach ($rows as $item) {
+            $dia = $item['dia'];
+            if (!isset($totalesPorDia[$dia])) {
+                $totalesPorDia[$dia] = 0;
+                $conteosPorDia[$dia] = 0;
+            }
+            $totalesPorDia[$dia] += $item['total'];
+            $conteosPorDia[$dia]++;
+        }
+        
+        $data = [];
+        foreach ($diasSemana as $dia) {
+            $promedio = isset($conteosPorDia[$dia]) && $conteosPorDia[$dia] > 0 
+                ? $totalesPorDia[$dia] / $conteosPorDia[$dia] 
+                : 0;
+            $data[] = round($promedio, 2);
+        }
+        
+        return [
+            'labels' => $diasSemana,
+            'data'   => $data
+        ];
+    }
+
     public function apiTopDiasSemanaPromedio($anio = null, $mes = null, $udn = null) {
         $anio = $anio ?? (isset($_POST['anio']) ? (int) $_POST['anio'] : date('Y'));
         $mes  = $mes  ?? (isset($_POST['mes'])  ? (int) $_POST['mes']  : date('m'));
