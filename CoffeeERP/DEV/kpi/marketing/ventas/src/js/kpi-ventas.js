@@ -16,7 +16,6 @@ $(async () => {
     app = new App(api, "root");
 
     salesDashboard = new SalesDashboard(api, "root");
-    dashboardChequePromedio = new DashboardChequePromedio(api, "root");
 
     sales = new Sales(api, "root");
     monthlySales = new MonthlySales(api, "root");
@@ -1532,8 +1531,3 @@ class CumulativeAverages extends Templates {
     }
 }
 
-
-class DashboardChequePromedio extends Templates {
-    constructor(link, div_modulo) {
-        super(link, div_modulo);
-  
