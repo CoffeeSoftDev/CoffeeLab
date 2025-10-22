@@ -90,7 +90,7 @@ class App extends Templates {
             topClientes.forEach((cliente, index) => {
                 const nombreCompleto = `${cliente.nombre} ${cliente.apellido_paterno || ""} ${cliente.apellido_materno || ""}`.trim();
                 const badgeVIP = cliente.vip == 1
-                    ? '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-400  text-white "><i class="icon-star mr-1"></i>VIP</span>'
+                    ? '<span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-400  text-white "><i class="icon-star mr-1 text-yellow-900"></i>VIP</span>'
                     : "";
                 const medalIcon =
                     index === 0
@@ -103,11 +103,11 @@ class App extends Templates {
 
                 const bgColor =
                     index === 0
-                        ? "bg-yellow-100 border-yellow-200"
+                        ? "bg-orange-100 border-yellow-200"
                         : index === 1
                             ? "bg-gray-50  border-gray-200"
                             : index === 2
-                                ? "bg-orange-50 border-orange-200"
+                                ? "bg-gray-50  border-gray-200"
                                 : "bg-white border-gray-200";
 
                 topHTML += `
@@ -147,7 +147,6 @@ class App extends Templates {
                                 </div>
                             </div>
                         </div>
-                        ${index < 3 ? '<div class="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full flex items-center justify-center"><i class="icon-star text-white text-xs"></i></div>' : ''}
                     </div>
                 `;
             });
@@ -166,7 +165,7 @@ class App extends Templates {
         bootbox.dialog({
             title: `
                 <div class="flex items-center space-x-3 p-2">
-                    <div class="w-12 h-12 bg-yellow-400  rounded flex items-center justify-center">
+                    <div class="w-12 h-12 bg-orange-400  rounded flex items-center justify-center">
                         <i class="icon-trophy text-white text-xl"></i>
                     </div>
                     <div>
@@ -177,7 +176,7 @@ class App extends Templates {
             `,
             message: `
                 <div class="bg-gray-50 -mx-4 -mb-4 px-6 py-4">
-                    <div class="max-h-96 overflow-y-auto pr-2" style="scrollbar-width: thin; scrollbar-color: #CBD5E0 #F7FAFC;">
+                    <div class="max-h-96 overflow-y-auto pr-2 mt-3" style="scrollbar-width: thin; scrollbar-color: #CBD5E0 #F7FAFC;">
                         ${topHTML}
                     </div>
                     <div class="mt-4 pt-4 border-t border-gray-200">
@@ -196,12 +195,7 @@ class App extends Templates {
             `,
             size: 'large',
             className: 'top-clients-modal',
-            buttons: {
-                close: {
-                    label: '<i class="icon-check mr-2"></i>Entendido',
-                    className: 'btn btn-primary px-6 py-2 rounded-lg font-semibold'
-                }
-            }
+            closeButton:true
         });
     }
 
