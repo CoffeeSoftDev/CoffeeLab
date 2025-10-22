@@ -26,7 +26,15 @@ class ctrl extends mdl {
         $udnId  = isset($_POST['udn_id']) && $_POST['udn_id'] !== 'all' ? $_POST['udn_id'] : null;
         $vip    = isset($_POST['vip']) && $_POST['vip']       !== 'all' ? $_POST['vip'] : null;
         
-        $ls     = $this->lsClientes([$active, $udnId, $vip]);
+        $ls     = $this->lsClientes([1, $udnId, 'all']);
+
+        // Validar que $ls no sea null o vacío
+        if (!$ls || !is_array($ls)) {
+            return [
+                'row' => [],
+                'ls' => []
+            ];
+        }
 
         foreach ($ls as $key) {
             $a = [];
