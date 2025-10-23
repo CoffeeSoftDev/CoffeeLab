@@ -98,8 +98,71 @@ class App extends Templates {
         });
 
 
+        this.headerBar({
+            parent: "filterBar" + this.PROJECT_NAME,
+            title: "Módulo de Gestión de Clientes",
+            subtitle: "Administración de información y seguimiento de clientes de las unidades de negocio.",
+            onClick: () => app.redirectToHome(),
+        });
+
+
         $('#content-tabs' + this.PROJECT_NAME).removeClass('h-screen');
     }
+
+
+    redirectToHome() {
+        const base = window.location.origin + '/DEV';
+        window.location.href = `${base}/kpi/marketing.php`;
+    }
+
+    headerBar(options) {
+        const defaults = {
+            parent: "root",
+            title: "Título por defecto",
+            subtitle: "Subtítulo por defecto",
+            icon: "icon-home",
+            textBtn: "Inicio",
+            classBtn: "border-1 border-blue-700 text-blue-600 hover:bg-blue-700 hover:text-white transition-colors duration-200",
+            onClick: null,
+        };
+
+        const opts = Object.assign({}, defaults, options);
+
+        const container = $("<div>", {
+            class: "relative flex justify-center items-center px-2 pt-3 pb-3"
+        });
+
+        // 🔵 Botón alineado a la izquierda (posición absoluta)
+        const leftSection = $("<div>", {
+            class: "absolute left-0"
+        }).append(
+            $("<button>", {
+                class: `${opts.classBtn} font-semibold px-4 py-2 rounded transition flex items-center`,
+                html: `<i class="${opts.icon} mr-2"></i>${opts.textBtn}`,
+                click: () => typeof opts.onClick === "function" && opts.onClick()
+            })
+        );
+
+        // 📜 Texto centrado
+        const centerSection = $("<div>", {
+            class: "text-center"
+        }).append(
+            $("<h2>", {
+                class: "text-2xl font-bold",
+                text: opts.title
+            }),
+            $("<p>", {
+                class: "text-gray-400",
+                text: opts.subtitle
+            })
+        );
+
+        container.append(leftSection, centerSection);
+        $(`#${opts.parent}`).html(container);
+    }
+
+
+
 }
 
 class Clientes extends Templates {

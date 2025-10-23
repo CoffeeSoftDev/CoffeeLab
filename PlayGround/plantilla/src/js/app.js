@@ -30,7 +30,7 @@ class App extends Templates {
         this.sideBar({ theme: 'light' });
         this.navBar({ theme: 'light' });
 
-        this.topClientesComponent({data: this.jsonTop()});
+        this.topClientesComponent({ data: this.jsonTop() });
 
     }
 
@@ -71,7 +71,7 @@ class App extends Templates {
         // this.renderTabsCostsSys()
     }
 
-   
+
 
     topClientesComponent(options = {}) {
         const defaults = {
@@ -111,7 +111,7 @@ class App extends Templates {
                                 : "bg-white border-gray-200";
 
                 topHTML += `
-                    <div class="relative mb-3 p-2 rounded-xl border-2 ${bgColor} transition-all duration-300 transform hover:-translate-y-1">
+                    <div class="relative mb-3 p-2 rounded border-1 ${bgColor} transition-all duration-300 transform hover:-translate-y-1">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-4">
                                 <div class="flex-shrink-0">
@@ -163,166 +163,130 @@ class App extends Templates {
         }
 
         bootbox.dialog({
-            title: `
-                <div class="flex items-center space-x-3 p-2">
-                    <div class="w-12 h-12 bg-orange-400  rounded flex items-center justify-center">
-                        <i class="icon-trophy text-white text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-bold text-gray-800 mb-0">Top 10 Clientes</h3>
-                        <p class="text-sm text-gray-600 mb-0">Ranking por monto total de compras</p>
-                    </div>
-                </div>
-            `,
+            title: this.createTitleModal({
+                title: "Top 10 Clientes",
+            }),
             message: `
-                <div class="bg-gray-50 -mx-4 -mb-4 px-6 py-4">
-                    <div class="max-h-96 overflow-y-auto pr-2 mt-3" style="scrollbar-width: thin; scrollbar-color: #CBD5E0 #F7FAFC;">
+                <div class="-mx-4 -mb-4 px-6 py-5">
+                    <div class="max-h-96 overflow-y-auto pr-2 " style="scrollbar-width: thin; scrollbar-color: #CBD5E0 #F7FAFC;">
                         ${topHTML}
                     </div>
-                    <div class="mt-4 pt-4 border-t border-gray-200">
-                        <div class="flex items-center justify-center space-x-6 text-sm text-gray-600">
-                            <div class="flex items-center space-x-2">
-                                <div class="w-3 h-3 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full"></div>
-                                <span>Top 3 destacados</span>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                <div class="w-3 h-3 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full"></div>
-                                <span>Cliente VIP</span>
-                            </div>
-                        </div>
-                    </div>
+                    
                 </div>
             `,
             size: 'large',
             className: 'top-clients-modal',
-            closeButton:true
+            closeButton: true
         });
     }
 
-    async onShowTopClientes() {
-        const udnId = $("#udn_id").val();
-        const request = await useFetch({
-            url: this._link,
-            data: {
-                opc: "getTopClientes",
-                limit: 10,
-                udn_id: udnId
-            }
-        });
 
-        if (request.status === 200) {
-            this.topClientesComponent({
-                parent: "body",
-                data: request.data
-            });
-        } else {
-            alert({ icon: "error", text: "Error al obtener top clientes" });
-        }
+   
+
+
+
+    jsonTop() {
+        return [
+            {
+                nombre: "Carlos",
+                apellido_paterno: "López",
+                apellido_materno: "García",
+                vip: 1,
+                udn_nombre: "Sucursal Centro",
+                total_pedidos: 28,
+                ultima_compra: "2025-09-15",
+                monto_total: 45999.5,
+                ticket_promedio: 1642.84
+            },
+            {
+                nombre: "Ana",
+                apellido_paterno: "Martínez",
+                apellido_materno: "Ramos",
+                vip: 0,
+                udn_nombre: "Sucursal Norte",
+                total_pedidos: 22,
+                ultima_compra: "2025-09-10",
+                monto_total: 37850.75,
+                ticket_promedio: 1720.49
+            },
+            {
+                nombre: "Luis",
+                apellido_paterno: "Hernández",
+                apellido_materno: "",
+                vip: 0,
+                udn_nombre: "Sucursal Este",
+                total_pedidos: 18,
+                ultima_compra: "2025-09-01",
+                monto_total: 29900.0,
+                ticket_promedio: 1661.11
+            },
+            {
+                nombre: "María",
+                apellido_paterno: "Sánchez",
+                apellido_materno: "Castro",
+                vip: 1,
+                udn_nombre: "Sucursal Sur",
+                total_pedidos: 15,
+                ultima_compra: "2025-08-20",
+                monto_total: 27800.25,
+                ticket_promedio: 1853.35
+            },
+            {
+                nombre: "Juan",
+                apellido_paterno: "Pérez",
+                apellido_materno: "Mora",
+                vip: 0,
+                udn_nombre: "Sucursal Centro",
+                total_pedidos: 14,
+                ultima_compra: "2025-08-30",
+                monto_total: 24300.0,
+                ticket_promedio: 1735.71
+            },
+            {
+                nombre: "Laura",
+                apellido_paterno: "Jiménez",
+                apellido_materno: "Delgado",
+                vip: 0,
+                udn_nombre: "Sucursal Norte",
+                total_pedidos: 13,
+                ultima_compra: "2025-09-05",
+                monto_total: 19950.5,
+                ticket_promedio: 1534.27
+            },
+            {
+                nombre: "Ricardo",
+                apellido_paterno: "Mendoza",
+                apellido_materno: "Flores",
+                vip: 1,
+                udn_nombre: "Sucursal Sur",
+                total_pedidos: 12,
+                ultima_compra: "2025-09-02",
+                monto_total: 18999.99,
+                ticket_promedio: 1583.33
+            },
+            {
+                nombre: "Paola",
+                apellido_paterno: "Ramírez",
+                apellido_materno: "Cruz",
+                vip: 0,
+                udn_nombre: "Sucursal Este",
+                total_pedidos: 11,
+                ultima_compra: "2025-08-15",
+                monto_total: 17600.0,
+                ticket_promedio: 1600.0
+            },
+
+        ]
+
+
+
+
+
+
+
+
+
     }
-
-
-     jsonTop(){
-         return [
-             {
-                 nombre: "Carlos",
-                 apellido_paterno: "López",
-                 apellido_materno: "García",
-                 vip: 1,
-                 udn_nombre: "Sucursal Centro",
-                 total_pedidos: 28,
-                 ultima_compra: "2025-09-15",
-                 monto_total: 45999.5,
-                 ticket_promedio: 1642.84
-             },
-             {
-                 nombre: "Ana",
-                 apellido_paterno: "Martínez",
-                 apellido_materno: "Ramos",
-                 vip: 0,
-                 udn_nombre: "Sucursal Norte",
-                 total_pedidos: 22,
-                 ultima_compra: "2025-09-10",
-                 monto_total: 37850.75,
-                 ticket_promedio: 1720.49
-             },
-             {
-                 nombre: "Luis",
-                 apellido_paterno: "Hernández",
-                 apellido_materno: "",
-                 vip: 0,
-                 udn_nombre: "Sucursal Este",
-                 total_pedidos: 18,
-                 ultima_compra: "2025-09-01",
-                 monto_total: 29900.0,
-                 ticket_promedio: 1661.11
-             },
-             {
-                 nombre: "María",
-                 apellido_paterno: "Sánchez",
-                 apellido_materno: "Castro",
-                 vip: 1,
-                 udn_nombre: "Sucursal Sur",
-                 total_pedidos: 15,
-                 ultima_compra: "2025-08-20",
-                 monto_total: 27800.25,
-                 ticket_promedio: 1853.35
-             },
-             {
-                 nombre: "Juan",
-                 apellido_paterno: "Pérez",
-                 apellido_materno: "Mora",
-                 vip: 0,
-                 udn_nombre: "Sucursal Centro",
-                 total_pedidos: 14,
-                 ultima_compra: "2025-08-30",
-                 monto_total: 24300.0,
-                 ticket_promedio: 1735.71
-             },
-             {
-                 nombre: "Laura",
-                 apellido_paterno: "Jiménez",
-                 apellido_materno: "Delgado",
-                 vip: 0,
-                 udn_nombre: "Sucursal Norte",
-                 total_pedidos: 13,
-                 ultima_compra: "2025-09-05",
-                 monto_total: 19950.5,
-                 ticket_promedio: 1534.27
-             },
-             {
-                 nombre: "Ricardo",
-                 apellido_paterno: "Mendoza",
-                 apellido_materno: "Flores",
-                 vip: 1,
-                 udn_nombre: "Sucursal Sur",
-                 total_pedidos: 12,
-                 ultima_compra: "2025-09-02",
-                 monto_total: 18999.99,
-                 ticket_promedio: 1583.33
-             },
-             {
-                 nombre: "Paola",
-                 apellido_paterno: "Ramírez",
-                 apellido_materno: "Cruz",
-                 vip: 0,
-                 udn_nombre: "Sucursal Este",
-                 total_pedidos: 11,
-                 ultima_compra: "2025-08-15",
-                 monto_total: 17600.0,
-                 ticket_promedio: 1600.0
-             },
-           
-         ]
-
-
-
-
-
-
-
-
-
-}
 }
 
 

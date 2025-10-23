@@ -13,25 +13,28 @@ class mdl extends CRUD {
         $this->bd = "rfwsmqex_marketing.";
     }
 
-    function lsClientes($params) {
+    function lsClientes($params = []) {
         $leftjoin = [
             'udn' => 'cliente.udn_id = udn.idUDN'
         ];
 
-        $whereClause = "1=1";
+        $whereClause = "cliente.active IS NOT NULL";
         $data = [];
 
-        if (isset($params[0]) && $params[0] !== '') {
+        // Filtro por estado activo/inactivo
+        if (isset($params[0]) && $params[0] !== '' && $params[0] !== null) {
             $whereClause .= " AND cliente.active = ?";
             $data[] = $params[0];
         }
 
-        if (isset($params[1]) && $params[1] !== '' && $params[1] !== 'all') {
+        // Filtro por UDN
+        if (isset($params[1]) && $params[1] !== '' && $params[1] !== 'all' && $params[1] !== null) {
             $whereClause .= " AND cliente.udn_id = ?";
             $data[] = $params[1];
         }
 
-        if (isset($params[2]) && $params[2] !== '' && $params[2] !== 'all') {
+        // Filtro por VIP
+        if (isset($params[2]) && $params[2] !== '' && $params[2] !== 'all' && $params[2] !== null) {
             $whereClause .= " AND cliente.vip = ?";
             $data[] = $params[2];
         }
