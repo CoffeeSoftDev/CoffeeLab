@@ -232,7 +232,7 @@ class App extends Templates {
                             </p>
                         </div> `
                 },
-             
+
 
                 {
                     opc: "input-group",
@@ -2497,25 +2497,12 @@ function calculateWithDiscount() {
     }
 
     const originalPrice = parseFloat(originalPriceElement.textContent) || 0;
-    let discount = parseFloat(discountInput.value) || 0;
+    let discountPercentage = parseFloat(discountInput.value) || 0;
 
-    // Controlar visibilidad del span
-    if (discount > 0) {
-        if (spanDescuento) {
-            spanDescuento.classList.remove('hidden');
-            spanDescuento.textContent = `Descuento aplicado: -$${discount.toFixed(2)}`;
-        }
-    } else {
-        if (spanDescuento) {
-            spanDescuento.classList.add('hidden');
-            spanDescuento.textContent = '';
-        }
-    }
-
-    // Validar que el descuento no sea negativo
-    if (discount < 0) {
-        discount = 0;
-        discountInput.value = '0.00';
+    // Validar que el porcentaje no sea negativo
+    if (discountPercentage < 0) {
+        discountPercentage = 0;
+        discountInput.value = '0';
         if (spanDescuento) {
             spanDescuento.classList.remove('hidden');
             spanDescuento.classList.add('text-red-500');
@@ -2524,14 +2511,14 @@ function calculateWithDiscount() {
         return;
     }
 
-    // Validar que el descuento no sea mayor al precio original
-    if (discount > originalPrice) {
-        discount = originalPrice;
-        discountInput.value = originalPrice.toFixed(2);
+    // Validar que el porcentaje no sea mayor a 100
+    if (discountPercentage > 100) {
+        discountPercentage = 100;
+        discountInput.value = '100';
         if (spanDescuento) {
             spanDescuento.classList.remove('hidden');
             spanDescuento.classList.add('text-red-500');
-            spanDescuento.textContent = 'El descuento no puede ser mayor al precio del pedido';
+            spanDescuento.textContent = 'El descuento no puede ser mayor al 100%';
         }
     } else {
         if (spanDescuento) {
@@ -2539,11 +2526,27 @@ function calculateWithDiscount() {
         }
     }
 
+    // Calcular el monto del descuento basado en el porcentaje
+    const discountAmount = (originalPrice * discountPercentage) / 100;
+
     // Calcular precio final
-    const finalPrice = originalPrice - discount;
+    const finalPrice = originalPrice - discountAmount;
+
+    // Controlar visibilidad del span
+    if (discountPercentage > 0) {
+        if (spanDescuento) {
+            spanDescuento.classList.remove('hidden');
+            spanDescuento.textContent = `Descuento aplicado: ${discountPercentage}% (-$${discountAmount.toFixed(2)})`;
+        }
+    } else {
+        if (spanDescuento) {
+            spanDescuento.classList.add('hidden');
+            spanDescuento.textContent = '';
+        }
+    }
 
     // Actualizar elementos en la interfaz
-    discountAmountElement.textContent = discount.toFixed(2);
+    discountAmountElement.textContent = discountAmount.toFixed(2);
     finalPriceElement.textContent = finalPrice.toFixed(2);
 
     // Actualizar el campo diferencia si está visible
