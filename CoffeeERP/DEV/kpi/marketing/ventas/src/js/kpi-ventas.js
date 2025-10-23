@@ -8,14 +8,15 @@ $(async () => {
 
     const data = await useFetch({ url: api, data: { opc: "init" } });
     console.log(data)
-    udn           = data.udn;
-    lsudn         = data.lsudn;
+    udn = data.udn;
+    lsudn = data.lsudn;
     clasificacion = data.clasification;
 
     // ** Instancias **
     app = new App(api, "root");
 
     salesDashboard = new SalesDashboard(api, "root");
+    dashboardChequePromedio = new DashboardChequePromedio('ctrl/ctrl-dashboard-cheque-promedio.php', "root");
 
     sales = new Sales(api, "root");
     monthlySales = new MonthlySales(api, "root");
@@ -186,7 +187,7 @@ class SalesDashboard extends Templates {
             json: [
                 { type: "grafico", id: "containerChequePro" },
                 {
-                    type   : "grafico", id: "barProductMargen1", title: "",
+                    type: "grafico", id: "barProductMargen1", title: "",
                     content: [
                         { class: "border px-3 py-2 rounded", type: "div", id: "filterBarProductMargen" },
                         { class: " mt-2", type: "div", id: "barProductMargen" },
@@ -196,7 +197,7 @@ class SalesDashboard extends Templates {
                 { type: "grafico", id: "Tendencia", title: "Tendencia de Ventas" },
             ]
         });
-   
+
         this.createfilterBar({
             parent: `filterBarProductMargen`,
             data: [
@@ -309,7 +310,7 @@ class SalesDashboard extends Templates {
         const udn = $('#filterBarDashboard #udn').val();
         const periodo1 = $('#filterBarDashboard #periodo1').val();
         const periodo2 = $('#filterBarDashboard #periodo2').val();
-        
+
         if (!udn || !periodo1 || !periodo2) {
             this.showError("Todos los filtros son requeridos para generar el dashboard");
             return false;
@@ -425,7 +426,7 @@ class SalesDashboard extends Templates {
         // Calcular tendencias y variaciones
         const chequePromedioActual = this.parseNumericValue(data.ChequePromedio);
         const ventaMesActual = this.parseNumericValue(data.ventaMes);
-        
+
         // KPIs visuales con métricas mejoradas
         this.infoCard({
             parent: "cardDashboard",
@@ -651,14 +652,14 @@ class SalesDashboard extends Templates {
         })
     }
 
-    async comparativaByCategory(){
-        let udn           = $('#filterBarDashboard #udn').val();
-        let periodo1      = $('#filterBarDashboard #periodo1').val();
+    async comparativaByCategory() {
+        let udn = $('#filterBarDashboard #udn').val();
+        let periodo1 = $('#filterBarDashboard #periodo1').val();
         let [anio1, mes1] = periodo1.split('-');
-        let periodo2      = $('#filterBarDashboard #periodo2').val();
+        let periodo2 = $('#filterBarDashboard #periodo2').val();
         let [anio2, mes2] = periodo2.split('-');
 
-           let mkt = await useFetch({
+        let mkt = await useFetch({
             url: api,
             data: {
                 opc: "comparativaByCategory",
@@ -671,13 +672,13 @@ class SalesDashboard extends Templates {
             },
         });
 
-      
-            this.linearChart({
-                parent: "barProductMargen",
-                id: "barProductMargewn",
-                title: "📈 Comparativa por Categoría",
-                data:mkt
-            });
+
+        this.linearChart({
+            parent: "barProductMargen",
+            id: "barProductMargewn",
+            title: "📈 Comparativa por Categoría",
+            data: mkt
+        });
 
     }
 
@@ -797,7 +798,7 @@ class SalesDashboard extends Templates {
             : "bg-white text-gray-800 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200";
         const titleColor = isDark ? "text-gray-300" : "text-gray-600";
         const descColor = isDark ? "text-gray-400" : "text-gray-500";
-        
+
         const renderCard = (card, i = "") => {
             const box = $("<div>", {
                 id: `${opts.id}_${i}`,
@@ -841,14 +842,14 @@ class SalesDashboard extends Templates {
             titleSection.append(titleElement);
 
             header.append(titleSection);
-            
+
             // Valor principal
             const value = $("<p>", {
                 id: card.id || "",
                 class: `text-2xl font-bold ${card.data?.color || "text-gray-800"} mb-2`,
                 text: card.data?.value || "0"
             });
-            
+
             // Descripción con mejor formato
             const description = $("<p>", {
                 class: `text-xs ${descColor} leading-relaxed`,
@@ -861,8 +862,8 @@ class SalesDashboard extends Templates {
                     class: "mt-2 h-1 bg-gray-200 rounded-full overflow-hidden"
                 });
                 const progress = $("<div>", {
-                    class: `h-full ${card.data?.color?.includes('8CC63F') ? 'bg-[#8CC63F]' : 
-                           card.data?.color?.includes('103B60') ? 'bg-[#103B60]' : 'bg-orange-400'} 
+                    class: `h-full ${card.data?.color?.includes('8CC63F') ? 'bg-[#8CC63F]' :
+                        card.data?.color?.includes('103B60') ? 'bg-[#103B60]' : 'bg-orange-400'} 
                            transition-all duration-500`,
                     css: { width: this.calculateChequeProgress(card.data?.value) + "%" }
                 });
@@ -874,12 +875,12 @@ class SalesDashboard extends Templates {
 
             return box;
         };
-        
+
         const container = $("<div>", {
             id: opts.id,
             class: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 ${opts.class}`
         });
-        
+
         if (opts.json.length > 0) {
             opts.json.forEach((item, i) => {
                 container.append(renderCard(item, i));
@@ -887,7 +888,7 @@ class SalesDashboard extends Templates {
         } else {
             container.append(renderCard(opts));
         }
-        
+
         $(`#${opts.parent}`).html(container);
     }
 
@@ -1230,7 +1231,7 @@ class SalesDashboard extends Templates {
         let lsclasificacion = clasificacion.filter((item) => item.udn == idudn);
 
         // Generar options HTML para el select
-        const optionsHtml = lsclasificacion.map(item => 
+        const optionsHtml = lsclasificacion.map(item =>
             `<option value="${item.id}">${item.valor}</option>`
         ).join('');
 
