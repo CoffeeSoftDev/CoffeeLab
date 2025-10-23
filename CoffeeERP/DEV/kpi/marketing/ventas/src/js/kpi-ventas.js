@@ -1,5 +1,5 @@
 let api = 'ctrl/ctrl-ingresos.php';
-let app, sales, salesDashboard, monthlySales, cumulativeAverages, dashboardChequePromedio;
+let app, sales, salesDashboard, monthlySales, cumulativeAverages;
 
 let udn, lsudn, clasificacion, clasificacionUdn;
 
@@ -14,14 +14,10 @@ $(async () => {
 
     // ** Instancias **
     app = new App(api, "root");
-
     salesDashboard = new SalesDashboard(api, "root");
-    dashboardChequePromedio = new DashboardChequePromedio('ctrl/ctrl-dashboard-cheque-promedio.php', "root");
-
     sales = new Sales(api, "root");
     monthlySales = new MonthlySales(api, "root");
     cumulativeAverages = new CumulativeAverages(api, "root");
-
 
     app.render();
 
@@ -41,7 +37,6 @@ class App extends Templates {
         // init instancias.
 
         salesDashboard.render();
-        dashboardChequePromedio.render();
         sales.render();
         monthlySales.render();
         cumulativeAverages.render();
@@ -81,11 +76,6 @@ class App extends Templates {
                     onClick: () => salesDashboard.renderDashboard()
                 },
                 {
-                    id: "dashboardChequePromedio",
-                    tab: "Dashboard Cheque Promedio",
-                    onClick: () => dashboardChequePromedio.renderDashboard()
-                },
-                {
                     id: "sales",
                     tab: "Módulo ventas",
                     onClick: () => {
@@ -97,6 +87,12 @@ class App extends Templates {
                     onClick: () => {
                     }
                 },
+                // {
+                //     id: "promediosDiarios",
+                //     tab: "Promedios diarios",
+                //     onClick: () => {
+                //     }
+                // },
                 {
                     id: "promediosAcumulados",
                     tab: "Promedios acumulados",
@@ -185,18 +181,811 @@ class SalesDashboard extends Templates {
             title: "📊 Dashboard de Ventas",
             subtitle: "Análisis comparativo de ventas entre dos períodos",
             json: [
-                { type: "grafico", id: "containerChequePro" },
+              
+
                 {
-                    type: "grafico", id: "barProductMargen1", title: "",
+                    type: "grafico", id: "dailyAverageCheck", title: "",
                     content: [
-                        { class: "border px-3 py-2 rounded", type: "div", id: "filterBarProductMargen" },
-                        { class: " mt-2", type: "div", id: "barProductMargen" },
+                        { class: "border px-3 py-2 rounded", type: "div", id: "filterBarDailyAverageCheck" },
+                        { class: " mt-2", type: "div", id: "containerDailyAverageCheck" },
                     ]
                 },
-                { type: "grafico", id: "ventasDiasSemana", title: "Ventas por Día de la Semana" },
-                { type: "grafico", id: "Tendencia", title: "Tendencia de Ventas" },
+
+                {
+                    type: "grafico", id: "linearChequePromedio", title: "",
+                    content: [
+                        { class: "border px-3 py-2 rounded", type: "div", id: "filterBarChequePromedio" },
+                        { class: " mt-2", type: "div", id: "barChequePromedio" },
+                    ]
+                },
+               
             ]
         });
+
+
+        this.filterBarDashboard();
+
+
+      
+        setTimeout(() => {
+            
+            this.renderDashboard();
+        }, 100);
+
+
+
+       
+        // this.layoutChequePromedio();
+    }
+
+    filterBarDashboard() {
+        this.createfilterBar({
+            parent: `filterBarDashboard`,
+            data: [
+                {
+                    opc: "select",
+                    id: "udn",
+                    lbl: "UDN",
+                    class: "col-sm-3",
+                    data: udn,
+                    onchange: `salesDashboard.renderDashboard()`,
+                },
+                {
+                    opc: "div",
+                    id: "containerPeriodo1",
+                    lbl: "Consultar con:",
+                    class: "col-lg-3 col-sm-4",
+                    html: `
+                        <input 
+                            type="month" 
+                            id="periodo1" 
+                            class="form-control"
+                            style="width: 100%; min-width: 100%; display: block;"
+                            onchange="salesDashboard.renderDashboard()"
+                        />
+                    `
+                },
+                {
+                    opc: "div",
+                    id: "containerPeriodo2",
+                    lbl: "Comparar con:",
+                    class: "col-lg-3 col-sm-4 ",
+                    html: `
+                        <input 
+                            type="month" 
+                            id="periodo2" 
+                            class="form-control"
+                            onchange="salesDashboard.renderDashboard()"
+                        />
+                    `
+                },
+            ],
+        });
+
+        const currentYear = moment().year();
+        const currentMonth = moment().month() + 1;
+        const lastYear = currentYear - 1;
+
+        const periodo1 = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
+        const periodo2 = `${lastYear}-${String(currentMonth).padStart(2, '0')}`;
+
+        $('#containerPeriodo1').removeClass('col-lg-3 col-sm-4');
+        $('#containerPeriodo2').removeClass('col-lg-3 col-sm-4');
+
+        setTimeout(() => {
+            $(`#filterBarDashboard #periodo1`).val(periodo1);
+            $(`#filterBarDashboard #periodo2`).val(periodo2);
+        }, 100);
+    }
+
+    async renderDashboard() {
+
+        // filtrar clasificacion x udn 
+        // this.handleCategoryChange($('#idFilterBar #udn').val());
+
+        let udn           = $('#filterBarDashboard #udn').val();
+        let periodo1      = $('#filterBarDashboard #periodo1').val();
+        let [anio1, mes1] = periodo1.split('-');
+        let periodo2      = $('#filterBarDashboard #periodo2').val();
+        let [anio2, mes2] = periodo2.split('-');
+
+        let mkt = await useFetch({
+            url: api,
+            data: {
+                opc: "apiPromediosDiarios",
+                udn: udn,
+                anio1: anio1,
+                mes1: mes1,
+                anio2: anio2,
+                mes2: mes2,
+            },
+        });
+
+       
+
+        this.showCards(mkt.dashboard);
+
+        // Graficos.
+
+        this.layoutDailyAverageCheck();
+
+        // this.chequeComparativo({
+        //     data: mkt.barras.dataset,
+        //     anioA: mkt.barras.anioA,
+        //     anioB: mkt.barras.anioB,
+
+        // });
+
+
+        // this.comparativaIngresosDiarios({ data: mkt.linear });
+
+        // this.ventasPorDiaSemana(mkt.barDays);
+
+
+        // this.topDiasSemana({
+        //     parent: "Tendencia",
+        //     title: "📊 Ranking por Promedio Semanal",
+        //     subtitle: "Promedio de ventas por día de la semana en el mes seleccionado",
+        //     data: mkt.topWeek
+        // });
+
+
+
+    }
+
+
+    // Cheque Promedio por día de la semana.
+    layoutDailyAverageCheck() {
+
+        $('#filterBarDailyAverageCheck').empty();
+
+        this.createfilterBar({
+            parent: `filterBarDailyAverageCheck`,
+            data: [
+                {
+                    opc: "select",
+                    id: "category",
+                    lbl: "Categorias",
+                    class: "col-sm-4",
+                    onchange: `salesDashboard.renderDailyAverageCheck()`,
+                },
+
+            ],
+        });
+
+        this.renderSelectCategory({
+            parent: 'filterBarDailyAverageCheck #category',
+            udn: $('#idFilterBar #udn').val(),
+            data: clasificacion,
+            includeAll: false
+        });
+
+     
+    }
+
+    async renderDailyAverageCheck(){
+        let udn           = $('#filterBarDashboard #udn').val();
+        let periodo1      = $('#filterBarDashboard #periodo1').val();
+        let [anio1, mes1] = periodo1.split('-');
+        let periodo2      = $('#filterBarDashboard #periodo2').val();
+        let [anio2, mes2] = periodo2.split('-');
+
+        let mkt = await useFetch({
+            url: api,
+            data: {
+                opc: "getDailyCheck",
+                udn: udn,
+                category: $('#category option:selected').text(),
+                anio1: anio1,
+                mes1: mes1,
+                anio2: anio2,
+                mes2: mes2,
+            },
+        });
+
+        console.log(mkt)
+
+
+        this.barChart({
+            parent: "containerDailyAverageCheck",
+            id: "chartDailyCheck",
+            title: "📊 Cheque Promedio Diario (Comparativo Anual)",
+            labels: mkt.labels,
+            dataA: mkt.dataA,  // Año actual
+            dataB: mkt.dataB,  // Año anterior
+            yearA: mkt.yearA,
+            yearB: mkt.yearB
+        });
+    }
+   
+
+    // Cheque Promedio.
+    layoutChequePromedio() {
+
+        this.createfilterBar({
+            parent: `filterBarChequePromedio`,
+            data: [
+                {
+                    opc: "select",
+                    id: "category",
+                    lbl: "Categorias",
+                    class: "col-sm-4",
+                    onchange: `salesDashboard.comparativeChequePromedio()`,
+                },
+
+            ],
+        });
+
+        this.renderSelectCategory({
+            parent: 'filterBarChequePromedio #category',
+            udn: $('#idFilterBar #udn').val(),
+            data: clasificacion,
+            includeAll: false
+        });
+
+        // this.renderChequePromedioCategory();
+    }
+
+    async renderChequePromedioCategory() {
+
+        let udn = $('#filterBarDashboard #udn').val();
+        let periodo1 = $('#filterBarDashboard #periodo1').val();
+        let [anio1, mes1] = periodo1.split('-');
+        let periodo2 = $('#filterBarDashboard #periodo2').val();
+        let [anio2, mes2] = periodo2.split('-');
+
+        let mkt = await useFetch({
+            url: api,
+            data: {
+                opc: "comparativaByCategory",
+                udn: udn,
+                category: $('#category option:selected').text(),
+                anio1: anio1,
+                mes1: mes1,
+                anio2: anio2,
+                mes2: mes2,
+            },
+        });
+
+        console.log('mkt',mkt)
+
+        this.linearChart({
+            parent: "barProductMargen",
+            id: "barProductMargewn",
+            title: "📈 Comparativa por Categoría",
+            data: mkt.chart
+        });
+
+    }
+
+
+
+    // Cheque Promedio cards.
+
+
+  
+
+    showCards(data) {
+        this.infoCard({
+            parent: "cardDashboard",
+            theme: "light",
+            json: [
+                {
+                    id: "kpiDia",
+                    title: data.ventaDia.titulo,
+                    data: {
+                        value: data.ventaDia.valor,
+                        description: data.ventaDia.fecha,
+                        color: data.ventaDia.color,
+                    },
+                },
+                {
+                    id: "kpiMes",
+                    title: data.ventaMes.titulo,
+                    data: {
+                        value: data.ventaMes.valor,
+                        description: `${this.getTrendIcon(data.ventaMes.tendencia)} ${data.ventaMes.mensaje}`,
+                        color: data.ventaMes.color,
+                    },
+                },
+                {
+                    title: data.clientes.titulo,
+                    data: {
+                        value: data.clientes.valor,
+                        description: `${this.getTrendIcon(data.clientes.tendencia)} ${data.clientes.mensaje}`,
+                        color: data.clientes.color,
+                    },
+                },
+                {
+                    id: "kpiCheque",
+                    title: data.chequePromedio.titulo,
+                    data: {
+                        value: data.chequePromedio.valor,
+                        description: `${this.getTrendIcon(data.chequePromedio.tendencia)} ${data.chequePromedio.mensaje}`,
+                        color: data.chequePromedio.color,
+                    },
+                },
+            ],
+        });
+    }
+
+
+
+
+    getTrendIcon(tendencia) {
+        switch (tendencia) {
+            case 'up':
+                return '↑';
+            case 'down':
+                return '↓';
+            default:
+                return '→';
+        }
+    }
+
+    infoCard(options) {
+        const defaults = {
+            parent: "root",
+            id: "infoCardKPI",
+            class: "",
+            theme: "light",
+            json: [],
+            data: {
+                value: "0",
+                description: "",
+                color: "text-gray-800"
+            },
+            onClick: () => { }
+        };
+        const opts = Object.assign({}, defaults, options);
+        const isDark = opts.theme === "dark";
+        const cardBase = isDark
+            ? "bg-[#1F2A37] text-white rounded-xl shadow"
+            : "bg-white text-gray-800 rounded-xl shadow";
+        const titleColor = isDark ? "text-gray-300" : "text-gray-600";
+        const descColor = isDark ? "text-gray-400" : "text-gray-500";
+
+        const renderCard = (card, i = "") => {
+            const box = $("<div>", {
+                id: `${opts.id}_${i}`,
+                class: `${cardBase} p-4`
+            });
+            const title = $("<p>", {
+                class: `text-sm ${titleColor}`,
+                text: card.title
+            });
+            const value = $("<p>", {
+                id: card.id || "",
+                class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
+                text: card.data?.value
+            });
+            const description = $("<p>", {
+                class: `text-xs mt-1 ${card.data?.color || descColor}`,
+                text: card.data?.description
+            });
+            box.append(title, value, description);
+            return box;
+        };
+
+        const container = $("<div>", {
+            id: opts.id,
+            class: `grid grid-cols-2 md:grid-cols-4 gap-4 ${opts.class}`
+        });
+
+        if (opts.json.length > 0) {
+            opts.json.forEach((item, i) => {
+                container.append(renderCard(item, i));
+            });
+        } else {
+            container.append(renderCard(opts));
+        }
+
+        $(`#${opts.parent}`).html(container);
+    }
+
+
+
+
+
+
+    // components.
+    dashboardComponent(options) {
+        const defaults = {
+            parent: "root",
+            id: "dashboardComponent",
+            title: "📊 Huubie · Dashboard de Eventos",
+            subtitle: "Resumen mensual · Cotizaciones · Pagados · Cancelados",
+            json: [
+                { type: "grafico", id: "barChartContainer", title: "Eventos por sucursal" },
+                { type: "tabla", id: "tableSucursal", title: "Tabla de sucursales" },
+                { type: "grafico", id: "donutChartContainer", title: "Ventas vs Entrada de dinero" },
+                { type: "grafico", id: "topClientsChartContainer", title: "Top 10 clientes" },
+                { type: "tabla", id: "tableClientes", title: "Tabla de clientes" }
+            ]
+        };
+
+        const opts = Object.assign(defaults, options);
+
+        const container = $(`
+        <div id="${opts.id}" class="w-full ">
+            <!-- Header -->
+            <div class="p-6 border-b border-gray-200 ">
+                <div class=" mx-auto">
+                    <h1 class="text-2xl font-bold text-[#103B60]">${opts.title}</h1>
+                    <p class="text-sm text-gray-600">${opts.subtitle}</p>
+                </div>
+            </div>
+
+            <!-- FilterBar -->
+            <div id="filterBarDashboard" class=" mx-auto px-4 py-4">
+          
+            </div>
+
+             <section id="cardDashboard" class=" mx-auto px-4 py-4">
+              
+            </section>
+
+            <!-- Content -->
+            <section id="content-${opts.id}" class="mx-auto px-4 py-6 grid gap-6 grid-cols-1 md:grid-cols-2"></section>
+        </div>`);
+
+        // Renderizar contenedores desde JSON
+        opts.json.forEach(item => {
+            let block = $("<div>", {
+                id: item.id,
+                class: "bg-white p-2 rounded-xl shadow-md border border-gray-200 min-h-[200px] w-full"
+            });
+
+            if (item.title) {
+                const defaultEmojis = {
+                    'grafico': '📊',
+                    'tabla': '�',
+                    'doc': '�',
+                    'filterBar': '🔍'
+                };
+
+                const emoji = item.emoji || defaultEmojis[item.type] || '';
+                const iconHtml = item.icon ? `<i class="${item.icon}"></i> ` : '';
+                const titleContent = `${emoji} ${iconHtml}${item.title}`;
+
+                block.prepend(`<h3 class="text-sm font-semibold text-gray-800 mb-3">${titleContent}</h3>`);
+            }
+
+            if (item.content && Array.isArray(item.content)) {
+                item.content.forEach(contentItem => {
+                    const element = $(`<${contentItem.type}>`, {
+                        id: contentItem.id || '',
+                        class: contentItem.class || '',
+                        text: contentItem.text || ''
+                    });
+
+                    if (contentItem.attributes) {
+                        Object.keys(contentItem.attributes).forEach(attr => {
+                            element.attr(attr, contentItem.attributes[attr]);
+                        });
+                    }
+
+                    if (contentItem.html) {
+                        element.html(contentItem.html);
+                    }
+
+                    block.append(element);
+                });
+            }
+
+            $(`#content-${opts.id}`, container).append(block);
+        });
+
+        $(`#${opts.parent}`).html(container);
+    }
+
+    infoCard(options) {
+        const defaults = {
+            parent: "root",
+            id: "infoCardKPI",
+            class: "",
+            theme: "light", // light | dark
+            json: [],
+            data: {
+                value: "0",
+                description: "",
+                color: "text-gray-800"
+            },
+            onClick: () => { }
+        };
+        const opts = Object.assign({}, defaults, options);
+        const isDark = opts.theme === "dark";
+        const cardBase = isDark
+            ? "bg-[#1F2A37] text-white rounded-xl shadow"
+            : "bg-white text-gray-800 rounded-xl shadow";
+        const titleColor = isDark ? "text-gray-300" : "text-gray-600";
+        const descColor = isDark ? "text-gray-400" : "text-gray-500";
+        const renderCard = (card, i = "") => {
+            const box = $("<div>", {
+                id: `${opts.id}_${i}`,
+                class: `${cardBase} p-4`
+            });
+            const title = $("<p>", {
+                class: `text-sm ${titleColor}`,
+                text: card.title
+            });
+            const value = $("<p>", {
+                id: card.id || "",
+                class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
+                text: card.data?.value
+            });
+            const description = $("<p>", {
+                class: `text-xs mt-1 ${card.data?.color || descColor}`,
+                text: card.data?.description
+            });
+            box.append(title, value, description);
+            return box;
+        };
+        const container = $("<div>", {
+            id: opts.id,
+            class: `grid grid-cols-2 md:grid-cols-4 gap-4 ${opts.class}`
+        });
+        if (opts.json.length > 0) {
+            opts.json.forEach((item, i) => {
+                container.append(renderCard(item, i));
+            });
+        } else {
+            container.append(renderCard(opts));
+        }
+        $(`#${opts.parent}`).html(container);
+    }
+
+    linearChart(options) {
+        const defaults = {
+            parent: "containerLineChart",
+            id: "linearChart",
+            title: "",
+            class: "border p-4 rounded-xl",
+            data: {},   // <- puede contener { labels: [], datasets: [], tooltip: [] }
+            json: [],
+            onShow: () => { },
+        };
+        const opts = Object.assign({}, defaults, options);
+        const container = $("<div>", { class: opts.class });
+        const title = $("<h2>", {
+            class: "text-lg font-bold mb-2",
+            text: opts.title
+        });
+        const canvasWrapper = $("<div>", {
+            class: "w-full",
+            css: { height: "300px" }
+        });
+        const canvas = $("<canvas>", {
+            id: opts.id,
+            class: "w-full h-full"
+        });
+        canvasWrapper.append(canvas);
+        container.append(title, canvasWrapper);
+        $('#' + opts.parent).html(container);
+
+        const ctx = document.getElementById(opts.id).getContext("2d");
+        if (!window._charts) window._charts = {};
+        if (window._charts[opts.id]) {
+            window._charts[opts.id].destroy();
+        }
+
+        window._charts[opts.id] = new Chart(ctx, {
+            type: "line",
+            data: opts.data,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: "bottom" },
+                    tooltip: {
+                        callbacks: {
+                            title: (items) => {
+                                const index = items[0].dataIndex;
+                                const tooltips = opts.data.tooltip || opts.data.labels;
+                                return tooltips[index];
+                            },
+                            label: (ctx) => `${ctx.dataset.label}: ${formatPrice(ctx.parsed.y)}`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: (v) => formatPrice(v)
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    barChart(options) {
+        const defaults = {
+            parent: "containerBarChart",
+            id: "chartBar",
+            title: "Comparativa por Categorías",
+            class: "border p-4 rounded-xl",
+            labels: [],
+            dataA: [], // Año anterior
+            dataB: [], // Año actual
+            yearA: new Date().getFullYear() - 1, // 2024
+            yearB: new Date().getFullYear(),     // 2025
+        };
+
+        const opts = Object.assign({}, defaults, options);
+
+        // 📦 Crear contenedor
+        const container = $("<div>", { class: opts.class });
+        const title = $("<h2>", {
+            class: "text-lg font-bold mb-2",
+            text: opts.title
+        });
+        const canvasWrapper = $("<div>", {
+            class: "w-full",
+            css: { height: "300px" }
+        });
+        const canvas = $("<canvas>", {
+            id: opts.id,
+            class: "w-full h-full"
+        });
+
+        canvasWrapper.append(canvas);
+        container.append(title, canvasWrapper);
+        $("#" + opts.parent).html(container);
+
+        const ctx = document.getElementById(opts.id).getContext("2d");
+        if (window._barChart) window._barChart.destroy();
+
+        // 🎨 Colores: Azul para período 1 (consulta), Verde para período 2 (comparación)
+        const colorPeriodo1 = "#103B60"; // Azul oscuro - Período de consulta
+        const colorPeriodo2 = "#8CC63F"; // Verde - Período de comparación
+
+        // 📊 Crear gráfico
+        window._barChart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: opts.labels,
+                datasets: [
+                    {
+                        label: `Año ${opts.yearA}`, // Período 2 (comparación) - dataB
+                        data: opts.dataB,
+                        backgroundColor: colorPeriodo2
+                    },
+                    {
+                        label: `Año ${opts.yearB}`, // Período 1 (consulta) - dataA
+                        data: opts.dataA,
+                        backgroundColor: colorPeriodo1
+                    },
+
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: "bottom",
+                        labels: {
+                            usePointStyle: true,
+                            padding: 15,
+                            font: {
+                                size: 13,
+                                weight: "600"
+                            },
+                            color: "#333"
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (ctx) =>
+                                `${ctx.dataset.label}: ${formatPrice(ctx.parsed.y)}`
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: (v) => formatPrice(v),
+                            color: "#333",
+                            font: { size: 12 }
+                        },
+                        grid: { color: "rgba(0,0,0,0.05)" }
+                    },
+                    x: {
+                        ticks: {
+                            color: "#333",
+                            font: { size: 12 }
+                        },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+
+
+
+    renderSelectCategory(options) {
+        const defaults = {
+            parent: "category",
+            udn: null,
+            data: [],
+            placeholder: "Seleccionar categoría",
+            includeAll: false,
+            onChange: null
+        };
+
+        const opts = Object.assign({}, defaults, options);
+
+        if (!opts.udn) {
+            console.warn('UDN no proporcionado para renderSelectCategory');
+            return;
+        }
+
+        const filteredData = opts.data.filter((item) => item.udn == opts.udn);
+
+        let optionsHtml = '';
+
+        if (opts.includeAll) {
+            optionsHtml += `<option value="0">${opts.placeholder}</option>`;
+        }
+
+        optionsHtml += filteredData.map(item =>
+            `<option value="${item.id}">${item.valor}</option>`
+        ).join('');
+
+        $(`#${opts.parent}`).html(optionsHtml);
+
+        if (opts.onChange && typeof opts.onChange === 'function') {
+            $(`#${opts.parent}`).off('change').on('change', opts.onChange);
+        }
+    }
+}
+
+class ChequePromedioDashboard extends SalesDashboard {
+    constructor(link, div_modulo) {
+        super(link, div_modulo);
+        this.PROJECT_NAME = "order";
+    }
+
+    render() {
+        this.layout();
+    }
+
+    layout() {
+
+        this.dashboardComponent({
+            parent: "container-dashboard",
+            id: "dashboardComponent",
+            title: "📊 Dashboard de Ventas",
+            subtitle: "Análisis comparativo de ventas entre dos períodos",
+            json: [
+                { type: "grafico", id: "containerChequePro" },
+
+                {
+                    type: "grafico", id: "linearChequePromedio", title: "",
+                    content: [
+                        { class: "border px-3 py-2 rounded", type: "div", id: "filterBarChequePromedio" },
+                        { class: " mt-2", type: "div", id: "barChequePromedio" },
+                    ]
+                },
+
+                // {
+                //     type   : "grafico", id: "barProductMargen1", title: "",
+                //     content: [
+                //         { class: "border px-3 py-2 rounded", type: "div", id: "filterBarProductMargen" },
+                //         { class: " mt-2", type: "div", id: "barProductMargen" },
+                //     ]
+                // },
+                // { type: "grafico", id: "ventasDiasSemana", title: "Ventas por Día de la Semana" },
+                // { type: "grafico", id: "Tendencia", title: "Tendencia de Ventas" },
+            ]
+        });
+
+
+
 
         this.createfilterBar({
             parent: `filterBarProductMargen`,
@@ -215,16 +1004,37 @@ class SalesDashboard extends Templates {
 
         this.filterBarDashboard();
         this.renderDashboard();
+
+        this.layoutChequePromedio();
     }
 
-    async renderDashboard() {
-        // Validar filtros antes de proceder
-        if (!this.validateFilters()) {
-            return;
-        }
+    layoutChequePromedio() {
 
-        // Filtrar clasificacion x udn 
-        this.handleCategoryChange($('#filterBarDashboard #udn').val());
+        this.createfilterBar({
+            parent: `filterBarChequePromedio`,
+            data: [
+                {
+                    opc: "select",
+                    id: "category",
+                    lbl: "Categorias",
+                    class: "col-sm-4",
+                    onchange: `salesDashboard.comparativeChequePromedio()`,
+                },
+
+            ],
+        });
+
+        this.renderSelectCategory({
+            parent: 'filterBarChequePromedio #category',
+            udn: $('#idFilterBar #udn').val(),
+            data: clasificacion,
+            includeAll: false
+        });
+
+        // this.renderChequePromedioCategory();
+    }
+
+    async renderChequePromedioCategory() {
 
         let udn = $('#filterBarDashboard #udn').val();
         let periodo1 = $('#filterBarDashboard #periodo1').val();
@@ -232,114 +1042,83 @@ class SalesDashboard extends Templates {
         let periodo2 = $('#filterBarDashboard #periodo2').val();
         let [anio2, mes2] = periodo2.split('-');
 
-        try {
-            // Mostrar loading state
-            this.showLoadingState();
+        let mkt = await useFetch({
+            url: api,
+            data: {
+                opc: "comparativaByCategory",
+                udn: udn,
+                category: $('#category option:selected').text(),
+                anio1: anio1,
+                mes1: mes1,
+                anio2: anio2,
+                mes2: mes2,
+            },
+        });
 
-            // Obtener datos principales del dashboard
-            let mkt = await useFetch({
-                url: api,
-                data: {
-                    opc: "apiPromediosDiarios",
-                    udn: udn,
-                    anio: anio1,
-                    mes: mes1,
-                    anio1: anio1,
-                    mes1: mes1,
-                    anio2: anio2,
-                    mes2: mes2,
-                },
-            });
 
-            // Obtener datos específicos de cheque promedio
-            let chequeData = await useFetch({
-                url: api,
-                data: {
-                    opc: "apiChequePromedioDashboard",
-                    udn: udn,
-                    anio: anio1,
-                    mes: mes1,
-                },
-            });
+        this.linearChart({
+            parent: "barProductMargen",
+            id: "barProductMargewn",
+            title: "📈 Comparativa por Categoría",
+            data: mkt
+        });
 
-            // Combinar datos para el dashboard
-            if (chequeData && chequeData.status === 200) {
-                mkt.dashboard = { ...mkt.dashboard, ...chequeData.data };
-            }
-
-            // Validar respuesta de la API
-            if (!mkt || mkt.status === 500) {
-                this.showError("Error al obtener datos del servidor");
-                return;
-            }
-
-            // Renderizar componentes con datos validados
-            this.showCards(mkt.dashboard);
-            this.renderCharts(mkt);
-
-        } catch (error) {
-            console.error("Error en renderDashboard:", error);
-            this.showError("Error al cargar el dashboard. Por favor, intente nuevamente.");
-        }
     }
 
-    renderCharts(mkt) {
-        // Gráfico comparativo de cheque promedio por categorías
+
+
+    async renderDashboard() {
+
+        // filtrar clasificacion x udn 
+        this.handleCategoryChange($('#idFilterBar #udn').val());
+
+        let udn = $('#filterBarDashboard #udn').val();
+        let periodo1 = $('#filterBarDashboard #periodo1').val();
+        let [anio1, mes1] = periodo1.split('-');
+        let periodo2 = $('#filterBarDashboard #periodo2').val();
+        let [anio2, mes2] = periodo2.split('-');
+
+        let mkt = await useFetch({
+            url: api,
+            data: {
+                opc: "apiPromediosDiarios",
+                udn: udn,
+                anio1: anio1,
+                mes1: mes1,
+                anio2: anio2,
+                mes2: mes2,
+            },
+        });
+
+        this.showCards(mkt.dashboard);
+
+        // Graficos.
+
         this.chequeComparativo({
             data: mkt.barras.dataset,
             anioA: mkt.barras.anioA,
             anioB: mkt.barras.anioB,
+
         });
 
-        // Comparativa de ingresos diarios
+
+
+
+
         this.comparativaIngresosDiarios({ data: mkt.linear });
 
-        // Ventas por día de semana
         this.ventasPorDiaSemana(mkt.barDays);
 
-        // Ranking semanal
+
         this.topDiasSemana({
             parent: "Tendencia",
             title: "📊 Ranking por Promedio Semanal",
             subtitle: "Promedio de ventas por día de la semana en el mes seleccionado",
             data: mkt.topWeek
         });
-    }
 
-    validateFilters() {
-        const udn = $('#filterBarDashboard #udn').val();
-        const periodo1 = $('#filterBarDashboard #periodo1').val();
-        const periodo2 = $('#filterBarDashboard #periodo2').val();
 
-        if (!udn || !periodo1 || !periodo2) {
-            this.showError("Todos los filtros son requeridos para generar el dashboard");
-            return false;
-        }
-        return true;
-    }
 
-    showLoadingState() {
-        // Mostrar skeleton en KPI cards
-        $('#cardDashboard').html(`
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                ${Array(4).fill().map(() => `
-                    <div class="bg-white rounded-xl shadow p-4 animate-pulse">
-                        <div class="h-4 bg-gray-200 rounded mb-2"></div>
-                        <div class="h-8 bg-gray-200 rounded mb-1"></div>
-                        <div class="h-3 bg-gray-200 rounded w-3/4"></div>
-                    </div>
-                `).join('')}
-            </div>
-        `);
-    }
-
-    showError(message) {
-        $('#cardDashboard').html(`
-            <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-center">
-                <div class="text-red-600 font-semibold mb-2">⚠️ Error</div>
-                <div class="text-red-700">${message}</div>
-            </div>
-        `);
     }
 
     filterBarDashboard() {
@@ -350,7 +1129,7 @@ class SalesDashboard extends Templates {
                     opc: "select",
                     id: "udn",
                     lbl: "UDN",
-                    class: "col-12 col-sm-6 col-lg-3 mb-3 mb-lg-0",
+                    class: "col-sm-3",
                     data: udn,
                     onchange: `salesDashboard.renderDashboard()`,
                 },
@@ -358,12 +1137,13 @@ class SalesDashboard extends Templates {
                     opc: "div",
                     id: "containerPeriodo1",
                     lbl: "Consultar con:",
-                    class: "col-12 col-sm-6 col-lg-3 mb-3 mb-lg-0",
+                    class: "col-lg-3 col-sm-4",
                     html: `
                         <input 
                             type="month" 
                             id="periodo1" 
-                            class="form-control w-100"
+                            class="form-control"
+                            style="width: 100%; min-width: 100%; display: block;"
                             onchange="salesDashboard.renderDashboard()"
                         />
                     `
@@ -372,29 +1152,14 @@ class SalesDashboard extends Templates {
                     opc: "div",
                     id: "containerPeriodo2",
                     lbl: "Comparar con:",
-                    class: "col-12 col-sm-6 col-lg-3 mb-3 mb-lg-0",
+                    class: "col-lg-3 col-sm-4 ",
                     html: `
                         <input 
                             type="month" 
                             id="periodo2" 
-                            class="form-control w-100"
+                            class="form-control"
                             onchange="salesDashboard.renderDashboard()"
                         />
-                    `
-                },
-                {
-                    opc: "div",
-                    id: "containerRefresh",
-                    lbl: "&nbsp;",
-                    class: "col-12 col-sm-6 col-lg-3 d-flex align-items-end",
-                    html: `
-                        <button 
-                            type="button" 
-                            class="btn btn-primary w-100"
-                            onclick="salesDashboard.renderDashboard()"
-                        >
-                            <i class="icon-arrows-cw mr-2"></i>Actualizar
-                        </button>
                     `
                 },
             ],
@@ -417,110 +1182,121 @@ class SalesDashboard extends Templates {
     }
 
     showCards(data) {
-        // Validar datos antes de renderizar
-        if (!data) {
-            this.showError("No hay datos disponibles para mostrar");
-            return;
-        }
-
-        // Calcular tendencias y variaciones
-        const chequePromedioActual = this.parseNumericValue(data.ChequePromedio);
-        const ventaMesActual = this.parseNumericValue(data.ventaMes);
-
-        // KPIs visuales con métricas mejoradas
         this.infoCard({
             parent: "cardDashboard",
             theme: "light",
             json: [
                 {
                     id: "kpiDia",
-                    title: "Venta del día de ayer",
+                    title: data.ventaDia.titulo,
                     data: {
-                        value: data.ventaDia || "$ 0.00",
-                        description: this.getDateDescription(),
-                        color: "text-[#8CC63F]",
-                        icon: "📈"
+                        value: data.ventaDia.valor,
+                        description: data.ventaDia.fecha,
+                        color: data.ventaDia.color,
                     },
                 },
                 {
                     id: "kpiMes",
-                    title: "Venta del Mes",
+                    title: data.ventaMes.titulo,
                     data: {
-                        value: data.ventaMes || "$ 0.00",
-                        description: this.getMonthDescription(),
-                        color: "text-green-800",
-                        icon: "💰"
+                        value: data.ventaMes.valor,
+                        description: `${this.getTrendIcon(data.ventaMes.tendencia)} ${data.ventaMes.mensaje}`,
+                        color: data.ventaMes.color,
                     },
                 },
                 {
-                    id: "kpiClientes",
-                    title: "Clientes del Mes",
+                    title: data.clientes.titulo,
                     data: {
-                        value: data.Clientes || "0",
-                        description: "Total de clientes activos",
-                        color: "text-[#103B60]",
-                        icon: "👥"
+                        value: data.clientes.valor,
+                        description: `${this.getTrendIcon(data.clientes.tendencia)} ${data.clientes.mensaje}`,
+                        color: data.clientes.color,
                     },
                 },
                 {
                     id: "kpiCheque",
-                    title: "Cheque Promedio",
+                    title: data.chequePromedio.titulo,
                     data: {
-                        value: data.ChequePromedio || "$ 0.00",
-                        description: this.getChequePromedioTrend(chequePromedioActual, data),
-                        color: this.getChequePromedioColor(chequePromedioActual, data),
-                        icon: "🧾"
+                        value: data.chequePromedio.valor,
+                        description: `${this.getTrendIcon(data.chequePromedio.tendencia)} ${data.chequePromedio.mensaje}`,
+                        color: data.chequePromedio.color,
                     },
                 },
             ],
         });
     }
 
-    parseNumericValue(value) {
-        if (!value) return 0;
-        // Remover símbolos de moneda y convertir a número
-        return parseFloat(value.toString().replace(/[$,\s]/g, '')) || 0;
+
+
+
+    getTrendIcon(tendencia) {
+        switch (tendencia) {
+            case 'up':
+                return '↑';
+            case 'down':
+                return '↓';
+            default:
+                return '→';
+        }
     }
 
-    getDateDescription() {
-        const yesterday = moment().subtract(1, 'day');
-        return yesterday.format('DD/MM/YYYY');
-    }
+    infoCard(options) {
+        const defaults = {
+            parent: "root",
+            id: "infoCardKPI",
+            class: "",
+            theme: "light",
+            json: [],
+            data: {
+                value: "0",
+                description: "",
+                color: "text-gray-800"
+            },
+            onClick: () => { }
+        };
+        const opts = Object.assign({}, defaults, options);
+        const isDark = opts.theme === "dark";
+        const cardBase = isDark
+            ? "bg-[#1F2A37] text-white rounded-xl shadow"
+            : "bg-white text-gray-800 rounded-xl shadow";
+        const titleColor = isDark ? "text-gray-300" : "text-gray-600";
+        const descColor = isDark ? "text-gray-400" : "text-gray-500";
 
-    getMonthDescription() {
-        const currentMonth = moment().format('MMMM YYYY');
-        return `Período: ${currentMonth}`;
-    }
+        const renderCard = (card, i = "") => {
+            const box = $("<div>", {
+                id: `${opts.id}_${i}`,
+                class: `${cardBase} p-4`
+            });
+            const title = $("<p>", {
+                class: `text-sm ${titleColor}`,
+                text: card.title
+            });
+            const value = $("<p>", {
+                id: card.id || "",
+                class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
+                text: card.data?.value
+            });
+            const description = $("<p>", {
+                class: `text-xs mt-1 ${card.data?.color || descColor}`,
+                text: card.data?.description
+            });
+            box.append(title, value, description);
+            return box;
+        };
 
-    getChequePromedioTrend(valor, data = null) {
-        // Usar datos reales de variación si están disponibles
-        if (data && data.variacionCheque !== undefined) {
-            const variacion = data.variacionCheque;
-            if (variacion > 5) return `↗️ +${variacion.toFixed(1)}% vs año anterior`;
-            if (variacion < -5) return `↘️ ${variacion.toFixed(1)}% vs año anterior`;
-            return `→ ${variacion.toFixed(1)}% vs año anterior`;
+        const container = $("<div>", {
+            id: opts.id,
+            class: `grid grid-cols-2 md:grid-cols-4 gap-4 ${opts.class}`
+        });
+
+        if (opts.json.length > 0) {
+            opts.json.forEach((item, i) => {
+                container.append(renderCard(item, i));
+            });
+        } else {
+            container.append(renderCard(opts));
         }
 
-        // Lógica de fallback basada en valor
-        if (valor > 1000) return "↗️ Excelente rendimiento";
-        if (valor > 500) return "→ Rendimiento estable";
-        return "↘️ Oportunidad de mejora";
-    }
-
-    getChequePromedioColor(valor, data = null) {
-        // Usar tendencia real si está disponible
-        if (data && data.tendencia) {
-            switch (data.tendencia) {
-                case 'positiva': return "text-[#8CC63F]"; // Verde
-                case 'negativa': return "text-red-600";   // Rojo
-                default: return "text-[#103B60]";         // Azul
-            }
-        }
-
-        // Lógica de fallback basada en valor
-        if (valor > 1000) return "text-[#8CC63F]"; // Verde para valores altos
-        if (valor > 500) return "text-[#103B60]";  // Azul para valores medios
-        return "text-orange-600";                   // Naranja para valores bajos
+        $(`#${opts.parent}`).html(container);
     }
 
     // graphigs.
@@ -701,29 +1477,26 @@ class SalesDashboard extends Templates {
         const opts = Object.assign(defaults, options);
 
         const container = $(`
-        <div id="${opts.id}" class="w-full min-h-screen bg-gray-50">
+        <div id="${opts.id}" class="w-full ">
             <!-- Header -->
-            <div class="bg-white shadow-sm border-b border-gray-200">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                    <h1 class="text-2xl sm:text-3xl font-bold text-[#103B60]">${opts.title}</h1>
-                    <p class="text-sm sm:text-base text-gray-600 mt-1">${opts.subtitle}</p>
+            <div class="p-6 border-b border-gray-200 ">
+                <div class=" mx-auto">
+                    <h1 class="text-2xl font-bold text-[#103B60]">${opts.title}</h1>
+                    <p class="text-sm text-gray-600">${opts.subtitle}</p>
                 </div>
             </div>
 
             <!-- FilterBar -->
-            <div class="bg-white shadow-sm">
-                <div id="filterBarDashboard" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                </div>
+            <div id="filterBarDashboard" class=" mx-auto px-4 py-4">
+          
             </div>
 
-            <!-- KPI Cards -->
-            <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <div id="cardDashboard" class="mb-8">
-                </div>
+             <section id="cardDashboard" class=" mx-auto px-4 py-4">
+              
             </section>
 
-            <!-- Charts Content -->
-            <section id="content-${opts.id}" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8 grid gap-6 grid-cols-1 xl:grid-cols-2"></section>
+            <!-- Content -->
+            <section id="content-${opts.id}" class="mx-auto px-4 py-6 grid gap-6 grid-cols-1 md:grid-cols-2"></section>
         </div>`);
 
         // Renderizar contenedores desde JSON
@@ -786,101 +1559,42 @@ class SalesDashboard extends Templates {
             data: {
                 value: "0",
                 description: "",
-                color: "text-gray-800",
-                icon: ""
+                color: "text-gray-800"
             },
             onClick: () => { }
         };
         const opts = Object.assign({}, defaults, options);
         const isDark = opts.theme === "dark";
         const cardBase = isDark
-            ? "bg-[#1F2A37] text-white rounded-xl shadow-lg border border-gray-700"
-            : "bg-white text-gray-800 rounded-xl shadow-lg border border-gray-100 hover:shadow-xl transition-shadow duration-200";
+            ? "bg-[#1F2A37] text-white rounded-xl shadow"
+            : "bg-white text-gray-800 rounded-xl shadow";
         const titleColor = isDark ? "text-gray-300" : "text-gray-600";
         const descColor = isDark ? "text-gray-400" : "text-gray-500";
-
         const renderCard = (card, i = "") => {
             const box = $("<div>", {
                 id: `${opts.id}_${i}`,
-                class: `${cardBase} p-4 cursor-pointer`,
-                click: () => typeof opts.onClick === "function" && opts.onClick(card)
+                class: `${cardBase} p-4`
             });
-
-            // Header con ícono y título
-            const header = $("<div>", {
-                class: "flex items-center justify-between mb-3"
-            });
-
-            const titleSection = $("<div>", {
-                class: "flex items-center gap-2"
-            });
-
-            if (card.data?.icon) {
-                titleSection.append($("<span>", {
-                    class: "text-lg",
-                    text: card.data.icon
-                }));
-            }
-
-            const titleElement = $("<p>", {
-                class: `text-sm font-medium ${titleColor}`,
+            const title = $("<p>", {
+                class: `text-sm ${titleColor}`,
                 text: card.title
             });
-
-            // Agregar tooltip informativo
-            if (card.id) {
-                const tooltipText = this.getTooltipText(card.id);
-                if (tooltipText) {
-                    titleElement.attr('title', tooltipText);
-                    titleElement.addClass('cursor-help');
-                    titleElement.append($("<i>", {
-                        class: "icon-help-circled ml-1 text-xs opacity-60"
-                    }));
-                }
-            }
-
-            titleSection.append(titleElement);
-
-            header.append(titleSection);
-
-            // Valor principal
             const value = $("<p>", {
                 id: card.id || "",
-                class: `text-2xl font-bold ${card.data?.color || "text-gray-800"} mb-2`,
-                text: card.data?.value || "0"
+                class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
+                text: card.data?.value
             });
-
-            // Descripción con mejor formato
             const description = $("<p>", {
-                class: `text-xs ${descColor} leading-relaxed`,
-                text: card.data?.description || ""
+                class: `text-xs mt-1 ${card.data?.color || descColor}`,
+                text: card.data?.description
             });
-
-            // Indicador visual para cheque promedio
-            if (card.id === "kpiCheque") {
-                const indicator = $("<div>", {
-                    class: "mt-2 h-1 bg-gray-200 rounded-full overflow-hidden"
-                });
-                const progress = $("<div>", {
-                    class: `h-full ${card.data?.color?.includes('8CC63F') ? 'bg-[#8CC63F]' :
-                        card.data?.color?.includes('103B60') ? 'bg-[#103B60]' : 'bg-orange-400'} 
-                           transition-all duration-500`,
-                    css: { width: this.calculateChequeProgress(card.data?.value) + "%" }
-                });
-                indicator.append(progress);
-                box.append(header, value, description, indicator);
-            } else {
-                box.append(header, value, description);
-            }
-
+            box.append(title, value, description);
             return box;
         };
-
         const container = $("<div>", {
             id: opts.id,
-            class: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 ${opts.class}`
+            class: `grid grid-cols-2 md:grid-cols-4 gap-4 ${opts.class}`
         });
-
         if (opts.json.length > 0) {
             opts.json.forEach((item, i) => {
                 container.append(renderCard(item, i));
@@ -888,40 +1602,7 @@ class SalesDashboard extends Templates {
         } else {
             container.append(renderCard(opts));
         }
-
         $(`#${opts.parent}`).html(container);
-    }
-
-    calculateChequeProgress(value) {
-        const numericValue = this.parseNumericValue(value);
-        // Calcular progreso basado en rangos típicos (0-2000)
-        return Math.min((numericValue / 2000) * 100, 100);
-    }
-
-    getTooltipText(cardId) {
-        const tooltips = {
-            'kpiDia': 'Total de ventas registradas el día anterior. Se actualiza automáticamente cada día.',
-            'kpiMes': 'Suma total de ventas del mes seleccionado. Incluye todas las categorías de productos.',
-            'kpiClientes': 'Número total de clientes únicos que realizaron compras en el período seleccionado.',
-            'kpiCheque': 'Promedio de gasto por cliente (Total Ventas ÷ Total Clientes). Indicador clave de rentabilidad.'
-        };
-        return tooltips[cardId] || null;
-    }
-
-    showEmptyState(message) {
-        return `
-            <div class="flex flex-col items-center justify-center py-12 text-center">
-                <div class="text-6xl text-gray-300 mb-4">📊</div>
-                <h3 class="text-lg font-semibold text-gray-600 mb-2">Sin datos disponibles</h3>
-                <p class="text-gray-500 max-w-md">${message}</p>
-                <button 
-                    class="mt-4 px-4 py-2 bg-[#103B60] text-white rounded-lg hover:bg-[#0d2f4d] transition-colors"
-                    onclick="salesDashboard.renderDashboard()"
-                >
-                    Intentar nuevamente
-                </button>
-            </div>
-        `;
     }
 
     linearChart(options) {
@@ -1227,18 +1908,53 @@ class SalesDashboard extends Templates {
     }
 
     handleCategoryChange(idudn) {
-        // Filtrar las clasificaciones que coincidan con el idudn
-        let lsclasificacion = clasificacion.filter((item) => item.udn == idudn);
+        this.renderSelectCategory({
+            parent: 'category',
+            udn: idudn,
+            data: clasificacion,
+            includeAll: false
+        });
+    }
 
-        // Generar options HTML para el select
-        const optionsHtml = lsclasificacion.map(item =>
+    renderSelectCategory(options) {
+        const defaults = {
+            parent: "category",
+            udn: null,
+            data: [],
+            placeholder: "Seleccionar categoría",
+            includeAll: false,
+            onChange: null
+        };
+
+        const opts = Object.assign({}, defaults, options);
+
+        if (!opts.udn) {
+            console.warn('UDN no proporcionado para renderSelectCategory');
+            return;
+        }
+
+        const filteredData = opts.data.filter((item) => item.udn == opts.udn);
+
+        let optionsHtml = '';
+
+        if (opts.includeAll) {
+            optionsHtml += `<option value="0">${opts.placeholder}</option>`;
+        }
+
+        optionsHtml += filteredData.map(item =>
             `<option value="${item.id}">${item.valor}</option>`
         ).join('');
 
-        // Actualizar el select con las opciones
-        $('#category').html(optionsHtml);
+        $(`#${opts.parent}`).html(optionsHtml);
+
+        if (opts.onChange && typeof opts.onChange === 'function') {
+            $(`#${opts.parent}`).off('change').on('change', opts.onChange);
+        }
     }
 }
+
+
+
 
 class Sales extends Templates {
     constructor(link, div_modulo) {

@@ -10,8 +10,8 @@ Tu **RAG (Retrieval-Augmented Generation) ** de conocimiento usa estos archivos:
 - MDL.md - Estructura para modelos PHP con clase CRUD
 - CTRL.md - Estructura para controladores PHP
 - FRONT JS.md - Patrones para archivos JavaScript frontend
-- **importante** usa #[[file:src/js/coffeSoft.js]] WHEN quieras crear los archivos del front.
-- #[[file:src/js/plugins.js]]
+- **CRÍTICO:** SIEMPRE usa #[[file:src/js/coffeSoft.js]] para crear archivos frontend - contiene las clases Complements, Components y Templates
+- **CRÍTICO:** SIEMPRE usa #[[file:src/js/plugins.js]] para funciones auxiliares jQuery
 - DOC COFFEESOFT.md - Documentación completa de componentes y métodos disponibles en CoffeeSoft
 - new component.md - Reglas para crear componentes jQuery personalizados con patrón configurable
 - [archivos].md
@@ -49,6 +49,8 @@ nombre_proyecto/
 │
 ├── index.php                      # Punto de entrada principal
 │                                  # Contiene: <div id="root"></div>
+│                                  # OBLIGATORIO: Incluir <script src="src/js/coffeSoft.js"></script>
+│                                  # OBLIGATORIO: Incluir <script src="src/js/plugins.js"></script>
 │
 ├── ctrl/                          # Controladores PHP (Lógica de negocio)
 │   └── ctrl-[nombre_proyecto].php   # Ej: ctrl-pedidos.php
@@ -57,12 +59,12 @@ nombre_proyecto/
 │   └── mdl-[nombre_proyecto].php    # Ej: mdl-pedidos.php
 │
 ├── js/                            # Scripts JS principales del proyecto
-│   └── [nombre_proyecto].js         # Ej: pedidos.js
+│   └── [nombre_proyecto].js         # Ej: pedidos.js (extiende Templates)
 │
 ├── src/                           # Recursos estáticos y reutilizables
 │   ├── js/                        # Librerías JavaScript base y utilitarias
-│   │   ├── coffeeSoft.js          # Núcleo del framework CoffeeSoft
-│   │   ├── plugins.js             # Plugins auxiliares jQuery
+│   │   ├── coffeSoft.js          # NÚCLEO: Clases Complements, Components, Templates
+│   │   ├── plugins.js             # PLUGINS: Funciones auxiliares jQuery
 │   │   └── [nombre_proyecto].js   # Opcional: JS duplicado o test
 │   │
 │   └── components/                # Componentes visuales reutilizables
@@ -81,10 +83,15 @@ nombre_proyecto/
 **Reglas de Creación:**
 
 1. **Obligatorios:** `index.php` y al menos un archivo de cada tipo (ctrl, mdl, js)
-2. **Opcionales:** Carpeta `src/` solo si necesitas recursos adicionales
-3. **Componentes:** Solo crear si desarrollas componentes reutilizables
-4. **Nombres:** Usar minúsculas, guiones para separar palabras, sin espacios ni caracteres especiales
-   5.- **Importante** Si se crean archivos js importarlos en index con formato `<script src="src/js/nombre_archivo.js"></script>`
+2. **CRÍTICO:** SIEMPRE incluir `src/js/coffeSoft.js` y `src/js/plugins.js` en TODOS los proyectos
+3. **CRÍTICO:** En `index.php` SIEMPRE incluir:
+   ```html
+   <script src="src/js/coffeSoft.js"></script>
+   <script src="src/js/plugins.js"></script>
+   ```
+4. **Componentes:** Solo crear si desarrollas componentes reutilizables
+5. **Nombres:** Usar minúsculas, guiones para separar palabras, sin espacios ni caracteres especiales
+6. **Frontend JS:** SIEMPRE debe extender la clase `Templates` del framework CoffeeSoft
 
 ### Instrucciones Generales:
 
@@ -195,11 +202,14 @@ De acuerdo a la lista se crearan los archivos:
 
 - **1.- Frontend (JS):**
 
+  - **OBLIGATORIO:** Consulta #[[file:src/js/coffeSoft.js]] para usar las clases correctas
+  - **OBLIGATORIO:** Extiende SIEMPRE la clase `Templates` en el archivo principal JS
+  - **OBLIGATORIO:** Usa los métodos de CoffeeSoft: `createTable()`, `createForm()`, `swalQuestion()`, etc.
   - Desarrolla el archivo JavaScript basándote en el `pivote` seleccionado.
-  - Si no hay pivote de referencia, analiza si existe algo similiar y muestralo.
+  - Si no hay pivote de referencia, analiza si existe algo similar y muéstralo.
     - Usa de tu conocimiento el archivo FRONT-JS.md
     - Si existe, el nuevo archivo debe **respetar completamente** la estructura del pivote (nombres, convenciones, métodos).
-  - Considera usar componentes de `Coffee-Soft` cuando sea apropiado.
+  - **CRÍTICO:** Todos los componentes deben usar la arquitectura de CoffeeSoft
 
 - **2.- Controlador:**
   - Crea el archivo `ctrl` respetando la estructura del `pivote` seleccionado.

@@ -70,8 +70,8 @@ function redireccion(modelo) {
     const HREF = new URL(window.location.href);
     const HASH = HREF.pathname.split("/").filter(Boolean);
     const ERP = HASH[0];
-
-    window.location.href = HREF.origin + "/" + ERP + "/" + modelo;
+    console.log(modelo)
+    window.location.href = HREF.origin + "/" + ERP + "/kpi/marketing.php" ;
 }
 // RECUPERAR CONTRASEÑA
 function modalForgot() {

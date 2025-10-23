@@ -2,11 +2,7 @@
 session_start();
 require_once '../conf/_conf.php';
 
-// Verificar sesión activa
-if (!isset($_SESSION['user_id'])) {
-    header('Location: ../acceso/index.php');
-    exit();
-}
+
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -78,7 +74,7 @@ if (!isset($_SESSION['user_id'])) {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     <!-- CoffeeSoft Framework -->
-    <script src="../src/js/coffeeSoft.js"></script>
+    <script src="../src/js/coffeSoft.js"></script>
     <script src="../src/js/plugins.js"></script>
     
     <!-- Launcher App -->

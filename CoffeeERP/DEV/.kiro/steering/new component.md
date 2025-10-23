@@ -87,6 +87,9 @@ Quiero que generes un **componente jQuery personalizado** cuyo propósito sea cr
 - No uses `$` para crear una variable
 - Al mostrar el uso basico debes mostrarlo como 'this.[nameComponent]()'
 - Si lleva dentro de la configuacion de opts el atributo json, preguntar al usuario si desea crear el <ctrl> y el <mdl>
+- **CRÍTICO:** NO agregar documentación JSDoc ni comentarios de documentación en los componentes
+- **CRÍTICO:** NO crear archivos de documentación separados (*.md, *.txt) para los componentes
+- El código debe ser limpio y autoexplicativo sin comentarios innecesarios
 
 ```js
 NombreComponente(options) {
