@@ -158,16 +158,18 @@ class App extends Templates {
                 data: { opc: "getModules" }
             });
 
-            if (response.status === 200) {
-                this.modules = response.data || [];
-                this.filteredModules = this.modules;
-                this.renderModuleCards();
-                this.updateModuleCount();
-            } else if (response.status === 401) {
-                window.location.href = '../acceso/index.php';
-            } else {
-                this.showEmptyState('No hay módulos disponibles');
-            }
+            console.log(response)
+
+            // if (response.status === 200) {
+            //     this.modules = response.data || [];
+            //     this.filteredModules = this.modules;
+            //     this.renderModuleCards();
+            //     this.updateModuleCount();
+            // } else if (response.status === 401) {
+            //     window.location.href = '../acceso/index.php';
+            // } else {
+            //     this.showEmptyState('No hay módulos disponibles');
+            // }
         } catch (error) {
             console.error('Error loading modules:', error);
             this.showEmptyState('Error al cargar los módulos');

@@ -2238,6 +2238,96 @@ class Components extends Complements {
         });
     }
 
+    dashboardComponent(options) {
+        const defaults = {
+            parent: "root",
+            id: "dashboardComponent",
+            title: "📊 Huubie · Dashboard de Eventos",
+            subtitle: "Resumen mensual · Cotizaciones · Pagados · Cancelados",
+            json: [
+                { type: "grafico", id: "barChartContainer", title: "Eventos por sucursal" },
+                { type: "tabla", id: "tableSucursal", title: "Tabla de sucursales" },
+                { type: "grafico", id: "donutChartContainer", title: "Ventas vs Entrada de dinero" },
+                { type: "grafico", id: "topClientsChartContainer", title: "Top 10 clientes" },
+                { type: "tabla", id: "tableClientes", title: "Tabla de clientes" }
+            ]
+        };
+
+        const opts = Object.assign(defaults, options);
+
+        const container = $(`
+        <div id="${opts.id}" class="w-full ">
+            <!-- Header -->
+            <div class="p-6 border-b border-gray-200 ">
+                <div class=" mx-auto">
+                    <h1 class="text-2xl font-bold text-[#103B60]">${opts.title}</h1>
+                    <p class="text-sm text-gray-600">${opts.subtitle}</p>
+                </div>
+            </div>
+
+            <!-- FilterBar -->
+            <div id="filterBarDashboard" class=" mx-auto px-4 py-4">
+          
+            </div>
+
+             <section id="cardDashboard" class=" mx-auto px-4 py-4">
+              
+            </section>
+
+            <!-- Content -->
+            <section id="content-${opts.id}" class=" mx-auto px-4 py-6 grid gap-6 lg:grid-cols-2"></section>
+        </div>`);
+
+        // Renderizar contenedores desde JSON
+        opts.json.forEach(item => {
+            let block = $("<div>", {
+                id: item.id,
+                class: "bg-white p-4 rounded-xl shadow-md border border-gray-200 min-h-[200px]"
+            });
+
+            if (item.title) {
+                const defaultEmojis = {
+                    'grafico': '📊',
+                    'tabla': '�',
+                    'doc': '�',
+                    'filterBar': '🔍'
+                };
+
+                const emoji = item.emoji || defaultEmojis[item.type] || '';
+                const iconHtml = item.icon ? `<i class="${item.icon}"></i> ` : '';
+                const titleContent = `${emoji} ${iconHtml}${item.title}`;
+
+                block.prepend(`<h3 class="text-sm font-semibold text-gray-800 mb-3">${titleContent}</h3>`);
+            }
+
+            if (item.content && Array.isArray(item.content)) {
+                item.content.forEach(contentItem => {
+                    const element = $(`<${contentItem.type}>`, {
+                        id: contentItem.id || '',
+                        class: contentItem.class || '',
+                        text: contentItem.text || ''
+                    });
+
+                    if (contentItem.attributes) {
+                        Object.keys(contentItem.attributes).forEach(attr => {
+                            element.attr(attr, contentItem.attributes[attr]);
+                        });
+                    }
+
+                    if (contentItem.html) {
+                        element.html(contentItem.html);
+                    }
+
+                    block.append(element);
+                });
+            }
+
+            $(`#content-${opts.id}`, container).append(block);
+        });
+
+        $(`#${opts.parent}`).html(container);
+    }
+
 
 }
 

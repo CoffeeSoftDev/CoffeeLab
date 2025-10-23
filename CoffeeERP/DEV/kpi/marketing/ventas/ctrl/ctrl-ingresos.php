@@ -568,32 +568,108 @@ class ctrl extends mdl {
         return ['data' => $__row];
     }
 
+    // Cheque Promedio Diarios.
 
 
+function getDailyCheck() {
+    $udn      = $_POST['udn']    ?? null;
+    $anio     = $_POST['anio1']  ?? date('Y');
+    $mes      = $_POST['mes1']   ?? date('m');
+    $category = strtolower(trim($_POST['category'] ?? 'todas'));
+
+    // 🔹 Obtener datos de ambos años
+    $apiActual   = $this->apiIngresosTotales($udn, $anio, $mes);
+    $apiAnterior = $this->apiIngresosTotales($udn, $_POST['anio2'] , $_POST['mes2']);
+
+    $rowsActual   = $apiActual['data'] ?? [];
+    $rowsAnterior = $apiAnterior['data'] ?? [];
+
+    // 🔹 Inicializar estructura por día
+    $daysOfWeek = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+    $weeklyActual   = array_fill_keys($daysOfWeek, ['total' => 0, 'clientes' => 0]);
+    $weeklyAnterior = array_fill_keys($daysOfWeek, ['total' => 0, 'clientes' => 0]);
+
+    // 🔹 Función para procesar datos según año
+    $processData = function ($rows, &$weeklyData) use ($category) {
+        foreach ($rows as $row) {
+            if (empty($row['fecha'])) continue;
+
+            $dayName  = ucfirst(strtolower(date('l', strtotime($row['fecha']))));
+            $clientes = isset($row['clientes']) ? intval($row['clientes']) : 0;
+            $total    = 0;
+
+            // 🔸 Filtrar por categoría si aplica
+            if ($category == 'todas' || $category == '') {
+                $total = isset($row['total']) ? floatval($row['total']) : 0;
+            } else {
+                foreach ($row as $key => $value) {
+                    if (strtolower($key) == $category) {
+                        $total = floatval($value);
+                        break;
+                    }
+                }
+            }
+
+            if (isset($weeklyData[$dayName])) {
+                $weeklyData[$dayName]['total']    += $total;
+                $weeklyData[$dayName]['clientes'] += $clientes;
+            }
+        }
+    };
+
+    // 🔹 Procesar ambos conjuntos
+    $processData($rowsActual, $weeklyActual);
+    $processData($rowsAnterior, $weeklyAnterior);
+
+    // 🔹 Construir arrays para gráfico
+    $labels = [];
+    $dataA  = []; // Año actual
+    $dataB  = []; // Año anterior
+
+    foreach ($daysOfWeek as $day) {
+        $labels[] = substr($day, 0, 3); // Mon, Tue, Wed...
+
+        $avgActual   = $weeklyActual[$day]['clientes'] > 0
+            ? round($weeklyActual[$day]['total'] / $weeklyActual[$day]['clientes'], 2)
+            : 0;
+
+        $avgAnterior = $weeklyAnterior[$day]['clientes'] > 0
+            ? round($weeklyAnterior[$day]['total'] / $weeklyAnterior[$day]['clientes'], 2)
+            : 0;
+
+        $dataA[] = $avgActual;
+        $dataB[] = $avgAnterior;
+    }
+
+    // 📊 Retornar estructura compatible con barChart()
+    return [
+        'status'  => 200,
+        'message' => 'Cheque promedio diario comparativo generado correctamente',
+        'filter'  => $category,
+        'labels'  => $labels,
+        'dataA'   => $dataA,   // Año actual
+        'dataB'   => $dataB,   // Año anterior
+        'yearA'   => intval($anio),       // Año actual
+        'yearB'   => intval($anio) - 1,   // Año anterior
+        'api'     => [
+            'actual'   => $apiActual,
+            'anterior' => $apiAnterior
+        ]
+    ];
+}
 
     // Dashboard -Promedios diarios
     public function apiPromediosDiarios() {
         $response = [];
 
-        $anio         = isset($_POST['anio']) ? (int) $_POST['anio'] : date('Y');
+        $anio         = isset($_POST['anio1']) ? (int) $_POST['anio1'] : date('Y');
         $anioAnterior = $anio - 1;
-        $mes          = isset($_POST['mes']) ? (int) $_POST['mes'] : date('m');
+        $mes          = isset($_POST['mes1']) ? (int) $_POST['mes1'] : date('m');
         $udn          = isset($_POST['udn']) ? (int) $_POST['udn'] : 1;
 
-        // Validaciones de entrada
-        if ($anio < 2020 || $anio > date('Y') + 1) {
-            return ['status' => 400, 'message' => 'Año inválido'];
-        }
-        if ($mes < 1 || $mes > 12) {
-            return ['status' => 400, 'message' => 'Mes inválido'];
-        }
-        if (!in_array($udn, [1, 2, 3, 4, 5])) {
-            return ['status' => 400, 'message' => 'UDN inválida'];
-        }
-
         $meses = [
-            'actual'   => ['year' => $anio,        'mes' => $mes],
-            'anterior' => ['year' => $anioAnterior,'mes' => $mes]
+            'actual'   => ['year' => $_POST['anio1'],        'mes' => $_POST['mes1']],
+            'anterior' => ['year' => $_POST['anio2'],'mes' =>$_POST['mes2']]
         ];
 
         if ($udn == 1) {
@@ -633,23 +709,13 @@ class ctrl extends mdl {
 
             foreach ($meses as $tipo => $fecha) {
                 $totalDias = cal_days_in_month(CAL_GREGORIAN, $fecha['mes'], $fecha['year']);
-                
-                // Cache key para consultas frecuentes
-                $cacheKey = "ingresos_{$udn}_{$fecha['year']}_{$fecha['mes']}";
-                
-                // Intentar obtener de cache (simulado con variable estática)
-                static $cache = [];
-                if (isset($cache[$cacheKey])) {
-                    $ventas = $cache[$cacheKey];
-                } else {
-                    $ventas = $this->ingresosMensuales([$udn, $fecha['year'], $fecha['mes']]);
-                    $cache[$cacheKey] = $ventas; // Guardar en cache
-                }
+                $ventas    = $this->ingresosMensuales([$udn, $fecha['year'], $fecha['mes']]);
 
                 $valor = $this->getCalculoPorConcepto($clave, $ventas, $totalDias);
 
                 $datos[$tipo] = [
                     'valor'   => $valor,
+                    'ventas'  =>  [$udn, $fecha['year'], $fecha['mes']],
                     'formato' => ($clave === 'totalHabitaciones') ? $valor : evaluar($valor),
                 ];
             }
@@ -667,6 +733,7 @@ class ctrl extends mdl {
         return [
             'status'    => 200,
             'data'      => $response,
+            'meses'     => $meses,
             'dashboard' => $this->apiDashBoard($response, $udn),
             'barras'    => $this->comparativaChequePromedio(),
             'linear'    => $this->apiLinearPromediosDiario($anio, $mes, $udn),
@@ -675,6 +742,8 @@ class ctrl extends mdl {
             'topWeek'   => $this->apiTopDiasSemanaPromedio($anio, $mes, $udn)
         ];
     }
+
+
 
     public function apiLinearPromediosDiario($anio = null, $mes = null, $udn = null) {
         $anio = $anio ?? (isset($_POST['anio']) ? (int) $_POST['anio'] : date('Y'));
@@ -747,108 +816,92 @@ class ctrl extends mdl {
 
 
     public function apiDashBoard($response, $udn) {
-        // Inicializar variables
-        $ventaMes       = 0;
-        $clientes       = 0;
-        $chequePromedio = 0;
+        $ventaMesActual       = 0;
+        $ventaMesAnterior     = 0;
+        $clientesActual       = 0;
+        $clientesAnterior     = 0;
+        $chequePromedioActual = 0;
+        $chequePromedioAnterior = 0;
 
         foreach ($response as $item) {
             switch ($item['id']) {
-                case 'totalGeneral': // Hotel
-                case 'totalGralAyB': // Restaurantes
-                    $ventaMes = $item['actual']['valor'];
+                case 'totalGeneral':
+                case 'totalGralAyB':
+                    $ventaMesActual   = $item['actual']['valor'];
+                    $ventaMesAnterior = $item['anterior']['valor'];
                     break;
-                case 'totalHabitaciones': // Clientes
-                    $clientes = $item['actual']['valor'];
+                case 'totalHabitaciones':
+                    $clientesActual   = $item['actual']['valor'];
+                    $clientesAnterior = $item['anterior']['valor'];
                     break;
-                case 'chequePromedio':      // Hotel
-                case 'chequePromedioAyB':   // Restaurante
-                    $chequePromedio = $item['actual']['valor'];
+                case 'chequePromedio':
+                case 'chequePromedioAyB':
+                    $chequePromedioActual   = $item['actual']['valor'];
+                    $chequePromedioAnterior = $item['anterior']['valor'];
                     break;
             }
         }
 
-        $ventasDia = $this->getVentasDelDia([$_POST['udn']]);
+        $ventasDia = $this->getVentasDelDia([$udn]);
+        $fechaAyer = date('d/m/Y', strtotime('-1 day'));
+
+        $variacionVentas = $this->calcularVariacion($ventaMesActual, $ventaMesAnterior);
+        $variacionClientes = $this->calcularVariacion($clientesActual, $clientesAnterior);
+        $variacionCheque = $this->calcularVariacion($chequePromedioActual, $chequePromedioAnterior);
 
         return [
-            'ventaMes'       => evaluar($ventaMes),
-            'Clientes'       => $clientes,
-            'ChequePromedio' => evaluar($chequePromedio),
-            'ventaDia'       => '$ '.$ventasDia,
+            'ventaDia' => [
+                'valor' => evaluar($ventasDia),
+                'fecha' => $fechaAyer,
+                'titulo' => 'Venta del día de ayer',
+                'color' => 'text-[#8CC63F]'
+            ],
+            'ventaMes' => [
+                'valor' => evaluar($ventaMesActual),
+                'variacion' => $variacionVentas['porcentaje'],
+                'mensaje' => $variacionVentas['mensaje'],
+                'tendencia' => $variacionVentas['tendencia'],
+                'titulo' => 'Venta del Mes',
+                'color' => $variacionVentas['tendencia'] === 'up' ? 'text-green-800' : 'text-red-600'
+            ],
+            'clientes' => [
+                'valor' => number_format($clientesActual, 0),
+                'variacion' => $variacionClientes['porcentaje'],
+                'mensaje' => $variacionClientes['mensaje'],
+                'tendencia' => $variacionClientes['tendencia'],
+                'titulo' => 'Clientes',
+                'color' => 'text-[#103B60]'
+            ],
+            'chequePromedio' => [
+                'valor' => evaluar($chequePromedioActual),
+                'variacion' => $variacionCheque['porcentaje'],
+                'mensaje' => $variacionCheque['mensaje'],
+                'tendencia' => $variacionCheque['tendencia'],
+                'titulo' => 'Cheque Promedio',
+                'color' => $variacionCheque['tendencia'] === 'up' ? 'text-green-600' : 'text-red-600'
+            ]
         ];
     }
 
-    public function apiChequePromedioDashboard() {
-        $anio = isset($_POST['anio']) ? (int) $_POST['anio'] : date('Y');
-        $mes  = isset($_POST['mes'])  ? (int) $_POST['mes']  : date('m');
-        $udn  = isset($_POST['udn'])  ? (int) $_POST['udn']  : 1;
-
-        // Validar parámetros de entrada
-        if (!$udn || !$anio || !$mes) {
+    private function calcularVariacion($actual, $anterior) {
+        if ($anterior == 0) {
             return [
-                'status'  => 400,
-                'message' => 'Parámetros UDN, año y mes son requeridos',
-                'data'    => null
+                'porcentaje' => '0%',
+                'mensaje' => 'Sin datos del año anterior',
+                'tendencia' => 'neutral'
             ];
         }
 
-        try {
-            // Obtener datos del mes actual
-            $ventasActuales = $this->ingresosMensuales([$udn, $anio, $mes]);
-            $totalDias = cal_days_in_month(CAL_GREGORIAN, $mes, $anio);
+        $diferencia = $actual - $anterior;
+        $porcentaje = ($diferencia / $anterior) * 100;
+        $signo = $porcentaje >= 0 ? '+' : '';
+        $tendencia = $porcentaje > 0 ? 'up' : ($porcentaje < 0 ? 'down' : 'neutral');
 
-            // Obtener datos del año anterior para comparación
-            $anioAnterior = $anio - 1;
-            $ventasAnteriores = $this->ingresosMensuales([$udn, $anioAnterior, $mes]);
-
-            // Calcular métricas principales
-            $chequePromedioActual = $ventasActuales['totalHabitaciones'] > 0 
-                ? $ventasActuales['totalGeneral'] / $ventasActuales['totalHabitaciones'] 
-                : 0;
-
-            $chequePromedioAnterior = $ventasAnteriores['totalHabitaciones'] > 0 
-                ? $ventasAnteriores['totalGeneral'] / $ventasAnteriores['totalHabitaciones'] 
-                : 0;
-
-            // Calcular variación porcentual
-            $variacionCheque = $chequePromedioAnterior > 0 
-                ? (($chequePromedioActual - $chequePromedioAnterior) / $chequePromedioAnterior) * 100 
-                : 0;
-
-            // Obtener venta del día anterior
-            $fechaAyer = date('Y-m-d', strtotime('-1 day'));
-            $ventaAyer = $this->getsoftVentas([$udn, $fechaAyer]);
-            $totalVentaAyer = 0;
-
-            if ($udn == 1) {
-                $totalVentaAyer = $ventaAyer['Hospedaje'] + $ventaAyer['AyB'] + $ventaAyer['Diversos'];
-            } else {
-                $totalVentaAyer = $ventaAyer['alimentos'] + $ventaAyer['bebidas'];
-            }
-
-            return [
-                'status' => 200,
-                'data' => [
-                    'ventaDia'           => evaluar($totalVentaAyer),
-                    'ventaMes'           => evaluar($ventasActuales['totalGeneral']),
-                    'Clientes'           => $ventasActuales['totalHabitaciones'],
-                    'ChequePromedio'     => evaluar($chequePromedioActual),
-                    'chequePromedioAnterior' => evaluar($chequePromedioAnterior),
-                    'variacionCheque'    => round($variacionCheque, 2),
-                    'tendencia'          => $variacionCheque > 0 ? 'positiva' : ($variacionCheque < 0 ? 'negativa' : 'estable'),
-                    'fechaConsulta'      => date('d/m/Y'),
-                    'fechaAyer'          => date('d/m/Y', strtotime('-1 day')),
-                    'mesTexto'           => date('F Y', mktime(0, 0, 0, $mes, 1, $anio))
-                ]
-            ];
-
-        } catch (Exception $e) {
-            return [
-                'status'  => 500,
-                'message' => 'Error al obtener datos de cheque promedio: ' . $e->getMessage(),
-                'data'    => null
-            ];
-        }
+        return [
+            'porcentaje' => $signo . number_format($porcentaje, 1) . '%',
+            'mensaje' => $signo . number_format($porcentaje, 1) . '% comparado con el año pasado',
+            'tendencia' => $tendencia
+        ];
     }
 
     function comparativaChequePromedio() {
@@ -945,110 +998,6 @@ class ctrl extends mdl {
             'status' => 200,
             'data'   => $rows
         ];
-    }
-
-    public function apiAnalisisCategorias() {
-        $anio = isset($_POST['anio']) ? (int) $_POST['anio'] : date('Y');
-        $mes  = isset($_POST['mes'])  ? (int) $_POST['mes']  : date('m');
-        $udn  = isset($_POST['udn'])  ? (int) $_POST['udn']  : 1;
-        $categoria = isset($_POST['categoria']) ? strtolower(trim($_POST['categoria'])) : 'todas';
-
-        // Validar parámetros
-        if (!$udn || !$anio || !$mes) {
-            return [
-                'status'  => 400,
-                'message' => 'Parámetros UDN, año y mes son requeridos'
-            ];
-        }
-
-        try {
-            // Obtener datos del período actual
-            $datosActuales = $this->apiIngresosTotales($udn, $anio, $mes)['data'];
-            
-            // Obtener datos del año anterior
-            $anioAnterior = $anio - 1;
-            $datosAnteriores = $this->apiIngresosTotales($udn, $anioAnterior, $mes)['data'];
-
-            // Procesar datos por categorías
-            $categorias = [];
-            
-            if ($udn == 1) {
-                $categorias = ['Hospedaje', 'AyB', 'Diversos'];
-            } elseif ($udn == 5) {
-                $categorias = ['alimentos', 'bebidas', 'guarniciones', 'sales', 'domicilio'];
-            } else {
-                $categorias = ['alimentos', 'bebidas'];
-            }
-
-            $resultado = [];
-            
-            foreach ($categorias as $cat) {
-                // Calcular totales y clientes para cada categoría
-                $totalActual = 0;
-                $totalAnterior = 0;
-                $clientesActual = 0;
-                $clientesAnterior = 0;
-
-                // Sumar datos del período actual
-                foreach ($datosActuales as $dia) {
-                    if (isset($dia[$cat])) {
-                        $totalActual += $dia[$cat];
-                        $clientesActual += $dia['clientes'];
-                    }
-                }
-
-                // Sumar datos del período anterior
-                foreach ($datosAnteriores as $dia) {
-                    if (isset($dia[$cat])) {
-                        $totalAnterior += $dia[$cat];
-                        $clientesAnterior += $dia['clientes'];
-                    }
-                }
-
-                // Calcular cheque promedio por categoría
-                $chequePromedioActual = $clientesActual > 0 ? $totalActual / $clientesActual : 0;
-                $chequePromedioAnterior = $clientesAnterior > 0 ? $totalAnterior / $clientesAnterior : 0;
-
-                // Calcular variación
-                $variacion = $chequePromedioAnterior > 0 
-                    ? (($chequePromedioActual - $chequePromedioAnterior) / $chequePromedioAnterior) * 100 
-                    : 0;
-
-                $resultado[] = [
-                    'categoria'              => ucfirst($cat),
-                    'totalActual'            => $totalActual,
-                    'totalAnterior'          => $totalAnterior,
-                    'clientesActual'         => $clientesActual,
-                    'clientesAnterior'       => $clientesAnterior,
-                    'chequePromedioActual'   => round($chequePromedioActual, 2),
-                    'chequePromedioAnterior' => round($chequePromedioAnterior, 2),
-                    'variacion'              => round($variacion, 2),
-                    'tendencia'              => $variacion > 0 ? 'positiva' : ($variacion < 0 ? 'negativa' : 'estable')
-                ];
-            }
-
-            // Ordenar por mayor impacto en cheque promedio
-            usort($resultado, function($a, $b) {
-                return $b['chequePromedioActual'] <=> $a['chequePromedioActual'];
-            });
-
-            return [
-                'status' => 200,
-                'data'   => $resultado,
-                'meta'   => [
-                    'periodo_actual'   => "$mes/$anio",
-                    'periodo_anterior' => "$mes/$anioAnterior",
-                    'udn'              => $udn,
-                    'categoria_filtro' => $categoria
-                ]
-            ];
-
-        } catch (Exception $e) {
-            return [
-                'status'  => 500,
-                'message' => 'Error al obtener análisis de categorías: ' . $e->getMessage()
-            ];
-        }
     }
 
    public function apiIngresosComparativoSemana($anio1 = null, $mes1 = null, $anio2 = null, $mes2 = null, $udn = null) {
@@ -1151,126 +1100,6 @@ class ctrl extends mdl {
         $subtitle = ucfirst($mesTexto) . " " . $anio . " - Top 5";
 
         return $data;
-    }
-
-    function getDashboardChequePromedio() {
-        try {
-            $udn  = isset($_POST['udn'])  ? (int)$_POST['udn']  : 1;
-            $mes  = isset($_POST['mes'])  ? (int)$_POST['mes']  : date('m');
-            $anio = isset($_POST['anio']) ? (int)$_POST['anio'] : date('Y');
-            
-            if ($mes < 1 || $mes > 12) {
-                return [
-                    'status'  => 400,
-                    'message' => 'Mes inválido'
-                ];
-            }
-            
-            $anioAnterior = $anio - 1;
-            
-            $ventasActual   = $this->ingresosMensuales([$udn, $anio, $mes]);
-            $ventasAnterior = $this->ingresosMensuales([$udn, $anioAnterior, $mes]);
-            
-            $ventaMesActual   = $ventasActual['totalGeneral'] ?? $ventasActual['totalGralAyB'] ?? 0;
-            $ventaMesAnterior = $ventasAnterior['totalGeneral'] ?? $ventasAnterior['totalGralAyB'] ?? 0;
-            
-            $clientesActual   = $ventasActual['totalHabitaciones'] ?? 0;
-            $clientesAnterior = $ventasAnterior['totalHabitaciones'] ?? 0;
-            
-            $chequePromedioActual   = $clientesActual > 0 ? $ventaMesActual / $clientesActual : 0;
-            $chequePromedioAnterior = $clientesAnterior > 0 ? $ventaMesAnterior / $clientesAnterior : 0;
-            
-            $varVentaMes = $ventaMesAnterior > 0 
-                ? round((($ventaMesActual - $ventaMesAnterior) / $ventaMesAnterior) * 100, 1) 
-                : 0;
-            $varClientes = $clientesAnterior > 0 
-                ? round((($clientesActual - $clientesAnterior) / $clientesAnterior) * 100, 1) 
-                : 0;
-            $varCheque = $chequePromedioAnterior > 0 
-                ? round((($chequePromedioActual - $chequePromedioAnterior) / $chequePromedioAnterior) * 100, 1) 
-                : 0;
-            
-            $ventaDia = $this->getVentasDelDia([$udn]);
-            
-            $cards = [
-                'ventaDia'       => '$' . $ventaDia,
-                'ventaMes'       => evaluar($ventaMesActual),
-                'clientes'       => $clientesActual,
-                'chequePromedio' => evaluar($chequePromedioActual),
-                'variaciones' => [
-                    'ventaMes'       => ($varVentaMes >= 0 ? '+' : '') . $varVentaMes . '% vs año anterior',
-                    'clientes'       => ($varClientes >= 0 ? '+' : '') . $varClientes . '% vs año anterior',
-                    'chequePromedio' => ($varCheque >= 0 ? '+' : '') . $varCheque . '% vs año anterior'
-                ]
-            ];
-            
-            $chequePorDia = $this->getChequePorDiaSemana($udn, $anio, $mes);
-            
-            $dataActual   = $this->getComparativaChequePromedio([$mes, $anio, $udn]);
-            $dataAnterior = $this->getComparativaChequePromedio([$mes, $anioAnterior, $udn]);
-            
-            $chequePorCategoria = [
-                'labels'       => ['A&B', 'Alimentos', 'Bebidas'],
-                'actual'       => [
-                    (float)($dataActual['AyB'] ?? 0),
-                    (float)($dataActual['Alimentos'] ?? 0),
-                    (float)($dataActual['Bebidas'] ?? 0)
-                ],
-                'anterior'     => [
-                    (float)($dataAnterior['AyB'] ?? 0),
-                    (float)($dataAnterior['Alimentos'] ?? 0),
-                    (float)($dataAnterior['Bebidas'] ?? 0)
-                ],
-                'anioActual'   => $anio,
-                'anioAnterior' => $anioAnterior
-            ];
-            
-            return [
-                'status'             => 200,
-                'cards'              => $cards,
-                'chequePorDia'       => $chequePorDia,
-                'chequePorCategoria' => $chequePorCategoria
-            ];
-            
-        } catch (Exception $e) {
-            return [
-                'status'  => 500,
-                'message' => 'Error interno del servidor',
-                'error'   => $e->getMessage()
-            ];
-        }
-    }
-
-    function getChequePorDiaSemana($udn, $anio, $mes) {
-        $diasSemana = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-        $apiData = $this->apiResumenIngresosPorDia($anio, $mes, $udn);
-        $rows = $apiData['data'];
-        
-        $totalesPorDia = [];
-        $conteosPorDia = [];
-        
-        foreach ($rows as $item) {
-            $dia = $item['dia'];
-            if (!isset($totalesPorDia[$dia])) {
-                $totalesPorDia[$dia] = 0;
-                $conteosPorDia[$dia] = 0;
-            }
-            $totalesPorDia[$dia] += $item['total'];
-            $conteosPorDia[$dia]++;
-        }
-        
-        $data = [];
-        foreach ($diasSemana as $dia) {
-            $promedio = isset($conteosPorDia[$dia]) && $conteosPorDia[$dia] > 0 
-                ? $totalesPorDia[$dia] / $conteosPorDia[$dia] 
-                : 0;
-            $data[] = round($promedio, 2);
-        }
-        
-        return [
-            'labels' => $diasSemana,
-            'data'   => $data
-        ];
     }
 
     public function apiTopDiasSemanaPromedio($anio = null, $mes = null, $udn = null) {

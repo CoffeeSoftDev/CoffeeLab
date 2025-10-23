@@ -25,7 +25,6 @@
             <div class="main-container" id="root"></div>
 
             <!-- Module Scripts -->
-            <script src="src/js/dashboard-cheque-promedio.js?t=<?php echo time(); ?>"></script>
             <script src="src/js/kpi-ventas.js?t=<?php echo time(); ?>"></script>
         
         </div>
