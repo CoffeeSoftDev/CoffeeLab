@@ -20,7 +20,6 @@ $(function () {
         assign.render();
     });
 });
-
 class App extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo)
@@ -414,29 +413,28 @@ class App extends Templates {
                     : `<img src="./src/img/check.svg" alt="No visto" title="No visto" class="ms-2" style="width: 16px; height: auto;" />`;
 
                 return `
-            <div class="d-flex align-items-start" id="${item.id}">
-                <div class="me-2" style="min-width: 35px;">
-                    <img src="${photo}" class="rounded-circle w-8 h-8" alt="foto de ${user.valor}">
-                </div>
-                <div>
-                    <small>
-                        <strong class="text-xs ${textColor}">${user.valor}</strong>
-                        <span class="text-body-tertiary">${item.date}</span>
-                        
-                    </small>
-                    <div class="rounded-2 bg-gray-50 p-2 d-flex justify-content-between cursor-pointer hover:bg-gray-300 align-items-center position-relative" id="msj${item.id}" onclick="app.openDelete('msj${item.id}', '${item.date}', '${user.id}', '${idUser}')">
-                        <span class="me-2">${escapeHTML(item.valor)}</span>
-                        ${visto}
-                        <button class="btn d-none btn-danger btn-sm p-1 position-absolute top-0 end-0 m-1" 
-                            onclick="app.deleteMessage('${item.id}')">
-                            <i class="icon-trash"></i>
-                        </button>
+                    <div class="d-flex align-items-start" id="${item.id}">
+                        <div class="me-2" style="min-width: 35px;">
+                            <img src="${photo}" class="rounded-circle w-8 h-8" alt="foto de ${user.valor}">
+                        </div>
+                        <div>
+                            <small>
+                                <strong class="text-xs ${textColor}">${user.valor}</strong>
+                                <span class="text-body-tertiary">${item.date}</span>
+                                
+                            </small>
+                            <div class="rounded-2 bg-gray-50 p-2 d-flex justify-content-between cursor-pointer hover:bg-gray-300 align-items-center position-relative" id="msj${item.id}" onclick="app.openDelete('msj${item.id}', '${item.date}', '${user.id}', '${idUser}')">
+                                <span class="me-2">${escapeHTML(item.valor)}</span>
+                                ${visto}
+                                <button class="btn d-none btn-danger btn-sm p-1 position-absolute top-0 end-0 m-1" 
+                                    onclick="app.deleteMessage('${item.id}')">
+                                    <i class="icon-trash"></i>
+                                </button>
+                            </div>
+                        </div>          
                     </div>
-                </div>          
-            </div>
-            `;
-            })
-            .join("");
+                    `;
+            }).join("");
 
 
         let form = "";
@@ -457,7 +455,9 @@ class App extends Templates {
                     </div>
                 </div>
             </div>
-            <div class="d-flex align-items-end mb-2">
+            <div class="d-flex align-items-between mb-2">
+                <a onclick='app.creaTuRespuesta(${JSON.stringify(opts.data)}, ${idUser})' class='cursor-pointer text-blue-600 hover:underline hover:text-blue-800 transition-colors duration-150'>Segun el contexto 💡</a>
+                <a onclick='app.empeoraTuRespuesta()' class='ms-auto cursor-pointer text-blue-600 hover:underline hover:text-blue-800 transition-colors duration-150'>😈Empeorar Respuesta</a>
                 <a onclick='app.typeOfAnswer()' class='ms-auto cursor-pointer text-blue-600 hover:underline hover:text-blue-800 transition-colors duration-150'>Mejora tu respuesta 💡</a>
             </div>
             ${form}
@@ -569,122 +569,362 @@ class App extends Templates {
         });
     }
 
-    typeOfAnswer() {
-        bootbox.dialog({
+    async typeOfAnswer() {
+        // 🪄 Crear diálogo Bootbox
+        const modalAnswer = bootbox.dialog({
             title: "💬 ¿Qué tipo de respuesta deseas?",
+            size: "small",
             message: `
-                <div class="form-group">
-                    <label for="tipoRespuesta" class="fw-bold mb-2">Selecciona un tipo de respuesta:</label>
-                    <select id="tipoRespuesta" class="form-control">
-                        <option value="">Seleccione una opción...</option>
-                        <option value="formal">Respuesta formal</option>
-                        <option value="casual">Respuesta casual</option>
-                        <option value="tecnica">Respuesta técnica</option>
-                        <option value="colaborativa">Respuesta colaborativa</option>
-                        <option value="seguimiento">Respuesta seguimiento</option>
-                        <option value="propositiva">Respuesta propositiva</option>
-                        <option value="reconocimiento">Respuesta reconocimiento</option>
-                        <option value="compromiso">Respuesta compromiso</option>
-                    </select>
+            <div class="form-group">
+                <label for="tipoRespuesta" class="fw-bold mb-2">Selecciona un tipo de respuesta:</label>
+                <select id="tipoRespuesta" class="form-control">
+                    <option value="">Seleccione una opción...</option>
+                    <option value="formal">Respuesta formal</option>
+                    <option value="casual">Respuesta casual</option>
+                    <option value="tecnica">Respuesta técnica</option>
+                    <option value="colaborativa">Respuesta colaborativa</option>
+                    <option value="seguimiento">Respuesta seguimiento</option>
+                    <option value="propositiva">Respuesta propositiva</option>
+                    <option value="reconocimiento">Respuesta reconocimiento</option>
+                    <option value="compromiso">Respuesta compromiso</option>
+                </select>
+
+                <div class="flex justify-end gap-2 mt-4">
+                    <button id="cancelarTipoRespuesta" class="btn btn-sm btn-secondary px-3 py-1">
+                        Cancelar
+                    </button>
+                    <button id="aceptarTipoRespuesta" class="btn btn-sm bg-blue-900 text-white px-3 py-1 hover:bg-blue-700">
+                        Aceptar
+                    </button>
+                </div>
+            </div>
+        `
+        });
+
+        // 💡 Antes de asignar, limpiamos eventos previos
+        $(document).off("click", "#cancelarTipoRespuesta");
+        $(document).off("click", "#aceptarTipoRespuesta");
+
+        // 🔘 Cancelar
+        $(document).on("click", "#cancelarTipoRespuesta", () => {
+            modalAnswer.modal("hide");
+        });
+
+        // ✅ Aceptar
+        $(document).on("click", "#aceptarTipoRespuesta", async () => {
+            const selectedOption = $("#tipoRespuesta").val();
+            const inputValue = $("#formChat #iptChat").val().trim();
+
+            if (!inputValue) {
+                alert({
+                    icon: "warning",
+                    text: "Por favor escribe un mensaje antes de mejorar tu respuesta."
+                });
+                return;
+            }
+
+            // 🔵 Contextos disponibles
+            const tipos = {
+                formal: "responde con un tono formal y profesional",
+                casual: "responde de forma cercana, natural y amistosa (puedes usar emojis)",
+                tecnica: "responde con precisión técnica y terminología especializada",
+                colaborativa: "responde de forma que invite a la colaboración y al trabajo en equipo",
+                seguimiento: "responde de forma clara y enfocada en el seguimiento de tareas",
+                propositiva: "responde de forma constructiva y con orientación a soluciones",
+                reconocimiento: "responde con tono motivador y de reconocimiento hacia el equipo",
+                compromiso: "responde con tono persuasivo, mostrando responsabilidad y compromiso"
+            };
+
+            const tipoDescripcion = tipos[selectedOption] ||
+                "mejora la redacción del mensaje manteniendo su intención original";
+
+            // 🧩 Cerrar Bootbox antes de loader
+            modalAnswer.modal("hide");
+
+            // ✨ Loader visual — sin timer
+            // 🧠 Mostrar loader visual
+            Swal.fire({
+                title: `
+                <div class="flex flex-col items-center justify-center text-white">
+                    <span class="text-lg font-semibold mb-3 drop-shadow-md">
+                        🧠 CoffeeIA está pensando la respuesta...
+                    </span>
+                    <div class="wand-container">
+                        <span class="wand text-4xl">🪄</span>
+                    </div>
                 </div>
             `,
-            size: "small",
-            buttons: {
-                cancel: {
-                    label: "Cancelar",
-                    className: "btn-secondary"
+                allowOutsideClick: false,
+                backdrop: `
+                    rgba(0,0,0,0.6)
+                    url("https://i.gifer.com/7efs.gif") center/150px no-repeat
+                `,
+                showConfirmButton: false,
+                customClass: {
+                    popup: "swal-coffee animate__animated animate__fadeInUp"
                 },
-                ok: {
-                    label: "Aceptar",
-                    className: "btn-primary",
-                    callback: async function () {
-                        const selectedOption = $("#tipoRespuesta").val();
-                        const inputValue = $("#formChat #iptChat").val().trim();
+                didOpen: () => {
+                    const swalPopup = document.querySelector(".swal2-container");
+                    if (swalPopup) swalPopup.style.zIndex = 99999;
+                }
+            });
 
-                        if (!inputValue) {
-                            alert({ icon: "warning", text: "Por favor escribe un mensaje antes de mejorar tu respuesta." });
-                            return;
-                        }
+            try {
 
-                        // 🔵 Descripción contextual según tipo
-                        const tipos = {
-                            formal: "responde con un tono formal y profesional",
-                            casual: "responde de forma cercana, natural y amistosa (puedes usar emojis)",
-                            tecnica: "responde con precisión técnica y terminología especializada",
-                            colaborativa: "responde de forma que invite a la colaboración y al trabajo en equipo",
-                            seguimiento: "responde de forma clara y enfocada en el seguimiento de tareas",
-                            propositiva: "responde de forma constructiva y con orientación a soluciones",
-                            reconocimiento: "responde con tono motivador y de reconocimiento hacia el equipo",
-                            compromiso: "responde con tono persuasivo, mostrando responsabilidad y compromiso"
-                        };
-
-                        const tipoDescripcion = tipos[selectedOption] || "mejora la redacción del mensaje manteniendo su intención original";
-                        // Obtener el archivo .env de carpeta conf y leer la clave API
-                        async function getKey() {
-                            const response = await fetch("../../DEV/conf/getEnv.php");
-                            const data = await response.json();
-                            return data.OPENAI_API_KEY;
-                        }
-
-
-                        // 🧠 Llamada al endpoint de ChatGPT
-                        try {
-                            const apiKey = await getKey(); // <-- ahora sí la obtenemos correctamente
-                            if (!apiKey) {
-                                alert({
-                                    icon: "error",
-                                    text: "No se pudo obtener la API Key. Verifica el archivo getEnv.php o el .env."
-                                });
-                                return;
+                // 🧠 Llamada al endpoint interno CoffeeIA
+                const response = await fetch("../../DEV/conf/_Complements.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        model: "gpt-4.1",
+                        temperature: 0.7,
+                        messages: [
+                            {
+                                role: "system",
+                                content: `
+                                Eres CoffeeIA 🤖, experto en redacción profesional y tono corporativo.
+                                Mejora los textos del usuario manteniendo su intención original,
+                                ajustando al contexto solicitado.
+                            `
+                            },
+                            {
+                                role: "user",
+                                content: `
+                                Contexto: ${tipoDescripcion}.
+                                Texto original: "${inputValue}".
+                                Solo devuelve el texto mejorado, sin explicaciones.
+                            `
                             }
-                            const response = await fetch("https://api.openai.com/v1/chat/completions", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json",
-                                    "Authorization": `Bearer ${apiKey}` // ← Reemplaza con tu clave
-                                },
-                                body: JSON.stringify({
-                                    model: "gpt-4.1",
-                                    messages: [
-                                        {
-                                            role: "system",
-                                            content: "Eres un asistente experto en redacción profesional llamado CoffeeIA, especializado en comunicación de equipos y tono corporativo."
-                                        },
-                                        {
-                                            role: "user",
-                                            content: `Mejora este texto según el siguiente contexto: "${tipoDescripcion}". Texto original: "${inputValue}". Solo dame el texto mejorado, sin explicaciones ni comentarios adicionales.`
-                                        }
-                                    ],
-                                    temperature: 0.7
-                                })
-                            });
+                        ]
+                    })
+                });
 
-                            const data = await response.json();
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
 
-                            if (data.choices && data.choices.length > 0) {
-                                const mejorado = data.choices[0].message.content.trim();
-                                $("#formChat #iptChat").val(mejorado);
-                            } else {
-                                alert({
-                                    icon: "error",
-                                    text: "No se pudo generar una respuesta mejorada. Intenta nuevamente."
-                                });
-                            }
-                        } catch (error) {
-                            console.error("Error al conectar con ChatGPT:", error);
-                            alert({
-                                icon: "error",
-                                text: "Ocurrió un error al conectarse con ChatGPT."
-                            });
-                        }
-                    }
+                const result = await response.json();
+
+                if (result?.status === 200) {
+                    $("#formChat #iptChat").val(result.response);
+                } else {
+                    alert({
+                        icon: "error",
+                        text: "No se pudo generar una respuesta mejorada. Intenta nuevamente."
+                    });
+                    console.error(result);
+                }
+            } catch (error) {
+                console.error("Error al conectar con CoffeeIA:", error);
+                alert({
+                    icon: "error",
+                    text: "Ocurrió un error al conectarse con CoffeeIA."
+                });
+            } finally {
+
+                // 💫 Asegura cierre del loader sin bloqueo visual
+                if (Swal.isVisible()) {
+                    Swal.close();
+                    setTimeout(() => $(".swal2-container").remove(), 300);
                 }
             }
         });
     }
 
+    async empeoraTuRespuesta() {
+        const inputValue = $("#formChat #iptChat").val().trim();
 
-    // AGREGAR A COFFEE SOFT
+        if (!inputValue) {
+            alert({
+                icon: "warning",
+                text: "Por favor escribe un mensaje antes de empeorar tu respuesta 😏."
+            });
+            return;
+        }
+
+        // 🧠 Mostrar loader visual
+        Swal.fire({
+            title: `
+                <div class="flex flex-col items-center justify-center text-white">
+                    <span class="text-lg font-semibold mb-3 drop-shadow-md">
+                        🧠 CoffeeIA está pensando la respuesta...
+                    </span>
+                    <div class="wand-container">
+                        <span class="wand text-4xl">🪄</span>
+                    </div>
+                </div>
+            `,
+            allowOutsideClick: false,
+            backdrop: `
+                    rgba(0,0,0,0.6)
+                    url("https://i.gifer.com/7efs.gif") center/150px no-repeat
+                `,
+            showConfirmButton: false,
+            customClass: {
+                popup: "swal-coffee animate__animated animate__fadeInUp"
+            },
+            didOpen: () => {
+                const swalPopup = document.querySelector(".swal2-container");
+                if (swalPopup) swalPopup.style.zIndex = 99999;
+            }
+        });
+
+
+
+        try {
+            // 🧩 Llamada al endpoint interno CoffeeIA
+            const response = await fetch("../../DEV/conf/_Complements.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: "gpt-4.1",
+                    temperature: 0.9,
+                    messages: [
+                        {
+                            role: "system",
+                            content: `
+                            Eres CoffeeIA 🤖, un asistente experto en redacción con un toque sarcástico, directo y ligeramente irónico.
+                            Tu tarea es reescribir los textos de forma que suenen más secos, cortantes o con sarcasmo sutil.
+                            No insultes ni uses groserías, pero puedes ser contundente, con una elegancia ácida.
+                            Mantén el texto breve, sin explicaciones.
+                        `
+                        },
+                        {
+                            role: "user",
+                            content: `
+                            Empeora este texto de manera sutil, haciéndolo más frío, sarcástico o irónico:
+                            "${inputValue}"
+                            Solo devuelve la versión "empeorada", sin explicaciones adicionales.
+                        `
+                        }
+                    ]
+                })
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const result = await response.json();
+
+            if (result?.status === 200) {
+                $("#formChat #iptChat").val(result.response);
+            } else {
+                alert({
+                    icon: "error",
+                    text: "No se pudo empeorar la respuesta. Quizá ya era demasiado mala 😅."
+                });
+                console.error(result);
+            }
+        } catch (error) {
+            console.error("Error al conectar con CoffeeIA:", error);
+            alert({
+                icon: "error",
+                text: "Ocurrió un error al conectarse con CoffeeIA."
+            });
+        } finally {
+            if (Swal.isVisible()) {
+                Swal.close();
+                setTimeout(() => $(".swal2-container").remove(), 300);
+            }
+        }
+    }
+
+    // 💬 Generar respuesta con manejo de errores y loader mágico
+    async creaTuRespuesta(data, idUser) {
+        const inputField = $("#formChat #iptChat");
+        let nombreUsuario = "";
+
+        // 🧩 Construcción de la conversación
+        const conversacion = data.map(item => {
+            let rol = "assistant";
+
+            if (item.user.id == idUser) {
+                nombreUsuario = item.user.valor;
+                rol = "user";
+            }
+
+            const contenido = `${item.user.valor}: ${item.valor}`;
+            return { role: rol, content: contenido };
+        });
+
+        const promptSystem = `
+            Eres CoffeeIA 🤖, experto en redacción profesional y tono corporativo.
+            Se te proporciona una conversación donde cada mensaje contiene el nombre del usuario y el mensaje que ha dicho.
+            Analiza la conversación y genera la respuesta que el usuario **${nombreUsuario}** y role: "user"
+            escribiría a continuación, sin incluir su nombre.
+
+            Restricciones:
+            ### No incluyas el nombre de usuario en tu respuesta final.
+            ### Devuelve únicamente el texto del mensaje.
+            ### Mantén su estilo y tono natural.
+        `;
+
+        // ✨ Mostrar loader con animación mágica (idéntico a empeoraTuRespuesta)
+        Swal.fire({
+            title: `
+                <div class="flex flex-col items-center justify-center text-white">
+                    <span class="text-lg font-semibold mb-3 drop-shadow-md">
+                        🧠 CoffeeIA está pensando la respuesta...
+                    </span>
+                    <div class="wand-container">
+                        <span class="wand text-4xl">🪄</span>
+                    </div>
+                </div>
+            `,
+            allowOutsideClick: false,
+            backdrop: `
+                    rgba(0,0,0,0.6)
+                    url("https://i.gifer.com/7efs.gif") center/150px no-repeat
+                `,
+            showConfirmButton: false,
+            customClass: {
+                popup: "swal-coffee animate__animated animate__fadeInUp"
+            },
+            didOpen: () => {
+                const swalPopup = document.querySelector(".swal2-container");
+                if (swalPopup) swalPopup.style.zIndex = 99999;
+            }
+        });
+
+        try {
+            // 🧠 Llamada al endpoint interno CoffeeIA
+            const response = await fetch("../../DEV/conf/_Complements.php", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    model: "gpt-4.1",
+                    temperature: 0.5,
+                    messages: [
+                        { role: "system", content: promptSystem },
+                        ...conversacion
+                    ]
+                })
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+            const result = await response.json();
+
+            if (result?.status === 200) {
+                inputField.val(result.response);
+            } else {
+                alert({
+                    icon: "error",
+                    text: "No se pudo generar la respuesta. Intenta nuevamente ☕."
+                });
+                console.error(result);
+            }
+        } catch (error) {
+            console.error("Error al conectar con CoffeeIA:", error);
+            alert({
+                icon: "error",
+                text: "Ocurrió un error al conectarse con CoffeeIA 😕."
+            });
+        } finally {
+            // 🪄 Cerrar loader mágico
+            if (Swal.isVisible()) {
+                Swal.close();
+                setTimeout(() => $(".swal2-container").remove(), 300);
+            }
+        }
+    }
+
     getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== "") {
@@ -1253,4 +1493,20 @@ class App extends Templates {
 
 function escapeHTML(text) {
     return text.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+// 🧠 Mostrar loader flotante
+function showCoffeeLoader(message = "CoffeeIA está pensando") {
+    const loader = $("#coffeeLoader");
+    $("#coffeeLoaderText").text(message);
+    loader.addClass("show").removeClass("hidden");
+}
+
+// 💤 Ocultar loader flotante
+function hideCoffeeLoader() {
+    const loader = $("#coffeeLoader");
+
+    setTimeout(() => {
+        loader.removeClass("show").addClass("hidden")
+
+    }, 800);
 }

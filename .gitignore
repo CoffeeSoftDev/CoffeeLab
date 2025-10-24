@@ -7,3 +7,6 @@ CoffeeHuubie/dev/src/plugins/
 .env
 
 CoffeeERP/DEV/conf/.env
+
+error.log
+ctrl/error.log
