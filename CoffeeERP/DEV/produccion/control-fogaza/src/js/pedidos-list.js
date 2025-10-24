@@ -555,7 +555,7 @@ class ListaPedidos extends App {
                 </div>
                 ${descuento > 0 ? `
                 <div>
-                    <div class="font-semibold">DESCUENTO:</div>
+                    <div class="font-semibold">DESCUENTO ${data.discount_percent} %:</div>
                     <div class="text-right me-5 text-green-600">-${fmt(descuento)}</div>
                 </div>` : ''}
             </div>

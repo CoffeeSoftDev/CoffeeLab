@@ -70,6 +70,7 @@ class Pedidos extends CRUD{
             observacion,
             efectivo,
             discount,
+            discount_percent,
             Total,
             tdc,
              TIME_FORMAT(pedidofolio.horapedido, '%h:%i %p') AS horapedido,
@@ -510,6 +511,7 @@ class listPedidos extends Pedidos {
                 tdc,
                 anticipo,
                 discount,
+                discount_percent,
                 whatsapp
             FROM
                 {$this->bd}pedidofolio

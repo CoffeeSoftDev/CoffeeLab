@@ -635,18 +635,24 @@ class ctrl extends Pedidos{
 
     // Operations.
     function endTicket() {
-        $tdc      = isset($_POST['tdc'])      && is_numeric($_POST['tdc'])      ? floatval($_POST['tdc'])      : 0;
-        $efectivo = isset($_POST['efectivo']) && is_numeric($_POST['efectivo']) ? floatval($_POST['efectivo']) : 0;
-    
+        $tdc       = isset($_POST['tdc'])       && is_numeric($_POST['tdc'])       ? floatval($_POST['tdc'])       : 0;
+        $efectivo  = isset($_POST['efectivo'])  && is_numeric($_POST['efectivo'])  ? floatval($_POST['efectivo'])  : 0;
+        $descuentoPorcentaje = isset($_POST['descuento']) && is_numeric($_POST['descuento']) ? floatval($_POST['descuento']) : 0;
+
+        $total = floatval($_POST['Total']);
+        $montoDescuento = $total * ($descuentoPorcentaje / 100);
+        $totalFinal = $total - $montoDescuento;
+
         $data = $this -> util -> sql([
-            'efectivo'   => $efectivo,
-            'tdc'        => $tdc,
-            'anticipo'   => ($tdc + $efectivo),
-            'Total'      => $_POST['Total'],
-            'discount'   => $_POST['descuento'],
-            'Status'     => 2,
-            'foliofecha' => date('Y-m-d H:i:s'),
-            'idLista'    => $_POST['idFolio']
+            'efectivo'         => $efectivo,
+            'tdc'              => $tdc,
+            'anticipo'         => ($tdc + $efectivo),
+            'Total'            => $totalFinal,
+            'discount'         => $montoDescuento,
+            'discount_percent' => $descuentoPorcentaje,
+            'Status'           => 2,
+            'foliofecha'       => date('Y-m-d H:i:s'),
+            'idLista'          => $_POST['idFolio']
         ], 1);
     
         $res = $this->setTickets($data);
