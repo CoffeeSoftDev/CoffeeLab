@@ -238,7 +238,7 @@ class App extends Templates {
                     opc: "input-group",
                     lbl: "Descuento",
                     id: "descuento",
-                    tipo: "cifra",
+                    // tipo: "cifra",
                     icon: "icon-percent",
                     class: "col-12 pt-2",
                     placeholder: "0.00",

@@ -217,7 +217,7 @@ class ctrl extends listPedidos{
             ? "<div class='text-end'>
                     <p title='Con descuento aplicado' class='text-green-600 cursor-pointer font-semibold'>" . evaluar($totalGral) . "</p>
                     <p class='line-through text-gray-500 text-[10px]'>" . evaluar( $key['Total']) . "</p>
-                    <p class='text-gray-500 text-[10px]'><i class='icon-tag'></i> Descuento: " . evaluar($discount) . "</p>
+                    <p class='text-gray-500 text-[10px]'><i class='icon-tag'></i> Descuento {$key['discount_percent']}% : " . evaluar($discount) . "</p>
                 </div>"
             : evaluar($key['Total']);
 
