@@ -292,17 +292,16 @@ class SalesDashboard extends Templates {
         let mkt = await useFetch({
             url: api,
             data: {
-                opc: "apiPromediosDiarios",
-                udn: udn,
+                opc  : "apiPromediosDiarios",
+                udn  : udn,
                 anio1: anio1,
-                mes1: mes1,
+                mes1 : mes1,
                 anio2: anio2,
-                mes2: mes2,
+                mes2 : mes2,
             },
         });
 
        
-
         this.showCards(mkt.dashboard);
 
         // Graficos.
