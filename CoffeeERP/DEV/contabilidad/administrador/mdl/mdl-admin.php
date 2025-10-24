@@ -1,6 +1,6 @@
 <?php
-require_once '../../conf/_CRUD.php';
-require_once '../../conf/_Utileria.php';
+require_once '../../../conf/_CRUD.php';
+require_once '../../../conf/_Utileria.php';
 session_start();
 
 class mdl extends CRUD {
@@ -9,33 +9,29 @@ class mdl extends CRUD {
 
     public function __construct() {
         $this->util = new Utileria;
-        $this->bd = "[name_bd].";
+        $this->bd = "";
     }
 
     // Módulos Desbloqueados
 
     function listModulesUnlocked($array) {
-        $leftjoin = [
-            $this->bd . 'udn' => 'module_unlock.udn_id = udn.idUDN',
-            $this->bd . 'module' => 'module_unlock.module_id = module.id'
-        ];
-
-        return $this->_Select([
-            'table' => $this->bd . 'module_unlock',
-            'values' => "
+        $query = "
+          SELECT 
                 module_unlock.id,
                 udn.UDN as udn_name,
-                module.name as module_name,
+                modulos.modulo as module_name,
                 DATE_FORMAT(module_unlock.unlock_date, '%d/%m/%Y') as unlock_date_formatted,
                 module_unlock.lock_reason,
                 module_unlock.active,
                 module_unlock.operation_date
-            ",
-            'leftjoin' => $leftjoin,
-            'where' => 'module_unlock.active = ?',
-            'order' => ['DESC' => 'module_unlock.unlock_date'],
-            'data' => $array
-        ]);
+            FROM module_unlock
+            LEFT JOIN udn ON module_unlock.udn_id = udn.idUDN
+            LEFT JOIN modulos ON module_unlock.module_id = modulos.idModulo
+            WHERE module_unlock.active = ?
+            ORDER BY module_unlock.unlock_date DESC
+        ";
+        
+        return $this->_Read($query, $array);
     }
 
     function getUnlockRequestById($id) {

@@ -115,16 +115,19 @@ class App extends Templates {
             data: [
                 {
                     opc: "button",
-                    class: "col-12 col-md-3",
+                    class: "col-12 col-md-2",
                     id: "btnDesbloquear",
+                    className:'w-full',
                     text: "Desbloquear módulo",
                     color_btn: "primary",
                     onClick: () => this.addUnlockRequest()
                 },
                 {
                     opc: "button",
-                    class: "col-12 col-md-3",
+                    class: "col-12 col-md-2",
                     id: "btnHorarios",
+                    className: 'w-full',
+
                     text: "Horario de cierre mensual",
                     color_btn: "secondary",
                     onClick: () => this.lsCloseTime()
