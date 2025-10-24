@@ -24,7 +24,7 @@ class ctrl extends mdl {
         foreach ($ls as $key) {
             $a = [];
 
-            if ($key['activo'] == 1) {
+            if ($key['active'] == 1) {
                 $a[] = [
                     'class' => 'btn btn-sm btn-primary me-1',
                     'html' => '<i class="icon-pencil"></i>',
@@ -34,27 +34,23 @@ class ctrl extends mdl {
                 $a[] = [
                     'class' => 'btn btn-sm btn-danger',
                     'html' => '<i class="icon-toggle-on"></i>',
-                    'onclick' => 'salesAccount.statusSalesAccount(' . $key['id'] . ', ' . $key['activo'] . ')'
+                    'onclick' => 'salesAccount.statusSalesAccount(' . $key['id'] . ', ' . $key['active'] . ')'
                 ];
             } else {
                 $a[] = [
                     'class' => 'btn btn-sm btn-outline-danger',
                     'html' => '<i class="icon-toggle-off"></i>',
-                    'onclick' => 'salesAccount.statusSalesAccount(' . $key['id'] . ', ' . $key['activo'] . ')'
+                    'onclick' => 'salesAccount.statusSalesAccount(' . $key['id'] . ', ' . $key['active'] . ')'
                 ];
             }
 
             $__row[] = [
-                'id' => $key['id'],
-                'Categoría' => $key['nombre'],
-                'Descuento' => renderCheckbox($key['permiso_descuento']),
-                'Cortesía' => renderCheckbox($key['permiso_cortesia']),
-                'IVA' => renderCheckbox($key['impuesto_iva']),
-                'IEPS' => renderCheckbox($key['impuesto_ieps']),
-                'Hospedaje' => renderCheckbox($key['impuesto_hospedaje']),
-                'Impuesto 0%' => renderCheckbox($key['impuesto_cero']),
-                'Estado' => renderStatus($key['activo']),
-                'a' => $a
+                'id'        => $key['id'],
+                'Categoría' => $key['name'],
+                'IVA'       => renderCheckbox($key['tax_iva']),
+                'IEPS'      => renderCheckbox($key['tax_ieps']),
+                'Hospedaje' => renderCheckbox($key['tax_hospedaje']),
+                'a'         => $a
             ];
         }
 
@@ -68,10 +64,10 @@ class ctrl extends mdl {
         $status = 500;
         $message = 'No se pudo agregar la categoría de venta';
         
-        $_POST['fecha_creacion'] = date('Y-m-d H:i:s');
-        $_POST['activo'] = 1;
+        $_POST['created_at'] = date('Y-m-d H:i:s');
+        $_POST['active'] = 1;
 
-        $exists = $this->existsSalesAccountByName([$_POST['nombre'], $_POST['udn_id']]);
+        $exists = $this->existsSalesAccountByName([$_POST['name'], $_POST['udn_id']]);
 
         if ($exists == 0) {
             $create = $this->createSalesAccount($this->util->sql($_POST));
@@ -145,8 +141,8 @@ class ctrl extends mdl {
     }
 }
 
-function renderStatus($activo) {
-    switch ($activo) {
+function renderStatus($active) {
+    switch ($active) {
         case 1:
             return '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-[#014737] text-[#3FC189]">
                         <i class="icon-check-circle text-blue-500"></i> Activo
@@ -163,11 +159,11 @@ function renderStatus($activo) {
 function renderCheckbox($value) {
     if ($value == 1) {
         return '<div class="flex justify-center">
-                    <i class="icon-check-circle text-green-500 text-lg"></i>
+                    <i class="icon-ok-squared text-green-500 text-2xl"></i>
                 </div>';
     } else {
         return '<div class="flex justify-center">
-                    <i class="icon-circle text-gray-400 text-lg"></i>
+                    <i class=" icon-minus-squared text-gray-400 text-2xl"></i>
                 </div>';
     }
 }

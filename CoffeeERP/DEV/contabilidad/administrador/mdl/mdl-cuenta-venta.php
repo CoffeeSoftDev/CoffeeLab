@@ -1,6 +1,6 @@
 <?php
-require_once '../../conf/_CRUD.php';
-require_once '../../conf/_Utileria.php';
+require_once '../../../conf/_CRUD.php';
+require_once '../../../conf/_Utileria.php';
 session_start();
 
 class mdl extends CRUD {
@@ -9,38 +9,32 @@ class mdl extends CRUD {
 
     public function __construct() {
         $this->util = new Utileria;
-        $this->bd = "erp_varoch.";
+        $this->bd   = "";
     }
 
     function listSalesAccount($array) {
-        return $this->_Select([
-            'table' => "{$this->bd}categoria_venta",
-            'values' => "
-                categoria_venta.id,
-                categoria_venta.udn_id,
-                categoria_venta.nombre,
-                categoria_venta.permiso_descuento,
-                categoria_venta.permiso_cortesia,
-                categoria_venta.impuesto_iva,
-                categoria_venta.impuesto_ieps,
-                categoria_venta.impuesto_hospedaje,
-                categoria_venta.impuesto_cero,
-                categoria_venta.activo,
-                DATE_FORMAT(categoria_venta.fecha_creacion, '%d/%m/%Y %H:%i') AS fecha_creacion,
-                udn.nombre AS udn_nombre
-            ",
-            'leftjoin' => [
-                "{$this->bd}udn" => "categoria_venta.udn_id = udn.id"
-            ],
-            'where' => 'categoria_venta.udn_id = ?',
-            'order' => ['ASC' => 'categoria_venta.nombre'],
-            'data' => $array
-        ]);
+        $query = "
+            SELECT 
+                sale_category.id,
+                sale_category.udn_id,
+                sale_category.name,
+                sale_category.tax_iva,
+                sale_category.tax_ieps,
+                sale_category.tax_hospedaje,
+                sale_category.active,
+                udn.UDN AS udn_nombre
+            FROM {$this->bd}sale_category
+            LEFT JOIN {$this->bd}udn ON sale_category.udn_id = udn.idUDN
+            WHERE sale_category.udn_id = ?
+            ORDER BY sale_category.name ASC
+        ";
+        
+        return $this->_Read($query, $array);
     }
 
     function getSalesAccountById($array) {
         return $this->_Select([
-            'table' => "{$this->bd}categoria_venta",
+            'table' => "{$this->bd}sale_category",
             'values' => '*',
             'where' => 'id = ?',
             'data' => $array
@@ -48,21 +42,22 @@ class mdl extends CRUD {
     }
 
     function lsUDN() {
-        return $this->_Select([
-            'table' => "{$this->bd}udn",
-            'values' => 'id, nombre AS valor',
-            'where' => 'activo = 1',
-            'order' => ['ASC' => 'nombre']
-        ]);
+        $query = "
+            SELECT idUDN AS id, UDN AS valor
+            FROM {$this->bd}udn
+            WHERE Stado = 1 AND idUDN NOT IN (8, 10, 7)
+            ORDER BY UDN DESC
+        ";
+        return $this->_Read($query, null);
     }
 
     function existsSalesAccountByName($array) {
         $query = "
             SELECT COUNT(*) as total
-            FROM {$this->bd}categoria_venta
-            WHERE LOWER(nombre) = LOWER(?)
+            FROM {$this->bd}sale_category
+            WHERE LOWER(name) = LOWER(?)
             AND udn_id = ?
-            AND activo = 1
+            AND active = 1
         ";
         $result = $this->_Read($query, $array);
         return $result[0]['total'];
@@ -70,7 +65,7 @@ class mdl extends CRUD {
 
     function createSalesAccount($array) {
         return $this->_Insert([
-            'table' => "{$this->bd}categoria_venta",
+            'table' => "{$this->bd}sale_category",
             'values' => $array['values'],
             'data' => $array['data']
         ]);
@@ -78,10 +73,12 @@ class mdl extends CRUD {
 
     function updateSalesAccount($array) {
         return $this->_Update([
-            'table' => "{$this->bd}categoria_venta",
+            'table' => "{$this->bd}sale_category",
             'values' => $array['values'],
             'where' => 'id = ?',
             'data' => $array['data']
         ]);
     }
+
+
 }

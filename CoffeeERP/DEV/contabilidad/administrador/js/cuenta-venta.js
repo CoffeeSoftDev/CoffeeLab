@@ -81,8 +81,7 @@ class SalesAccountManager extends Templates {
             attr: {
                 id: `tb${this.PROJECT_NAME}`,
                 theme: 'corporativo',
-                title: 'Lista de Categorías de Venta',
-                subtitle: 'Categorías registradas en el sistema',
+             
                 center: [2, 3, 4, 5, 6, 7, 8],
                 right: [9]
             }
