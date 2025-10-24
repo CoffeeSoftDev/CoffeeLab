@@ -153,9 +153,13 @@ class mdl extends CRUD {
                 SUM(AyB) as totalAyB,
                 SUM(alimentos) as totalAlimentos,
                 SUM(bebidas) as totalBebidas,
+                SUM(guarniciones) as totalGuarniciones,
+                SUM(sales) as totalSales,
+                SUM(domicilio) as totalDomicilio,
                 SUM(Diversos) as totalDiversos,
-                (SUM(Hospedaje) + SUM(AyB) + SUM(Diversos)) AS totalGeneral,
+                ( SUM(Hospedaje) + SUM(AyB) + SUM(Diversos)) AS totalGeneral,
                 (SUM(alimentos) + SUM(bebidas) ) AS totalGralAyB,
+                (SUM(domicilio) + SUM(sales) + SUM(guarniciones) + SUM(alimentos) + SUM(bebidas) ) AS totalGral,
                 SUM(noHabitaciones) as totalHabitaciones
             FROM
             {$this->bd}soft_folio

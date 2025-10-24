@@ -28,10 +28,10 @@
             <div class=" main-container" id="root"></div>
 
           <!-- Módulos del Sistema -->
-    <script src="js/dashboard.js?t=<?php echo time(); ?>"></script>
-    <script src="js/productos.js?t=<?php echo time(); ?>"></script>
-    <script src="js/canales.js?t=<?php echo time(); ?>"></script>
-    <script src="js/pedidos.js?t=<?php echo time(); ?>"></script>
+        <script src="js/dashboard.js?t=<?php echo time(); ?>"></script>
+        <script src="js/productos.js?t=<?php echo time(); ?>"></script>
+        <script src="js/canales.js?t=<?php echo time(); ?>"></script>
+        <script src="js/pedidos.js?t=<?php echo time(); ?>"></script>
 
 
         </div>

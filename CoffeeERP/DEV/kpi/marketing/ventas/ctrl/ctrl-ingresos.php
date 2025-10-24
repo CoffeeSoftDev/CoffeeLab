@@ -338,6 +338,29 @@ class ctrl extends mdl {
                 'chequePromedioAyB'       => 'cheque Promedio AyB',
                 'chequePromedioDiversos'  => 'cheque Promedio Diversos',
             );
+
+        elseif($udn == 5):
+
+             $consultas = array(
+                 'totalHabitaciones' => 'Clientes',
+                 'totalAlimentos'    => 'Cortes',
+                 'totalBebidas'      => 'Bebidas',
+                 'totalGuarniciones' => 'Guarniciones',
+                 'totalSales'        => 'Sales',
+                 'totalDomicilio'    => 'Domicilio',
+                 'totalGral'         => 'Total',
+
+                'group'             => '',
+                
+                
+                'porcAgrupacion'          => '% Ocupacion',
+                'tarifaEfectiva'          => 'Tarifa efectiva acumulada',
+                'chequePromedio'          => 'Cheque Promedio',
+                'chequePromedioHospedaje' => 'chequePromedioHospedaje',
+                'chequePromedioAyB'       => 'cheque Promedio AyB',
+                'chequePromedioDiversos'  => 'cheque Promedio Diversos',
+            );
+
         else:
 
               $consultas = array(
@@ -415,7 +438,6 @@ class ctrl extends mdl {
     }
 
    
-
     function comparativaByCategory() {
         $anioNow = $_POST['anio1'];
         $mesNow  = $_POST['mes1'];
@@ -593,28 +615,36 @@ class ctrl extends mdl {
         $mes2     = $_POST['mes2']   ?? date('m');
         $category = strtolower(trim($_POST['category'] ?? 'todas'));
 
-        // 🔹 Obtener datos de ambos años
         $apiActual   = $this->apiIngresosTotales($udn, $anio1, $mes1);
         $apiAnterior = $this->apiIngresosTotales($udn, $anio2, $mes2);
 
         $rowsActual   = $apiActual['data'] ?? [];
         $rowsAnterior = $apiAnterior['data'] ?? [];
 
-        // 🔹 Inicializar estructura por día
-        $daysOfWeek = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-        $weeklyActual   = array_fill_keys($daysOfWeek, ['total' => 0, 'clientes' => 0]);
-        $weeklyAnterior = array_fill_keys($daysOfWeek, ['total' => 0, 'clientes' => 0]);
+        // Días en español
+        $diasES = [
+            'Monday'    => 'Lunes',
+            'Tuesday'   => 'Martes',
+            'Wednesday' => 'Miércoles',
+            'Thursday'  => 'Jueves',
+            'Friday'    => 'Viernes',
+            'Saturday'  => 'Sábado',
+            'Sunday'    => 'Domingo'
+        ];
 
-        // 🔹 Función para procesar datos según año
-        $processData = function ($rows, &$weeklyData) use ($category) {
+        $weeklyActual   = array_fill_keys(array_values($diasES), ['total' => 0, 'clientes' => 0]);
+        $weeklyAnterior = array_fill_keys(array_values($diasES), ['total' => 0, 'clientes' => 0]);
+
+        $processData = function ($rows, &$weeklyData) use ($category, $diasES) {
             foreach ($rows as $row) {
                 if (empty($row['fecha'])) continue;
 
-                $dayName  = ucfirst(strtolower(date('l', strtotime($row['fecha']))));
+                $dayEnglish = ucfirst(strtolower(date('l', strtotime($row['fecha']))));
+                $dayName    = $diasES[$dayEnglish] ?? $dayEnglish;
+
                 $clientes = isset($row['clientes']) ? intval($row['clientes']) : 0;
                 $total    = 0;
 
-                // 🔸 Filtrar por categoría si aplica
                 if ($category == 'todas' || $category == '') {
                     $total = isset($row['total']) ? floatval($row['total']) : 0;
                 } else {
@@ -633,46 +663,44 @@ class ctrl extends mdl {
             }
         };
 
-        // 🔹 Procesar ambos conjuntos
         $processData($rowsActual, $weeklyActual);
         $processData($rowsAnterior, $weeklyAnterior);
 
-        // 🔹 Construir arrays para gráfico
         $labels = [];
-        $dataA  = []; // Año anterior (anio2)
-        $dataB  = []; // Año actual (anio1)
+        $dataA  = [];
+        $dataB  = [];
 
-        foreach ($daysOfWeek as $day) {
-            $labels[] = substr($day, 0, 3); // Mon, Tue, Wed...
+        foreach ($diasES as $en => $es) {
+            $labels[] = $es;
 
-            $avgActual   = $weeklyActual[$day]['clientes'] > 0
-                ? round($weeklyActual[$day]['total'] / $weeklyActual[$day]['clientes'], 2)
+            $avgActual = $weeklyActual[$es]['clientes'] > 0
+                ? round($weeklyActual[$es]['total'] / $weeklyActual[$es]['clientes'], 2)
                 : 0;
 
-            $avgAnterior = $weeklyAnterior[$day]['clientes'] > 0
-                ? round($weeklyAnterior[$day]['total'] / $weeklyAnterior[$day]['clientes'], 2)
+            $avgAnterior = $weeklyAnterior[$es]['clientes'] > 0
+                ? round($weeklyAnterior[$es]['total'] / $weeklyAnterior[$es]['clientes'], 2)
                 : 0;
 
-            $dataA[] = $avgAnterior;  // Primero el año anterior
-            $dataB[] = $avgActual;    // Después el año actual
+            $dataA[] = $avgAnterior;
+            $dataB[] = $avgActual;
         }
 
-        // 📊 Retornar estructura compatible con barChart()
         return [
             'status'  => 200,
             'message' => 'Cheque promedio diario comparativo generado correctamente',
             'filter'  => $category,
             'labels'  => $labels,
-            'dataA'   => $dataA,   // Año anterior (anio2)
-            'dataB'   => $dataB,   // Año actual (anio1)
-            'yearA'   => intval($anio2),  // Año anterior
-            'yearB'   => intval($anio1),  // Año actual
+            'dataA'   => $dataA,
+            'dataB'   => $dataB,
+            'yearA'   => intval($anio2),
+            'yearB'   => intval($anio1),
             'api'     => [
                 'actual'   => $apiActual,
                 'anterior' => $apiAnterior
             ]
         ];
     }
+
 
     // Dashboard -Promedios diarios
     public function apiPromediosDiarios() {
@@ -758,6 +786,191 @@ class ctrl extends mdl {
             'topWeek'   => $this->apiTopDiasSemanaPromedio($anio, $mes, $udn)
         ];
     }
+
+    public function apiPromediosDiariosRange() {
+        $__row        = [];
+        $mesCompleto  = $_POST['monthText'];
+        $Anio         = $_POST['anio'];
+        $AnioAnterior = $Anio - 1;
+        $udn          = $_POST['udn'];
+        $mesActual    = $_POST['mes'];
+        $rangoMeses   = $_POST['rango'] ?? 1;
+
+        $consultas = [];
+
+        if ($udn == 1):
+            $consultas = [
+                'totalGeneral'      => 'Suma de ingresos',
+                'totalHospedaje'    => 'ingreso de Hospedaje',
+                'totalAyB'          => 'ingreso AyB',
+                'totalDiversos'     => 'ingreso Diversos',
+                'totalHabitaciones' => 'Habitaciones',
+                'group'             => '',
+                'porcAgrupacion'          => '% Ocupacion',
+                'tarifaEfectiva'          => 'Tarifa efectiva acumulada',
+                'chequePromedio'          => 'Cheque Promedio',
+                'chequePromedioHospedaje' => 'chequePromedioHospedaje',
+                'chequePromedioAyB'       => 'cheque Promedio AyB',
+                'chequePromedioDiversos'  => 'cheque Promedio Diversos',
+            ];
+        elseif ($udn == 5):
+            $consultas = [
+                'totalHabitaciones' => 'Clientes',
+                'totalAlimentos'    => 'Cortes',
+                'totalBebidas'      => 'Bebidas',
+                'totalGuarniciones' => 'Guarniciones',
+                'totalSales'        => 'Sales y condimentos',
+                'totalDomicilio'    => 'Domicilio',
+                'totalGral'         => 'Total',
+                'group'             => '',
+                'porcAgrupacion'          => '% Ocupacion',
+                'tarifaEfectiva'          => 'Tarifa efectiva acumulada',
+                'chequePromedio'          => 'Cheque Promedio',
+                'chequePromedioHospedaje' => 'chequePromedioHospedaje',
+                'chequePromedioAyB'       => 'cheque Promedio AyB',
+                'chequePromedioDiversos'  => 'cheque Promedio Diversos',
+            ];
+        else:
+            $consultas = [
+                'totalHabitaciones'       => 'Clientes',
+                'totalGralAyB'            => 'Ventas AyB',
+                'totalAlimentos'          => 'Alimentos',
+                'totalBebidas'            => 'Bebidas',
+                'group'                   => '',
+                'chequePromedioAyB'       => 'Cheque Promedio AyB',
+                'chequePromedioAlimentos' => 'Cheque Promedio Alimentos',
+                'chequePromedioBebidas'   => 'Cheque Promedio Bebidas',
+            ];
+        endif;
+
+        $thead = ['Concepto'];
+        $month = [];
+
+        for ($i = 0; $i < $rangoMeses; $i++) {
+            $currTime = mktime(0, 0, 0, $mesActual - $i, 1, $Anio);
+            $prevTime = mktime(0, 0, 0, $mesActual - $i, 1, $AnioAnterior);
+
+            $currYear = date('Y', $currTime);
+            $currMonth = date('n', $currTime);
+            $prevYear = date('Y', $prevTime);
+            $prevMonth = date('n', $prevTime);
+            $textMes = ucfirst(strftime('%B', $currTime));
+
+            $thead[] = "$textMes / $currYear";
+            $thead[] = "$textMes / $prevYear";
+
+            $month[] = [
+                'label'        => $textMes,
+                'currentMonth' => ['year' => $currYear, 'month' => $currMonth],
+                'previousMonth'=> ['year' => $prevYear, 'month' => $prevMonth],
+            ];
+        }
+
+        foreach ($consultas as $key => $titulo) {
+            $row = [];
+
+            if ($key != 'group') {
+                $base = [ 'id' => $key, 'concepto' => $titulo ];
+
+                foreach ($month as $block) {
+                    $ventasCurr = $this->ingresosMensuales([$udn, $block['currentMonth']['year'], $block['currentMonth']['month']]);
+                    $ventasPrev = $this->ingresosMensuales([$udn, $block['previousMonth']['year'], $block['previousMonth']['month']]);
+
+                    $totalCurr = $this->getCalculoPorConcepto($key, $ventasCurr, cal_days_in_month(CAL_GREGORIAN, $block['currentMonth']['month'], $block['currentMonth']['year']));
+                    $totalPrev = $this->getCalculoPorConcepto($key, $ventasPrev, cal_days_in_month(CAL_GREGORIAN, $block['previousMonth']['month'], $block['previousMonth']['year']));
+
+                    $row["{$block['label']}_current"] = [
+                        'val'   => $totalCurr,
+                        'text'  => ($key == 'totalHabitaciones') ? $totalCurr : evaluar($totalCurr),
+                        'class' => 'text-end'
+                    ];
+                    $row["{$block['label']}_previous"] = [
+                        'val'   => $totalPrev,
+                        'text'  => ($key == 'totalHabitaciones') ? $totalPrev : evaluar($totalPrev),
+                        'class' => 'text-end'
+                    ];
+                }
+
+                $__row[] = array_merge($base, $row);
+            } else {
+                $__row[] = ['id' => 0, 'Concepto' => '', 'colgroup' => true];
+            }
+        }
+
+        return [
+            'thead' => $thead,
+            'row'   => $__row
+        ];
+    }
+
+    public function getDatasetRangeConcepto($concepto = null) {
+        $res = $this->apiPromediosDiariosRange();
+        
+        $mesesES = [
+            'January' => 'Enero', 'February' => 'Febrero', 'March' => 'Marzo',
+            'April' => 'Abril', 'May' => 'Mayo', 'June' => 'Junio',
+            'July' => 'Julio', 'August' => 'Agosto', 'September' => 'Septiembre',
+            'October' => 'Octubre', 'November' => 'Noviembre', 'December' => 'Diciembre'
+        ];
+        
+        $labels = [];
+        $dataA = [];
+        $dataB = [];
+        $nombre = '';
+        $yearA = $_POST['anio'] ?? date('Y');
+        $yearB = $yearA - 1;
+
+        foreach ($res['row'] as $item) {
+            if (strcasecmp($item['concepto'], $concepto) === 0) {
+                $nombre = $item['concepto'];
+
+                foreach ($item as $key => $value) {
+                    if (is_array($value) && isset($value['val'])) {
+                        if (strpos($key, '_current') !== false) {
+                            $mesLabel = str_replace('_current', '', $key);
+                            if (!in_array($mesLabel, $labels)) {
+                                $labels[] = isset($mesesES[$mesLabel]) ? $mesesES[$mesLabel] : $mesLabel;
+                            }
+                            $dataB[] = floatval($value['val']);
+                        } elseif (strpos($key, '_previous') !== false) {
+                            $dataA[] = floatval($value['val']);
+                        }
+                    }
+                }
+
+                break;
+            }
+        }
+
+        $labels = array_reverse($labels);
+        $dataA = array_reverse($dataA);
+        $dataB = array_reverse($dataB);
+
+        return [
+            'title'  => "Comparativa Anual de Cheque Promedio ( $nombre ) ",
+            'labels' => $labels,
+            'dataA'  => $dataB,
+            'dataB'  => $dataA,
+            'yearA'  => intval($yearB),
+            'yearB'  => intval($yearA)
+        ];
+    }
+
+    function getPromediosDiariosRange(){
+        $response = $this->apiPromediosDiariosRange();
+        $concepto = $_POST['concepto'] ;
+        $concepto = ucfirst(strtolower(trim($concepto)));
+        $grafica  = $this->getDatasetRangeConcepto($concepto);
+
+        return[
+            'dataset' => $grafica,
+            'range'   => $response,
+            'concepto' => $concepto
+        ];
+    }
+
+
+
 
 
 
@@ -1552,6 +1765,80 @@ class ctrl extends mdl {
     }
 
 
+      function getCalendarioVentas() {
+        $udn = $_POST['udn'] ?? 1;
+        $fechaFin = new DateTime();
+        $fechaInicio = clone $fechaFin;
+        $fechaInicio->modify('-34 days');
+
+        $semanas = [];
+        $semanaActual = [];
+        $totalSemana = 0;
+        $contadorDias = 0;
+        $numeroSemana = 1;
+
+        $fechaTemp = clone $fechaInicio;
+
+        while ($fechaTemp <= $fechaFin) {
+            $fecha = $fechaTemp->format('Y-m-d');
+            $ventas = $this->getsoftVentas([$udn, $fecha]);
+
+            $total = 0;
+            $clientes = isset($ventas['noHabitaciones']) ? intval($ventas['noHabitaciones']) : 0;
+
+            if ($udn == 1) {
+                $total = ($ventas['Hospedaje'] ?? 0) + ($ventas['AyB'] ?? 0) + ($ventas['Diversos'] ?? 0);
+            } elseif ($udn == 5) {
+                $total = ($ventas['alimentos'] ?? 0) + ($ventas['bebidas'] ?? 0) + 
+                         ($ventas['guarniciones'] ?? 0) + ($ventas['sales'] ?? 0) + 
+                         ($ventas['domicilio'] ?? 0);
+            } else {
+                $total = ($ventas['alimentos'] ?? 0) + ($ventas['bebidas'] ?? 0);
+            }
+
+            $chequePromedio = $clientes > 0 ? $total / $clientes : 0;
+
+            $dia = [
+                'dia' => $fechaTemp->format('d'),
+                'fecha' => $fecha,
+                'diaSemana' => formatSpanishDay($fecha),
+                'total' => $total,
+                'totalFormateado' => evaluar($total),
+                'clientes' => $clientes,
+                'chequePromedio' => evaluar($chequePromedio)
+            ];
+
+            $semanaActual[] = $dia;
+            $totalSemana += $total;
+            $contadorDias++;
+
+            if ($contadorDias == 7 || $fechaTemp == $fechaFin) {
+                $semanas[] = [
+                    'numero' => $numeroSemana,
+                    'totalSemana' => evaluar($totalSemana),
+                    'totalSemanaRaw' => $totalSemana,
+                    'dias' => $semanaActual
+                ];
+
+                $semanaActual = [];
+                $totalSemana = 0;
+                $contadorDias = 0;
+                $numeroSemana++;
+            }
+
+            $fechaTemp->modify('+1 day');
+        }
+
+        return [
+            'status' => 200,
+            'title' => 'Calendario de Ventas - Últimas 5 Semanas',
+            'semanas' => $semanas,
+            'fechaInicio' => $fechaInicio->format('Y-m-d'),
+            'fechaFin' => $fechaFin->format('Y-m-d')
+        ];
+    }
+
+
 
 
     // Aux.
@@ -1579,6 +1866,9 @@ class ctrl extends mdl {
         }
 
     }
+
+
+
 
 }
 
@@ -1645,3 +1935,6 @@ function createElement($tag, $attributes = [], $text = null) {
 // ✅ Instancia final del controlador
 $ctrl = new ctrl();
 echo json_encode($ctrl->{$_POST['opc']}());
+
+
+  

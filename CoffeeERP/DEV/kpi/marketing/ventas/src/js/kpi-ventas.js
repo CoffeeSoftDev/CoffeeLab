@@ -1,5 +1,5 @@
 let api = 'ctrl/ctrl-ingresos.php';
-let app, sales, salesDashboard, monthlySales, cumulativeAverages;
+let app, sales, salesDashboard, monthlySales, cumulativeAverages, salesCalendar;
 
 let udn, lsudn, clasificacion, clasificacionUdn;
 
@@ -18,6 +18,7 @@ $(async () => {
     sales = new Sales(api, "root");
     monthlySales = new MonthlySales(api, "root");
     cumulativeAverages = new CumulativeAverages(api, "root");
+    salesCalendar = new SalesCalendar(api, "root");
 
     app.render();
 
@@ -40,6 +41,7 @@ class App extends Templates {
         sales.render();
         monthlySales.render();
         cumulativeAverages.render();
+        salesCalendar.render();
 
     }
 
@@ -98,6 +100,11 @@ class App extends Templates {
                     tab: "Promedios acumulados",
                     onClick: () => {
                     }
+                },
+                {
+                    id: "calendarioVentas",
+                    tab: "Calendario de Ventas",
+                    onClick: () => salesCalendar.renderCalendar()
                 },
             ]
         });
@@ -292,12 +299,12 @@ class SalesDashboard extends Templates {
         let mkt = await useFetch({
             url: api,
             data: {
-                opc  : "apiPromediosDiarios",
-                udn  : udn,
+                opc: "apiPromediosDiarios",
+                udn: udn,
                 anio1: anio1,
-                mes1 : mes1,
+                mes1: mes1,
                 anio2: anio2,
-                mes2 : mes2,
+                mes2: mes2,
             },
         });
 
@@ -308,26 +315,9 @@ class SalesDashboard extends Templates {
         // Graficos.
 
         this.layoutDailyAverageCheck();
+        this.layoutChequePromedio();
 
-        // this.chequeComparativo({
-        //     data: mkt.barras.dataset,
-        //     anioA: mkt.barras.anioA,
-        //     anioB: mkt.barras.anioB,
-
-        // });
-
-
-        // this.comparativaIngresosDiarios({ data: mkt.linear });
-
-        // this.ventasPorDiaSemana(mkt.barDays);
-
-
-        // this.topDiasSemana({
-        //     parent: "Tendencia",
-        //     title: "📊 Ranking por Promedio Semanal",
-        //     subtitle: "Promedio de ventas por día de la semana en el mes seleccionado",
-        //     data: mkt.topWeek
-        // });
+        //  
 
 
 
@@ -412,10 +402,10 @@ class SalesDashboard extends Templates {
         });
     }
 
-
-
     // Cheque Promedio.
     layoutChequePromedio() {
+
+        $('#filterBarChequePromedio').empty();
 
         this.createfilterBar({
             parent: `filterBarChequePromedio`,
@@ -423,9 +413,9 @@ class SalesDashboard extends Templates {
                 {
                     opc: "select",
                     id: "category",
-                    lbl: "Categorias",
+                    lbl: "Categoria",
                     class: "col-sm-4",
-                    onchange: `salesDashboard.comparativeChequePromedio()`,
+                    onchange: `salesDashboard.renderChequePromedioCategory()`,
                 },
 
             ],
@@ -444,37 +434,56 @@ class SalesDashboard extends Templates {
     async renderChequePromedioCategory() {
 
         let udn = $('#filterBarDashboard #udn').val();
-        let periodo1 = $('#filterBarDashboard #periodo1').val();
-        let [anio1, mes1] = periodo1.split('-');
-        let periodo2 = $('#filterBarDashboard #periodo2').val();
-        let [anio2, mes2] = periodo2.split('-');
+        let category = $('#filterBarChequePromedio #category option:selected').text();
+        let date = this.getFilterDate();
+
+        const meses = moment.months();
+        const nombreMes1 = meses[parseInt(date.month1) - 1];
+        const nombreMes2 = meses[parseInt(date.month2) - 1];
 
         let mkt = await useFetch({
             url: api,
             data: {
-                opc: "comparativaByCategory",
+                opc: "getPromediosDiariosRange",
                 udn: udn,
-                category: $('#category option:selected').text(),
-                anio1: anio1,
-                mes1: mes1,
-                anio2: anio2,
-                mes2: mes2,
+                concepto: category,
+                mes: 10,
+                anio: 2025,
+                rango: 3
+
             },
         });
 
-        console.log('mkt', mkt)
 
-        this.linearChart({
-            parent: "barProductMargen",
-            id: "barProductMargewn",
-            title: "📈 Comparativa por Categoría",
-            data: mkt.chart
+
+        this.barChart({
+            parent: 'barChequePromedio',
+            id: 'chartAnual',
+            ...mkt.dataset
         });
 
+
+
+        // let mkt = await useFetch({
+        //     url: api,
+        //     data: {
+        //         opc: "getDailyCheck",
+        //         udn: udn,
+        //         category: category,
+        //         anio1: date.year1,
+        //         mes1: date.month1,
+        //         anio2: date.year2,
+        //         mes2: date.month2,
+        //     },
+        // });
+
+        console.log(mkt)
+
+
+
+
+
     }
-
-
-
     // Cheque Promedio cards.
 
 
@@ -2263,3 +2272,222 @@ class CumulativeAverages extends Templates {
     }
 }
 
+
+
+class SalesCalendar extends Templates {
+    constructor(link, div_modulo) {
+        super(link, div_modulo);
+        this.PROJECT_NAME = "SalesCalendar";
+    }
+
+    render() {
+        this.layout();
+    }
+
+    layout() {
+        this.primaryLayout({
+            parent: `container-calendarioVentas`,
+            id: this.PROJECT_NAME,
+            card: {
+                filterBar: { class: 'w-full border-b pb-2', id: `filterBar${this.PROJECT_NAME}` },
+                container: { class: 'w-full my-2 h-full', id: `container${this.PROJECT_NAME}` }
+            }
+        });
+    }
+
+    async renderCalendar() {
+        $(`#container${this.PROJECT_NAME}`).html(`
+            <div class="px-2 pt-2 pb-2">
+                <h2 class="text-2xl font-semibold">📅 Calendario de Ventas</h2>
+                <p class="text-gray-400">Visualiza las ventas de las últimas 5 semanas</p>
+            </div>
+            <div id="calendario-container"></div>
+        `);
+
+        this.filterBar();
+
+        const udn = $('#filterBarSalesCalendar #udn').val();
+        const data = await useFetch({
+            url: this._link,
+            data: {
+                opc: 'getCalendarioVentas',
+                udn: udn
+            }
+        });
+
+        this.calendarioVentas({
+            parent: 'calendario-container',
+            id: 'calendarioVentas',
+            title: data.title || 'Calendario de Ventas - Últimas 5 Semanas',
+            json: data.semanas || [],
+            onDayClick: (dia) => {
+                console.log('Día seleccionado:', dia);
+                alert({
+                    icon: 'info',
+                    title: `Ventas del día ${dia.dia}`,
+                    html: `
+                        <div class="text-left">
+                            <p><strong>Total:</strong> ${dia.totalFormateado}</p>
+                            <p><strong>Clientes:</strong> ${dia.clientes}</p>
+                            <p><strong>Cheque Promedio:</strong> ${dia.chequePromedio}</p>
+                        </div>
+                    `,
+                    btn1: true,
+                    btn1Text: 'Cerrar'
+                });
+            }
+        });
+    }
+
+    filterBar() {
+        this.createfilterBar({
+            parent: `filterBar${this.PROJECT_NAME}`,
+            data: [
+                {
+                    opc: "select",
+                    id: "udn",
+                    lbl: "UDN",
+                    class: "col-sm-3",
+                    data: lsudn,
+                    onchange: `salesCalendar.renderCalendar()`
+                }
+            ]
+        });
+    }
+
+    // Components.
+
+    calendarioVentas(options) {
+        const defaults = {
+            parent: "calendario-container",
+            id: "calendarioVentas",
+            class: "w-full p-4",
+            title: "Calendario de Ventas - Últimas 5 Semanas",
+            data: {},
+            json: [],
+            onDayClick: () => { },
+            onWeekClick: () => { }
+        };
+
+        const opts = Object.assign({}, defaults, options);
+
+        const container = $("<div>", {
+            id: opts.id,
+            class: opts.class
+        });
+
+        const header = $("<div>", {
+            class: "mb-6"
+        }).append(
+            $("<h2>", {
+                class: "text-2xl font-bold text-gray-800",
+                text: opts.title
+            })
+        );
+
+        const calendarContainer = $("<div>", {
+            class: "space-y-6"
+        });
+
+        if (opts.json && opts.json.length > 0) {
+            opts.json.forEach((semana, index) => {
+                const semanaBlock = this.renderSemana(semana, index + 1, opts);
+                calendarContainer.append(semanaBlock);
+            });
+        }
+
+        container.append(header, calendarContainer);
+        $(`#${opts.parent}`).html(container);
+    }
+
+    renderSemana(semana, numeroSemana, opts) {
+        const semanaContainer = $("<div>", {
+            class: "bg-white rounded-lg shadow-md p-4 border border-gray-200"
+        });
+
+        const semanaHeader = $("<div>", {
+            class: "flex justify-between items-center mb-4 pb-2 border-b border-gray-300"
+        }).append(
+            $("<h3>", {
+                class: "text-lg font-semibold text-gray-700",
+                text: `Semana ${numeroSemana}`
+            }),
+            $("<span>", {
+                class: "text-lg font-bold text-[#8CC63F]",
+                html: `Total: <span class="text-xl">${semana.totalSemana}</span>`
+            })
+        );
+
+        const diasHeader = $("<div>", {
+            class: "grid grid-cols-7 gap-2 mb-2"
+        });
+
+        const diasSemana = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+        diasSemana.forEach(dia => {
+            diasHeader.append(
+                $("<div>", {
+                    class: "text-center text-sm font-semibold text-gray-600 py-1",
+                    text: dia
+                })
+            );
+        });
+
+        const diasContainer = $("<div>", {
+            class: "grid grid-cols-7 gap-2"
+        });
+
+        semana.dias.forEach(dia => {
+            const diaCard = this.renderDia(dia, opts);
+            diasContainer.append(diaCard);
+        });
+
+        semanaContainer.append(semanaHeader, diasHeader, diasContainer);
+        return semanaContainer;
+    }
+
+    renderDia(dia, opts) {
+        const total = parseFloat(dia.total) || 0;
+        const colorClass = this.getColorByAmount(total);
+
+        const diaCard = $("<div>", {
+            class: `${colorClass} rounded-lg p-3 cursor-pointer hover:shadow-lg transition-all duration-200 border-2 border-transparent hover:border-[#8CC63F]`,
+            click: () => {
+                if (typeof opts.onDayClick === "function") {
+                    opts.onDayClick(dia);
+                }
+            }
+        });
+
+        const diaNumero = $("<div>", {
+            class: "text-sm font-bold text-gray-700 mb-1",
+            text: dia.dia
+        });
+
+        const diaTotal = $("<div>", {
+            class: "text-lg font-bold text-gray-900",
+            text: dia.totalFormateado
+        });
+
+        const diaClientes = $("<div>", {
+            class: "text-xs text-gray-600 mt-1",
+            text: `${dia.clientes} clientes`
+        });
+
+        const diaCheque = $("<div>", {
+            class: "text-xs text-gray-500",
+            text: `CP: ${dia.chequePromedio}`
+        });
+
+        diaCard.append(diaNumero, diaTotal, diaClientes, diaCheque);
+        return diaCard;
+    }
+
+    getColorByAmount(total) {
+        if (total === 0) return "bg-gray-100";
+        if (total < 20000) return "bg-blue-100";
+        if (total < 30000) return "bg-yellow-100";
+        if (total < 40000) return "bg-green-100";
+        if (total < 50000) return "bg-green-200";
+        return "bg-green-300";
+    }
+}
