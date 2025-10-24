@@ -466,8 +466,8 @@ class ctrl extends mdl {
             return formatSpanishDay($d['fecha']) . ' ' . date('d', strtotime($d['fecha']));
         }, $datosNow);
 
-        $valuesNow = array_map(fn($d) => floatval($d['total'] ?? 0), $datosNow);
-        $valuesOld = array_map(fn($d) => floatval($d['total'] ?? 0), $datosOld);
+        $valuesNow = array_map(function($d) { return floatval($d['total'] ?? 0); }, $datosNow);
+        $valuesOld = array_map(function($d) { return floatval($d['total'] ?? 0); }, $datosOld);
 
         return [
             'labels'  => $labels,
@@ -1765,7 +1765,7 @@ class ctrl extends mdl {
     }
 
 
-      function getCalendarioVentas() {
+    function getCalendarioVentas() {
         $udn = $_POST['udn'] ?? 1;
         $fechaFin = new DateTime();
         $fechaInicio = clone $fechaFin;
@@ -1798,8 +1798,14 @@ class ctrl extends mdl {
 
             $chequePromedio = $clientes > 0 ? $total / $clientes : 0;
 
+            // Obtener mes abreviado en español
+            $mesesAbreviados = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+            $mesAbreviado = $mesesAbreviados[(int)$fechaTemp->format('m') - 1];
+
             $dia = [
                 'dia' => $fechaTemp->format('d'),
+                'mesAbreviado' => $mesAbreviado,
+                'mes' => $fechaTemp->format('m'),
                 'fecha' => $fecha,
                 'diaSemana' => formatSpanishDay($fecha),
                 'total' => $total,
