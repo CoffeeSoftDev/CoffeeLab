@@ -7,7 +7,7 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 
 require_once '../mdl/mdl-admin.php';
-
+require_once '../../../conf/coffeSoft.php';
 class ctrl extends mdl {
 
     function init() {
@@ -25,18 +25,19 @@ class ctrl extends mdl {
 
         foreach ($ls as $key) {
             $lockIcon = $key['active'] == 1 
-                ? '<i class="icon-lock-open text-green-500 cursor-pointer" onclick="app.toggleLockStatus(' . $key['id'] . ', ' . $key['active'] . ')"></i>'
-                : '<i class="icon-lock text-red-500 cursor-pointer" onclick="app.toggleLockStatus(' . $key['id'] . ', ' . $key['active'] . ')"></i>';
+                ? '<i class="icon-lock-open text-green-500 cursor-pointer text-lg" onclick="app.toggleLockStatus(' . $key['id'] . ', ' . $key['active'] . ')"></i>'
+                : '<i class="icon-lock text-red-500 cursor-pointer text-lg" onclick="app.toggleLockStatus(' . $key['id'] . ', ' . $key['active'] . ')"></i>';
 
             $__row[] = [
-                'id' => $key['id'],
-                'UDN' => $key['udn_name'],
-                'Fecha solicitada' => $key['unlock_date_formatted'],
-                'Módulo' => $key['module_name'],
-                'Motivo' => $key['lock_reason'],
+                
+                'id'               => $key['id'],
+                'UDN'              => $key['udn_name'],
+                'Fecha solicitada' => formatSpanishDate($key['unlock_date']),
+                'Módulo'           => $key['module_name'],
+                'Motivo'           => $key['lock_reason'],
                 'Bloquear' => [
                     'html' => $lockIcon,
-                    'class' => 'text-center'
+                    'class' => 'text-center '
                 ]
             ];
         }
@@ -110,7 +111,7 @@ class ctrl extends mdl {
         $message = 'Error al actualizar el estado';
 
         try {
-            $_POST['operation_date'] = date('Y-m-d H:i:s');
+            // $_POST['operation_date'] = date('Y-m-d H:i:s');
             
             $update = $this->updateModuleStatus($this->util->sql($_POST, 1));
 
@@ -130,6 +131,8 @@ class ctrl extends mdl {
         ];
     }
 
+    // Time.
+
     function lsCloseTime() {
         $__row = [];
         $ls = $this->listCloseTime();
@@ -145,13 +148,13 @@ class ctrl extends mdl {
             
             $currentMonth = (int)date('n');
             
-            if ($key['month'] >= $currentMonth) {
+            // if ($key['month'] >= $currentMonth) {
                 $a[] = [
                     'class' => 'btn btn-sm btn-primary',
                     'html' => '<i class="icon-pencil"></i>',
                     'onclick' => 'app.editCloseTime(' . $key['id'] . ', ' . $key['month'] . ')'
                 ];
-            }
+            // }
 
             $__row[] = [
                 'id' => $key['id'],

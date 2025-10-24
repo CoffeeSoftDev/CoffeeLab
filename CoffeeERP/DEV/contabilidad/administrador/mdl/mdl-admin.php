@@ -20,18 +20,18 @@ class mdl extends CRUD {
                 module_unlock.id,
                 udn.UDN as udn_name,
                 modulos.modulo as module_name,
-                DATE_FORMAT(module_unlock.unlock_date, '%d/%m/%Y') as unlock_date_formatted,
+                unlock_date,
                 module_unlock.lock_reason,
                 module_unlock.active,
                 module_unlock.operation_date
             FROM module_unlock
             LEFT JOIN udn ON module_unlock.udn_id = udn.idUDN
             LEFT JOIN modulos ON module_unlock.module_id = modulos.idModulo
-            WHERE module_unlock.active = ?
+            -- WHERE module_unlock.active = ?
             ORDER BY module_unlock.unlock_date DESC
         ";
         
-        return $this->_Read($query, $array);
+        return $this->_Read($query,null);
     }
 
     function getUnlockRequestById($id) {
@@ -67,7 +67,7 @@ class mdl extends CRUD {
         return $this->_Update([
             'table' => $this->bd . 'module_unlock',
             'values' => $array['values'],
-            'where' => $array['where'],
+            'where' => 'id = ?',
             'data' => $array['data']
         ]);
     }
@@ -101,12 +101,13 @@ class mdl extends CRUD {
     // Listas para Filtros
 
     function lsUDN() {
-        return $this->_Select([
-            'table' => $this->bd . 'udn',
-            'values' => 'idUDN as id, UDN as valor',
-            'where' => 'Estado = 1',
-            'order' => ['ASC' => 'UDN']
-        ]);
+        $query = "
+            SELECT idUDN AS id, UDN AS valor
+            FROM udn
+            WHERE Stado = 1 AND idUDN NOT IN (8, 10, 7)
+            ORDER BY UDN DESC
+        ";
+        return $this->_Read($query, null);
     }
 
     function lsModules() {

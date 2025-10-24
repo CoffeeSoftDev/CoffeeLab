@@ -117,19 +117,19 @@ class App extends Templates {
                     opc: "button",
                     class: "col-12 col-md-2",
                     id: "btnDesbloquear",
-                    className:'w-full',
+                    className: 'w-full',
                     text: "Desbloquear módulo",
                     color_btn: "primary",
                     onClick: () => this.addUnlockRequest()
                 },
                 {
                     opc: "button",
-                    class: "col-12 col-md-2",
+                    class: "col-12 col-md-3",
                     id: "btnHorarios",
-                    className: 'w-full',
+                    className: 'w-full bg-orange-400 hover:bg-orange-700 text-white',
 
                     text: "Horario de cierre mensual",
-                    color_btn: "secondary",
+                    color_btn: " ",
                     onClick: () => this.lsCloseTime()
                 }
             ]
@@ -146,8 +146,7 @@ class App extends Templates {
             attr: {
                 id: "tbModulesUnlocked",
                 theme: 'corporativo',
-                title: 'Tabla de módulos desbloqueados actualmente',
-                center: [1, 2, 5],
+                center: [1, 2, 5, 6],
                 right: []
             }
         });
@@ -222,11 +221,7 @@ class App extends Templates {
                 rows: 3,
                 required: true
             },
-            {
-                opc: "btn-submit",
-                text: "Continuar",
-                class: "col-12"
-            }
+
         ];
     }
 
@@ -237,13 +232,14 @@ class App extends Templates {
         this.swalQuestion({
             opts: {
                 title: `¿Confirmar acción?`,
-                text: `¿Deseas ${action} este módulo?`,
+                html: `¿Deseas <b>${action} / ${newStatus} </b> este módulo?`,
                 icon: "warning"
             },
             data: {
                 opc: "toggleLockStatus",
+                operation_date: moment().format('YYYY-MM-DD HH:mm:ss'),
+                active: newStatus,
                 id: id,
-                active: newStatus
             },
             methods: {
                 send: (response) => {
@@ -266,31 +262,113 @@ class App extends Templates {
         });
     }
 
-    lsCloseTime() {
+    // Time
+
+    async lsCloseTime() {
+        const response = await useFetch({
+            url: this._link,
+            data: { opc: "lsCloseTime" }
+        });
+
+        const meses = [
+            { id: 1, valor: 'Enero' },
+            { id: 2, valor: 'Febrero' },
+            { id: 3, valor: 'Marzo' },
+            { id: 4, valor: 'Abril' },
+            { id: 5, valor: 'Mayo' },
+            { id: 6, valor: 'Junio' },
+            { id: 7, valor: 'Julio' },
+            { id: 8, valor: 'Agosto' },
+            { id: 9, valor: 'Septiembre' },
+            { id: 10, valor: 'Octubre' },
+            { id: 11, valor: 'Noviembre' },
+            { id: 12, valor: 'Diciembre' }
+        ];
+
         bootbox.dialog({
-            title: 'Horario de cierre mensual',
-            size: 'large',
+            title: 'HORA DE CIERRE MENSUAL',
+            closeButton: true,
             message: `
-                <div id="container-close-time">
-                    <div id="filterbar-close-time" class="mb-3"></div>
-                    <div id="table-close-time"></div>
+                <div id="container-close-time" class="p-3">
+                    <form id="form-close-time" novalidate></form>
+                    <div id="table-close-time" class="mt-4"></div>
                 </div>
             `,
-            onShown: () => {
-                this.createTable({
-                    parent: "table-close-time",
-                    idFilterBar: "filterbar-close-time",
-                    data: { opc: "lsCloseTime" },
-                    coffeesoft: true,
-                    conf: { datatable: false, pag: 12 },
-                    attr: {
-                        id: "tbCloseTime",
-                        theme: 'light',
-                        center: [0, 1],
-                        right: [2]
-                    }
-                });
+
+        });
+
+        this.createForm({
+            parent: 'form-close-time',
+            id: 'formCloseTime',
+            data: { opc: 'updateCloseTime' },
+            json: [
+                {
+                    opc: "select",
+                    id: "month",
+                    lbl: "Mes",
+                    class: "col-12 mb-3",
+                    data: meses,
+                    text: "valor",
+                    value: "id",
+                    required: true
+                },
+                {
+                    opc: "input",
+                    id: "close_time",
+                    lbl: "Horario de cierre",
+                    type: "time",
+                    class: "col-12 mb-3",
+                    required: true
+                },
+                {
+                    opc: "btn-submit",
+                    text: "Actualizar hora de cierre",
+                    class: "col-12"
+                }
+            ],
+            success: (response) => {
+                if (response.status === 200) {
+                    alert({
+                        icon: "success",
+                        text: response.message,
+                        btn1: true
+                    });
+                    this.lsCloseTime();
+                } else {
+                    alert({
+                        icon: "error",
+                        text: response.message,
+                        btn1: true
+                    });
+                }
             }
+        });
+
+        $('#close_time').val('12:00');
+
+        this.renderCloseTimeTable(response.ls);
+    }
+
+    renderCloseTimeTable(data) {
+        const meses = [
+            '', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ];
+
+        const rows = data.map(item => ({
+            'Mes': meses[item.month],
+            'Hora de cierre': `${item.close_time_formatted} hrs`
+        }));
+
+        this.createCoffeTable({
+            parent: 'table-close-time',
+            id: 'tbCloseTimeModal',
+            theme: 'corporativo',
+            data: {
+                thead: ['Mes', 'Hora de cierre'],
+                row: rows
+            },
+            center: [0, 1]
         });
     }
 
@@ -340,4 +418,5 @@ class App extends Templates {
             }
         });
     }
+
 }
