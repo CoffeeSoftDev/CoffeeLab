@@ -92,7 +92,7 @@ class mdl extends CRUD {
                 AND DATE_FORMAT(fecha_folio,'%Y-%m-%d') = ?
         ";
         $sql = $this->_Read($query, $array);
-        return $sql[0];
+        return !empty($sql) ? $sql[0] : null;
     }
 
     function getIngresosDayOfWeek($array){
@@ -168,7 +168,7 @@ class mdl extends CRUD {
 
         $sql = $this->_Read($query, $array);
 
-        return $sql[0];
+        return !empty($sql) ? $sql[0] : null;
     }
 
 
@@ -200,7 +200,7 @@ class mdl extends CRUD {
 
         $sql = $this->_Read($query, $array);
 
-        return $sql[0];
+        return !empty($sql) ? $sql[0] : null;
     }
 
     function getsoft_ventas($array){
@@ -260,6 +260,6 @@ class mdl extends CRUD {
 
         $sql = $this->_Read($query, $array);
 
-        return $sql[0];
+        return !empty($sql) ? $sql[0] : null;
     }
 }

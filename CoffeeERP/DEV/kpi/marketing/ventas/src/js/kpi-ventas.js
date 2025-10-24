@@ -181,7 +181,7 @@ class SalesDashboard extends Templates {
             title: "📊 Dashboard de Ventas",
             subtitle: "Análisis comparativo de ventas entre dos períodos",
             json: [
-              
+
 
                 {
                     type: "grafico", id: "dailyAverageCheck", title: "",
@@ -198,7 +198,7 @@ class SalesDashboard extends Templates {
                         { class: " mt-2", type: "div", id: "barChequePromedio" },
                     ]
                 },
-               
+
             ]
         });
 
@@ -206,15 +206,15 @@ class SalesDashboard extends Templates {
         this.filterBarDashboard();
 
 
-      
+
         setTimeout(() => {
-            
+
             this.renderDashboard();
         }, 100);
 
 
 
-       
+
         // this.layoutChequePromedio();
     }
 
@@ -283,10 +283,10 @@ class SalesDashboard extends Templates {
         // filtrar clasificacion x udn 
         // this.handleCategoryChange($('#idFilterBar #udn').val());
 
-        let udn           = $('#filterBarDashboard #udn').val();
-        let periodo1      = $('#filterBarDashboard #periodo1').val();
+        let udn = $('#filterBarDashboard #udn').val();
+        let periodo1 = $('#filterBarDashboard #periodo1').val();
         let [anio1, mes1] = periodo1.split('-');
-        let periodo2      = $('#filterBarDashboard #periodo2').val();
+        let periodo2 = $('#filterBarDashboard #periodo2').val();
         let [anio2, mes2] = periodo2.split('-');
 
         let mkt = await useFetch({
@@ -301,7 +301,8 @@ class SalesDashboard extends Templates {
             },
         });
 
-       
+
+
         this.showCards(mkt.dashboard);
 
         // Graficos.
@@ -359,44 +360,59 @@ class SalesDashboard extends Templates {
             includeAll: false
         });
 
-     
+
     }
 
-    async renderDailyAverageCheck(){
-        let udn           = $('#filterBarDashboard #udn').val();
-        let periodo1      = $('#filterBarDashboard #periodo1').val();
-        let [anio1, mes1] = periodo1.split('-');
-        let periodo2      = $('#filterBarDashboard #periodo2').val();
-        let [anio2, mes2] = periodo2.split('-');
+    getFilterDate() {
+        let periodo1 = $('#filterBarDashboard #periodo1').val();
+        let [year1, month1] = periodo1.split('-');
+
+        let periodo2 = $('#filterBarDashboard #periodo2').val();
+        let [year2, month2] = periodo2.split('-');
+
+        return {
+            year1,
+            month1,
+            year2,
+            month2
+        };
+    }
+
+    async renderDailyAverageCheck() {
+        let udn = $('#filterBarDashboard #udn').val();
+        let category = $('#category option:selected').text();
+        let date = this.getFilterDate();
+
+        const meses = moment.months();
+        const nombreMes1 = meses[parseInt(date.month1) - 1];
+        const nombreMes2 = meses[parseInt(date.month2) - 1];
 
         let mkt = await useFetch({
             url: api,
             data: {
                 opc: "getDailyCheck",
                 udn: udn,
-                category: $('#category option:selected').text(),
-                anio1: anio1,
-                mes1: mes1,
-                anio2: anio2,
-                mes2: mes2,
+                category: category,
+                anio1: date.year1,
+                mes1: date.month1,
+                anio2: date.year2,
+                mes2: date.month2,
             },
         });
-
-        console.log(mkt)
-
 
         this.barChart({
             parent: "containerDailyAverageCheck",
             id: "chartDailyCheck",
-            title: "📊 Cheque Promedio Diario (Comparativo Anual)",
+            title: `📊 Cheque Promedio Diario - ${nombreMes1} ${date.year1} vs ${nombreMes2} ${date.year2}`,
             labels: mkt.labels,
-            dataA: mkt.dataA,  // Año actual
-            dataB: mkt.dataB,  // Año anterior
+            dataA: mkt.dataB,
+            dataB: mkt.dataA,
             yearA: mkt.yearA,
             yearB: mkt.yearB
         });
     }
-   
+
+
 
     // Cheque Promedio.
     layoutChequePromedio() {
@@ -446,7 +462,7 @@ class SalesDashboard extends Templates {
             },
         });
 
-        console.log('mkt',mkt)
+        console.log('mkt', mkt)
 
         this.linearChart({
             parent: "barProductMargen",
@@ -462,7 +478,7 @@ class SalesDashboard extends Templates {
     // Cheque Promedio cards.
 
 
-  
+
 
     showCards(data) {
         this.infoCard({

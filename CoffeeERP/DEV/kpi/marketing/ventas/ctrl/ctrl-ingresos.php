@@ -475,8 +475,6 @@ class ctrl extends mdl {
         ];
     }
 
-
-
     // Api
     function apiIngresosTotales($udn, $anio, $mes) {
         $fi = new DateTime($anio . '-' . $mes . '-01');
@@ -494,6 +492,22 @@ class ctrl extends mdl {
             $fecha = $fi->format('Y-m-d');
 
             $softVentas = $this->getsoftVentas([$udn, $fecha]);
+
+            // Si no hay datos, crear un registro vacío
+            if ($softVentas === null) {
+                $softVentas = [
+                    'id_venta'       => null,
+                    'noHabitaciones' => 0,
+                    'Hospedaje'      => 0,
+                    'AyB'            => 0,
+                    'Diversos'       => 0,
+                    'alimentos'      => 0,
+                    'bebidas'        => 0,
+                    'guarniciones'   => 0,
+                    'sales'          => 0,
+                    'domicilio'      => 0
+                ];
+            }
 
             $row = [
                 'id'    => $idRow,
@@ -571,92 +585,94 @@ class ctrl extends mdl {
     // Cheque Promedio Diarios.
 
 
-function getDailyCheck() {
-    $udn      = $_POST['udn']    ?? null;
-    $anio     = $_POST['anio1']  ?? date('Y');
-    $mes      = $_POST['mes1']   ?? date('m');
-    $category = strtolower(trim($_POST['category'] ?? 'todas'));
+    function getDailyCheck() {
+        $udn      = $_POST['udn']    ?? null;
+        $anio1    = $_POST['anio1']  ?? date('Y');
+        $mes1     = $_POST['mes1']   ?? date('m');
+        $anio2    = $_POST['anio2']  ?? date('Y') - 1;
+        $mes2     = $_POST['mes2']   ?? date('m');
+        $category = strtolower(trim($_POST['category'] ?? 'todas'));
 
-    // 🔹 Obtener datos de ambos años
-    $apiActual   = $this->apiIngresosTotales($udn, $anio, $mes);
-    $apiAnterior = $this->apiIngresosTotales($udn, $_POST['anio2'] , $_POST['mes2']);
+        // 🔹 Obtener datos de ambos años
+        $apiActual   = $this->apiIngresosTotales($udn, $anio1, $mes1);
+        $apiAnterior = $this->apiIngresosTotales($udn, $anio2, $mes2);
 
-    $rowsActual   = $apiActual['data'] ?? [];
-    $rowsAnterior = $apiAnterior['data'] ?? [];
+        $rowsActual   = $apiActual['data'] ?? [];
+        $rowsAnterior = $apiAnterior['data'] ?? [];
 
-    // 🔹 Inicializar estructura por día
-    $daysOfWeek = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
-    $weeklyActual   = array_fill_keys($daysOfWeek, ['total' => 0, 'clientes' => 0]);
-    $weeklyAnterior = array_fill_keys($daysOfWeek, ['total' => 0, 'clientes' => 0]);
+        // 🔹 Inicializar estructura por día
+        $daysOfWeek = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
+        $weeklyActual   = array_fill_keys($daysOfWeek, ['total' => 0, 'clientes' => 0]);
+        $weeklyAnterior = array_fill_keys($daysOfWeek, ['total' => 0, 'clientes' => 0]);
 
-    // 🔹 Función para procesar datos según año
-    $processData = function ($rows, &$weeklyData) use ($category) {
-        foreach ($rows as $row) {
-            if (empty($row['fecha'])) continue;
+        // 🔹 Función para procesar datos según año
+        $processData = function ($rows, &$weeklyData) use ($category) {
+            foreach ($rows as $row) {
+                if (empty($row['fecha'])) continue;
 
-            $dayName  = ucfirst(strtolower(date('l', strtotime($row['fecha']))));
-            $clientes = isset($row['clientes']) ? intval($row['clientes']) : 0;
-            $total    = 0;
+                $dayName  = ucfirst(strtolower(date('l', strtotime($row['fecha']))));
+                $clientes = isset($row['clientes']) ? intval($row['clientes']) : 0;
+                $total    = 0;
 
-            // 🔸 Filtrar por categoría si aplica
-            if ($category == 'todas' || $category == '') {
-                $total = isset($row['total']) ? floatval($row['total']) : 0;
-            } else {
-                foreach ($row as $key => $value) {
-                    if (strtolower($key) == $category) {
-                        $total = floatval($value);
-                        break;
+                // 🔸 Filtrar por categoría si aplica
+                if ($category == 'todas' || $category == '') {
+                    $total = isset($row['total']) ? floatval($row['total']) : 0;
+                } else {
+                    foreach ($row as $key => $value) {
+                        if (strtolower($key) == $category) {
+                            $total = floatval($value);
+                            break;
+                        }
                     }
                 }
-            }
 
-            if (isset($weeklyData[$dayName])) {
-                $weeklyData[$dayName]['total']    += $total;
-                $weeklyData[$dayName]['clientes'] += $clientes;
+                if (isset($weeklyData[$dayName])) {
+                    $weeklyData[$dayName]['total']    += $total;
+                    $weeklyData[$dayName]['clientes'] += $clientes;
+                }
             }
+        };
+
+        // 🔹 Procesar ambos conjuntos
+        $processData($rowsActual, $weeklyActual);
+        $processData($rowsAnterior, $weeklyAnterior);
+
+        // 🔹 Construir arrays para gráfico
+        $labels = [];
+        $dataA  = []; // Año anterior (anio2)
+        $dataB  = []; // Año actual (anio1)
+
+        foreach ($daysOfWeek as $day) {
+            $labels[] = substr($day, 0, 3); // Mon, Tue, Wed...
+
+            $avgActual   = $weeklyActual[$day]['clientes'] > 0
+                ? round($weeklyActual[$day]['total'] / $weeklyActual[$day]['clientes'], 2)
+                : 0;
+
+            $avgAnterior = $weeklyAnterior[$day]['clientes'] > 0
+                ? round($weeklyAnterior[$day]['total'] / $weeklyAnterior[$day]['clientes'], 2)
+                : 0;
+
+            $dataA[] = $avgAnterior;  // Primero el año anterior
+            $dataB[] = $avgActual;    // Después el año actual
         }
-    };
 
-    // 🔹 Procesar ambos conjuntos
-    $processData($rowsActual, $weeklyActual);
-    $processData($rowsAnterior, $weeklyAnterior);
-
-    // 🔹 Construir arrays para gráfico
-    $labels = [];
-    $dataA  = []; // Año actual
-    $dataB  = []; // Año anterior
-
-    foreach ($daysOfWeek as $day) {
-        $labels[] = substr($day, 0, 3); // Mon, Tue, Wed...
-
-        $avgActual   = $weeklyActual[$day]['clientes'] > 0
-            ? round($weeklyActual[$day]['total'] / $weeklyActual[$day]['clientes'], 2)
-            : 0;
-
-        $avgAnterior = $weeklyAnterior[$day]['clientes'] > 0
-            ? round($weeklyAnterior[$day]['total'] / $weeklyAnterior[$day]['clientes'], 2)
-            : 0;
-
-        $dataA[] = $avgActual;
-        $dataB[] = $avgAnterior;
+        // 📊 Retornar estructura compatible con barChart()
+        return [
+            'status'  => 200,
+            'message' => 'Cheque promedio diario comparativo generado correctamente',
+            'filter'  => $category,
+            'labels'  => $labels,
+            'dataA'   => $dataA,   // Año anterior (anio2)
+            'dataB'   => $dataB,   // Año actual (anio1)
+            'yearA'   => intval($anio2),  // Año anterior
+            'yearB'   => intval($anio1),  // Año actual
+            'api'     => [
+                'actual'   => $apiActual,
+                'anterior' => $apiAnterior
+            ]
+        ];
     }
-
-    // 📊 Retornar estructura compatible con barChart()
-    return [
-        'status'  => 200,
-        'message' => 'Cheque promedio diario comparativo generado correctamente',
-        'filter'  => $category,
-        'labels'  => $labels,
-        'dataA'   => $dataA,   // Año actual
-        'dataB'   => $dataB,   // Año anterior
-        'yearA'   => intval($anio),       // Año actual
-        'yearB'   => intval($anio) - 1,   // Año anterior
-        'api'     => [
-            'actual'   => $apiActual,
-            'anterior' => $apiAnterior
-        ]
-    ];
-}
 
     // Dashboard -Promedios diarios
     public function apiPromediosDiarios() {
@@ -977,7 +993,7 @@ function getDailyCheck() {
                         'dia'         => $dayName,
                         'alimentos'   => $item['alimentos'],
                         'bebidas'     => $item['bebidas'],
-                        'complementos'=> $item['complementos'],
+                        'guarniciones'=> $item['guarniciones'] ?? 0,
                         'total'       => $item['total']
                     ];
                 } else {
