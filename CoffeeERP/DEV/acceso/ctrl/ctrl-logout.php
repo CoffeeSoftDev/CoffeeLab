@@ -11,7 +11,7 @@
             const HREF = new URL(window.location.href);
             const HASH = HREF.pathname.split('/').filter(Boolean);
             const ERP = HASH[0];
-
+            console.log('LOGIN',ERP);
             localStorage.clear();
             sessionStorage.clear();
             

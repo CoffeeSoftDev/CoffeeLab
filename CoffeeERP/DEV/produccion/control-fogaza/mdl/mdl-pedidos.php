@@ -69,6 +69,7 @@ class Pedidos extends CRUD{
             pedidofolio.anticipo,
             observacion,
             efectivo,
+            discount,
             Total,
             tdc,
              TIME_FORMAT(pedidofolio.horapedido, '%h:%i %p') AS horapedido,

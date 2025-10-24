@@ -13,25 +13,28 @@ class mdl extends CRUD {
         $this->bd = "rfwsmqex_marketing.";
     }
 
-    function lsClientes($params) {
+    function lsClientes($params = []) {
         $leftjoin = [
             'udn' => 'cliente.udn_id = udn.idUDN'
         ];
 
-        $whereClause = "1=1";
+        $whereClause = "cliente.active IS NOT NULL";
         $data = [];
 
-        if (isset($params[0]) && $params[0] !== '') {
+        // Filtro por estado activo/inactivo
+        if (isset($params[0]) && $params[0] !== '' && $params[0] !== null) {
             $whereClause .= " AND cliente.active = ?";
             $data[] = $params[0];
         }
 
-        if (isset($params[1]) && $params[1] !== '' && $params[1] !== 'all') {
+        // Filtro por UDN
+        if (isset($params[1]) && $params[1] !== '' && $params[1] !== 'all' && $params[1] !== null) {
             $whereClause .= " AND cliente.udn_id = ?";
             $data[] = $params[1];
         }
 
-        if (isset($params[2]) && $params[2] !== '' && $params[2] !== 'all') {
+        // Filtro por VIP
+        if (isset($params[2]) && $params[2] !== '' && $params[2] !== 'all' && $params[2] !== null) {
             $whereClause .= " AND cliente.vip = ?";
             $data[] = $params[2];
         }
@@ -266,12 +269,7 @@ class mdl extends CRUD {
         return !empty($result) ? $result[0] : null;
     }
 
-    /**
-     * Obtiene el historial de pedidos de un cliente
-     * @param int $clienteId ID del cliente
-     * @param int $limit Límite de registros (opcional)
-     * @return array Lista de pedidos del cliente
-     */
+ 
     function getHistorialPedidos($clienteId, $limit = 10) {
         $query = "
             SELECT 
@@ -286,17 +284,13 @@ class mdl extends CRUD {
             LEFT JOIN udn u ON p.udn_id = u.idUDN
             WHERE p.cliente_id = ?
             ORDER BY p.fecha_pedido DESC
-            LIMIT ?
+            LIMIT 10
         ";
 
-        return $this->_Read($query, [$clienteId, $limit]);
+        return $this->_Read($query, [$clienteId]);
     }
 
-    /**
-     * Obtiene estadísticas de comportamiento de todos los clientes
-     * @param array $params [udn_id, active]
-     * @return array Lista de clientes con estadísticas
-     */
+    
     function getComportamientoClientes($params) {
         $whereClause = "c.active = ?";
         $data = [$params[0]];
@@ -310,10 +304,10 @@ class mdl extends CRUD {
             SELECT 
                 c.id,
                 c.nombre,
-                c.apellido_paterno,
-                c.apellido_materno,
+             
                 c.vip,
                 c.telefono,
+                c.correo,
                 u.UDN as udn_nombre,
                 u.color,
                 COUNT(p.id) as total_pedidos,
@@ -389,23 +383,16 @@ class mdl extends CRUD {
         return $this->_Read($query, $params);
     }
 
-    /**
-     * Obtiene top clientes por monto total
-     * @param int $limit Cantidad de clientes a retornar
-     * @param int|null $udnId Filtrar por unidad de negocio
-     * @return array Lista de top clientes
-     */
-    function getTopClient($limit = 10, $udnId = null) {
-        $whereClause = "c.active = 1";
+    function getTopClient( $udnId = null) {
+        $whereClause = " c.active = 1 ";
         $params = [];
 
         if ($udnId !== null && $udnId !== 'all') {
-            $whereClause .= " AND c.udn_id = ?";
+            $whereClause .= " AND c.udn_id = ? ";
             $params[] = $udnId;
         }
 
-        $params[] = $limit;
-
+        
         $query = "
             SELECT 
                 c.id,
@@ -426,9 +413,18 @@ class mdl extends CRUD {
             GROUP BY c.id
             HAVING total_pedidos > 0
             ORDER BY monto_total DESC
-            LIMIT ?
+            LIMIT 10
         ";
 
         return $this->_Read($query, $params);
+    }
+
+    function updateClientVipStatus($array) {
+        return $this->_Update([
+            'table' => "{$this->bd}cliente",
+            'values' => $array['values'],
+            'where' => 'id = ?',
+            'data' => $array['data']
+        ]);
     }
 }

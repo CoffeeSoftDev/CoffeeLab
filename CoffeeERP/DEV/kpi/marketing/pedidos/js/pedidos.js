@@ -7,13 +7,14 @@ let canales, productos, campanas, lsudn, udn, redes_sociales, anuncios;
 
 $(async () => {
     const data = await useFetch({ url: api, data: { opc: "init" } });
-    udn = data.udn;
-    lsudn = data.udn;
-    canales = data.canales;
-    productos = data.productos;
-    campanas = data.campanas;
+    
+    udn            = data.udn;
+    lsudn          = data.udn;
+    canales        = data.canales;
+    productos      = data.productos;
+    campanas       = data.campanas;
     redes_sociales = data.redes_sociales;
-    anuncios = data.anuncios;
+    anuncios       = data.anuncios;
 
     app     = new App(api, "root");
     pedidos = new Pedidos(api, 'root');
@@ -82,12 +83,11 @@ class App extends Templates {
                 {
                     id: "history",
                     tab: "Historial Anual",
-                    onClick: () => history.render()
+                    onClick: () => report.lsResumenPedidos()
                 },
                 {
-                    id: "admin",
+                    id : "admin",
                     tab: "Administrador",
-                    onClick: () => admin.lsTypes()
                 },
             ]
         });

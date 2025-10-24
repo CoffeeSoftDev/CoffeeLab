@@ -976,7 +976,8 @@ class ctrl extends listPedidos{
 
 
             $__row[] = [
-                'id'    => $key['id'],
+                
+                'id'      => $key['id'],
                 'name'    => $key['name'],
                 'price'   => $key['costo'],
                 'desc'    => $key['leyenda'],

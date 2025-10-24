@@ -3,6 +3,7 @@
 
 # Plugins directory
 CoffeeHuubie/dev/src/plugins/
+<<<<<<< HEAD
 
 .env
 
@@ -10,3 +11,5 @@ CoffeeERP/DEV/conf/.env
 
 error.log
 ctrl/error.log
+=======
+>>>>>>> 5a671353a429383ceb2e33194cfc34f18b97adbb
