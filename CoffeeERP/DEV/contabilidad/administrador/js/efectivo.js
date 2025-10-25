@@ -91,7 +91,10 @@ class Efectivo extends Templates {
                     id: "active",
                     lbl: "Estado",
                     class: "col-12 col-md-3",
-                    data: status,
+                    data: [
+                        { id: "1", valor: "Activos" },
+                        { id: "0", valor: "Inactivos" }
+                    ],
                     onchange: 'app.lsConceptos()'
                 },
                 {
@@ -213,7 +216,11 @@ class Efectivo extends Templates {
                 id: "operation_type",
                 lbl: "Tipo de Operación",
                 class: "col-12 mb-3",
-                data: operationType
+                data: [
+                    { id: "suma", valor: "suma" },
+                    { id: "resta", valor: "resta" }
+                ],
+              
             },
             {
                 opc: "textarea",
@@ -407,7 +414,10 @@ class CashMovement extends App {
                 id: "movement_type",
                 lbl: "Tipo de Movimiento",
                 class: "col-12 mb-3",
-                data: movementType
+                data: [
+                    { id: "suma", valor: "suma" },
+                    { id: "resta", valor: "resta" }
+                ],
             },
             {
                 opc: "input",

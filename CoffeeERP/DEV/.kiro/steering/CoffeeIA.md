@@ -140,6 +140,31 @@ Reglas de generación:
 9. RESPETA LAS REGLAS DE MDL.md, CTRL.md y FRONT JS.md
 10. Solo agrega comentario cuando sea necesario
 11. NO DES UNA DESCRIPCION SI GENERASTE CODIGO
+12. **CRÍTICO - Nomenclatura de Contenedores en Tabs:** Cuando se use `tabLayout` en `primaryLayout`, los contenedores DEBEN seguir la nomenclatura `container-[nombre-tab]`:
+   - Cada tab DEBE tener un `id` único y descriptivo en minúsculas
+   - El `tabLayout` genera automáticamente contenedores con el patrón: `container-[id-del-tab]`
+   - Los métodos deben referenciar estos contenedores: `$("#container-efectivo")`, `$("#container-moneda")`, etc.
+   - Los métodos deben seguir la nomenclatura: `ls[NombreTab]()`, `filterBar[NombreTab]()`
+   - **Ejemplo correcto:**
+     ```javascript
+     this.tabLayout({
+         json: [
+             { id: "efectivo", tab: "Efectivo", onClick: () => this.lsEfectivo() },
+             { id: "moneda", tab: "Moneda extranjera", onClick: () => this.lsMoneda() }
+         ]
+     });
+     // Genera automáticamente: container-efectivo, container-moneda
+     
+     layout() {
+         this.primaryLayout({
+            parent: "container-efectivo",
+            id: this.PROJECT_NAME,
+            class: 'w-full',
+            // ... CONFIGURACIONES EXTRAS
+         });
+     }
+     ```
+   - **Ejemplo incorrecto:** Todos los tabs con el mismo `id: "conceptos"`
 
 #### Antes de comenzar.
 
