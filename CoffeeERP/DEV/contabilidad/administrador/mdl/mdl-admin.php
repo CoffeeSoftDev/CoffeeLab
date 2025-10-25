@@ -9,7 +9,7 @@ class mdl extends CRUD {
 
     public function __construct() {
         $this->util = new Utileria;
-        $this->bd = "";
+        $this->bd = "rfwsmqex_contabilidad.";
     }
 
     // Módulos Desbloqueados
@@ -18,20 +18,23 @@ class mdl extends CRUD {
         $query = "
           SELECT 
                 module_unlock.id,
+                module_unlock.udn_id,
+                module_unlock.module_id,
                 udn.UDN as udn_name,
-                modulos.modulo as module_name,
-                unlock_date,
+                module.name as module_name,
+                module_unlock.unlock_date,
+                module_unlock.lock_date,
                 module_unlock.lock_reason,
-                module_unlock.active,
-                module_unlock.operation_date
-            FROM module_unlock
+                module_unlock.operation_date,
+                module_unlock.active
+            FROM {$this->bd}module_unlock
             LEFT JOIN udn ON module_unlock.udn_id = udn.idUDN
-            LEFT JOIN modulos ON module_unlock.module_id = modulos.idModulo
-            -- WHERE module_unlock.active = ?
+            LEFT JOIN {$this->bd}module ON module_unlock.module_id = module.id
+            WHERE module_unlock.active = 1
             ORDER BY module_unlock.unlock_date DESC
         ";
         
-        return $this->_Read($query,null);
+        return $this->_Read($query, null);
     }
 
     function getUnlockRequestById($id) {
@@ -113,7 +116,7 @@ class mdl extends CRUD {
     function lsModules() {
         return $this->_Select([
             'table' => $this->bd . 'module',
-            'values' => 'id, name as valor',
+            'values' => 'id, name as valor, description',
             'where' => 'active = 1',
             'order' => ['ASC' => 'name']
         ]);

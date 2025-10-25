@@ -9,7 +9,7 @@ class mdl extends CRUD {
 
     public function __construct() {
         $this->util = new Utileria;
-        $this->bd   = "";
+        $this->bd   = "rfwsmqex_contabilidad.";
     }
 
     function listSalesAccount($array) {
@@ -26,7 +26,7 @@ class mdl extends CRUD {
                 sale_category.active,
                 udn.UDN AS udn_nombre
             FROM {$this->bd}sale_category
-            LEFT JOIN {$this->bd}udn ON sale_category.udn_id = udn.idUDN
+            LEFT JOIN udn ON sale_category.udn_id = udn.idUDN
             WHERE sale_category.udn_id = ?
             ORDER BY sale_category.name ASC
         ";

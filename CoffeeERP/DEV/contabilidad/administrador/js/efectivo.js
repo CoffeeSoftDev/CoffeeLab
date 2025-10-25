@@ -1,22 +1,6 @@
-let api = 'ctrl/ctrl-efectivo.php';
-let app, cashMovement;
 
-let udn, operationType, movementType, status;
 
-$(async () => {
-    const data = await useFetch({ url: api, data: { opc: "init" } });
-    udn           = data.udn;
-    operationType = data.operationType;
-    movementType  = data.movementType;
-    status        = data.status;
-
-    app          = new App(api, "root");
-    cashMovement = new CashMovement(api, "root");
-    
-    app.render();
-});
-
-class App extends Templates {
+class Efectivo extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "efectivo";
@@ -31,7 +15,7 @@ class App extends Templates {
 
     layout() {
         this.primaryLayout({
-            parent: "root",
+            parent: "container-formasPago",
             id: this.PROJECT_NAME,
             class: 'w-full',
             card: {
@@ -52,25 +36,39 @@ class App extends Templates {
             json: [
                 {
                     id: "conceptos",
-                    tab: "Conceptos de Efectivo",
+                    tab: "Efectivo",
                     class: "mb-1",
                     active: true,
                     onClick: () => this.lsConceptos()
                 },
                 {
-                    id: "movimientos",
-                    tab: "Movimientos",
-                    onClick: () => cashMovement.lsMovimientos()
-                }
+                    id: "conceptos",
+                    tab: "Moneda extranjera",
+                    class: "mb-1",
+                    // active: true,
+                    onClick: () => this.lsConceptos()
+                },
+                {
+                    id: "conceptos",
+                    tab: "Bancos",
+                    class: "mb-1",
+                    // active: true,
+                    onClick: () => this.lsConceptos()
+                },
+                // {
+                //     id: "movimientos",
+                //     tab: "Movimientos",
+                //     onClick: () => cashMovement.lsMovimientos()
+                // }
             ]
         });
 
-        $("#container" + this.PROJECT_NAME).prepend(`
-            <div class="px-4 pt-3 pb-3">
-                <h2 class="text-2xl font-semibold">💵 Administrador de Efectivo</h2>
-                <p class="text-gray-400">Gestiona conceptos y movimientos de efectivo.</p>
-            </div>
-        `);
+        // $("#container" + this.PROJECT_NAME).prepend(`
+        //     <div class="px-4 pt-3 pb-3">
+        //         <h2 class="text-2xl font-semibold">💵 Administrador de Efectivo</h2>
+        //         <p class="text-gray-400">Gestiona conceptos y movimientos de efectivo.</p>
+        //     </div>
+        // `);
     }
 
     filterBarConceptos() {
@@ -174,8 +172,8 @@ class App extends Templates {
 
     statusConcepto(id, active) {
         const action = active === 1 ? 'desactivar' : 'activar';
-        const message = active === 1 
-            ? 'El flujo de efectivo se ha deshabilitado temporalmente para esta unidad.' 
+        const message = active === 1
+            ? 'El flujo de efectivo se ha deshabilitado temporalmente para esta unidad.'
             : 'El flujo de efectivo está habilitado nuevamente para registrar movimientos.';
 
         this.swalQuestion({
@@ -302,7 +300,7 @@ class CashMovement extends App {
             }
         });
 
-        $('#udn_id').on('change', function() {
+        $('#udn_id').on('change', function () {
             cashMovement.loadConceptsByUdn($(this).val());
         });
     }
@@ -370,17 +368,17 @@ class CashMovement extends App {
             methods: {
                 send: (response) => {
                     if (response.status === 200) {
-                        alert({ 
-                            icon: "success", 
+                        alert({
+                            icon: "success",
                             title: "Cierre Exitoso",
                             text: response.message,
-                            btn1: true 
+                            btn1: true
                         });
                         this.lsMovimientos();
                     } else {
-                        alert({ 
-                            icon: "error", 
-                            text: response.message 
+                        alert({
+                            icon: "error",
+                            text: response.message
                         });
                     }
                 },

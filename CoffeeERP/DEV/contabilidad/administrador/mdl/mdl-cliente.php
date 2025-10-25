@@ -1,7 +1,7 @@
 <?php
-require_once '../../conf/_CRUD.php';
-require_once '../../conf/_Utileria.php';
-session_start();
+require_once '../../../conf/_CRUD.php';
+require_once '../../../conf/_Utileria.php';
+
 
 class mdl extends CRUD {
     protected $util;
@@ -9,7 +9,7 @@ class mdl extends CRUD {
 
     public function __construct() {
         $this->util = new Utileria;
-        $this->bd = "[name_bd].";
+        $this->bd = "rfwsmqex_contabilidad.";
     }
 
     function lsUDN() {
@@ -23,13 +23,19 @@ class mdl extends CRUD {
     }
 
     function listClientes($array) {
-        return $this->_Select([
-            'table'  => $this->bd . 'customer',
-            'values' => 'id, name, active, DATE_FORMAT(date_creation, "%d %M %Y") as date_creation',
-            'where'  => 'active = ? AND udn_id = ?',
-            'order'  => ['DESC' => 'id'],
-            'data'   => $array
-        ]);
+        
+        $query = "
+            SELECT 
+                id, 
+                name, 
+                active, 
+                DATE_FORMAT(date_create, '%d %M %Y') as date_create,
+                udn_id
+            FROM {$this->bd}customer
+            WHERE active = ? AND udn_id = ?
+            ORDER BY id DESC
+        ";
+        return $this->_Read($query, $array);
     }
 
     function getClienteById($array) {

@@ -1,17 +1,4 @@
 
-// let salesAccount;
-// let udn, lsudn;
-
-// $(async () => {
-//     const data = await useFetch({ url: api, data: { opc: "init" } });
-//     lsudn = data.udn;
-//     udn = data.udn;
-
-//     console.log(data)
-
-//     salesAccount = new SalesAccountManager(api, "root");
-//     salesAccount.render();
-// });
 
 class SalesAccountManager extends Templates {
     constructor(link, div_modulo) {

@@ -1,7 +1,13 @@
 let api = 'ctrl/ctrl-admin.php';
 let api_cta = 'ctrl/ctrl-cuenta-venta.php';
-let app, salesAccount;
-let lsudn, udn,lsmodules;
+let api_cliente = 'ctrl/ctrl-cliente.php';
+let api_supplier = 'ctrl/ctrl-proveedores.php';
+let api_efectivo = 'ctrl/ctrl-efectivo.php';
+
+// vars.
+let app, salesAccount, client, paymentMethod, cashMovement, supplier;
+let lsudn, udn, lsmodules;
+
 
 $(async () => {
     const data = await useFetch({ url: api, data: { opc: "init" } });
@@ -11,8 +17,16 @@ $(async () => {
 
     app = new App(api, "root");
     salesAccount = new SalesAccountManager(api_cta, "root");
+    supplier = new AdminSupplier(api_supplier, "root");
+    client = new Clientes(api_cliente, "root");
+
+    paymentMethod = new Efectivo(api_efectivo, "root");
+    cashMovement = new CashMovement(api_efectivo, "root");
+
+
 
     app.render();
+
 });
 
 class App extends Templates {
@@ -27,12 +41,16 @@ class App extends Templates {
         this.layoutHeader();
         this.lsModulesUnlocked();
 
+
         // initial.
         salesAccount.render();
-
+        client.render();
+        supplier.render();
+        paymentMethod.render();
     }
 
     layout() {
+
         this.primaryLayout({
             parent: 'root',
             id: this.PROJECT_NAME,
@@ -54,7 +72,7 @@ class App extends Templates {
             <div class="bg-white border-b px-6 py-4">
                 <div class="flex justify-between items-center">
                     <div>
-                        <button onclick="window.location.href='../../'" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition flex items-center gap-2">
+                        <button onclick="window.location.href='home.php'" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition flex items-center gap-2">
                             <i class="icon-arrow-left"></i>
                             Menú principal
                         </button>
@@ -80,28 +98,35 @@ class App extends Templates {
                 {
                     id: "desbloqueo",
                     tab: "Desbloqueo de módulos",
-                    active: true,
+
                     onClick: () => this.lsModulesUnlocked()
                 },
                 {
                     id: "cta",
                     tab: "Cuenta de ventas",
-                    onClick: () => console.log("Cuenta de ventas")
+                    onClick: () => salesAccount.lsSalesAccount()
                 },
                 {
                     id: "formasPago",
                     tab: "Formas de pago",
+                    active: true,
                     onClick: () => console.log("Formas de pago")
                 },
                 {
-                    id: "clientes",
+                    id: "client",
                     tab: "Clientes",
-                    onClick: () => console.log("Clientes")
+
+                    onClick: () => client.lsClientes()
                 },
                 {
                     id: "compras",
                     tab: "Compras",
                     onClick: () => console.log("Compras")
+                },
+                {
+                    id: "proveedores",
+                    tab: "Proveedores",
+                    onClick: () => supplier.lsSuppliers()
                 }
             ]
         });

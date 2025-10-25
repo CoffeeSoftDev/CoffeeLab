@@ -1,15 +1,3 @@
-let api = 'ctrl/ctrl-proveedores.php';
-let supplier;
-let lsudn;
-
-$(async () => {
-    const data = await useFetch({ url: api, data: { opc: "init" } });
-    lsudn = data.udn;
-
-    supplier = new AdminSupplier(api, "root");
-    supplier.render();
-});
-
 class AdminSupplier extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
@@ -24,7 +12,7 @@ class AdminSupplier extends Templates {
 
     layout() {
         this.primaryLayout({
-            parent: `root`,
+            parent: `container-proveedores`,
             id: this.PROJECT_NAME,
             class: 'w-full',
             card: {

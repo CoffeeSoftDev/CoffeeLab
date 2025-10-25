@@ -1,15 +1,7 @@
-let api = 'ctrl/ctrl-cliente.php';
-let app, lsudn;
 
-$(async () => {
-    const data = await useFetch({ url: api, data: { opc: "init" } });
-    lsudn = data.udn;
 
-    app = new App(api, "root");
-    app.render();
-});
 
-class App extends Templates {
+class Clientes extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "Cliente";
@@ -23,7 +15,7 @@ class App extends Templates {
 
     layout() {
         this.primaryLayout({
-            parent: `root`,
+            parent: `container-client`,
             id: this.PROJECT_NAME,
             class: '',
             card: {
@@ -41,35 +33,39 @@ class App extends Templates {
     }
 
     filterBar() {
+        
         this.createfilterBar({
             parent: `filterBar${this.PROJECT_NAME}`,
             data: [
+
                 {
-                    opc: "select",
-                    id: "udn",
-                    lbl: "Filtrar por unidad de negocio",
-                    class: "col-12 col-md-3",
-                    data: lsudn,
-                    text: "valor",
-                    value: "id",
-                    onchange: 'app.lsClientes()'
+                    opc     : "select",
+                    id      : "udn",
+                    lbl     : "Filtrar por unidad de negocio",
+                    class   : "col-12 col-md-3",
+                    data    : lsudn,
+                    text    : "valor",
+                    value   : "id",
+                    onchange: 'client.lsClientes()'
                 },
+
                 {
-                    opc: "select",
-                    id: "active",
-                    lbl: "Estado",
+                    opc  : "select",
+                    id   : "active",
+                    lbl  : "Estado",
                     class: "col-12 col-md-3",
-                    data: [
+                    data : [
                         { id: "1", valor: "Activos" },
                         { id: "0", valor: "Inactivos" }
                     ],
-                    onchange: 'app.lsClientes()'
+                    onchange: 'client.lsClientes()'
                 },
+
                 {
-                    opc: "button",
-                    class: "col-12 col-md-3",
-                    id: "btnNuevoCliente",
-                    text: "+ Agregar nuevo cliente",
+                    opc    : "button",
+                    class  : "col-12 col-md-3",
+                    id     : "btnNuevoCliente",
+                    text   : "+ Agregar nuevo cliente",
                     onClick: () => this.addCliente(),
                 },
             ],
@@ -85,8 +81,8 @@ class App extends Templates {
             conf: { datatable: true, pag: 10 },
             attr: {
                 id: `tbClientes`,
-                theme: 'light',
-                center: [1]
+                theme: 'corporativo',
+                center: [2]
             },
         });
     }
@@ -174,7 +170,7 @@ class App extends Templates {
 
     statusCliente(id, active) {
         const action = active === 1 ? 'desactivar' : 'activar';
-        const message = active === 1 
+        const message = active === 1
             ? 'El cliente ya no estará disponible, pero seguirá reflejándose en los registros contables.'
             : 'El cliente estará disponible para captura de información.';
 

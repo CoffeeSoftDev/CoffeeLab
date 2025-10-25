@@ -26,6 +26,20 @@ Debe respetarse el formato de CoffeeSoft
   public $bd;
   ```
 
+- **Configuración de Base de Datos**
+  - Si el usuario especifica el nombre de la base de datos, usar:
+    ```php
+    $this->bd = "rfwsmqex_[nombre_bd_especificado].";
+    ```
+  - Si NO se especifica la base de datos, usar el nombre del proyecto:
+    ```php
+    $this->bd = "rfwsmqex_[nombre_proyecto].";
+    ```
+  - Ejemplos:
+    - Proyecto "contabilidad" → `$this->bd = "rfwsmqex_contabilidad.";`
+    - Proyecto "ventas" → `$this->bd = "rfwsmqex_ventas.";`
+    - BD especificada "erp" → `$this->bd = "rfwsmqex_erp.";`
+
 - **Nomenclatura de campos**
   - Todos los nombres de columna deben estar en inglés.
   - La clave primaria siempre se llamará `id`.

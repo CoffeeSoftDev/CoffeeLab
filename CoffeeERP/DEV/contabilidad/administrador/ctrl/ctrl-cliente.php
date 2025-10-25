@@ -31,19 +31,19 @@ class ctrl extends mdl {
                 $a[] = [
                     'class'   => 'btn btn-sm btn-primary me-1',
                     'html'    => '<i class="icon-pencil"></i>',
-                    'onclick' => 'app.editCliente(' . $key['id'] . ')'
+                    'onclick' => 'client.editCliente(' . $key['id'] . ')'
                 ];
 
                 $a[] = [
                     'class'   => 'btn btn-sm btn-danger',
                     'html'    => '<i class="icon-toggle-on"></i>',
-                    'onclick' => 'app.statusCliente(' . $key['id'] . ', ' . $key['active'] . ')'
+                    'onclick' => 'client.statusCliente(' . $key['id'] . ', ' . $key['active'] . ')'
                 ];
             } else {
                 $a[] = [
                     'class'   => 'btn btn-sm btn-outline-danger',
                     'html'    => '<i class="icon-toggle-off"></i>',
-                    'onclick' => 'app.statusCliente(' . $key['id'] . ', ' . $key['active'] . ')'
+                    'onclick' => 'client.statusCliente(' . $key['id'] . ', ' . $key['active'] . ')'
                 ];
             }
 
@@ -83,10 +83,10 @@ class ctrl extends mdl {
     }
 
     function addCliente() {
-        $status = 500;
-        $message = 'No se pudo agregar el cliente';
-        $_POST['date_creation'] = date('Y-m-d H:i:s');
-        $_POST['active'] = 1;
+        $status               = 500;
+        $message              = 'No se pudo agregar el cliente';
+        $_POST['date_create'] = date('Y-m-d H:i:s');
+        $_POST['active']      = 1;
 
         $exists = $this->existsClienteByName([$_POST['name'], $_POST['udn_id']]);
 

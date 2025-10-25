@@ -9,7 +9,7 @@ class mdl extends CRUD {
 
     public function __construct() {
         $this->util = new Utileria;
-        $this->bd = "coffeesoft.";
+        $this->bd = "rfwsmqex_contabilidad.";
     }
 
     // Cash Concepts
