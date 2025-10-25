@@ -21,6 +21,8 @@ class mdl extends CRUD {
                 sale_category.tax_iva,
                 sale_category.tax_ieps,
                 sale_category.tax_hospedaje,
+                sale_category.discount,
+                sale_category.courtesy,
                 sale_category.active,
                 udn.UDN AS udn_nombre
             FROM {$this->bd}sale_category

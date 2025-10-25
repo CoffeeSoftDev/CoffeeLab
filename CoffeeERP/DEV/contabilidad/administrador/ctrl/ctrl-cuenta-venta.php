@@ -47,6 +47,8 @@ class ctrl extends mdl {
             $__row[] = [
                 'id'        => $key['id'],
                 'Categoría' => $key['name'],
+                'Descuento' => renderCheckbox($key['discount']),
+                'Cortesía'  => renderCheckbox($key['courtesy']),
                 'IVA'       => renderCheckbox($key['tax_iva']),
                 'IEPS'      => renderCheckbox($key['tax_ieps']),
                 'Hospedaje' => renderCheckbox($key['tax_hospedaje']),

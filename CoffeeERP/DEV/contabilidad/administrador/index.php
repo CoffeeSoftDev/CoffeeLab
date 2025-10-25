@@ -50,9 +50,30 @@
     </style>
 </head>
 <body>
-    <div id="root" class="container-fluid p-4"></div>
-    
-    <!-- Module Script -->
-    <script src="efectivo.js"></script>
+    <?php require_once('../../layout/navbar.php'); ?>
+
+    <main>
+        <section id="sidebar"></section>
+
+        <div id="main__content">
+            <nav aria-label='breadcrumb'>
+                <ol class='breadcrumb'>
+                    <li class='breadcrumb-item text-uppercase text-muted'>KPI</li>
+                    <li class='breadcrumb-item fw-bold active'>Ventas</li>
+                </ol>
+            </nav>
+
+          
+
+            <div class=" main-container" id="root"></div>
+
+          <!-- Módulos del Sistema -->
+        <script src="js/admin.js?t=<?php echo time(); ?>"></script>
+        <script src="js/cuenta-venta.js?t=<?php echo time(); ?>"></script>
+      
+
+
+        </div>
+    </main>
 </body>
 </html>
