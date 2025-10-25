@@ -29,6 +29,7 @@
 
           <!-- Módulos del Sistema -->
         <script src="js/admin.js?t=<?php echo time(); ?>"></script>
+        <script src="js/cuenta-venta.js?t=<?php echo time(); ?>"></script>
       
 
 

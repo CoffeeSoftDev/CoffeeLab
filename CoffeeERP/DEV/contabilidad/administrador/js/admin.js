@@ -1,13 +1,17 @@
 let api = 'ctrl/ctrl-admin.php';
-let app;
-let lsudn, lsmodules;
+let api_cta = 'ctrl/ctrl-cuenta-venta.php';
+let app, salesAccount;
+let lsudn, udn,lsmodules;
 
 $(async () => {
     const data = await useFetch({ url: api, data: { opc: "init" } });
     lsudn = data.udn;
+    udn = data.udn;
     lsmodules = data.modules;
 
     app = new App(api, "root");
+    salesAccount = new SalesAccountManager(api_cta, "root");
+
     app.render();
 });
 
@@ -18,9 +22,14 @@ class App extends Templates {
     }
 
     render() {
+
         this.layout();
         this.layoutHeader();
         this.lsModulesUnlocked();
+
+        // initial.
+        salesAccount.render();
+
     }
 
     layout() {
@@ -75,7 +84,7 @@ class App extends Templates {
                     onClick: () => this.lsModulesUnlocked()
                 },
                 {
-                    id: "cuentaVentas",
+                    id: "cta",
                     tab: "Cuenta de ventas",
                     onClick: () => console.log("Cuenta de ventas")
                 },

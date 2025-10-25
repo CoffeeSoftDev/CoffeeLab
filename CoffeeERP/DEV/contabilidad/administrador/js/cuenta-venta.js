@@ -1,14 +1,17 @@
-let api = 'ctrl/ctrl-cuenta-venta.php';
-let salesAccount;
-let lsudn;
 
-$(async () => {
-    const data = await useFetch({ url: api, data: { opc: "init" } });
-    lsudn = data.udn;
+// let salesAccount;
+// let udn, lsudn;
 
-    salesAccount = new SalesAccountManager(api, "root");
-    salesAccount.render();
-});
+// $(async () => {
+//     const data = await useFetch({ url: api, data: { opc: "init" } });
+//     lsudn = data.udn;
+//     udn = data.udn;
+
+//     console.log(data)
+
+//     salesAccount = new SalesAccountManager(api, "root");
+//     salesAccount.render();
+// });
 
 class SalesAccountManager extends Templates {
     constructor(link, div_modulo) {
@@ -24,7 +27,7 @@ class SalesAccountManager extends Templates {
 
     layout() {
         this.primaryLayout({
-            parent: "root",
+            parent: "container-cta",
             id: this.PROJECT_NAME,
             class: "w-full",
             card: {
@@ -81,7 +84,7 @@ class SalesAccountManager extends Templates {
             attr: {
                 id: `tb${this.PROJECT_NAME}`,
                 theme: 'corporativo',
-             
+
                 center: [2, 3, 4, 5, 6, 7, 8],
                 right: [9]
             }
@@ -96,7 +99,9 @@ class SalesAccountManager extends Templates {
                 title: 'Nueva cuenta de ventas',
                 closeButton: true
             },
+
             json: this.jsonSalesAccount(),
+
             success: (response) => {
                 if (response.status === 200) {
                     alert({
@@ -157,6 +162,10 @@ class SalesAccountManager extends Templates {
                     }
                 }
             });
+
+            setTimeout(() => {
+                this.initializeToggles(data);
+            }, 100);
         }
     }
 
@@ -167,7 +176,7 @@ class SalesAccountManager extends Templates {
 
         let message = '';
         if (isActive) {
-            message = 'Esta categoría no podrá usarse en las ventas diarias, pero seguirá reflejándose en los registros contables.<br><br>Es importante que también se desactive en el <strong>Soft-Restaurant</strong>.';
+            message = 'Esta categoría <strong>no podrá usarse </strong> no podrá usarse en las ventas diarias, pero seguirá reflejándose en los registros contables.<br><br>Es importante que también se desactive en el <strong>Soft-Restaurant</strong>.';
         } else {
             message = 'Antes de activar la categoría de venta nuevamente, es importante que también se active en el <strong>Soft-Restaurant</strong>.';
         }
@@ -180,8 +189,8 @@ class SalesAccountManager extends Templates {
             },
             data: {
                 opc: "statusSalesAccount",
-                activo: newStatus,
-                id: id
+                active: newStatus,
+                id: id,
             },
             methods: {
                 send: (response) => {
@@ -206,31 +215,22 @@ class SalesAccountManager extends Templates {
         });
     }
 
-    jsonSalesAccount(isEdit = false) {
-        const fields = [
-            {
-                opc: "label",
-                id: "lblInfo",
-                text: "Información de la categoría",
-                class: "col-12 fw-bold text-lg mb-2 border-b pb-2"
-            }
-        ];
+    jsonSalesAccount(isEdit = false, _lsudn = []) {
 
-        if (!isEdit) {
-            fields.push({
+        return [
+            {
                 opc: "select",
                 id: "udn_id",
+                name: "udn_id",
                 lbl: "Unidad de negocio",
                 class: "col-12 mb-3",
-                data: lsudn,
+                data: udn,
                 required: true
-            });
-        }
-
-        fields.push(
+            },
             {
                 opc: "input",
-                id: "nombre",
+                id: "name",
+                name: "name",
                 lbl: "Nombre de la cuenta",
                 tipo: "texto",
                 class: "col-12 mb-3",
@@ -241,74 +241,87 @@ class SalesAccountManager extends Templates {
                 opc: "label",
                 id: "lblPermisos",
                 text: "Permisos",
-                class: "col-12 fw-bold text-lg mb-2 mt-3 border-b pb-2"
+                class: "col-12 fw-bold text-lg "
             },
-            {
-                opc: "checkbox",
-                id: "permiso_descuento",
-                lbl: "Permitir descuento",
-                class: "col-6 mb-3"
-            },
-            {
-                opc: "checkbox",
-                id: "permiso_cortesia",
-                lbl: "Permitir cortesía",
-                class: "col-6 mb-3"
-            },
+            ...this.toggleDiv("discount", "Permitir descuento",'col-12 '),
+            ...this.toggleDiv("courtesy", "Permitir cortesía",'col-12 mb-2 '),
             {
                 opc: "label",
                 id: "lblImpuestos",
                 text: "Impuestos aplicables",
-                class: "col-12 fw-bold text-lg mb-2 mt-3 border-b pb-2"
+                class: "col-12 fw-bold text-lg "
             },
+            ...this.toggleDiv("tax_iva", "IVA"),
+            ...this.toggleDiv("tax_ieps", "IEPS"),
+            ...this.toggleDiv("tax_hospedaje", "Hospedaje"),
+            // ...this.toggleDiv("impuesto_cero", "Impuesto al 0%"),
             {
-                opc: "checkbox",
-                id: "impuesto_iva",
-                lbl: "IVA",
-                class: "col-6 mb-3"
-            },
-            {
-                opc: "checkbox",
-                id: "impuesto_ieps",
-                lbl: "IEPS",
-                class: "col-6 mb-3"
-            },
-            {
-                opc: "checkbox",
-                id: "impuesto_hospedaje",
-                lbl: "Hospedaje",
-                class: "col-6 mb-3"
-            },
-            {
-                opc: "checkbox",
-                id: "impuesto_cero",
-                lbl: "Impuesto al 0%",
-                class: "col-6 mb-3"
-            }
-        );
-
-        const warningMessage = isEdit
-            ? "**Importante:** Antes de cambiar el nombre de la categoría, es importante que el cambio sea realizado con anticipación en el *Soft-Restaurant* de la unidad de negocio."
-            : "**Importante:** Antes de registrar una nueva categoría de venta, es importante que exista en el *Soft-Restaurant* de la unidad de negocio.";
-
-        fields.push({
-            opc: "div",
-            id: "warningMessage",
-            class: "col-12 mt-3",
-            html: `
+                opc: "div",
+                id: "warningMessage",
+                class: "col-12 mt-3",
+                html: `
                 <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
                     <div class="flex">
                         <div class="flex-shrink-0">
                             <i class="icon-alert-triangle text-yellow-400"></i>
                         </div>
                         <div class="ml-3">
-                            <p class="text-sm text-yellow-700">${warningMessage}</p>
+                            <p class="text-sm text-yellow-700">${isEdit
+                        ? "**Importante:** Antes de cambiar el nombre de la categoría, es importante que el cambio sea realizado con anticipación en el *Soft-Restaurant* de la unidad de negocio."
+                        : "**Importante:** Antes de registrar una nueva categoría de venta, es importante que exista en el *Soft-Restaurant* de la unidad de negocio."
+                    }</p>
                         </div>
                     </div>
                 </div>
             `
-        });
-
-        return fields;
+            }
+        ];
     }
+
+    // Auxiliar.
+
+    toggleDiv(id, labelText,clase = "col-6") {
+        return [
+            {
+                opc: "div",
+                id: `toggle-${id}`,
+                class:  clase ,
+                html: `
+                    <label for="check-${id}" class="flex items-center cursor-pointer">
+                        <input 
+                            type="checkbox" 
+                            id="check-${id}" 
+                            class="w-5 h-5 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
+                            onchange="salesAccount.handleCheckboxChange('${id}', this.checked)"
+                        >
+                        <input type="hidden" name="${id}" id="${id}" value="0">
+                        <span class="ml-3 text-sm text-gray-700 font-medium">${labelText}</span>
+                    </label>
+                `
+            }
+        ];
+    }
+
+    handleCheckboxChange(id, isChecked) {
+        const hidden = document.getElementById(id);
+        if (hidden) {
+            hidden.value = isChecked ? "1" : "0";
+        }
+    }
+
+    initializeToggles(data) {
+        const toggleFields = ['discount', 'courtesy', 'tax_iva', 'tax_ieps', 'tax_hospedaje'];
+
+        toggleFields.forEach(field => {
+            const checkbox = document.getElementById(`check-${field}`);
+            const hidden = document.getElementById(field);
+
+            if (checkbox && hidden && data[field]) {
+                const value = data[field].toString();
+                hidden.value = value;
+                checkbox.checked = value === "1";
+            }
+        });
+    }
+
 }
