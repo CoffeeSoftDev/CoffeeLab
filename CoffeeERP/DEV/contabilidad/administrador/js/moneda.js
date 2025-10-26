@@ -25,7 +25,7 @@ class AdminForeignCurrency extends Templates {
 
     layout() {
         this.primaryLayout({
-            parent: `root`,
+            parent: `container-moneda`,
             id: this.PROJECT_NAME,
             class: 'w-full',
             card: {

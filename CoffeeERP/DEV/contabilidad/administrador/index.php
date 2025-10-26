@@ -32,6 +32,7 @@
         <script src="js/cuenta-venta.js?t=<?php echo time(); ?>"></script>
         <script src="js/proveedores.js?t=<?php echo time(); ?>"></script>
         <script src="js/cliente.js?t=<?php echo time(); ?>"></script>
+        <script src="js/formasPago.js?t=<?php echo time(); ?>"></script>
         <script src="js/efectivo.js?t=<?php echo time(); ?>"></script>
 
 

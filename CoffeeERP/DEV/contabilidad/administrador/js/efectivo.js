@@ -1,5 +1,3 @@
-
-
 class Efectivo extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
@@ -42,14 +40,14 @@ class Efectivo extends Templates {
                     onClick: () => this.lsConceptos()
                 },
                 {
-                    id: "conceptos",
+                    id: "moneda",
                     tab: "Moneda extranjera",
                     class: "mb-1",
                     // active: true,
                     onClick: () => this.lsConceptos()
                 },
                 {
-                    id: "conceptos",
+                    id: "bancos",
                     tab: "Bancos",
                     class: "mb-1",
                     // active: true,
@@ -63,12 +61,6 @@ class Efectivo extends Templates {
             ]
         });
 
-        // $("#container" + this.PROJECT_NAME).prepend(`
-        //     <div class="px-4 pt-3 pb-3">
-        //         <h2 class="text-2xl font-semibold">💵 Administrador de Efectivo</h2>
-        //         <p class="text-gray-400">Gestiona conceptos y movimientos de efectivo.</p>
-        //     </div>
-        // `);
     }
 
     filterBarConceptos() {
@@ -220,7 +212,7 @@ class Efectivo extends Templates {
                     { id: "suma", valor: "suma" },
                     { id: "resta", valor: "resta" }
                 ],
-              
+
             },
             {
                 opc: "textarea",

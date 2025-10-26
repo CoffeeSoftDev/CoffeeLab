@@ -3,9 +3,10 @@ let api_cta = 'ctrl/ctrl-cuenta-venta.php';
 let api_cliente = 'ctrl/ctrl-cliente.php';
 let api_supplier = 'ctrl/ctrl-proveedores.php';
 let api_efectivo = 'ctrl/ctrl-efectivo.php';
+let api_formasPago = 'ctrl/ctrl-formasPago.php';
 
 // vars.
-let app, salesAccount, client, paymentMethod, cashMovement, supplier;
+let app, salesAccount, client, paymentMethod, cashMovement, supplier, formasPago;
 let lsudn, udn, lsmodules;
 
 
@@ -19,6 +20,7 @@ $(async () => {
     salesAccount = new SalesAccountManager(api_cta, "root");
     supplier = new AdminSupplier(api_supplier, "root");
     client = new Clientes(api_cliente, "root");
+    formasPago = new FormasPago(api_formasPago, "root");
 
     paymentMethod = new Efectivo(api_efectivo, "root");
     cashMovement = new CashMovement(api_efectivo, "root");
@@ -46,6 +48,7 @@ class App extends Templates {
         salesAccount.render();
         client.render();
         supplier.render();
+        formasPago.render();
         paymentMethod.render();
     }
 
@@ -110,7 +113,7 @@ class App extends Templates {
                     id: "formasPago",
                     tab: "Formas de pago",
                     active: true,
-                    onClick: () => console.log("Formas de pago")
+                    onClick: () => formasPago.lsFormasPago()
                 },
                 {
                     id: "client",
