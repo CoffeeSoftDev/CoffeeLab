@@ -1,10 +1,10 @@
-let api_formasPago = 'ctrl/ctrl-formasPago.php';
-let formasPago;
+// let api_formasPago = 'ctrl/ctrl-formasPago.php';
+// let formasPago;
 
-$(async () => {
-    formasPago = new FormasPago(api_formasPago, "root");
-    formasPago.render();
-});
+// $(async () => {
+//     formasPago = new FormasPago(api_formasPago, "root");
+//     formasPago.render();
+// });
 
 class FormasPago extends Templates {
     constructor(link, div_modulo) {

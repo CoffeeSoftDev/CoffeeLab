@@ -18,7 +18,7 @@
         <div id="main__content">
             <nav aria-label='breadcrumb'>
                 <ol class='breadcrumb'>
-                    <li class='breadcrumb-item text-uppercase text-muted'>KPI</li>
+                    <li class='breadcrumb-item text-uppercase text-muted'>Captura</li>
                     <li class='breadcrumb-item fw-bold active'>Ventas</li>
                 </ol>
             </nav>
@@ -28,14 +28,8 @@
             <div class=" main-container" id="root"></div>
 
           <!-- Módulos del Sistema -->
-        <script src="js/admin.js?t=<?php echo time(); ?>"></script>
-        <script src="js/cuenta-venta.js?t=<?php echo time(); ?>"></script>
-        <script src="js/proveedores.js?t=<?php echo time(); ?>"></script>
-        <script src="js/cliente.js?t=<?php echo time(); ?>"></script>
-        <script src="js/formasPago.js?t=<?php echo time(); ?>"></script>
-        <script src="js/efectivo.js?t=<?php echo time(); ?>"></script>
-        <script src="js/moneda.js?t=<?php echo time(); ?>"></script>
-
+        <script src="js/archivos.js?t=<?php echo time(); ?>"></script>
+    
 
 
         </div>

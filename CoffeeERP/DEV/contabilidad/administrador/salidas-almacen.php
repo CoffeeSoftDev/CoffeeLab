@@ -18,22 +18,17 @@
         <div id="main__content">
             <nav aria-label='breadcrumb'>
                 <ol class='breadcrumb'>
-                    <li class='breadcrumb-item text-uppercase text-muted'>KPI</li>
-                    <li class='breadcrumb-item fw-bold active'>Ventas</li>
+                    <li class='breadcrumb-item text-uppercase text-muted'>Contabilidad</li>
+                    <li class='breadcrumb-item text-uppercase text-muted'>Administrador</li>
+                    <li class='breadcrumb-item fw-bold active'>Salidas de Almacén</li>
                 </ol>
             </nav>
 
-          
+            <div class="main-container" id="root"></div>
 
-            <div class=" main-container" id="root"></div>
-
-          <!-- Módulos del Sistema -->
-        <script src="js/moneda.js?t=<?php echo time(); ?>"></script>
-      
-
-
+            <!-- Módulo de Salidas de Almacén -->
+            <script src="js/salidas-almacen.js?t=<?php echo time(); ?>"></script>
         </div>
     </main>
 </body>
 </html>
-

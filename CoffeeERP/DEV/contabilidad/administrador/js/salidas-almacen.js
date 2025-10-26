@@ -1,19 +1,31 @@
+let api = 'ctrl/ctrl-salidas-almacen.php';
+let warehouseOutput;
+let warehouses, lsudn;
 
-class AdminForeignCurrency extends Templates {
+$(async () => {
+    const data = await useFetch({ url: api, data: { opc: "init" } });
+    warehouses = data.warehouses;
+    lsudn = data.udn;
+
+    warehouseOutput = new AdminWarehouseOutput(api, "root");
+    warehouseOutput.render();
+});
+
+class AdminWarehouseOutput extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
-        this.PROJECT_NAME = "ForeignCurrency";
+        this.PROJECT_NAME = "WarehouseOutput";
     }
 
     render() {
         this.layout();
         this.filterBar();
-        this.lsCurrencies();
+        this.lsWarehouseOutputs();
     }
 
     layout() {
         this.primaryLayout({
-            parent: `container-moneda`,
+            parent: `container-salidas-almacen`,
             id: this.PROJECT_NAME,
             class: 'w-full',
             card: {
@@ -24,8 +36,8 @@ class AdminForeignCurrency extends Templates {
 
         $(`#container${this.PROJECT_NAME}`).prepend(`
             <div class="px-4 pt-3 pb-3">
-                <h2 class="text-2xl font-semibold">💱 Monedas Extranjeras</h2>
-                <p class="text-gray-400">Administra las monedas extranjeras y sus tipos de cambio.</p>
+                <h2 class="text-2xl font-semibold">📦 Salidas de Almacén</h2>
+                <p class="text-gray-400">Administra las salidas de almacén del sistema.</p>
             </div>
         `);
     }
@@ -40,7 +52,7 @@ class AdminForeignCurrency extends Templates {
                     lbl: "Unidad de negocio",
                     class: "col-12 col-md-3",
                     data: lsudn,
-                    onchange: 'moneda.lsCurrencies()'
+                    onchange: 'warehouseOutput.lsWarehouseOutputs()'
                 },
                 {
                     opc: "select",
@@ -49,50 +61,72 @@ class AdminForeignCurrency extends Templates {
                     class: "col-12 col-md-3",
                     data: [
                         { id: "1", valor: "Activas" },
-                        { id: "0", valor: "Inactivas" }
+                        { id: "0", valor: "Eliminadas" }
                     ],
-                    onchange: 'moneda.lsCurrencies()'
+                    onchange: 'warehouseOutput.lsWarehouseOutputs()'
                 },
                 {
                     opc: "button",
-                    class: "col-12 col-md-4",
-                    id: "btnAddCurrency",
-                    text: "+ Nueva moneda",
+                    class: "col-12 col-md-3",
+                    id: "btnUploadFiles",
+                    text: "📁 Subir archivos de almacén",
+                    color_btn: "success",
+                    onClick: () => this.uploadFiles()
+                },
+                {
+                    opc: "button",
+                    class: "col-12 col-md-3",
+                    id: "btnAddOutput",
+                    text: "+ Registrar nueva salida",
                     color_btn: "primary",
-                    onClick: () => this.addCurrency()
+                    onClick: () => this.addWarehouseOutput()
                 }
             ]
         });
     }
 
-    lsCurrencies() {
+    async lsWarehouseOutputs() {
         const udn = $(`#filterBar${this.PROJECT_NAME} #udn`).val();
         const active = $(`#filterBar${this.PROJECT_NAME} #active`).val();
 
+        const totalData = await useFetch({
+            url: api,
+            data: { opc: 'getTotalOutputs', udn: udn }
+        });
+
+        $(`#container${this.PROJECT_NAME}`).find('.px-4').after(`
+            <div class="mx-4 mb-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-600">Total de salidas de almacén</span>
+                    <span class="text-2xl font-bold text-green-700">$ ${this.formatPrice(totalData.total)}</span>
+                </div>
+            </div>
+        `);
+
         this.createTable({
-            parent: `containerForeignCurrency`,
+            parent: `containerWarehouseOutput`,
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
-            data: { opc: 'lsCurrencies', udn: udn, active: active },
+            data: { opc: 'lsWarehouseOutputs', udn: udn, active: active },
             coffeesoft: true,
             conf: { datatable: true, pag: 15 },
             attr: {
                 id: `tb${this.PROJECT_NAME}`,
                 theme: 'corporativo',
-                  center: [1, 3],
-                right: [2]
+                center: [0],
+                right: [1]
             }
         });
     }
 
-    addCurrency() {
+    addWarehouseOutput() {
         this.createModalForm({
-            id: 'formCurrencyAdd',
-            data: { opc: 'addCurrency', udn_id: $(`#filterBar${this.PROJECT_NAME} #udn`).val() },
+            id: 'formWarehouseOutputAdd',
+            data: { opc: 'addWarehouseOutput' },
             bootbox: {
-                title: '💱 Agregar Nueva Moneda Extranjera',
+                title: '📦 Nueva Salida de Almacén',
                 closeButton: true
             },
-            json: this.jsonCurrency(),
+            json: this.jsonWarehouseOutput(),
             success: (response) => {
                 if (response.status === 200) {
                     alert({
@@ -101,7 +135,7 @@ class AdminForeignCurrency extends Templates {
                         btn1: true,
                         btn1Text: "Aceptar"
                     });
-                    this.lsCurrencies();
+                    this.lsWarehouseOutputs();
                 } else {
                     alert({
                         icon: "error",
@@ -114,10 +148,10 @@ class AdminForeignCurrency extends Templates {
         });
     }
 
-    async editCurrency(id) {
+    async editWarehouseOutput(id) {
         const request = await useFetch({
-            url: this._link,
-            data: { opc: "getCurrency", id: id }
+            url: api,
+            data: { opc: "getWarehouseOutput", id: id }
         });
 
         if (request.status !== 200) {
@@ -130,17 +164,17 @@ class AdminForeignCurrency extends Templates {
             return;
         }
 
-        const currency = request.data;
+        const output = request.data;
 
         this.createModalForm({
-            id: 'formCurrencyEdit',
-            data: { opc: 'editCurrency', id: currency.id },
+            id: 'formWarehouseOutputEdit',
+            data: { opc: 'editWarehouseOutput', id: output.id },
             bootbox: {
-                title: '✏️ Editar Moneda Extranjera',
+                title: '✏️ Editar Salida de Almacén',
                 closeButton: true
             },
-            autofill: currency,
-            json: this.jsonCurrency(true),
+            autofill: output,
+            json: this.jsonWarehouseOutput(),
             success: (response) => {
                 if (response.status === 200) {
                     alert({
@@ -149,7 +183,7 @@ class AdminForeignCurrency extends Templates {
                         btn1: true,
                         btn1Text: "Aceptar"
                     });
-                    this.lsCurrencies();
+                    this.lsWarehouseOutputs();
                 } else {
                     alert({
                         icon: "error",
@@ -162,22 +196,15 @@ class AdminForeignCurrency extends Templates {
         });
     }
 
-    toggleStatus(id, currentStatus) {
-        const newStatus = currentStatus === 1 ? 0 : 1;
-        const action = newStatus === 1 ? 'activar' : 'desactivar';
-        const message = newStatus === 1 
-            ? 'La moneda extranjera estará disponible para captura de información.'
-            : 'La moneda extranjera ya no estará disponible, pero seguirá reflejándose en los registros contables.';
-
+    deleteWarehouseOutput(id) {
         this.swalQuestion({
             opts: {
-                title: `¿Desea ${action} esta moneda?`,
-                text: message,
+                title: "¿Está seguro de querer eliminar la salida de almacén?",
+                text: "Esta acción no se puede deshacer.",
                 icon: "warning"
             },
             data: {
-                opc: "toggleStatus",
-                active: newStatus,
+                opc: "deleteWarehouseOutput",
                 id: id
             },
             methods: {
@@ -189,7 +216,7 @@ class AdminForeignCurrency extends Templates {
                             btn1: true,
                             btn1Text: "Aceptar"
                         });
-                        this.lsCurrencies();
+                        this.lsWarehouseOutputs();
                     } else {
                         alert({
                             icon: "error",
@@ -203,49 +230,50 @@ class AdminForeignCurrency extends Templates {
         });
     }
 
-    jsonCurrency(isEdit = false) {
-        const fields = [
+    uploadFiles() {
+        alert({
+            icon: "info",
+            text: "Funcionalidad de carga de archivos en desarrollo",
+            btn1: true,
+            btn1Text: "Ok"
+        });
+    }
+
+    jsonWarehouseOutput() {
+        return [
             {
-                opc: "input",
-                id: "name",
-                lbl: "Nombre del concepto",
-                tipo: "texto",
-                class: "col-12 mb-3",
-                placeholder: "Ej.: Dólar, Quetzal, etc."
+                opc: "select",
+                id: "insumo_id",
+                lbl: "Almacén",
+                class: "col-12 col-md-6 mb-3",
+                data: warehouses,
+                placeholder: "Selecciona el almacén"
             },
             {
                 opc: "input",
-                id: "code",
-                lbl: "Símbolo de la moneda",
-                tipo: "texto",
-                class: "col-12 mb-3",
-                placeholder: "Ej.: USD, MXN, etc."
-            },
-            {
-                opc: "input",
-                id: "conversion_value",
-                lbl: "Tipo de cambio (MXN)",
+                id: "amount",
+                lbl: "Cantidad",
                 tipo: "cifra",
-                class: "col-12 mb-3",
+                class: "col-12 col-md-6 mb-3",
                 placeholder: "0.00",
-                onkeyup: "validationInputForNumber('#conversion_value')"
+                onkeyup: "validationInputForNumber('#amount')"
+            },
+            {
+                opc: "textarea",
+                id: "description",
+                lbl: "Descripción (opcional)",
+                rows: 3,
+                class: "col-12 mb-3",
+                placeholder: "Escribe una breve descripción",
+                required: false
             }
         ];
+    }
 
-        if (isEdit) {
-            fields.push({
-                opc: "div",
-                id: "warningMessage",
-                class: "col-12 mb-3",
-                html: `
-                    <div class="alert alert-danger" role="alert">
-                        <strong>⚠️ Importante:</strong> Los cambios afectarán a todas las unidades. 
-                        Confirme que los retiros de efectivo se hayan realizado antes de actualizar el tipo de cambio (MXN).
-                    </div>
-                `
-            });
-        }
-
-        return fields;
+    formatPrice(amount) {
+        return new Intl.NumberFormat('es-MX', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        }).format(amount);
     }
 }

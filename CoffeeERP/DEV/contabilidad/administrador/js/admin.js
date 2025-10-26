@@ -1,12 +1,12 @@
-let api = 'ctrl/ctrl-admin.php';
-let api_cta = 'ctrl/ctrl-cuenta-venta.php';
-let api_cliente = 'ctrl/ctrl-cliente.php';
-let api_supplier = 'ctrl/ctrl-proveedores.php';
-let api_efectivo = 'ctrl/ctrl-efectivo.php';
+let api            = 'ctrl/ctrl-admin.php';
+let api_cta        = 'ctrl/ctrl-cuenta-venta.php';
+let api_cliente    = 'ctrl/ctrl-cliente.php';
+let api_supplier   = 'ctrl/ctrl-proveedores.php';
+let api_efectivo   = 'ctrl/ctrl-efectivo.php';
 let api_formasPago = 'ctrl/ctrl-formasPago.php';
-
+let api_moneda     = 'ctrl/ctrl-moneda.php';
 // vars.
-let app, salesAccount, client, paymentMethod, cashMovement, supplier, formasPago;
+let app, salesAccount, client,moneda, compras, cashMovement, supplier, formasPago;
 let lsudn, udn, lsmodules;
 
 
@@ -16,14 +16,16 @@ $(async () => {
     udn = data.udn;
     lsmodules = data.modules;
 
-    app = new App(api, "root");
+    app          = new App(api, "root");
     salesAccount = new SalesAccountManager(api_cta, "root");
-    supplier = new AdminSupplier(api_supplier, "root");
-    client = new Clientes(api_cliente, "root");
-    formasPago = new FormasPago(api_formasPago, "root");
+    supplier     = new AdminSupplier(api_supplier, "root");
+    client       = new Clientes(api_cliente, "root");
+    formasPago   = new PaymentMethod(api_efectivo, "root");
+    moneda       = new AdminForeignCurrency(api_moneda, "root");
 
-    paymentMethod = new Efectivo(api_efectivo, "root");
-    cashMovement = new CashMovement(api_efectivo, "root");
+    // formasPago = new Efectivo(api_efectivo, "root");
+
+    // cashMovement = new CashMovement(api_efectivo, "root");
 
 
 
@@ -48,8 +50,9 @@ class App extends Templates {
         salesAccount.render();
         client.render();
         supplier.render();
+        
         formasPago.render();
-        paymentMethod.render();
+        moneda.render();
     }
 
     layout() {

@@ -1,4 +1,4 @@
-class Efectivo extends Templates {
+class PaymentMethod extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "efectivo";
@@ -8,7 +8,7 @@ class Efectivo extends Templates {
         this.layout();
         this.filterBarConceptos();
         this.lsConceptos();
-        cashMovement.filterBarMovimientos();
+        
     }
 
     layout() {
@@ -37,14 +37,14 @@ class Efectivo extends Templates {
                     tab: "Efectivo",
                     class: "mb-1",
                     active: true,
-                    onClick: () => this.lsConceptos()
+                    onClick: () => formasPago.lsConceptos()
                 },
                 {
                     id: "moneda",
                     tab: "Moneda extranjera",
                     class: "mb-1",
                     // active: true,
-                    onClick: () => this.lsConceptos()
+                    onClick: () => moneda.lsCurrencies()
                 },
                 {
                     id: "bancos",
@@ -76,7 +76,7 @@ class Efectivo extends Templates {
                     lbl: "Unidad de Negocio",
                     class: "col-12 col-md-3",
                     data: udn,
-                    onchange: 'app.lsConceptos()'
+                    onchange: 'formasPago.lsConceptos()'
                 },
                 {
                     opc: "select",
@@ -87,7 +87,7 @@ class Efectivo extends Templates {
                         { id: "1", valor: "Activos" },
                         { id: "0", valor: "Inactivos" }
                     ],
-                    onchange: 'app.lsConceptos()'
+                    onchange: 'formasPago.lsConceptos()'
                 },
                 {
                     opc: "button",
