@@ -1,6 +1,6 @@
 <?php
-require_once '../../../conf/_CRUD.php';
-require_once '../../../conf/_Utileria.php';
+require_once '../../conf/_CRUD.php';
+require_once '../../conf/_Utileria.php';
 session_start();
 
 class mdl extends CRUD {
@@ -12,83 +12,73 @@ class mdl extends CRUD {
         $this->bd = "rfwsmqex_contabilidad.";
     }
 
-    function listSuppliers($array) {
-        $where = 'supplier.active = ?';
-        $data = [$array['active']];
-
-        if (!empty($array['udn_id'])) {
-            $where .= ' AND supplier.udn_id = ?';
-            $data[] = $array['udn_id'];
-        }
-
-        $query = "
-            SELECT 
-                supplier.id,
-                supplier.name,
-                supplier.active,
-                udn.UDN as udn_name
-            FROM {$this->bd}supplier
-            LEFT JOIN udn ON supplier.udn_id = udn.idUDN
-            WHERE {$where}
-            ORDER BY supplier.name ASC
-        ";
-
-        return $this->_Read($query, $data);
+    function listProveedores($array) {
+        return $this->_Select([
+            'table'  => $this->bd . 'proveedores',
+            'values' => "
+                id,
+                nombre,
+                rfc,
+                telefono,
+                email,
+                direccion,
+                DATE_FORMAT(fecha_creacion, '%d/%m/%Y') AS fecha_creacion,
+                activo
+            ",
+            'where'  => 'activo = ?',
+            'order'  => ['DESC' => 'id'],
+            'data'   => $array
+        ]);
     }
 
-    function getSupplierById($array) {
-        $query = "
-            SELECT 
-                supplier.id,
-                supplier.name,
-                supplier.udn_id,
-                supplier.active,
-                udn.UDN as udn_name
-            FROM {$this->bd}supplier
-            LEFT JOIN udn ON supplier.udn_id = udn.idUDN
-            WHERE supplier.id = ?
-        ";
-        
-        $result = $this->_Read($query, $array);
-        return $result[0] ?? null;
+    function getProveedorById($id) {
+        return $this->_Select([
+            'table'  => $this->bd . 'proveedores',
+            'values' => '*',
+            'where'  => 'id = ?',
+            'data'   => [$id]
+        ])[0];
     }
 
-    function createSupplier($array) {
+    function createProveedor($array) {
         return $this->_Insert([
-            'table' => $this->bd . 'supplier',
+            'table'  => $this->bd . 'proveedores',
             'values' => $array['values'],
-            'data' => $array['data']
+            'data'   => $array['data']
         ]);
     }
 
-    function updateSupplier($array) {
+    function updateProveedor($array) {
         return $this->_Update([
-            'table' => $this->bd . 'supplier',
+            'table'  => $this->bd . 'proveedores',
             'values' => $array['values'],
-            'where' => $array['where'],
-            'data' => $array['data']
+            'where'  => $array['where'],
+            'data'   => $array['data']
         ]);
     }
 
-    function existsSupplierByName($array) {
+    function existsProveedorByName($array) {
         $query = "
             SELECT id
-            FROM {$this->bd}supplier
-            WHERE LOWER(name) = LOWER(?)
-            AND udn_id = ?
-            AND active = 1
+            FROM {$this->bd}proveedores
+            WHERE LOWER(nombre) = LOWER(?)
+            AND activo = 1
         ";
+        
         $exists = $this->_Read($query, $array);
         return count($exists) > 0;
     }
 
-    function lsUDN() {
+    function existsOtherProveedorByName($array) {
         $query = "
-            SELECT idUDN AS id, UDN AS valor
-            FROM udn
-            WHERE Stado = 1 AND idUDN NOT IN (8, 10, 7)
-            ORDER BY UDN DESC
+            SELECT id
+            FROM {$this->bd}proveedores
+            WHERE LOWER(nombre) = LOWER(?)
+            AND id != ?
+            AND activo = 1
         ";
-        return $this->_Read($query, null);
+        
+        $exists = $this->_Read($query, $array);
+        return count($exists) > 0;
     }
 }
