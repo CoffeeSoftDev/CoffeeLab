@@ -5,24 +5,24 @@ let app, saleCapture, paymentForms, adminModule;
 let saleCategories, discounts, cashConcepts, bankAccounts, customers;
 
 $(async () => {
-    const udn = 1;
-    
-    const data = await useFetch({ 
-        url: api, 
-        data: { opc: "init", udn: udn } 
+    const udn = 5;
+
+    const data = await useFetch({
+        url: api,
+        data: { opc: "init", udn: udn }
     });
-    
+
     saleCategories = data.saleCategories;
-    discounts      = data.discounts;
-    cashConcepts   = data.cashConcepts;
-    bankAccounts   = data.bankAccounts;
-    customers      = data.customers;
+    discounts = data.discounts;
+    cashConcepts = data.cashConcepts;
+    bankAccounts = data.bankAccounts;
+    customers = data.customers;
 
     app = new App(api, "root");
     saleCapture = new SaleCapture(api, "root");
     // paymentForms = new PaymentForms(api, "root");
     // adminModule = new AdminModule(apiAdmin, "root");
-    
+
     app.render();
     saleCapture.render();
 });
@@ -82,7 +82,7 @@ class App extends Templates {
         });
 
         $('#content-tabsventas').removeClass('h-screen');
-        
+
         // saleCapture.render();
     }
 
@@ -167,76 +167,133 @@ class SaleCapture extends App {
             </div>
         `);
 
-        // this.renderSaleForm();
-        // this.renderPaymentForm();
+        this.renderSaleForm();
+        this.renderPaymentForm();
         // this.attachEvents();
     }
 
     renderSaleForm() {
-        const form = $("<div>", { class: "space-y-4" });
+        const form = $("<div>", { class: "space-y-6 p-4" });
 
-        form.append(`
-            <div class="form-group">
-                <label>Fecha de operación</label>
-                <input type="date" id="operation_date" class="form-control" value="${moment().format('YYYY-MM-DD')}">
-            </div>
+        const categoriesSection = $("<div>", { class: "mb-6" });
+        categoriesSection.append(`
+            <h4 class="font-semibold text-gray-700 mb-3">Venta por categoría (sin impuestos)</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         `);
 
-        const categoriesSection = $("<div>", { class: "border-t pt-3 mt-3" });
-        categoriesSection.append(`<h4 class="font-semibold mb-2">Categorías de venta</h4>`);
-        
         saleCategories.forEach(cat => {
             categoriesSection.append(`
                 <div class="form-group">
-                    <label>${cat.valor}</label>
-                    <input type="number" step="0.01" class="form-control category-input" 
-                           data-id="${cat.id}" data-name="${cat.valor}" value="0">
+                    <label class="block text-sm font-medium text-gray-600 mb-1">${cat.valor}</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                        <input type="number" step="0.01" 
+                               class="form-control pl-8 w-full border border-gray-300 rounded-lg px-3 py-2 category-input" 
+                               data-id="${cat.id}" 
+                               data-name="${cat.valor}"
+                               data-tax-iva="${cat.tax_iva || 0}"
+                               data-tax-ieps="${cat.tax_ieps || 0}"
+                               data-tax-hospedaje="${cat.tax_hospedaje || 0}"
+                               data-courtesy="${cat.courtesy || 0}"
+                               data-discount="${cat.discount || 0}"
+                               value="0">
+                    </div>
                 </div>
             `);
         });
+        categoriesSection.append(`</div>`);
 
-        const discountsSection = $("<div>", { class: "border-t pt-3 mt-3" });
-        discountsSection.append(`<h4 class="font-semibold mb-2">Descuentos y cortesías</h4>`);
-        
+        const discountsSection = $("<div>", { class: "mb-6 border-t pt-4" });
+        discountsSection.append(`
+            <h4 class="font-semibold text-gray-700 mb-3">Descuentos y cortesías (sin impuestos)</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        `);
+
         discounts.forEach(disc => {
             discountsSection.append(`
                 <div class="form-group">
-                    <label>${disc.valor}</label>
-                    <input type="number" step="0.01" class="form-control discount-input" 
-                           data-id="${disc.id}" data-name="${disc.valor}" value="0">
+                    <label class="block text-sm font-medium text-gray-600 mb-1">${disc.valor}</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                        <input type="number" step="0.01" 
+                               class="form-control pl-8 w-full border border-gray-300 rounded-lg px-3 py-2 discount-input" 
+                               data-id="${disc.id}" 
+                               data-name="${disc.valor}"
+                               data-tax-iva="${disc.tax_iva || 0}"
+                               data-tax-ieps="${disc.tax_ieps || 0}"
+                               data-tax-hospedaje="${disc.tax_hospedaje || 0}"
+                               value="0">
+                    </div>
                 </div>
             `);
         });
+        discountsSection.append(`</div>`);
 
-        const taxesSection = $("<div>", { class: "border-t pt-3 mt-3" });
-        taxesSection.append(`<h4 class="font-semibold mb-2">Impuestos</h4>`);
+        const taxesSection = $("<div>", { class: "mb-6 border-t pt-4" });
         taxesSection.append(`
-            <div class="form-group">
-                <label>IVA (8%)</label>
-                <input type="number" step="0.01" id="tax_iva" class="form-control" value="0" readonly>
-            </div>
-            <div class="form-group">
-                <label>IEPS</label>
-                <input type="number" step="0.01" id="tax_ieps" class="form-control" value="0">
-            </div>
-            <div class="form-group">
-                <label>Hospedaje</label>
-                <input type="number" step="0.01" id="tax_hospedaje" class="form-control" value="0">
+            <h4 class="font-semibold text-gray-700 mb-3">Impuestos</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="form-group">
+                    <label class="block text-sm font-medium text-gray-600 mb-1">IVA (8 %)</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                        <input type="number" step="0.01" 
+                               id="tax_iva" 
+                               class="form-control pl-8 w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-50" 
+                               value="0" 
+                               readonly>
+                    </div>
+                </div>
             </div>
         `);
 
-        form.append(categoriesSection, discountsSection, taxesSection);
+        const summarySection = $("<div>", { class: "border-t pt-4 mt-6" });
+        summarySection.append(`
+            <div class="bg-gray-50 rounded-lg p-4 space-y-2">
+                <div class="flex justify-between text-gray-700">
+                    <span>Ventas</span>
+                    <span id="summary_sales" class="font-semibold">$ 0.00</span>
+                </div>
+                <div class="flex justify-between text-red-600">
+                    <span>Descuentos y cortesías</span>
+                    <span id="summary_discounts" class="font-semibold">$ 0.00</span>
+                </div>
+                <div class="flex justify-between text-gray-700">
+                    <span>Impuestos</span>
+                    <span id="summary_taxes" class="font-semibold">$ 0.00</span>
+                </div>
+                <div class="flex justify-between text-lg font-bold text-gray-900 border-t pt-2 mt-2">
+                    <span>Total de venta</span>
+                    <span id="summary_total">$ 0.00</span>
+                </div>
+            </div>
+        `);
+
+        const buttonSection = $("<div>", { class: "mt-6 text-center" });
+        buttonSection.append(`
+            <button id="btnSaveSale" 
+                    class="bg-[#103B60] hover:bg-[#0d2f4d] text-white font-semibold px-8 py-3 rounded-lg transition-colors">
+                Guardar la venta del día
+            </button>
+        `);
+
+        form.append(categoriesSection, discountsSection, taxesSection, summarySection, buttonSection);
+
         $("#formSaleCapture").html(form);
+
+        $(".category-input, .discount-input").on("input", () => this.updateTotals());
+        $("#btnSaveSale").on("click", () => this.saveDailySale());
 
         this.updateTotals();
     }
 
     renderPaymentForm() {
+        console.log(cashConcepts)
         const form = $("<div>", { class: "space-y-4" });
 
         const cashSection = $("<div>", { class: "border-t pt-3" });
         cashSection.append(`<h4 class="font-semibold mb-2">Pagado en efectivo</h4>`);
-        
+
         cashConcepts.forEach(concept => {
             cashSection.append(`
                 <div class="form-group">
@@ -247,33 +304,34 @@ class SaleCapture extends App {
             `);
         });
 
-        const banksSection = $("<div>", { class: "border-t pt-3 mt-3" });
-        banksSection.append(`<h4 class="font-semibold mb-2">Pagado por bancos</h4>`);
-        
-        bankAccounts.forEach(bank => {
-            banksSection.append(`
-                <div class="form-group">
-                    <label>${bank.valor}</label>
-                    <input type="number" step="0.01" class="form-control bank-input" 
-                           data-id="${bank.id}" value="0">
-                </div>
-            `);
-        });
+        // const banksSection = $("<div>", { class: "border-t pt-3 mt-3" });
+        // banksSection.append(`<h4 class="font-semibold mb-2">Pagado por bancos</h4>`);
 
-        const creditsSection = $("<div>", { class: "border-t pt-3 mt-3" });
-        creditsSection.append(`<h4 class="font-semibold mb-2">Créditos a clientes</h4>`);
-        creditsSection.append(`
-            <div class="form-group">
-                <label>Consumos</label>
-                <input type="number" step="0.01" id="credit_consumer" class="form-control" value="0">
-            </div>
-            <div class="form-group">
-                <label>Pagos o abonos</label>
-                <input type="number" step="0.01" id="credit_payment" class="form-control" value="0">
-            </div>
-        `);
+        // bankAccounts.forEach(bank => {
+        //     banksSection.append(`
+        //         <div class="form-group">
+        //             <label>${bank.valor}</label>
+        //             <input type="number" step="0.01" class="form-control bank-input" 
+        //                    data-id="${bank.id}" value="0">
+        //         </div>
+        //     `);
+        // });
 
-        form.append(cashSection, banksSection, creditsSection);
+        // const creditsSection = $("<div>", { class: "border-t pt-3 mt-3" });
+        // creditsSection.append(`<h4 class="font-semibold mb-2">Créditos a clientes</h4>`);
+        // creditsSection.append(`
+        //     <div class="form-group">
+        //         <label>Consumos</label>
+        //         <input type="number" step="0.01" id="credit_consumer" class="form-control" value="0">
+        //     </div>
+        //     <div class="form-group">
+        //         <label>Pagos o abonos</label>
+        //         <input type="number" step="0.01" id="credit_payment" class="form-control" value="0">
+        //     </div>
+        // `);
+
+        // form.append(cashSection, banksSection, creditsSection);
+        form.append(cashConcepts);
         $("#formPaymentForms").html(form);
 
         this.updatePaymentTotals();
@@ -294,12 +352,12 @@ class SaleCapture extends App {
 
     updateTotals() {
         let totalCategories = 0;
-        $('.category-input').each(function() {
+        $('.category-input').each(function () {
             totalCategories += parseFloat($(this).val()) || 0;
         });
 
         let totalDiscounts = 0;
-        $('.discount-input').each(function() {
+        $('.discount-input').each(function () {
             totalDiscounts += parseFloat($(this).val()) || 0;
         });
 
@@ -338,7 +396,7 @@ class SaleCapture extends App {
 
     updatePaymentTotals() {
         let totalCash = 0;
-        $('.cash-input').each(function() {
+        $('.cash-input').each(function () {
             const amount = parseFloat($(this).val()) || 0;
             const type = $(this).data('type');
             if (type === 'suma') {
@@ -349,7 +407,7 @@ class SaleCapture extends App {
         });
 
         let totalBanks = 0;
-        $('.bank-input').each(function() {
+        $('.bank-input').each(function () {
             totalBanks += parseFloat($(this).val()) || 0;
         });
 
@@ -358,7 +416,7 @@ class SaleCapture extends App {
         const netCredit = creditConsumer - creditPayment;
 
         const totalReceived = totalCash + totalBanks + netCredit;
-        
+
         const totals = this.updateTotals();
         const difference = totals.totalSale - totalReceived;
 
@@ -399,7 +457,7 @@ class SaleCapture extends App {
         const categories = [];
         const discountsList = [];
 
-        $('.category-input').each(function() {
+        $('.category-input').each(function () {
             const amount = parseFloat($(this).val()) || 0;
             if (amount > 0) {
                 categories.push({
@@ -413,7 +471,7 @@ class SaleCapture extends App {
             }
         });
 
-        $('.discount-input').each(function() {
+        $('.discount-input').each(function () {
             const amount = parseFloat($(this).val()) || 0;
             if (amount > 0) {
                 discountsList.push({
@@ -482,626 +540,3 @@ class SaleCapture extends App {
 }
 
 
-class AdminModule extends App {
-    constructor(link, div_modulo) {
-        super(link, div_modulo);
-    }
-
-    render() {
-        this.layout();
-    }
-
-    layout() {
-        const container = $(`#container-admin`);
-        
-        this.tabLayout({
-            parent: "container-admin",
-            id: "tabsAdmin",
-            theme: "light",
-            type: "short",
-            json: [
-                {
-                    id: "categorias",
-                    tab: "Categorías",
-                    active: true,
-                    onClick: () => this.lsSaleCategories()
-                },
-                {
-                    id: "descuentos",
-                    tab: "Descuentos",
-                    onClick: () => this.lsDiscounts()
-                },
-                {
-                    id: "conceptos",
-                    tab: "Conceptos Efectivo",
-                    onClick: () => this.lsCashConcepts()
-                },
-                {
-                    id: "clientes",
-                    tab: "Clientes",
-                    onClick: () => this.lsCustomers()
-                }
-            ]
-        });
-
-        this.lsSaleCategories();
-    }
-
-    lsSaleCategories() {
-        const container = $(`#container-categorias`);
-        container.html('<div id="filterbar-categorias" class="mb-2"></div><div id="tabla-categorias"></div>');
-
-        this.createfilterBar({
-            parent: "filterbar-categorias",
-            data: [
-                {
-                    opc: "select",
-                    id: "active",
-                    class: "col-12 col-md-3",
-                    data: [
-                        { id: "1", valor: "Activas" },
-                        { id: "0", valor: "Inactivas" }
-                    ],
-                    onchange: 'adminModule.lsSaleCategories()'
-                },
-                {
-                    opc: "button",
-                    class: "col-12 col-md-3",
-                    id: "btnNewCategory",
-                    text: "Nueva categoría",
-                    onClick: () => this.addSaleCategory(),
-                },
-            ],
-        });
-
-        this.createTable({
-            parent: "tabla-categorias",
-            idFilterBar: "filterbar-categorias",
-            data: { opc: "lsSaleCategories", udn: 1 },
-            coffeesoft: true,
-            conf: { datatable: true, pag: 10 },
-            attr: {
-                id: "tbCategories",
-                theme: 'light',
-                center: [3]
-            },
-        });
-    }
-
-    addSaleCategory() {
-        this.createModalForm({
-            id: 'formCategoryAdd',
-            data: { opc: 'addSaleCategory', udn_id: 1 },
-            bootbox: {
-                title: 'Agregar Categoría de Venta',
-            },
-            json: [
-                {
-                    opc: "input",
-                    id: "name",
-                    lbl: "Nombre de la categoría",
-                    class: "col-12 mb-3"
-                },
-                {
-                    opc: "textarea",
-                    id: "description",
-                    lbl: "Descripción",
-                    class: "col-12 mb-3"
-                }
-            ],
-            success: (response) => {
-                if (response.status === 200) {
-                    alert({ icon: "success", text: response.message });
-                    this.lsSaleCategories();
-                } else {
-                    alert({ icon: "error", text: response.message });
-                }
-            }
-        });
-    }
-
-    async editSaleCategory(id) {
-        const request = await useFetch({
-            url: this._link,
-            data: { opc: "getSaleCategory", id: id }
-        });
-
-        const data = request.data;
-
-        this.createModalForm({
-            id: 'formCategoryEdit',
-            data: { opc: 'editSaleCategory', id: id },
-            bootbox: {
-                title: 'Editar Categoría',
-            },
-            autofill: data,
-            json: [
-                {
-                    opc: "input",
-                    id: "name",
-                    lbl: "Nombre de la categoría",
-                    class: "col-12 mb-3"
-                },
-                {
-                    opc: "textarea",
-                    id: "description",
-                    lbl: "Descripción",
-                    class: "col-12 mb-3"
-                }
-            ],
-            success: (response) => {
-                if (response.status === 200) {
-                    alert({ icon: "success", text: response.message });
-                    this.lsSaleCategories();
-                } else {
-                    alert({ icon: "error", text: response.message });
-                }
-            }
-        });
-    }
-
-    statusSaleCategory(id, active) {
-        this.swalQuestion({
-            opts: {
-                title: "¿Cambiar estado?",
-                text: "Esta acción activará o desactivará la categoría",
-                icon: "warning",
-            },
-            data: {
-                opc: "statusSaleCategory",
-                active: active === 1 ? 0 : 1,
-                id: id,
-            },
-            methods: {
-                send: (response) => {
-                    if (response.status === 200) {
-                        alert({ icon: "success", text: response.message });
-                        this.lsSaleCategories();
-                    }
-                }
-            },
-        });
-    }
-
-    lsDiscounts() {
-        const container = $(`#container-descuentos`);
-        container.html('<div id="filterbar-descuentos" class="mb-2"></div><div id="tabla-descuentos"></div>');
-
-        this.createfilterBar({
-            parent: "filterbar-descuentos",
-            data: [
-                {
-                    opc: "select",
-                    id: "active",
-                    class: "col-12 col-md-3",
-                    data: [
-                        { id: "1", valor: "Activos" },
-                        { id: "0", valor: "Inactivos" }
-                    ],
-                    onchange: 'adminModule.lsDiscounts()'
-                },
-                {
-                    opc: "button",
-                    class: "col-12 col-md-3",
-                    id: "btnNewDiscount",
-                    text: "Nuevo descuento",
-                    onClick: () => this.addDiscount(),
-                },
-            ],
-        });
-
-        this.createTable({
-            parent: "tabla-descuentos",
-            idFilterBar: "filterbar-descuentos",
-            data: { opc: "lsDiscounts", udn: 1 },
-            coffeesoft: true,
-            conf: { datatable: true, pag: 10 },
-            attr: {
-                id: "tbDiscounts",
-                theme: 'light',
-                center: [2, 3]
-            },
-        });
-    }
-
-    addDiscount() {
-        this.createModalForm({
-            id: 'formDiscountAdd',
-            data: { opc: 'addDiscount', udn_id: 1 },
-            bootbox: {
-                title: 'Agregar Descuento/Cortesía',
-            },
-            json: [
-                {
-                    opc: "input",
-                    id: "name",
-                    lbl: "Nombre",
-                    class: "col-12 mb-3"
-                },
-                {
-                    opc: "checkbox",
-                    id: "tax_iva",
-                    lbl: "Aplica IVA",
-                    class: "col-4 mb-3"
-                },
-                {
-                    opc: "checkbox",
-                    id: "tax_ieps",
-                    lbl: "Aplica IEPS",
-                    class: "col-4 mb-3"
-                },
-                {
-                    opc: "checkbox",
-                    id: "tax_hospedaje",
-                    lbl: "Aplica Hospedaje",
-                    class: "col-4 mb-3"
-                }
-            ],
-            success: (response) => {
-                if (response.status === 200) {
-                    alert({ icon: "success", text: response.message });
-                    this.lsDiscounts();
-                } else {
-                    alert({ icon: "error", text: response.message });
-                }
-            }
-        });
-    }
-
-    async editDiscount(id) {
-        const request = await useFetch({
-            url: this._link,
-            data: { opc: "getDiscount", id: id }
-        });
-
-        const data = request.data;
-
-        this.createModalForm({
-            id: 'formDiscountEdit',
-            data: { opc: 'editDiscount', id: id },
-            bootbox: {
-                title: 'Editar Descuento/Cortesía',
-            },
-            autofill: data,
-            json: [
-                {
-                    opc: "input",
-                    id: "name",
-                    lbl: "Nombre",
-                    class: "col-12 mb-3"
-                },
-                {
-                    opc: "checkbox",
-                    id: "tax_iva",
-                    lbl: "Aplica IVA",
-                    class: "col-4 mb-3"
-                },
-                {
-                    opc: "checkbox",
-                    id: "tax_ieps",
-                    lbl: "Aplica IEPS",
-                    class: "col-4 mb-3"
-                },
-                {
-                    opc: "checkbox",
-                    id: "tax_hospedaje",
-                    lbl: "Aplica Hospedaje",
-                    class: "col-4 mb-3"
-                }
-            ],
-            success: (response) => {
-                if (response.status === 200) {
-                    alert({ icon: "success", text: response.message });
-                    this.lsDiscounts();
-                } else {
-                    alert({ icon: "error", text: response.message });
-                }
-            }
-        });
-    }
-
-    statusDiscount(id, active) {
-        this.swalQuestion({
-            opts: {
-                title: "¿Cambiar estado?",
-                text: "Esta acción activará o desactivará el descuento/cortesía",
-                icon: "warning",
-            },
-            data: {
-                opc: "statusDiscount",
-                active: active === 1 ? 0 : 1,
-                id: id,
-            },
-            methods: {
-                send: (response) => {
-                    if (response.status === 200) {
-                        alert({ icon: "success", text: response.message });
-                        this.lsDiscounts();
-                    }
-                }
-            },
-        });
-    }
-
-    lsCashConcepts() {
-        const container = $(`#container-conceptos`);
-        container.html('<div id="filterbar-conceptos" class="mb-2"></div><div id="tabla-conceptos"></div>');
-
-        this.createfilterBar({
-            parent: "filterbar-conceptos",
-            data: [
-                {
-                    opc: "select",
-                    id: "active",
-                    class: "col-12 col-md-3",
-                    data: [
-                        { id: "1", valor: "Activos" },
-                        { id: "0", valor: "Inactivos" }
-                    ],
-                    onchange: 'adminModule.lsCashConcepts()'
-                },
-                {
-                    opc: "button",
-                    class: "col-12 col-md-3",
-                    id: "btnNewConcept",
-                    text: "Nuevo concepto",
-                    onClick: () => this.addCashConcept(),
-                },
-            ],
-        });
-
-        this.createTable({
-            parent: "tabla-conceptos",
-            idFilterBar: "filterbar-conceptos",
-            data: { opc: "lsCashConcepts", udn: 1 },
-            coffeesoft: true,
-            conf: { datatable: true, pag: 10 },
-            attr: {
-                id: "tbConcepts",
-                theme: 'light',
-                center: [2, 3]
-            },
-        });
-    }
-
-    addCashConcept() {
-        this.createModalForm({
-            id: 'formConceptAdd',
-            data: { opc: 'addCashConcept', udn_id: 1 },
-            bootbox: {
-                title: 'Agregar Concepto de Efectivo',
-            },
-            json: [
-                {
-                    opc: "input",
-                    id: "name",
-                    lbl: "Nombre del concepto",
-                    class: "col-12 mb-3"
-                },
-                {
-                    opc: "select",
-                    id: "operation_type",
-                    lbl: "Tipo de operación",
-                    class: "col-12 mb-3",
-                    data: [
-                        { id: "suma", valor: "Suma" },
-                        { id: "resta", valor: "Resta" }
-                    ]
-                }
-            ],
-            success: (response) => {
-                if (response.status === 200) {
-                    alert({ icon: "success", text: response.message });
-                    this.lsCashConcepts();
-                } else {
-                    alert({ icon: "error", text: response.message });
-                }
-            }
-        });
-    }
-
-    async editCashConcept(id) {
-        const request = await useFetch({
-            url: this._link,
-            data: { opc: "getCashConcept", id: id }
-        });
-
-        const data = request.data;
-
-        this.createModalForm({
-            id: 'formConceptEdit',
-            data: { opc: 'editCashConcept', id: id },
-            bootbox: {
-                title: 'Editar Concepto',
-            },
-            autofill: data,
-            json: [
-                {
-                    opc: "input",
-                    id: "name",
-                    lbl: "Nombre del concepto",
-                    class: "col-12 mb-3"
-                },
-                {
-                    opc: "select",
-                    id: "operation_type",
-                    lbl: "Tipo de operación",
-                    class: "col-12 mb-3",
-                    data: [
-                        { id: "suma", valor: "Suma" },
-                        { id: "resta", valor: "Resta" }
-                    ]
-                }
-            ],
-            success: (response) => {
-                if (response.status === 200) {
-                    alert({ icon: "success", text: response.message });
-                    this.lsCashConcepts();
-                } else {
-                    alert({ icon: "error", text: response.message });
-                }
-            }
-        });
-    }
-
-    statusCashConcept(id, active) {
-        this.swalQuestion({
-            opts: {
-                title: "¿Cambiar estado?",
-                text: "Esta acción activará o desactivará el concepto",
-                icon: "warning",
-            },
-            data: {
-                opc: "statusCashConcept",
-                active: active === 1 ? 0 : 1,
-                id: id,
-            },
-            methods: {
-                send: (response) => {
-                    if (response.status === 200) {
-                        alert({ icon: "success", text: response.message });
-                        this.lsCashConcepts();
-                    }
-                }
-            },
-        });
-    }
-
-    lsCustomers() {
-        const container = $(`#container-clientes`);
-        container.html('<div id="filterbar-clientes" class="mb-2"></div><div id="tabla-clientes"></div>');
-
-        this.createfilterBar({
-            parent: "filterbar-clientes",
-            data: [
-                {
-                    opc: "select",
-                    id: "active",
-                    class: "col-12 col-md-3",
-                    data: [
-                        { id: "1", valor: "Activos" },
-                        { id: "0", valor: "Inactivos" }
-                    ],
-                    onchange: 'adminModule.lsCustomers()'
-                },
-                {
-                    opc: "button",
-                    class: "col-12 col-md-3",
-                    id: "btnNewCustomer",
-                    text: "Nuevo cliente",
-                    onClick: () => this.addCustomer(),
-                },
-            ],
-        });
-
-        this.createTable({
-            parent: "tabla-clientes",
-            idFilterBar: "filterbar-clientes",
-            data: { opc: "lsCustomers", udn: 1 },
-            coffeesoft: true,
-            conf: { datatable: true, pag: 10 },
-            attr: {
-                id: "tbCustomers",
-                theme: 'light',
-                center: [2, 3]
-            },
-        });
-    }
-
-    addCustomer() {
-        this.createModalForm({
-            id: 'formCustomerAdd',
-            data: { opc: 'addCustomer', udn_id: 1 },
-            bootbox: {
-                title: 'Agregar Cliente',
-            },
-            json: [
-                {
-                    opc: "input",
-                    id: "name",
-                    lbl: "Nombre del cliente",
-                    class: "col-12 mb-3"
-                },
-                {
-                    opc: "input",
-                    id: "balance",
-                    lbl: "Saldo inicial",
-                    tipo: "cifra",
-                    class: "col-12 mb-3"
-                }
-            ],
-            success: (response) => {
-                if (response.status === 200) {
-                    alert({ icon: "success", text: response.message });
-                    this.lsCustomers();
-                } else {
-                    alert({ icon: "error", text: response.message });
-                }
-            }
-        });
-    }
-
-    async editCustomer(id) {
-        const request = await useFetch({
-            url: this._link,
-            data: { opc: "getCustomer", id: id }
-        });
-
-        const data = request.data;
-
-        this.createModalForm({
-            id: 'formCustomerEdit',
-            data: { opc: 'editCustomer', id: id },
-            bootbox: {
-                title: 'Editar Cliente',
-            },
-            autofill: data,
-            json: [
-                {
-                    opc: "input",
-                    id: "name",
-                    lbl: "Nombre del cliente",
-                    class: "col-12 mb-3"
-                },
-                {
-                    opc: "input",
-                    id: "balance",
-                    lbl: "Saldo",
-                    tipo: "cifra",
-                    class: "col-12 mb-3"
-                }
-            ],
-            success: (response) => {
-                if (response.status === 200) {
-                    alert({ icon: "success", text: response.message });
-                    this.lsCustomers();
-                } else {
-                    alert({ icon: "error", text: response.message });
-                }
-            }
-        });
-    }
-
-    statusCustomer(id, active) {
-        this.swalQuestion({
-            opts: {
-                title: "¿Cambiar estado?",
-                text: "Esta acción activará o desactivará el cliente",
-                icon: "warning",
-            },
-            data: {
-                opc: "statusCustomer",
-                active: active === 1 ? 0 : 1,
-                id: id,
-            },
-            methods: {
-                send: (response) => {
-                    if (response.status === 200) {
-                        alert({ icon: "success", text: response.message });
-                        this.lsCustomers();
-                    }
-                }
-            },
-        });
-    }
-}

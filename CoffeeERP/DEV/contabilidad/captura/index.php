@@ -28,9 +28,11 @@
             <div class=" main-container" id="root"></div>
 
           <!-- Módulos del Sistema -->
-        <script src="js/ventas.js?t=<?php echo time(); ?>"></script>
-        <!-- <script src="js/archivos.js?t=<?php echo time(); ?>"></script> -->
-      
+        <!-- <script src="js/ventas.js?t=<?php echo time(); ?>"></script> -->
+        <script src="js/compras.js?t=<?php echo time(); ?>"></script> 
+      <script src="js/archivos.js?t=<?php echo time(); ?>"></script>
+        <script src="js/salidas-almacen.js?t=<?php echo time(); ?>"></script>
+
         
         
 

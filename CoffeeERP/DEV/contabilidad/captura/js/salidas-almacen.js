@@ -1,15 +1,4 @@
-let api = 'ctrl/ctrl-salidas-almacen.php';
-let warehouseOutput;
-let warehouses, lsudn;
 
-$(async () => {
-    const data = await useFetch({ url: api, data: { opc: "init" } });
-    warehouses = data.warehouses;
-    lsudn = data.udn;
-
-    warehouseOutput = new AdminWarehouseOutput(api, "root");
-    warehouseOutput.render();
-});
 
 class AdminWarehouseOutput extends Templates {
     constructor(link, div_modulo) {
@@ -26,6 +15,7 @@ class AdminWarehouseOutput extends Templates {
     layout() {
         this.primaryLayout({
             parent: `container-salidas-almacen`,
+            // parent: `root`,
             id: this.PROJECT_NAME,
             class: 'w-full',
             card: {
@@ -34,12 +24,6 @@ class AdminWarehouseOutput extends Templates {
             }
         });
 
-        $(`#container${this.PROJECT_NAME}`).prepend(`
-            <div class="px-4 pt-3 pb-3">
-                <h2 class="text-2xl font-semibold">📦 Salidas de Almacén</h2>
-                <p class="text-gray-400">Administra las salidas de almacén del sistema.</p>
-            </div>
-        `);
     }
 
     filterBar() {
@@ -48,10 +32,10 @@ class AdminWarehouseOutput extends Templates {
             data: [
                 {
                     opc: "select",
-                    id: "udn",
-                    lbl: "Unidad de negocio",
+                    id: "product",
+                    lbl: "Producto",
                     class: "col-12 col-md-3",
-                    data: lsudn,
+                    data: products,
                     onchange: 'warehouseOutput.lsWarehouseOutputs()'
                 },
                 {
@@ -67,53 +51,56 @@ class AdminWarehouseOutput extends Templates {
                 },
                 {
                     opc: "button",
-                    class: "col-12 col-md-3",
-                    id: "btnUploadFiles",
-                    text: "📁 Subir archivos de almacén",
-                    color_btn: "success",
-                    onClick: () => this.uploadFiles()
-                },
-                {
-                    opc: "button",
-                    class: "col-12 col-md-3",
+                    class: "col-12 col-md-2",
                     id: "btnAddOutput",
+                    className:'w-100',
                     text: "+ Registrar nueva salida",
                     color_btn: "primary",
                     onClick: () => this.addWarehouseOutput()
-                }
+                },
+                {
+                    opc: "button",
+                    class: "col-12 col-md-2",
+                    id: "btnUploadFiles",
+                    text: "Subir archivos",
+                    className:'w-100',
+                    color_btn: "success",
+                    onClick: () => this.uploadFiles()
+                },
+               
             ]
         });
     }
 
     async lsWarehouseOutputs() {
-        const udn = $(`#filterBar${this.PROJECT_NAME} #udn`).val();
+        const product = $(`#filterBar${this.PROJECT_NAME} #product`).val();
         const active = $(`#filterBar${this.PROJECT_NAME} #active`).val();
 
-        const totalData = await useFetch({
-            url: api,
-            data: { opc: 'getTotalOutputs', udn: udn }
-        });
+        // const totalData = await useFetch({
+        //     url: api_warehouse,
+        //     data: { opc: 'getTotalOutputs', product: product }
+        // });
 
-        $(`#container${this.PROJECT_NAME}`).find('.px-4').after(`
-            <div class="mx-4 mb-3 p-4 bg-green-50 border border-green-200 rounded-lg">
-                <div class="flex justify-between items-center">
-                    <span class="text-sm text-gray-600">Total de salidas de almacén</span>
-                    <span class="text-2xl font-bold text-green-700">$ ${this.formatPrice(totalData.total)}</span>
-                </div>
-            </div>
-        `);
+        // $(`#container${this.PROJECT_NAME}`).find('.px-4').after(`
+        //     <div class="mx-4 mb-3 p-4 bg-green-50 border border-green-200 rounded-lg">
+        //         <div class="flex justify-between items-center">
+        //             <span class="text-sm text-gray-600">Total de salidas de almacén</span>
+        //             <span class="text-2xl font-bold text-green-700">${this.formatPrice(totalData.total)}</span>
+        //         </div>
+        //     </div>
+        // `);
 
         this.createTable({
-            parent: `containerWarehouseOutput`,
+            parent: `container${this.PROJECT_NAME}`,
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
-            data: { opc: 'lsWarehouseOutputs', udn: udn, active: active },
+            data: { opc: 'lsWarehouseOutputs', product: product, active: active },
             coffeesoft: true,
             conf: { datatable: true, pag: 15 },
             attr: {
                 id: `tb${this.PROJECT_NAME}`,
                 theme: 'corporativo',
-                center: [0],
-                right: [1]
+                center: [1, 2],
+                right: []
             }
         });
     }
@@ -243,11 +230,12 @@ class AdminWarehouseOutput extends Templates {
         return [
             {
                 opc: "select",
-                id: "insumo_id",
-                lbl: "Almacén",
+                id: "product_id",
+                lbl: "Producto",
                 class: "col-12 col-md-6 mb-3",
-                data: warehouses,
-                placeholder: "Selecciona el almacén"
+                data: products,
+                placeholder: "Selecciona el producto",
+                required: true
             },
             {
                 opc: "input",
@@ -256,7 +244,8 @@ class AdminWarehouseOutput extends Templates {
                 tipo: "cifra",
                 class: "col-12 col-md-6 mb-3",
                 placeholder: "0.00",
-                onkeyup: "validationInputForNumber('#amount')"
+                onkeyup: "validationInputForNumber('#amount')",
+                required: true
             },
             {
                 opc: "textarea",

@@ -2,17 +2,49 @@ let api = 'ctrl/ctrl-archivos.php';
 let app, dashboardFiles, adminFiles;
 let modules, lsudn, counts;
 
+// -- salidas de almacen.
+let api_warehouse = 'ctrl/ctrl-salidas-almacen.php';
+let warehouseOutput;
+let products;
+
+// -- compras.
+
+let api_compras = 'ctrl/ctrl-compras.php';
+let compras;
+
+let purchaseTypes, methodPay, udn, productClass, suppliers, products_compras;
+
+
+
+
 $(async () => {
     const data = await useFetch({ url: api, data: { opc: "init" } });
     modules = data.modules;
-    lsudn = data.udn;
-    counts = data.counts;
+    lsudn   = data.udn;
+    counts  = data.counts;
 
     app = new App(api, "root");
 
     adminFiles = new AdminFiles(api, "root");
-
     app.render();
+
+    // almacen.
+    const data_alm        = await useFetch({ url: api_warehouse, data: { opc: "init" } });
+          products        = data_alm.products;
+          warehouseOutput = new AdminWarehouseOutput(api_warehouse, "root");
+    warehouseOutput.render();
+
+    // compras.
+
+    const data_compras = await useFetch({ url: api_compras, data: { opc: "init" } });
+    purchaseTypes = data_compras.purchaseTypes;
+    methodPay = data_compras.methodPay;
+    udn = data_compras.udn;
+    productClass = data_compras.productClass;
+
+    compras = new Compras(api_compras, "root");
+    compras.render()
+
 });
 
 class App extends Templates {
@@ -24,6 +56,7 @@ class App extends Templates {
     render() {
         this.layout();
         adminFiles.render();
+      
     }
 
     layout() {
@@ -55,30 +88,33 @@ class App extends Templates {
                     id: "admin",
                     tab: "Administrador de archivos",
                     active: true,
-                    onClick: () => adminFiles.lsFiles()
+                    // onClick: () => adminFiles.lsFiles()
                 },
+                {
+                    id: "salidas-almacen",
+                    tab: "Salidas de almacén",
+                    // onClick: () => adminFiles.lsFiles()
+                },
+                {
+                    id: "compras",
+                    tab: "Compras",
+                    // onClick: () => adminFiles.lsFiles()
+                },
+
                 {
                     id: "ventas",
                     tab: "Ventas",
-                    onClick: () => adminFiles.lsFiles()
+                    // onClick: () => adminFiles.lsFiles()
                 },
                 {
                     id: "clientes",
                     tab: "Clientes",
-                    onClick: () => adminFiles.lsFiles()
+                    // onClick: () => adminFiles.lsFiles()
                 },
+              
+              
                 {
-                    id: "admin",
-                    tab: "Compras",
-                    onClick: () => adminFiles.lsFiles()
-                },
-                {
-                    id: "admin",
-                    tab: "Salidas de almacén",
-                    onClick: () => adminFiles.lsFiles()
-                },
-                {
-                    id: "admin",
+                    id: "proveedor",
                     tab: "Pagos a proveedor",
                     onClick: () => adminFiles.lsFiles()
                 },

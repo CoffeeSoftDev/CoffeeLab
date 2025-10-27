@@ -23,10 +23,10 @@ class ctrl extends mdlVentas {
 
         return [
             'saleCategories' => $this->adminModel->lsSaleCategory([$udn]),
-            'discounts' => $this->adminModel->lsDiscount([$udn]),
-            'cashConcepts' => $this->adminModel->lsCashConcept([$udn]),
-            'bankAccounts' => $this->adminModel->lsBankAccount([$udn]),
-            'customers' => $this->adminModel->lsCustomer([$udn])
+            'discounts'      => $this->adminModel->lsDiscount([$udn]),
+            'cashConcepts'   => $this->adminModel->lsCashConcept([$udn]),
+            'bankAccounts'   => $this->adminModel->lsBankAccount([$udn]),
+            'customers'      => $this->adminModel->lsCustomer([$udn])
         ];
     }
 

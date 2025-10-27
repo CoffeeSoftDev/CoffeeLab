@@ -27,7 +27,6 @@
             <div class="main-container" id="root"></div>
 
             <!-- Módulo de Salidas de Almacén -->
-            <script src="js/salidas-almacen.js?t=<?php echo time(); ?>"></script>
         </div>
     </main>
 </body>

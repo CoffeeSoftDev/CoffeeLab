@@ -167,13 +167,18 @@ class mdl extends CRUD {
     }
 
     function lsCashConcept($array) {
-        return $this->_Select([
-            'table' => "{$this->bd}cash_concept",
-            'values' => "id, name as valor, operation_type",
-            'where' => 'active = 1 AND udn_id = ?',
-            'order' => ['ASC' => 'name'],
-            'data' => $array
-        ]);
+        $query = "
+            SELECT 
+                id, 
+                name as valor, 
+                operation_type
+            FROM {$this->bd}cash_concept
+            WHERE active = 1 
+            AND udn_id = ?
+            ORDER BY name ASC
+        ";
+        
+        return $this->_Read($query, $array);
     }
 
     // Bank Accounts
@@ -223,13 +228,18 @@ class mdl extends CRUD {
     }
 
     function lsBankAccount($array) {
-        return $this->_Select([
-            'table' => "{$this->bd}bank_account",
-            'values' => "id, name as valor, code",
-            'where' => 'active = 1 AND udn_id = ?',
-            'order' => ['ASC' => 'name'],
-            'data' => $array
-        ]);
+        $query = "
+            SELECT 
+                id, 
+                name as valor, 
+                code
+            FROM {$this->bd}bank_account
+            WHERE active = 1 
+            AND udn_id = ?
+            ORDER BY name ASC
+        ";
+        
+        return $this->_Read($query, $array);
     }
 
     // Customers

@@ -12,18 +12,18 @@ class ctrl extends mdl {
 
     function init() {
         return [
-            'warehouses' => $this->lsWarehouses(),
+            'products' => $this->lsProducts(),
             'udn' => $this->lsUDN()
         ];
     }
 
     function lsWarehouseOutputs() {
         $active = $_POST['active'] ?? 1;
-        $udn_id = $_POST['udn'] ?? null;
+        $product_id = $_POST['product'] ?? null;
         
         $data = $this->listWarehouseOutputs([
             'active' => $active,
-            'udn_id' => $udn_id
+            'product_id' => $product_id
         ]);
         
         $rows = [];
@@ -47,11 +47,12 @@ class ctrl extends mdl {
 
             $rows[] = [
                 'id' => $item['id'],
-                'Almacén' => htmlspecialchars($item['warehouse_name']),
-                'Monto' => [
-                    'html' => '$ ' . number_format($item['amount'], 2),
+                'Producto' => htmlspecialchars($item['product_name']),
+                'Cantidad' => [
+                    'html' => number_format($item['amount'], 2),
                     'class' => 'text-end'
                 ],
+                'Fecha de operación' => $item['formatted_date'],
                 'Descripción' => htmlspecialchars($item['description'] ?: 'Sin descripción'),
                 'a' => $a
             ];
@@ -88,10 +89,10 @@ class ctrl extends mdl {
         $status = 500;
         $message = 'Error al registrar salida de almacén';
 
-        if (empty($_POST['insumo_id']) || empty($_POST['amount'])) {
+        if (empty($_POST['product_id']) || empty($_POST['amount'])) {
             return [
                 'status' => 400,
-                'message' => 'El almacén y la cantidad son obligatorios'
+                'message' => 'El producto y la cantidad son obligatorios'
             ];
         }
 
@@ -123,10 +124,10 @@ class ctrl extends mdl {
         $status = 500;
         $message = 'Error al editar salida de almacén';
 
-        if (empty($_POST['insumo_id']) || empty($_POST['amount'])) {
+        if (empty($_POST['product_id']) || empty($_POST['amount'])) {
             return [
                 'status' => 400,
-                'message' => 'El almacén y la cantidad son obligatorios'
+                'message' => 'El producto y la cantidad son obligatorios'
             ];
         }
 
@@ -168,10 +169,10 @@ class ctrl extends mdl {
     }
 
     function getTotalOutputs() {
-        $udn_id = $_POST['udn'] ?? null;
+        $product_id = $_POST['product'] ?? null;
         
         $total = $this->getTotalWarehouseOutputs([
-            'udn_id' => $udn_id
+            'product_id' => $product_id
         ]);
 
         return [

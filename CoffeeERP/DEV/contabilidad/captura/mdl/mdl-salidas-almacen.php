@@ -16,23 +16,23 @@ class mdl extends CRUD {
         $where = 'warehouse_output.active = ?';
         $data = [$array['active']];
 
-        if (!empty($array['udn_id'])) {
-            $where .= ' AND warehouse_output.insumo_id = ?';
-            $data[] = $array['udn_id'];
+        if (!empty($array['product_id'])) {
+            $where .= ' AND warehouse_output.product_id = ?';
+            $data[] = $array['product_id'];
         }
 
         $query = "
             SELECT 
                 warehouse_output.id,
-                warehouse_output.insumo_id,
+                warehouse_output.product_id,
                 warehouse_output.amount,
                 warehouse_output.description,
                 warehouse_output.operation_date,
                 warehouse_output.active,
-                COALESCE(insumos.nombre, 'Sin especificar') as warehouse_name,
-                DATE_FORMAT(warehouse_output.operation_date, '%d/%m/%Y') as formatted_date
+                COALESCE(product.name, 'Sin especificar') as product_name,
+                DATE_FORMAT(warehouse_output.operation_date, '%d/%m/%Y %H:%i') as formatted_date
             FROM {$this->bd}warehouse_output
-            LEFT JOIN insumos ON warehouse_output.insumo_id = insumos.idInsumo
+            LEFT JOIN {$this->bd}product ON warehouse_output.product_id = product.id
             WHERE {$where}
             ORDER BY warehouse_output.operation_date DESC, warehouse_output.id DESC
         ";
@@ -79,9 +79,9 @@ class mdl extends CRUD {
         $where = 'active = 1';
         $data = [];
 
-        if (!empty($array['udn_id'])) {
-            $where .= ' AND insumo_id = ?';
-            $data[] = $array['udn_id'];
+        if (!empty($array['product_id'])) {
+            $where .= ' AND product_id = ?';
+            $data[] = $array['product_id'];
         }
 
         $query = "
@@ -94,14 +94,13 @@ class mdl extends CRUD {
         return $result[0]['total'] ?? 0;
     }
 
-    function lsWarehouses() {
-        $query = "
-            SELECT idInsumo AS id, nombre AS valor
-            FROM insumos
-            WHERE Stado = 1
-            ORDER BY nombre ASC
-        ";
-        return $this->_Read($query, null);
+    function lsProducts() {
+        return $this->_Select([
+            'table' => $this->bd . 'product',
+            'values' => 'id, name as valor',
+            'where' => 'active = 1',
+            'order' => ['ASC' => 'name']
+        ]);
     }
 
     function lsUDN() {

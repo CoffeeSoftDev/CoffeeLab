@@ -196,7 +196,7 @@ CREATE TABLE IF NOT EXISTS detail_credit_customer (
 -- =====================================================
 -- 5. File Storage Table
 -- =====================================================
-CREATE TABLE IF NOT EXISTS closure_files (
+CREATE TABLE IF NOT EXISTS files (
     id INT PRIMARY KEY AUTO_INCREMENT,
     daily_closure_id INT NOT NULL,
     name VARCHAR(255) NOT NULL,

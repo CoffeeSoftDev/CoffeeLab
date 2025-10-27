@@ -16,15 +16,15 @@ class mdl extends CRUD {
         $where = 'files.active = 1';
         $data = [];
 
-        if (!empty($array['module'])) {
-            $where .= ' AND files.description = ?';
-            $data[] = $array['module'];
-        }
+        // if (!empty($array['module'])) {
+        //     $where .= ' AND files.description = ?';
+        //     $data[] = $array['module'];
+        // }
 
-        if (!empty($array['search'])) {
-            $where .= ' AND files.file_name LIKE ?';
-            $data[] = '%' . $array['search'] . '%';
-        }
+        // if (!empty($array['search'])) {
+        //     $where .= ' AND files.file_name LIKE ?';
+        //     $data[] = '%' . $array['search'] . '%';
+        // }
 
         if (!empty($array['udn_id'])) {
             $where .= ' AND files.udn_id = ?';
