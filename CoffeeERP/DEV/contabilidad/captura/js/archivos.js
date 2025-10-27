@@ -87,7 +87,6 @@ class App extends Templates {
                 {
                     id: "admin",
                     tab: "Administrador de archivos",
-                    active: true,
                     // onClick: () => adminFiles.lsFiles()
                 },
                 {
@@ -98,6 +97,8 @@ class App extends Templates {
                 {
                     id: "compras",
                     tab: "Compras",
+                    active: true,
+
                     // onClick: () => adminFiles.lsFiles()
                 },
 

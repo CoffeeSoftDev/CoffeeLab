@@ -29,6 +29,7 @@ class App extends Templates {
     }
 
     layout() {
+
         this.primaryLayout({
             parent: `root`,
             id: this.PROJECT_NAME,
@@ -71,6 +72,7 @@ class App extends Templates {
     }
 
     filterBar() {
+        
         const container = $(`#container-movimientos`);
         container.html('<div id="filterbar-movimientos" class="mb-2"></div><div id="dashboard-cards"></div><div id="tabla-movimientos"></div>');
 

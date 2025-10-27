@@ -8,6 +8,7 @@
 <script src="https://rawcdn.githack.com/SomxS/Grupo-Varoch/refs/heads/main/src/js/plugins.js"></script>
 <script src="https://www.plugins.erp-varoch.com/ERP/JS/complementos.js"></script>
 
+
 <body>
     <?php require_once('../../../layout/navbar.php'); ?>
 
@@ -26,6 +27,7 @@
 
             <!-- Module Scripts -->
             <script src="src/js/kpi-ventas.js?t=<?php echo time(); ?>"></script>
+            <script src="src/js/dashboard.js?t=<?php echo time(); ?>"></script>
         
         </div>
     </main>

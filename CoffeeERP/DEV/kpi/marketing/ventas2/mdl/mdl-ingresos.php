@@ -56,7 +56,8 @@ class mdl extends CRUD {
             WHERE F.fecha_folio = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
             AND F.id_udn = ?
         ";
-        return $this->_Read($query, $array)[0]['total'];
+        $result = $this->_Read($query, $array);
+        return !empty($result) ? $result[0]['total'] : '0.00';
     }
 
     public function getComparativaChequePromedio($array) {
@@ -71,7 +72,8 @@ class mdl extends CRUD {
             AND YEAR(F.fecha_folio) = ?
             AND F.id_udn = ?
         ";
-        return $this->_Read($query, $array)[0];
+        $result = $this->_Read($query, $array);
+        return !empty($result) ? $result[0] : ['AyB' => 0, 'Alimentos' => 0, 'Bebidas' => 0];
     }
 
 
@@ -92,7 +94,7 @@ class mdl extends CRUD {
                 AND DATE_FORMAT(fecha_folio,'%Y-%m-%d') = ?
         ";
         $sql = $this->_Read($query, $array);
-        return $sql[0];
+        return !empty($sql) ? $sql[0] : null;
     }
 
     function getIngresosDayOfWeek($array){
@@ -168,7 +170,16 @@ class mdl extends CRUD {
 
         $sql = $this->_Read($query, $array);
 
-        return $sql[0];
+        return !empty($sql) ? $sql[0] : [
+            'totalHospedaje' => 0,
+            'totalAyB' => 0,
+            'totalAlimentos' => 0,
+            'totalBebidas' => 0,
+            'totalDiversos' => 0,
+            'totalGeneral' => 0,
+            'totalGralAyB' => 0,
+            'totalHabitaciones' => 0
+        ];
     }
 
 
@@ -200,7 +211,16 @@ class mdl extends CRUD {
 
         $sql = $this->_Read($query, $array);
 
-        return $sql[0];
+        return !empty($sql) ? $sql[0] : [
+            'totalHospedaje' => 0,
+            'totalAlimentos' => 0,
+            'totalBebidas' => 0,
+            'totalAyB' => 0,
+            'totalDiversos' => 0,
+            'totalGeneral' => 0,
+            'totalHabitaciones' => 0,
+            'totalDias' => 0
+        ];
     }
 
     function getsoft_ventas($array){
@@ -260,6 +280,6 @@ class mdl extends CRUD {
 
         $sql = $this->_Read($query, $array);
 
-        return $sql[0];
+        return !empty($sql) ? $sql[0] : null;
     }
 }
