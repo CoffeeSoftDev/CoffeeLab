@@ -31,29 +31,31 @@ class ctrl extends mdl {
         
         $rows = [];
 
-        foreach ($data as $item) {
-            $fileSize = $this->formatFileSize($item['file_size']);
-            $fileType = $this->getFileType($item['file_name']);
-            
-            $rows[] = [
-                'id' => $item['id'],
-                'Módulo' => [
-                    'html' => '<span class="badge bg-primary">' . htmlspecialchars($item['module']) . '</span>',
-                    'class' => 'text-center'
-                ],
-                'Subido por' => htmlspecialchars($item['uploaded_by']),
-                'Nombre del archivo' => htmlspecialchars($item['file_name']),
-                'Tipo/Tamaño' => [
-                    'html' => '<span class="text-muted">' . $fileType . ' / ' . $fileSize . '</span>',
-                    'class' => 'text-center'
-                ],
-                'dropdown' => $this->dropdown($item['id'], $item['src'])
-            ];
+        if (is_array($data) && !empty($data)) {
+            foreach ($data as $item) {
+                $fileSize = $this->formatFileSize($item['file_size']);
+                $fileType = $this->getFileType($item['file_name']);
+                
+                $rows[] = [
+                    'id' => $item['id'],
+                    'Módulo' => [
+                        'html' => '<span class="badge bg-primary">' . htmlspecialchars($item['module']) . '</span>',
+                        'class' => 'text-center'
+                    ],
+                    'Subido por' => htmlspecialchars($item['uploaded_by']),
+                    'Nombre del archivo' => htmlspecialchars($item['file_name']),
+                    'Tipo/Tamaño' => [
+                        'html' => '<span class="text-muted">' . $fileType . ' / ' . $fileSize . '</span>',
+                        'class' => 'text-center'
+                    ],
+                    'dropdown' => $this->dropdown($item['id'], $item['src'])
+                ];
+            }
         }
 
         return [
             'row' => $rows,
-            'ls' => $data
+            'ls' => $data ?? []
         ];
     }
 

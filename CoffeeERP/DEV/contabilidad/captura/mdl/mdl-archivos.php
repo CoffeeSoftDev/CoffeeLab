@@ -88,7 +88,7 @@ class mdl extends CRUD {
             GROUP BY description
         ";
         
-        $results = $this->_Read($query, null);
+        $results = $this->_Read($query, []);
         
         $counts = [
             'total' => 0,
@@ -98,22 +98,24 @@ class mdl extends CRUD {
             'almacen' => 0
         ];
         
-        foreach ($results as $row) {
-            $counts['total'] += $row['count'];
-            
-            switch ($row['module']) {
-                case 'Ventas':
-                    $counts['ventas'] = $row['count'];
-                    break;
-                case 'Compras':
-                    $counts['compras'] = $row['count'];
-                    break;
-                case 'Pagos a proveedor':
-                    $counts['proveedores'] = $row['count'];
-                    break;
-                case 'Salidas de almacén':
-                    $counts['almacen'] = $row['count'];
-                    break;
+        if (is_array($results) && !empty($results)) {
+            foreach ($results as $row) {
+                $counts['total'] += $row['count'];
+                
+                switch ($row['module']) {
+                    case 'Ventas':
+                        $counts['ventas'] = $row['count'];
+                        break;
+                    case 'Compras':
+                        $counts['compras'] = $row['count'];
+                        break;
+                    case 'Pagos a proveedor':
+                        $counts['proveedores'] = $row['count'];
+                        break;
+                    case 'Salidas de almacén':
+                        $counts['almacen'] = $row['count'];
+                        break;
+                }
             }
         }
         
