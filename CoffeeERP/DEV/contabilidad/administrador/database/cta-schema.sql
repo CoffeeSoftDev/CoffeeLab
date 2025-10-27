@@ -32,9 +32,7 @@ CREATE TABLE IF NOT EXISTS `purchase_type` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `udn_id` INT(11) NOT NULL COMMENT 'Unidad de negocio',
   `name` VARCHAR(255) NOT NULL COMMENT 'Nombre del tipo de compra',
-  `description` TEXT NULL COMMENT 'Descripción del tipo',
   `active` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1=Activo, 0=Inactivo',
-  `date_creation` DATETIME NOT NULL COMMENT 'Fecha de creación',
   PRIMARY KEY (`id`),
   INDEX `idx_udn` (`udn_id`),
   INDEX `idx_active` (`active`)
@@ -45,9 +43,7 @@ CREATE TABLE IF NOT EXISTS `payment_method` (
   `id` INT(11) NOT NULL AUTO_INCREMENT,
   `udn_id` INT(11) NOT NULL COMMENT 'Unidad de negocio',
   `name` VARCHAR(255) NOT NULL COMMENT 'Nombre de la forma de pago',
-  `description` TEXT NULL COMMENT 'Descripción',
   `active` TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1=Activo, 0=Inactivo',
-  `date_creation` DATETIME NOT NULL COMMENT 'Fecha de creación',
   PRIMARY KEY (`id`),
   INDEX `idx_udn` (`udn_id`),
   INDEX `idx_active` (`active`)

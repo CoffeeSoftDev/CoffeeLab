@@ -16,11 +16,13 @@ class ctrl extends mdl {
         ];
     }
 
+    // Cuenta de mayor (product_class)
+
     function lsMayorAccount() {
         $__row = [];
         $udn = $_POST['udn'];
         
-        $ls = $this->listMayorAccount([$udn]);
+        $ls = $this->listProductClass([$udn]);
 
         foreach ($ls as $key) {
             $a = [];
@@ -60,12 +62,13 @@ class ctrl extends mdl {
     }
 
     function getMayorAccount() {
-        $id = $_POST['id'];
-        $status = 404;
-        $message = 'Cuenta no encontrada';
-        $data = null;
 
-        $account = $this->getMayorAccountById([$id]);
+        $id      = $_POST['id'];
+        $status  = 404;
+        $message = 'Cuenta no encontrada';
+        $data    = null;
+
+        $account = $this->getProductClassById([$id]);
 
         if ($account) {
             $status = 200;
@@ -83,13 +86,13 @@ class ctrl extends mdl {
     function addMayorAccount() {
         $status = 500;
         $message = 'No se pudo agregar la cuenta';
-        $_POST['date_creation'] = date('Y-m-d H:i:s');
+        // $_POST['date_creation'] = date('Y-m-d H:i:s');
         $_POST['active'] = 1;
 
-        $exists = $this->existsMayorAccountByName([$_POST['name'], $_POST['udn']]);
+        $exists = $this->existsProductClassByName([$_POST['name'], $_POST['udn']]);
 
         if ($exists === 0) {
-            $create = $this->createMayorAccount($this->util->sql($_POST));
+            $create = $this->createProductClass($this->util->sql($_POST));
             if ($create) {
                 $status = 200;
                 $message = 'Cuenta de mayor agregada correctamente';
@@ -110,7 +113,7 @@ class ctrl extends mdl {
         $status = 500;
         $message = 'Error al editar cuenta';
 
-        $edit = $this->updateMayorAccount($this->util->sql($_POST, 1));
+        $edit = $this->updateProductClass($this->util->sql($_POST, 1));
         if ($edit) {
             $status = 200;
             $message = 'Cuenta de mayor editada correctamente';
@@ -126,7 +129,7 @@ class ctrl extends mdl {
         $status = 500;
         $message = 'No se pudo actualizar el estado';
 
-        $update = $this->updateMayorAccount($this->util->sql($_POST, 1));
+        $update = $this->updateProductClass($this->util->sql($_POST, 1));
 
         if ($update) {
             $status = 200;
@@ -139,17 +142,20 @@ class ctrl extends mdl {
         ];
     }
 
+
+    // Sub cuenta 
+
     function lsSubAccount() {
         $__row = [];
         $udn = $_POST['udn'];
         
-        $ls = $this->listSubAccount([$udn]);
+        $ls = $this->listProduct([$udn]);
 
         foreach ($ls as $key) {
             $__row[] = [
                 'id'              => $key['id'],
                 'Subcuenta'       => $key['name'],
-                'Cuenta de mayor' => $key['mayor_account_name'],
+                'Cuenta de mayor' => $key['product_class_name'],
                 'Estado'          => renderStatus($key['active']),
                 'opc'             => 0
             ];
@@ -182,6 +188,8 @@ class ctrl extends mdl {
             'ls'  => $ls
         ];
     }
+
+    
 
     function lsPaymentMethod() {
         $__row = [];

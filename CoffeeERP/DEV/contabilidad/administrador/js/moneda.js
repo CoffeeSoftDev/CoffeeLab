@@ -1,15 +1,3 @@
-let api = 'ctrl/ctrl-moneda.php';
-let currency;
-let lsudn, lsPaymentMethods;
-
-$(async () => {
-    const data = await useFetch({ url: api, data: { opc: "init" } });
-    lsudn = data.udn;
-    lsPaymentMethods = data.paymentMethods;
-
-    currency = new AdminForeignCurrency(api, "root");
-    currency.render();
-});
 
 class AdminForeignCurrency extends Templates {
     constructor(link, div_modulo) {
@@ -25,7 +13,7 @@ class AdminForeignCurrency extends Templates {
 
     layout() {
         this.primaryLayout({
-            parent: `root`,
+            parent: `container-moneda`,
             id: this.PROJECT_NAME,
             class: 'w-full',
             card: {
@@ -52,7 +40,7 @@ class AdminForeignCurrency extends Templates {
                     lbl: "Unidad de negocio",
                     class: "col-12 col-md-3",
                     data: lsudn,
-                    onchange: 'currency.lsCurrencies()'
+                    onchange: 'moneda.lsCurrencies()'
                 },
                 {
                     opc: "select",
@@ -63,13 +51,13 @@ class AdminForeignCurrency extends Templates {
                         { id: "1", valor: "Activas" },
                         { id: "0", valor: "Inactivas" }
                     ],
-                    onchange: 'currency.lsCurrencies()'
+                    onchange: 'moneda.lsCurrencies()'
                 },
                 {
                     opc: "button",
                     class: "col-12 col-md-4",
                     id: "btnAddCurrency",
-                    text: "+ Agregar nueva moneda extranjera",
+                    text: "+ Nueva moneda",
                     color_btn: "primary",
                     onClick: () => this.addCurrency()
                 }
@@ -82,7 +70,7 @@ class AdminForeignCurrency extends Templates {
         const active = $(`#filterBar${this.PROJECT_NAME} #active`).val();
 
         this.createTable({
-            parent: `container${this.PROJECT_NAME}`,
+            parent: `containerForeignCurrency`,
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
             data: { opc: 'lsCurrencies', udn: udn, active: active },
             coffeesoft: true,

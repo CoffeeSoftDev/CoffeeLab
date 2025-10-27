@@ -34,19 +34,19 @@ class ctrl extends mdl {
                 $a[] = [
                     'class'   => 'btn btn-sm btn-primary me-1',
                     'html'    => '<i class="icon-pencil"></i>',
-                    'onclick' => 'app.editConcepto(' . $item['id'] . ')'
+                    'onclick' => 'formasPago.editConcepto(' . $item['id'] . ')'
                 ];
 
                 $a[] = [
                     'class'   => 'btn btn-sm btn-danger',
                     'html'    => '<i class="icon-toggle-on"></i>',
-                    'onclick' => 'app.statusConcepto(' . $item['id'] . ', ' . $item['active'] . ')'
+                    'onclick' => 'formasPago.statusConcepto(' . $item['id'] . ', ' . $item['active'] . ')'
                 ];
             } else {
                 $a[] = [
                     'class'   => 'btn btn-sm btn-outline-danger',
                     'html'    => '<i class="icon-toggle-off"></i>',
-                    'onclick' => 'app.statusConcepto(' . $item['id'] . ', ' . $item['active'] . ')'
+                    'onclick' => 'formasPago.statusConcepto(' . $item['id'] . ', ' . $item['active'] . ')'
                 ];
             }
 

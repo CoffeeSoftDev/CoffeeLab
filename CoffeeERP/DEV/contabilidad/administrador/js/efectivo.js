@@ -1,6 +1,4 @@
-
-
-class Efectivo extends Templates {
+class PaymentMethod extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "efectivo";
@@ -10,12 +8,12 @@ class Efectivo extends Templates {
         this.layout();
         this.filterBarConceptos();
         this.lsConceptos();
-        cashMovement.filterBarMovimientos();
+        
     }
 
     layout() {
         this.primaryLayout({
-            parent: "container-formasPago",
+            parent: "container-payment",
             id: this.PROJECT_NAME,
             class: 'w-full',
             card: {
@@ -32,28 +30,27 @@ class Efectivo extends Templates {
             parent: "container" + this.PROJECT_NAME,
             id: "tabs" + this.PROJECT_NAME,
             theme: "light",
-            type: "short",
+            type: "button",
             json: [
                 {
                     id: "conceptos",
                     tab: "Efectivo",
                     class: "mb-1",
-                    active: true,
-                    onClick: () => this.lsConceptos()
+                    onClick: () => formasPago.lsConceptos()
                 },
                 {
-                    id: "conceptos",
+                    id: "moneda",
                     tab: "Moneda extranjera",
                     class: "mb-1",
                     // active: true,
-                    onClick: () => this.lsConceptos()
+                    onClick: () => moneda.lsCurrencies()
                 },
                 {
-                    id: "conceptos",
+                    id: "banco",
                     tab: "Bancos",
                     class: "mb-1",
-                    // active: true,
-                    onClick: () => this.lsConceptos()
+                    active: true,
+                    onClick: () => banco.lsBankAccounts()
                 },
                 // {
                 //     id: "movimientos",
@@ -63,12 +60,6 @@ class Efectivo extends Templates {
             ]
         });
 
-        // $("#container" + this.PROJECT_NAME).prepend(`
-        //     <div class="px-4 pt-3 pb-3">
-        //         <h2 class="text-2xl font-semibold">💵 Administrador de Efectivo</h2>
-        //         <p class="text-gray-400">Gestiona conceptos y movimientos de efectivo.</p>
-        //     </div>
-        // `);
     }
 
     filterBarConceptos() {
@@ -84,15 +75,18 @@ class Efectivo extends Templates {
                     lbl: "Unidad de Negocio",
                     class: "col-12 col-md-3",
                     data: udn,
-                    onchange: 'app.lsConceptos()'
+                    onchange: 'formasPago.lsConceptos()'
                 },
                 {
                     opc: "select",
                     id: "active",
                     lbl: "Estado",
                     class: "col-12 col-md-3",
-                    data: status,
-                    onchange: 'app.lsConceptos()'
+                    data: [
+                        { id: "1", valor: "Activos" },
+                        { id: "0", valor: "Inactivos" }
+                    ],
+                    onchange: 'formasPago.lsConceptos()'
                 },
                 {
                     opc: "button",
@@ -213,7 +207,11 @@ class Efectivo extends Templates {
                 id: "operation_type",
                 lbl: "Tipo de Operación",
                 class: "col-12 mb-3",
-                data: operationType
+                data: [
+                    { id: "suma", valor: "suma" },
+                    { id: "resta", valor: "resta" }
+                ],
+
             },
             {
                 opc: "textarea",
@@ -407,7 +405,10 @@ class CashMovement extends App {
                 id: "movement_type",
                 lbl: "Tipo de Movimiento",
                 class: "col-12 mb-3",
-                data: movementType
+                data: [
+                    { id: "suma", valor: "suma" },
+                    { id: "resta", valor: "resta" }
+                ],
             },
             {
                 opc: "input",

@@ -1,32 +1,49 @@
-let api = 'ctrl/ctrl-admin.php';
-let api_cta = 'ctrl/ctrl-cuenta-venta.php';
-let api_cliente = 'ctrl/ctrl-cliente.php';
-let api_supplier = 'ctrl/ctrl-proveedores.php';
-let api_efectivo = 'ctrl/ctrl-efectivo.php';
-
+let api            = 'ctrl/ctrl-admin.php';
+let api_cta        = 'ctrl/ctrl-cuenta-venta.php';
+let api_cliente    = 'ctrl/ctrl-cliente.php';
+let api_supplier   = 'ctrl/ctrl-proveedores.php';
+let api_efectivo   = 'ctrl/ctrl-efectivo.php';
+let api_formasPago = 'ctrl/ctrl-formasPago.php';
+let api_moneda     = 'ctrl/ctrl-moneda.php';
+let api_banco      = 'ctrl/ctrl-banco.php';
 // vars.
-let app, salesAccount, client, paymentMethod, cashMovement, supplier;
+let app, salesAccount, client, moneda, banco, compras, cashMovement, supplier, formasPago;
 let lsudn, udn, lsmodules;
 
+let api_compra = 'ctrl/ctrl-cta.php';
+let ctaCompra, mayorAccount, subAccount, purchaseType, paymentMethod;
 
 $(async () => {
+
     const data = await useFetch({ url: api, data: { opc: "init" } });
     lsudn = data.udn;
     udn = data.udn;
     lsmodules = data.modules;
 
-    app = new App(api, "root");
+    app          = new App(api, "root");
     salesAccount = new SalesAccountManager(api_cta, "root");
-    supplier = new AdminSupplier(api_supplier, "root");
-    client = new Clientes(api_cliente, "root");
+    supplier     = new AdminSupplier(api_supplier, "root");
+    client       = new Clientes(api_cliente, "root");
+    formasPago   = new PaymentMethod(api_efectivo, "root");
+    moneda       = new AdminForeignCurrency(api_moneda, "root");
+    banco        = new AdminBankAccounts(api_banco, "root");
 
-    paymentMethod = new Efectivo(api_efectivo, "root");
-    cashMovement = new CashMovement(api_efectivo, "root");
+    // Compras modules - Instanciar primero las clases que ComprasCta necesita
+    mayorAccount = new MayorAccount(api_compra, "root");
+    subAccount = new SubAccount(api_compra, "root");
+    purchaseType = new TipoCompras('ctrl/ctrl-tipo-compras.php', "root");
+    paymentMethod = new FormasPago('ctrl/ctrl-formasPago.php', "root");
 
+    // Ahora instanciar ComprasCta después de que sus dependencias estén listas
+    ctaCompra = new ComprasCta(api_compra, "root");
 
 
     app.render();
-
+    ctaCompra.render();
+    mayorAccount.render();
+    subAccount.render();
+    purchaseType.render();
+    paymentMethod.render()
 });
 
 class App extends Templates {
@@ -46,7 +63,18 @@ class App extends Templates {
         salesAccount.render();
         client.render();
         supplier.render();
-        paymentMethod.render();
+
+        formasPago.render();
+        moneda.render();
+        banco.render();
+
+
+
+       
+      
+       
+
+
     }
 
     layout() {
@@ -54,7 +82,7 @@ class App extends Templates {
         this.primaryLayout({
             parent: 'root',
             id: this.PROJECT_NAME,
-            class: 'w-full min-h-screen bg-gray-50',
+            class: 'w-full min-h-screen bg-gray-50 p-2',
             card: {
                 filterBar: { class: 'w-full', id: `filterBar${this.PROJECT_NAME}` },
                 container: { class: 'w-full h-full', id: `container${this.PROJECT_NAME}` }
@@ -69,7 +97,7 @@ class App extends Templates {
         const currentDate = moment().format('dddd, D [de] MMMM [del] YYYY');
 
         const header = $(`
-            <div class="bg-white border-b px-6 py-4">
+            <div class="bg-white  py-2 mb-3">
                 <div class="flex justify-between items-center">
                     <div>
                         <button onclick="window.location.href='home.php'" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition flex items-center gap-2">
@@ -98,7 +126,7 @@ class App extends Templates {
                 {
                     id: "desbloqueo",
                     tab: "Desbloqueo de módulos",
-
+                    active: true,
                     onClick: () => this.lsModulesUnlocked()
                 },
                 {
@@ -107,10 +135,9 @@ class App extends Templates {
                     onClick: () => salesAccount.lsSalesAccount()
                 },
                 {
-                    id: "formasPago",
+                    id: "payment",
                     tab: "Formas de pago",
-                    active: true,
-                    onClick: () => console.log("Formas de pago")
+                    onClick: () => formasPago.lsFormasPago()
                 },
                 {
                     id: "client",
@@ -121,6 +148,8 @@ class App extends Templates {
                 {
                     id: "compras",
                     tab: "Compras",
+                   
+
                     onClick: () => console.log("Compras")
                 },
                 {
@@ -158,7 +187,7 @@ class App extends Templates {
                 },
                 {
                     opc: "button",
-                    class: "col-12 col-md-3",
+                    class: "col-12 col-md-2",
                     id: "btnHorarios",
                     className: 'w-full bg-orange-400 hover:bg-orange-700 text-white',
 

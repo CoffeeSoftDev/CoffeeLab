@@ -7,6 +7,7 @@ if (!isset($_SESSION['usuario'])) {
     exit();
 }
 ?>
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -62,9 +63,18 @@ if (!isset($_SESSION['usuario'])) {
         }
     </style>
 </head>
+=======
+
+<!-- CoffeeSoft Framework -->
+<script src="../../../../DEV/src/js/coffeeSoft.js"></script>
+<script src="https://rawcdn.githack.com/SomxS/Grupo-Varoch/refs/heads/main/src/js/plugins.js"></script>
+<script src="https://www.plugins.erp-varoch.com/ERP/JS/complementos.js"></script>
+
+>>>>>>> ebba68b5452f35b0a4bbd1da087c1aa15b436806
 <body>
     <div id="root" class="container-fluid p-4"></div>
 
+<<<<<<< HEAD
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     
@@ -94,5 +104,38 @@ if (!isset($_SESSION['usuario'])) {
     
     <!-- Módulo de Compras -->
     <script src="js/compras.js"></script>
+=======
+    <main>
+        <section id="sidebar"></section>
+
+        <div id="main__content">
+            <nav aria-label='breadcrumb'>
+                <ol class='breadcrumb'>
+                    <li class='breadcrumb-item text-uppercase text-muted'>KPI</li>
+                    <li class='breadcrumb-item fw-bold active'>Ventas</li>
+                </ol>
+            </nav>
+
+          
+
+            <div class=" main-container" id="root"></div>
+
+          <!-- Módulos del Sistema -->
+        <script src="js/admin.js?t=<?php echo time(); ?>"></script>
+        <script src="js/cuenta-venta.js?t=<?php echo time(); ?>"></script>
+        <script src="js/proveedores.js?t=<?php echo time(); ?>"></script>
+        <script src="js/cliente.js?t=<?php echo time(); ?>"></script>
+        <script src="js/formasPago.js?t=<?php echo time(); ?>"></script>
+        <script src="js/cta.js?t=<?php echo time(); ?>"></script>
+        <script src="js/efectivo.js?t=<?php echo time(); ?>"></script>
+        <script src="js/moneda.js?t=<?php echo time(); ?>"></script>
+        <script src="js/banco.js?t=<?php echo time(); ?>"></script>
+        
+        
+
+
+        </div>
+    </main>
+>>>>>>> ebba68b5452f35b0a4bbd1da087c1aa15b436806
 </body>
 </html>

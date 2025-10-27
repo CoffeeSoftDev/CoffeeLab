@@ -1,21 +1,19 @@
-let api = 'ctrl/ctrl-banco.php';
-let bankAccounts;
-let lsudn, lsPaymentMethods, lsBanks;
+
+let  lsPaymentMethods, lsBanks;
 
 $(async () => {
     const data = await useFetch({ url: api, data: { opc: "init" } });
-    lsudn = data.udn;
+//     lsudn = data.udn;
     lsPaymentMethods = data.paymentMethods;
     lsBanks = data.banks;
 
-    bankAccounts = new AdminBankAccounts(api, "root");
-    bankAccounts.render();
+
 });
 
 class AdminBankAccounts extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
-        this.PROJECT_NAME = "BankAccounts";
+        this.PROJECT_NAME = "Bank";
     }
 
     render() {
@@ -26,7 +24,7 @@ class AdminBankAccounts extends Templates {
 
     layout() {
         this.primaryLayout({
-            parent: `root`,
+            parent: `container-banco`,
             id: this.PROJECT_NAME,
             class: 'w-full',
             card: {
@@ -35,12 +33,7 @@ class AdminBankAccounts extends Templates {
             }
         });
 
-        $(`#container${this.PROJECT_NAME}`).prepend(`
-            <div class="px-4 pt-3 pb-3">
-                <h2 class="text-2xl font-semibold">🏦 Cuentas Bancarias</h2>
-                <p class="text-gray-400">Administra bancos y cuentas bancarias por unidad de negocio.</p>
-            </div>
-        `);
+     
     }
 
     filterBar() {
@@ -51,18 +44,11 @@ class AdminBankAccounts extends Templates {
                     opc: "select",
                     id: "udn",
                     lbl: "Unidad de negocio",
-                    class: "col-12 col-md-2",
+                    class: "col-12 col-md-3",
                     data: lsudn,
                     onchange: 'bankAccounts.lsBankAccounts()'
                 },
-                {
-                    opc: "select",
-                    id: "payment_method",
-                    lbl: "Forma de pago",
-                    class: "col-12 col-md-2",
-                    data: lsPaymentMethods,
-                    onchange: 'bankAccounts.lsBankAccounts()'
-                },
+               
                 {
                     opc: "select",
                     id: "active",
@@ -78,7 +64,8 @@ class AdminBankAccounts extends Templates {
                     opc: "button",
                     class: "col-12 col-md-3",
                     id: "btnAddBank",
-                    text: "+ Agregar nuevo banco",
+                    className:'w-100',
+                    text: "+  nuevo banco",
                     color_btn: "success",
                     onClick: () => this.addBank()
                 },
@@ -86,7 +73,8 @@ class AdminBankAccounts extends Templates {
                     opc: "button",
                     class: "col-12 col-md-3",
                     id: "btnAddBankAccount",
-                    text: "+ Agregar nueva cuenta de banco",
+                    className: 'w-100',
+                    text: "+  nueva cuenta de banco",
                     color_btn: "primary",
                     onClick: () => this.addBankAccount()
                 }

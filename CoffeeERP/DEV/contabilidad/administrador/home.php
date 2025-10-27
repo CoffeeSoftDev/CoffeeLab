@@ -27,7 +27,7 @@
     <link rel="stylesheet" href="../../src/plugin/bootstrap-5/css/bootstrap.min.css">
     
     <!-- CoffeeSoft Framework -->
-    <script src="https://erp-varoch.com/ERP24/gestor-de-actividades/src/js/CoffeeSoft.js"></script>
+    <script src="../../../../DEV/src/js/coffeSoft.js"></script>
     <script src="https://rawcdn.githack.com/SomxS/Grupo-Varoch/refs/heads/main/src/js/plugins.js"></script>
     
     <style>
