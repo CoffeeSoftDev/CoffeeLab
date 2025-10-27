@@ -17,6 +17,9 @@ class App extends Templates {
     render() {
         this.layout();
         this.loadDashboard();
+        this.navBar({
+            theme:'light'
+        })
     }
 
     layout() {
@@ -35,22 +38,29 @@ class App extends Templates {
 
     headerDashboard() {
         const container = $("<div>", {
-            class: "bg-white p-6 rounded-lg shadow-sm mb-6"
+            class: "bg-white p-6 rounded-lg shadow-sm mb-6 mt-5"
         });
 
         const header = $("<div>", {
             class: "flex justify-between items-center"
         });
 
+        const userName = this.getCookie('user') || 'Usuario';
+        const almacen = this.getCookie('almacen') || 'Sin almacén seleccionado';
+
         const welcomeSection = $("<div>");
         welcomeSection.append(
             $("<h1>", {
                 class: "text-2xl font-bold text-gray-800",
-                text: "Bienvenido, Alicia Rosas"
+                text: `Bienvenido, ${userName}`
             }),
             $("<p>", {
                 class: "text-sm text-gray-500",
                 text: moment().format('dddd, DD [de] MMMM [de] YYYY')
+            }),
+            $("<p>", {
+                class: "text-sm text-blue-600 font-medium mt-1",
+                html: `<i class="icon-box mr-1"></i>Almacén: ${almacen}`
             })
         );
 
@@ -115,29 +125,30 @@ class App extends Templates {
                 iconColor: "text-blue-500",
                 bgColor: "bg-blue-50",
                 title: "Ventas del periodo",
-                value: formatPrice(data.ventas || 0)
+                value: formatPrice(data.ventas || 25000)
             },
             {
                 icon: "icon-basket",
                 iconColor: "text-green-500",
                 bgColor: "bg-green-50",
                 title: "Compras del periodo",
-                value: formatPrice(data.compras || 0)
+                value: formatPrice(data.compras || 22942.23)
+            },
+           
+            {
+                icon: "icon-money",
+                iconColor: "text-red-500",
+                bgColor: "bg-red-50",
+                title: "Retiros del periodo",
+                value: formatPrice(data.retiros || 2057.32)
             },
             {
                 icon: "icon-folder-open",
                 iconColor: "text-purple-500",
                 bgColor: "bg-purple-50",
                 title: "Archivos subidos del periodo",
-                value: data.archivos || 0
+                value: data.archivos || 10
             },
-            {
-                icon: "icon-money",
-                iconColor: "text-red-500",
-                bgColor: "bg-red-50",
-                title: "Retiros del periodo",
-                value: formatPrice(data.retiros || 0)
-            }
         ];
 
         cards.forEach(card => {
@@ -174,6 +185,13 @@ class App extends Templates {
         $('#container' + this.PROJECT_NAME).html(container);
     }
 
+    getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return decodeURIComponent(parts.pop().split(';').shift());
+        return null;
+    }
+
     renderMainMenu() {
         const menuContainer = $("<div>", {
             class: "mt-8"
@@ -195,7 +213,7 @@ class App extends Templates {
                 bgColor: "bg-green-50",
                 title: "Archivos",
                 description: "Concentrado de archivos",
-                link: "../archivos/"
+                link: "../captura/index.php"
             },
             {
                 icon: "icon-basket",
@@ -203,7 +221,7 @@ class App extends Templates {
                 bgColor: "bg-green-50",
                 title: "Ventas",
                 description: "Concentrado de ventas",
-                link: "../ventas/"
+                link: "../captura/index.php"
             },
             {
                 icon: "icon-users",
@@ -211,7 +229,7 @@ class App extends Templates {
                 bgColor: "bg-green-50",
                 title: "Clientes",
                 description: "Concentrado de consumos y pagos a créditos",
-                link: "../clientes/"
+                link: "../captura/index.php"
             },
             {
                 icon: "icon-basket",
@@ -219,7 +237,7 @@ class App extends Templates {
                 bgColor: "bg-green-50",
                 title: "Compras",
                 description: "Concentrado de compras",
-                link: "../compras/"
+                link: "../captura/index.php"
             },
             {
                 icon: "icon-box",
@@ -227,7 +245,7 @@ class App extends Templates {
                 bgColor: "bg-green-50",
                 title: "Almacén",
                 description: "Concentrado de entradas y salidas de almacén",
-                link: "../almacen/"
+                link: "../captura/index.php"
             },
             {
                 icon: "icon-calculator",
@@ -235,7 +253,7 @@ class App extends Templates {
                 bgColor: "bg-green-50",
                 title: "Costos",
                 description: "Concentrado de costos",
-                link: "../costos/"
+                link: "../captura/index.php"
             },
             {
                 icon: "icon-briefcase",
@@ -243,7 +261,7 @@ class App extends Templates {
                 bgColor: "bg-green-50",
                 title: "Proveedores",
                 description: "Concentrado de compras y pagos",
-                link: "../proveedores/"
+                link: "../captura/index.php"
             },
             {
                 icon: "icon-doc-text",
@@ -251,24 +269,24 @@ class App extends Templates {
                 bgColor: "bg-green-50",
                 title: "Carátula",
                 description: "Consulta el resumen por periodo",
-                link: "../caratula/"
+                link: "../captura/index.php"
             },
-            {
-                icon: "icon-money",
-                iconColor: "text-blue-600",
-                bgColor: "bg-blue-50",
-                title: "Tesorería",
-                description: "Concentrado de retiros y reembolsos",
-                link: "../tesoreria/"
-            },
-            {
-                icon: "icon-user",
-                iconColor: "text-blue-600",
-                bgColor: "bg-blue-50",
-                title: "Capital Humano",
-                description: "Consulta de anticipos",
-                link: "../capital-humano/"
-            },
+            // {
+            //     icon: "icon-money",
+            //     iconColor: "text-blue-600",
+            //     bgColor: "bg-blue-50",
+            //     title: "Tesorería",
+            //     description: "Concentrado de retiros y reembolsos",
+            //     // link: "../captura/index.php"
+            // },
+            // {
+            //     icon: "icon-user",
+            //     iconColor: "text-blue-600",
+            //     bgColor: "bg-blue-50",
+            //     title: "Capital Humano",
+            //     description: "Consulta de anticipos",
+            //     // link: "../captura/index.php"
+            // },
             {
                 icon: "icon-cog",
                 iconColor: "text-blue-600",

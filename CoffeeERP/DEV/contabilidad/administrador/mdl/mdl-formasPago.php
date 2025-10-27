@@ -13,19 +13,17 @@ class mdl extends CRUD {
     }
 
     function listFormasPago($array) {
-        return $this->_Select([
-            'table' => $this->bd . 'payment_methods',
-            'values' => "
+        $query = "
+            SELECT 
                 id,
                 name,
-                active,
-                DATE_FORMAT(date_creation, '%d/%m/%Y %H:%i') as date_creation,
-                DATE_FORMAT(date_updated, '%d/%m/%Y %H:%i') as date_updated
-            ",
-            'where' => 'active = ?',
-            'order' => ['DESC' => 'id'],
-            'data' => $array
-        ]);
+                active
+           FROM {$this->bd}payment_methods
+            WHERE active = ?
+            ORDER BY id DESC
+        ";
+        
+        return $this->_Read($query, $array);
     }
 
     function getFormaPagoById($id) {

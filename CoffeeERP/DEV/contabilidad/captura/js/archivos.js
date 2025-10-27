@@ -9,7 +9,7 @@ $(async () => {
     counts = data.counts;
 
     app = new App(api, "root");
-    dashboardFiles = new DashboardFiles(api, "root");
+
     adminFiles = new AdminFiles(api, "root");
 
     app.render();
@@ -23,7 +23,6 @@ class App extends Templates {
 
     render() {
         this.layout();
-        dashboardFiles.render();
         adminFiles.render();
     }
 
@@ -42,7 +41,7 @@ class App extends Templates {
             parent: `filterBarArchivos`,
             title: "📦 Módulo de Archivos",
             subtitle: "Gestiona y visualiza archivos del sistema.",
-            onClick: () => app.render()
+            onClick: () => window.location.href = '../administrador/home.php'
         });
 
         this.tabLayout({
@@ -52,6 +51,12 @@ class App extends Templates {
             class: '',
             type: "short",
             json: [
+                {
+                    id: "admin",
+                    tab: "Administrador de archivos",
+                    active: true,
+                    onClick: () => adminFiles.lsFiles()
+                },
                 {
                     id: "ventas",
                     tab: "Ventas",
@@ -77,19 +82,8 @@ class App extends Templates {
                     tab: "Pagos a proveedor",
                     onClick: () => adminFiles.lsFiles()
                 },
-                {
-                    id: "admin",
-                    tab: "Administrador de archivos",
-                    active: true,
-                    onClick: () => adminFiles.lsFiles()
-                },
-                {
-                    id: "dashboard",
-                    tab: "Dashboard",
-                    class: "mb-1",
-                  
-                    onClick: () => dashboardFiles.renderDashboard()
-                },
+                
+            
             
             ]
         });
@@ -226,200 +220,6 @@ class App extends Templates {
     }
 }
 
-class DashboardFiles extends App {
-    constructor(link, div_modulo) {
-        super(link, div_modulo);
-        this.PROJECT_NAME = "dashboard";
-    }
-
-    render() {
-        this.layout();
-    }
-
-    async layout() {
-        this.dashboardComponent({
-            parent: "container-dashboard",
-            id: "dashboardComponent",
-            title: "📊 Dashboard de Archivos",
-            subtitle: "Resumen de archivos por módulo del sistema",
-            json: []
-        });
-
-        this.filterBarDashboard();
-        await this.renderDashboard();
-    }
-
-    filterBarDashboard() {
-        this.createfilterBar({
-            parent: `filterBarDashboard`,
-            data: [
-                {
-                    opc: "select",
-                    id: "module",
-                    lbl: "Módulo",
-                    class: "col-sm-3",
-                    data: [{ id: "", valor: "Todos los módulos" }, ...modules],
-                    onchange: `dashboardFiles.renderDashboard()`
-                },
-                {
-                    opc: "input",
-                    id: "search",
-                    lbl: "Buscar archivo",
-                    tipo: "texto",
-                    class: "col-sm-6",
-                    placeholder: "Nombre del archivo...",
-                    onkeyup: `dashboardFiles.renderDashboard()`
-                }
-            ]
-        });
-    }
-
-    async renderDashboard() {
-        const countsData = await useFetch({
-            url: api,
-            data: { opc: "getFileCounts" }
-        });
-
-        this.showCards(countsData.data);
-    }
-
-    showCards(data) {
-        this.infoCard({
-            parent: "cardDashboard",
-            theme: "light",
-            json: [
-                {
-                    id: "kpiTotal",
-                    title: "Archivos totales",
-                    data: {
-                        value: data.total,
-                        color: "text-[#103B60]"
-                    }
-                },
-                {
-                    id: "kpiVentas",
-                    title: "Archivos de ventas",
-                    data: {
-                        value: data.ventas,
-                        color: "text-[#8CC63F]"
-                    }
-                },
-                {
-                    id: "kpiCompras",
-                    title: "Archivos de compras",
-                    data: {
-                        value: data.compras,
-                        color: "text-blue-600"
-                    }
-                },
-                {
-                    id: "kpiProveedores",
-                    title: "Archivos de proveedores",
-                    data: {
-                        value: data.proveedores,
-                        color: "text-orange-600"
-                    }
-                },
-                {
-                    id: "kpiAlmacen",
-                    title: "Archivos de almacén",
-                    data: {
-                        value: data.almacen,
-                        color: "text-purple-600"
-                    }
-                }
-            ]
-        });
-    }
-
-    dashboardComponent(options) {
-        const defaults = {
-            parent: "root",
-            id: "dashboardComponent",
-            title: "📊 Dashboard",
-            subtitle: "Resumen del sistema",
-            json: []
-        };
-
-        const opts = Object.assign(defaults, options);
-
-        const container = $(`
-        <div id="${opts.id}" class="w-full">
-            <div class="p-6 border-b border-gray-200">
-                <div class="mx-auto">
-                    <h1 class="text-2xl font-bold text-[#103B60]">${opts.title}</h1>
-                    <p class="text-sm text-gray-600">${opts.subtitle}</p>
-                </div>
-            </div>
-
-            <div id="filterBarDashboard" class="mx-auto px-4 py-4"></div>
-
-            <section id="cardDashboard" class="mx-auto px-4 py-4"></section>
-
-            <section id="content-${opts.id}" class="mx-auto px-4 py-6 grid gap-6 lg:grid-cols-2"></section>
-        </div>`);
-
-        opts.json.forEach(item => {
-            let block = $("<div>", {
-                id: item.id,
-                class: "bg-white p-4 rounded-xl shadow-md border border-gray-200 min-h-[200px]"
-            });
-
-            if (item.title) {
-                block.prepend(`<h3 class="text-sm font-semibold text-gray-800 mb-3">${item.title}</h3>`);
-            }
-
-            $(`#content-${opts.id}`, container).append(block);
-        });
-
-        $(`#${opts.parent}`).html(container);
-    }
-
-    infoCard(options) {
-        const defaults = {
-            parent: "root",
-            id: "infoCardKPI",
-            class: "",
-            theme: "light",
-            json: []
-        };
-        const opts = Object.assign({}, defaults, options);
-        const isDark = opts.theme === "dark";
-        const cardBase = isDark
-            ? "bg-[#1F2A37] text-white rounded-xl shadow"
-            : "bg-white text-gray-800 rounded-xl shadow";
-        const titleColor = isDark ? "text-gray-300" : "text-gray-600";
-
-        const renderCard = (card, i = "") => {
-            const box = $("<div>", {
-                id: `${opts.id}_${i}`,
-                class: `${cardBase} p-4`
-            });
-            const title = $("<p>", {
-                class: `text-sm ${titleColor}`,
-                text: card.title
-            });
-            const value = $("<p>", {
-                id: card.id || "",
-                class: `text-2xl font-bold ${card.data?.color || "text-gray-800"}`,
-                text: card.data?.value
-            });
-            box.append(title, value);
-            return box;
-        };
-
-        const container = $("<div>", {
-            id: opts.id,
-            class: `grid grid-cols-2 md:grid-cols-5 gap-4 ${opts.class}`
-        });
-
-        opts.json.forEach((item, i) => {
-            container.append(renderCard(item, i));
-        });
-
-        $(`#${opts.parent}`).html(container);
-    }
-}
 
 class AdminFiles extends App {
     constructor(link, div_modulo) {
@@ -439,18 +239,80 @@ class AdminFiles extends App {
             id: this.PROJECT_NAME,
             class: 'w-full',
             card: {
-                filterBar: { class: 'w-full border-b pb-2', id: `filterBar${this.PROJECT_NAME}` },
+                filterBar: { class: 'w-full  pb-2', id: `filterBar${this.PROJECT_NAME}` },
                 container: { class: 'w-full my-2 h-full', id: `container${this.PROJECT_NAME}` }
             }
         });
 
-        $(`#container${this.PROJECT_NAME}`).prepend(`
-            <div class="px-2 pt-2 pb-2">
-                <h2 class="text-2xl font-semibold">📦 Administrador de Archivos</h2>
-                <p class="text-gray-400">Gestiona los archivos del sistema por módulo.</p>
+        $(`#filterBar${this.PROJECT_NAME}`).prepend(`
+            <div id="cardFiles" class="p-3 ">
+               
             </div>
         `);
+
+        this.showCards();
+
     }
+
+
+
+    async showCards() {
+        const data = await useFetch({
+            url: api,
+            data: { opc: "getFileCounts" }
+        });
+
+
+        this.infoCard({
+            parent: "cardFiles",
+            theme: "light",
+            json: [
+                {
+                    id: "kpiTotal",
+                    title: "Archivos totales",
+                    data: {
+                        value: data.total ?? 12,
+                        color: "text-[#103B60]"
+                    }
+                },
+                {
+                    id: "kpiVentas",
+                    title: "Archivos de ventas",
+                    data: {
+                        value: data.ventas ??5,
+                        color: "text-[#8CC63F]"
+                    }
+                },
+                {
+                    id: "kpiCompras",
+                    title: "Archivos de compras",
+                    data: {
+                        value: data.compras ?? 3,
+                        color: "text-blue-600"
+                    }
+                },
+                {
+                    id: "kpiProveedores",
+                    title: "Archivos de proveedores",
+                    data: {
+                        value: data.proveedores ?? 2,
+                        color: "text-orange-600"
+                    }
+                },
+                {
+                    id: "kpiAlmacen",
+                    title: "Archivos de almacén",
+                    data: {
+                        value: data.almacen ?? 2,
+                        color: "text-purple-600"
+                    }
+                }
+            ]
+        });
+    }
+
+
+
 
     filterBarFiles() {
         this.createfilterBar({
@@ -459,7 +321,7 @@ class AdminFiles extends App {
                 {
                     opc: "select",
                     id: "module",
-                    lbl: "Mostrar archivos de",
+                    lbl: "",
                     class: "col-sm-2",
                     data: [{ id: "", valor: "Mostrar todas los archivos" }, ...modules],
                     onchange: `adminFiles.lsFiles()`
@@ -498,8 +360,8 @@ class AdminFiles extends App {
             attr: {
                 id: `tbFiles`,
                 theme: 'corporativo',
-                title: '📋 Lista de Archivos',
-                subtitle: 'Archivos registrados en el sistema',
+                // title: '📋 Lista de Archivos',
+                // subtitle: 'Archivos registrados en el sistema',
                 center: [0, 3]
             }
         });
@@ -554,4 +416,52 @@ class AdminFiles extends App {
         link.click();
         document.body.removeChild(link);
     }
+
+    // Components.
+
+    infoCard(options) {
+        const defaults = {
+            parent: "root",
+            id: "infoCardKPI",
+            class: "",
+            theme: "light",
+            json: []
+        };
+        const opts = Object.assign({}, defaults, options);
+        const isDark = opts.theme === "dark";
+        const cardBase = isDark
+            ? "bg-[#1F2A37] text-white border rounded "
+            : "bg-white text-gray-800  border rounded";
+        const titleColor = isDark ? "text-gray-300" : "text-gray-600";
+
+        const renderCard = (card, i = "") => {
+            const box = $("<div>", {
+                id: `${opts.id}_${i}`,
+                class: `${cardBase} p-4`
+            });
+            const title = $("<p>", {
+                class: `text-sm ${titleColor}`,
+                text: card.title
+            });
+            const value = $("<p>", {
+                id: card.id || "",
+                class: `text-2xl font-bold ${card.data?.color || "text-gray-800"}`,
+                text: card.data?.value
+            });
+            box.append(title, value);
+            return box;
+        };
+
+        const container = $("<div>", {
+            id: opts.id,
+            class: `grid grid-cols-2 md:grid-cols-5 gap-4 ${opts.class}`
+        });
+
+        opts.json.forEach((item, i) => {
+            container.append(renderCard(item, i));
+        });
+
+        $(`#${opts.parent}`).html(container);
+    }
+   
 }

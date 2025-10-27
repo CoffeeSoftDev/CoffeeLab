@@ -24,19 +24,19 @@ class ctrl extends mdl {
                 $a[] = [
                     'class' => 'btn btn-sm btn-primary me-1',
                     'html' => '<i class="icon-pencil"></i>',
-                    'onclick' => 'formasPago.editFormaPago(' . $key['id'] . ')'
+                    'onclick' => 'paymentMethod.editFormaPago(' . $key['id'] . ')'
                 ];
 
                 $a[] = [
                     'class' => 'btn btn-sm btn-danger',
                     'html' => '<i class="icon-toggle-on"></i>',
-                    'onclick' => 'formasPago.statusFormaPago(' . $key['id'] . ', ' . $key['active'] . ')'
+                    'onclick' => 'paymentMethod.statusFormaPago(' . $key['id'] . ', ' . $key['active'] . ')'
                 ];
             } else {
                 $a[] = [
                     'class' => 'btn btn-sm btn-outline-danger',
                     'html' => '<i class="icon-toggle-off"></i>',
-                    'onclick' => 'formasPago.statusFormaPago(' . $key['id'] . ', ' . $key['active'] . ')'
+                    'onclick' => 'paymentMethod.statusFormaPago(' . $key['id'] . ', ' . $key['active'] . ')'
                 ];
             }
 
@@ -44,7 +44,6 @@ class ctrl extends mdl {
                 'id' => $key['id'],
                 'Nombre' => $key['name'],
                 'Estado' => renderStatus($key['active']),
-                'Fecha de creación' => $key['date_creation'],
                 'a' => $a
             ];
         }
@@ -80,7 +79,7 @@ class ctrl extends mdl {
         $message = 'No se pudo agregar la forma de pago';
 
         try {
-            $_POST['date_creation'] = date('Y-m-d H:i:s');
+            // $_POST['date_creation'] = date('Y-m-d H:i:s');
             $_POST['active'] = 1;
 
             $exists = $this->existsFormaPagoByName([$_POST['name']]);

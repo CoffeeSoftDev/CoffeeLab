@@ -94,6 +94,15 @@ class mdl extends CRUD {
         ]);
     }
 
+    function updateBank($array) {
+        return $this->_Update([
+            'table' => $this->bd . 'banks',
+            'values' => $array['values'],
+            'where' => $array['where'],
+            'data' => $array['data']
+        ]);
+    }
+
     function updateBankAccount($array) {
         return $this->_Update([
             'table' => $this->bd . 'bank_accounts',

@@ -13,7 +13,7 @@ class PaymentMethod extends Templates {
 
     layout() {
         this.primaryLayout({
-            parent: "container-formasPago",
+            parent: "container-payment",
             id: this.PROJECT_NAME,
             class: 'w-full',
             card: {
@@ -30,13 +30,12 @@ class PaymentMethod extends Templates {
             parent: "container" + this.PROJECT_NAME,
             id: "tabs" + this.PROJECT_NAME,
             theme: "light",
-            type: "short",
+            type: "button",
             json: [
                 {
                     id: "conceptos",
                     tab: "Efectivo",
                     class: "mb-1",
-                    active: true,
                     onClick: () => formasPago.lsConceptos()
                 },
                 {
@@ -47,11 +46,11 @@ class PaymentMethod extends Templates {
                     onClick: () => moneda.lsCurrencies()
                 },
                 {
-                    id: "bancos",
+                    id: "banco",
                     tab: "Bancos",
                     class: "mb-1",
-                    // active: true,
-                    onClick: () => this.lsConceptos()
+                    active: true,
+                    onClick: () => banco.lsBankAccounts()
                 },
                 // {
                 //     id: "movimientos",
