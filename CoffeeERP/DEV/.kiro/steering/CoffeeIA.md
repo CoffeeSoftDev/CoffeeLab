@@ -133,9 +133,30 @@ Reglas de generación:
 5. Los nuevos componentes deben implementarse como `métodos` y no como funciones independientes.
 6. Respeta la lógica y la arquitectura de los componentes establecidos.
 7. **CRÍTICO - Nomenclatura de Funciones:** Los nombres de las funciones del modelo (mdl) NO pueden ser iguales a los del controlador (ctrl). Esta regla es OBLIGATORIA para evitar conflictos:
-   - **Controlador:** `ls()`, `add()`, `edit()`, `get()`, `init()`, `status[Entidad]()`
-   - **Modelo:** `list[Entidad]()`, `create[Entidad]()`, `update[Entidad]()`, `get[Entidad]ById()`, `ls[Entidad]()`, `exists[Entidad]ByName()`
-   - **Nunca usar:** Mismo nombre en ambos archivos (ej: NO usar `getUsers()` en ctrl Y mdl)
+
+   **Nomenclatura Permitida para Controladores (CTRL):**
+   - ✅ `init()` - Para inicializar datos/filtros
+   - ✅ `ls()` - Para listar registros en tablas
+   - ✅ `add[Entidad]()` - Para agregar nuevos registros
+   - ✅ `edit[Entidad]()` - Para editar registros existentes
+   - ✅ `get[Entidad]()` - Para obtener un registro específico
+   - ✅ `status[Entidad]()` - Para cambiar estados
+   - ✅ `cancel[Entidad]()` - Para cancelar registros
+   - ✅ `delete[Entidad]()` - Para eliminar registros
+   - ❌ **PROHIBIDO:** `list[Entidad]()`, `create[Entidad]()`, `update[Entidad]()`, `get[Entidad]ById()`, `ls[Entidad]()`
+
+   **Nomenclatura Permitida para Modelos (MDL):**
+   - ✅ `list[Entidad]()` - Para listar registros
+   - ✅ `create[Entidad]()` - Para crear registros
+   - ✅ `update[Entidad]()` - Para actualizar registros
+   - ✅ `get[Entidad]ById()` - Para obtener un registro por ID
+   - ✅ `delete[Entidad]ById()` - Para eliminar registros
+   - ✅ `ls[Entidad]()` - Para consultas de filtros/selects
+   - ✅ `exists[Entidad]ByName()` - Para validar existencia
+   - ✅ `getMax[Entidad]Id()` - Para obtener último ID
+   - ❌ **PROHIBIDO:** `ls()`, `add()`, `edit()`, `get()`, `init()`, `status[Entidad]()`
+
+   **Regla de Oro:** NUNCA usar el mismo nombre de función en CTRL y MDL (ej: NO usar `getUsers()` en ambos archivos)
 8. La carpetas se llaman js , mdl , ctrl
 9. RESPETA LAS REGLAS DE MDL.md, CTRL.md y FRONT JS.md
 10. Solo agrega comentario cuando sea necesario

@@ -479,10 +479,10 @@ class ListaPedidos extends App {
         let totalGeneral = 0;
 
         productos.forEach(product => {
-            const p        = product.data[0] || {};
-            const base     = parseFloat(p.importeBase || 0);
-            const oblea    = parseFloat(p.importeOblea || 0);
-            const precio   = parseFloat(product.price || 0);
+            const p = product.data[0] || {};
+            const base = parseFloat(p.importeBase || 0);
+            const oblea = parseFloat(p.importeOblea || 0);
+            const precio = parseFloat(product.price || 0);
             const subtotal = base + oblea + precio;
 
             totalGeneral += subtotal;
@@ -547,7 +547,7 @@ class ListaPedidos extends App {
         const restante = subtotalConDescuento - anticipo;
 
         containerProducto += `
-        <div class="text-sm space-y-2 mt-4">
+        <div class="text-sm space-y-2 mt-5">
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <div class="font-semibold">SUBTOTAL:</div>
@@ -576,6 +576,23 @@ class ListaPedidos extends App {
                 </div>
             </div>
             <hr class="border-dashed border-t my-2" />
+            ${(parseFloat(data.efectivo || 0) > 0 || parseFloat(data.tdc || 0) > 0) ? `
+            <div class="mt-2">
+                <div class="font-semibold mb-2">FORMA DE PAGO:</div>
+                <div class="grid grid-cols-2 gap-4">
+                    ${parseFloat(data.efectivo || 0) > 0 ? `
+                    <div>
+                        <div class="text-sm">EFECTIVO:</div>
+                        <div class="text-right me-5">${fmt(data.efectivo)}</div>
+                    </div>` : ''}
+                    ${parseFloat(data.tdc || 0) > 0 ? `
+                    <div>
+                        <div class="text-sm">TDC:</div>
+                        <div class="text-right me-5">${fmt(data.tdc)}</div>
+                    </div>` : ''}
+                </div>
+            </div>
+            <hr class="border-dashed border-t my-2" />` : ''}
         </div>`;
 
         container.append(header);

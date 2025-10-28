@@ -19,7 +19,16 @@ class SalesDashboard extends Templates {
             title: "📊 Dashboard de Ventas",
             subtitle: "Análisis comparativo de ventas entre dos períodos",
             json: [
+                { type: "div", id: "CategoryDashboard" },
+
                 // Graficos de cheque promedio.
+                {
+                    type: "grafico", id: "linearChequePromedio", title: "",
+                    content: [
+                        { class: "border px-3 py-2 rounded", type: "div", id: "filterBarChequePromedio" },
+                        { class: " mt-2", type: "div", id: "barChequePromedio" },
+                    ]
+                },
 
                 {
                     type: "grafico", id: "dailyAverageCheck", title: "",
@@ -29,13 +38,6 @@ class SalesDashboard extends Templates {
                     ]
                 },
 
-                {
-                    type: "grafico", id: "linearChequePromedio", title: "",
-                    content: [
-                        { class: "border px-3 py-2 rounded", type: "div", id: "filterBarChequePromedio" },
-                        { class: " mt-2", type: "div", id: "barChequePromedio" },
-                    ]
-                },
 
                 { type: "grafico", id: "containerChequePro" },
                 {
@@ -54,23 +56,38 @@ class SalesDashboard extends Templates {
 
         this.filterBarDashboard();
 
-        // this.createfilterBar({
-        //     parent: `filterBarProductMargen`,
-        //     data: [
-        //         {
-        //             opc: "select",
-        //             id: "category",
-        //             lbl: "Categorias",
-        //             class: "col-sm-4",
-        //             // data:,
-        //             onchange: `salesDashboard.comparativaByCategory()`,
-        //         },
+        this.tabLayout({
+            parent: `CategoryDashboard`,
+            id: `tabs${this.PROJECT_NAME}`,
+            theme: "light",
+            class: 'mt-2',
+            type: "button",
+            renderContainer: false,
+            json: [
+                {
+                    id: "graphigs-sales",
+                    tab: "Graficas de venta",
+                    class: "mb-1",
+                    active: true,
+                    onClick: () => this.showGraphicsCategory('sales')
+                },
+                {
+                    id: "graphigs-daily",
+                    tab: "Graficas de Cheque Promedio",
+                    onClick: () => this.showGraphicsCategory('daily')
+                },
+            ]
 
-        //     ],
-        // });
+        });
 
-        // this.filterBarDashboard();
-        // this.renderDashboard();
+
+        setTimeout(() => {
+            this.renderDashboard();
+            this.showGraphicsCategory('sales');
+        }, 500);
+
+
+
     }
 
     filterBarDashboard() {
@@ -133,10 +150,7 @@ class SalesDashboard extends Templates {
         }, 100);
     }
 
-
     async renderDashboard() {
-
-
 
         let udn = $('#filterBarDashboard #udn').val();
         let periodo1 = $('#filterBarDashboard #periodo1').val();
@@ -156,26 +170,63 @@ class SalesDashboard extends Templates {
             },
         });
 
-        console.log(mkt)
+
 
         // init Cards.
 
         this.showCards(mkt.dashboard);
 
-        // Graficos.
+        // Graficos cheque promedio.
 
         this.layoutDailyAverageCheck();
-        // this.layoutChequePromedio();
+        this.layoutChequePromedio();
 
+        // Graficos ventas.
 
+        this.chequeComparativo({
+            data: mkt.barras.dataset,
+            anioA: mkt.barras.anioA,
+            anioB: mkt.barras.anioB,
+        });
 
+        // Grafico Linear.
+        this.comparativaIngresosDiarios({ data: mkt.linear });
+
+        this.topDiasSemana({
+            parent: "Tendencia",
+            title: "📊 Ranking por Promedio Semanal",
+            subtitle: "Promedio de ventas por día de la semana en el mes seleccionado",
+            data: mkt.topWeek
+        });
 
 
     }
 
+    showGraphicsCategory(category) {
+        if (category === 'sales') {
+            // Mostrar gráficos de ventas
+            $('#containerChequePro').show();
+            $('#barProductMargen1').show();
+            $('#ventasDiasSemana').show();
+            $('#Tendencia').show();
+
+            // Ocultar gráficos de cheque promedio
+            $('#linearChequePromedio').hide();
+            $('#dailyAverageCheck').hide();
+        } else if (category === 'daily') {
+            // Mostrar gráficos de cheque promedio
+            $('#linearChequePromedio').show();
+            $('#dailyAverageCheck').show();
+
+            // Ocultar gráficos de ventas
+            $('#containerChequePro').hide();
+            $('#barProductMargen1').hide();
+            $('#ventasDiasSemana').hide();
+            $('#Tendencia').hide();
+        }
+    }
+
     // Cards.
-
-
     showCards(data) {
         this.infoCard({
             parent: "cardDashboard",
@@ -263,14 +314,14 @@ class SalesDashboard extends Templates {
 
     }
 
-
     async renderDailyAverageCheck() {
+        console.log('ADD')
 
-        let udn      = $('#filterBarDashboard #udn').val();
+        let udn = $('#filterBarDashboard #udn').val();
         let category = $('#category option:selected').text();
-        let date     = this.getFilterDate();
+        let date = this.getFilterDate();
 
-        const meses      = moment.months();
+        const meses = moment.months();
         const nombreMes1 = meses[parseInt(date.month1) - 1];
         const nombreMes2 = meses[parseInt(date.month2) - 1];
 
@@ -278,130 +329,109 @@ class SalesDashboard extends Templates {
             url: api_dashboard,
             data: {
 
-                opc     : "getDailyCheck",
-                udn     : udn,
+                opc: "getDailyCheck",
+                udn: udn,
                 category: category,
-                anio1   : date.year1,
-                mes1    : date.month1,
-                anio2   : date.year2,
-                mes2    : date.month2,
+                anio1: date.year1,
+                mes1: date.month1,
+                anio2: date.year2,
+                mes2: date.month2,
             },
         });
 
         this.barChart({
-            
+
             parent: "containerDailyAverageCheck",
             id: "chartDailyCheck",
 
-            title : `📊 Cheque Promedio Diario - ${nombreMes1} ${date.year1} vs ${nombreMes2} ${date.year2}`,
+            title: `📊 Cheque Promedio Diario - ${nombreMes1} ${date.year1} vs ${nombreMes2} ${date.year2}`,
             labels: mkt.labels,
-            dataA : mkt.dataB,
-            dataB : mkt.dataA,
-            yearA : mkt.yearA,
-            yearB : mkt.yearB
+            dataA: mkt.dataB,
+            dataB: mkt.dataA,
+            yearA: mkt.yearA,
+            yearB: mkt.yearB
         });
+    }
+
+    // Daily Average 
+
+    layoutChequePromedio() {
+
+        $('#filterBarChequePromedio').empty();
+
+        this.createfilterBar({
+            parent: `filterBarChequePromedio`,
+            data: [
+                {
+                    opc: "select",
+                    id: "category",
+                    lbl: "Categoria",
+                    class: "col-sm-4",
+                    onchange: `salesDashboard.renderChequePromedioCategory()`,
+                },
+                {
+                    opc: "select",
+                    id: "range",
+                    lbl: "Rango de consulta",
+                    class: "col-sm-4",
+                    data: [
+                        { id: '3', valor: ' 3 meses' },
+                        { id: '6', valor: ' 6 meses' },
+                        { id: '9', valor: ' 9 meses' },
+                    ],
+                    onchange: `salesDashboard.renderChequePromedioCategory()`,
+                },
+
+            ],
+        });
+
+        this.renderSelectCategory({
+            parent: 'filterBarChequePromedio #category',
+            udn: $('#idFilterBar #udn').val(),
+            data: clasificacion,
+            includeAll: false
+        });
+
+        this.renderChequePromedioCategory()
+
+
+    }
+
+    async renderChequePromedioCategory() {
+
+        let udn = $('#filterBarDashboard #udn').val();
+        let category = $('#filterBarChequePromedio #category option:selected').text();
+        let date = this.getFilterDate();
+
+        const meses = moment.months();
+        const nombreMes1 = meses[parseInt(date.month1) - 1];
+        const nombreMes2 = meses[parseInt(date.month2) - 1];
+
+        let mkt = await useFetch({
+            url: api_dashboard,
+            data: {
+                opc: "getPromediosDiariosRange",
+                udn: udn,
+                concepto: category,
+                mes: 10,
+                anio: 2025,
+                rango: $('#filterBarChequePromedio #range').val()
+
+            },
+        });
+
+
+
+        this.barChart({
+            parent: 'barChequePromedio',
+            id: 'chartAnual',
+            ...mkt.dataset
+        });
+
     }
 
 
 
-
-    // async renderDashboard() {
-
-    //     // filtrar clasificacion x udn 
-    //     this.handleCategoryChange($('#idFilterBar #udn').val());
-
-    //     let udn = $('#filterBarDashboard #udn').val();
-    //     let periodo1 = $('#filterBarDashboard #periodo1').val();
-    //     let [anio1, mes1] = periodo1.split('-');
-    //     let periodo2 = $('#filterBarDashboard #periodo2').val();
-    //     let [anio2, mes2] = periodo2.split('-');
-
-    //     let mkt = await useFetch({
-    //         url: api,
-    //         data: {
-    //             opc: "apiPromediosDiarios",
-    //             udn: udn,
-    //             anio1: anio1,
-    //             mes1: mes1,
-    //             anio2: anio2,
-    //             mes2: mes2,
-    //         },
-    //     });
-
-    //     this.showCards(mkt.dashboard);
-
-    //     // Graficos.
-
-    //     this.chequeComparativo({
-    //         data: mkt.barras.dataset,
-    //         anioA: mkt.barras.anioA,
-    //         anioB: mkt.barras.anioB,
-
-    //     });
-
-
-    //     this.comparativaIngresosDiarios({ data: mkt.linear });
-
-    //     this.ventasPorDiaSemana(mkt.barDays);
-
-
-    //     this.topDiasSemana({
-    //         parent: "Tendencia",
-    //         title: "📊 Ranking por Promedio Semanal",
-    //         subtitle: "Promedio de ventas por día de la semana en el mes seleccionado",
-    //         data: mkt.topWeek
-    //     });
-
-
-
-    // }
-
-
-
-    // showCards(data) {
-    //     // KPIs visuales
-    //     this.infoCard({
-    //         parent: "cardDashboard",
-    //         theme: "light",
-    //         json: [
-    //             {
-    //                 id: "kpiDia",
-    //                 title: "Venta del día de ayer",
-    //                 data: {
-    //                     value: data.ventaDia,
-    //                     // description: "+12% vs ayer",
-    //                     color: "text-[#8CC63F]",
-    //                 },
-    //             },
-    //             {
-    //                 id: "kpiMes",
-    //                 title: "Venta del Mes",
-    //                 data: {
-    //                     value: data.ventaMes,
-    //                     // description: "+8% vs mes anterior",
-    //                     color: "text-green-800",
-    //                 },
-    //             },
-    //             {
-    //                 title: "Clientes",
-    //                 data: {
-    //                     value: data.Clientes,
-    //                     // description: "+5% vs período anterior",
-    //                     color: "text-[#103B60]",
-    //                 },
-    //             },
-    //             {
-    //                 id: "kpiCheque",
-    //                 title: "Cheque Promedio",
-    //                 data: {
-    //                     value: data.ChequePromedio,
-    //                     // description: "-2% vs período anterior",
-    //                     color: "text-red-600",
-    //                 },
-    //             },
-    //         ],
-    //     });
-    // }
 
     // graphigs.
     chequeComparativo(options) {
@@ -433,7 +463,7 @@ class SalesDashboard extends Templates {
         });
         const canvasWrapper = $("<div>", {
             class: "w-full",
-            css: { height: "300px" }
+            css: { height: "400px" }
         });
         const canvas = $("<canvas>", {
             id: opts.id,
@@ -464,25 +494,38 @@ class SalesDashboard extends Templates {
 
                 ]
             },
+            plugins: [{
+                id: 'barValueLabelsComparativa',
+                afterDatasetsDraw: function (chart) {
+                    const ctx = chart.ctx;
+                    ctx.font = "bold 11px sans-serif";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "bottom";
+
+                    chart.data.datasets.forEach(function (dataset, datasetIndex) {
+                        const meta = chart.getDatasetMeta(datasetIndex);
+                        if (!meta.hidden) {
+                            meta.data.forEach(function (bar, index) {
+                                const value = dataset.data[index];
+                                if (value && value > 0) {
+                                    const label = typeof formatPrice === "function" ? formatPrice(value) : value;
+                                    ctx.fillStyle = "#000";
+                                    ctx.fillText(label, bar.x, bar.y - 5);
+                                }
+                            });
+                        }
+                    });
+                }
+            }],
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                animation: {
-                    onComplete: function () {
-                        const chart = this;
-                        const ctx = chart.ctx;
-                        ctx.font = "12px sans-serif";
-                        ctx.textAlign = "center";
-                        ctx.textBaseline = "bottom";
-                        ctx.fillStyle = "#000";
-                        chart.data.datasets.forEach(function (dataset, i) {
-                            const meta = chart.getDatasetMeta(i);
-                            meta.data.forEach(function (bar, index) {
-                                const value = dataset.data[index];
-                                const label = typeof formatPrice === "function" ? formatPrice(value) : value;
-                                ctx.fillText(label, bar.x, bar.y - 5);
-                            });
-                        });
+                layout: {
+                    padding: {
+                        top: 30,
+                        bottom: 10,
+                        left: 10,
+                        right: 10
                     }
                 },
                 plugins: {
@@ -496,6 +539,7 @@ class SalesDashboard extends Templates {
                 scales: {
                     y: {
                         beginAtZero: true,
+                        grace: '5%',
                         ticks: {
                             callback: (v) => formatPrice(v)
                         }
@@ -569,43 +613,45 @@ class SalesDashboard extends Templates {
             id: "dashboardComponent",
             title: "📊 Huubie · Dashboard de Eventos",
             subtitle: "Resumen mensual · Cotizaciones · Pagados · Cancelados",
-            json: [
-                { type: "grafico", id: "barChartContainer", title: "Eventos por sucursal" },
-                { type: "tabla", id: "tableSucursal", title: "Tabla de sucursales" },
-                { type: "grafico", id: "donutChartContainer", title: "Ventas vs Entrada de dinero" },
-                { type: "grafico", id: "topClientsChartContainer", title: "Top 10 clientes" },
-                { type: "tabla", id: "tableClientes", title: "Tabla de clientes" }
-            ]
+            json: []
         };
 
         const opts = Object.assign(defaults, options);
 
         const container = $(`
-        <div id="${opts.id}" class="w-full ">
-            <!-- Header -->
-            <div class="p-6 border-b border-gray-200 ">
-                <div class=" mx-auto">
+        <div id="${opts.id}" class="w-full">
+            <div class="p-6 border-b border-gray-200">
+                <div class="mx-auto">
                     <h1 class="text-2xl font-bold text-[#103B60]">${opts.title}</h1>
                     <p class="text-sm text-gray-600">${opts.subtitle}</p>
                 </div>
             </div>
 
-            <!-- FilterBar -->
-            <div id="filterBarDashboard" class=" mx-auto px-4 py-4">
-          
-            </div>
+            <div id="filterBarDashboard" class="mx-auto px-4 py-3"></div>
 
-             <section id="cardDashboard" class=" mx-auto px-4 py-4">
-              
-            </section>
+            <section id="cardDashboard" class="mx-auto px-4 py-3"></section>
 
-            <!-- Content -->
-            <section id="content-${opts.id}" class="mx-auto px-4 py-6 grid gap-6 grid-cols-1 md:grid-cols-2"></section>
+            <section id="content-${opts.id}" class="mx-auto px-4 py-2 grid gap-6 grid-cols-1 md:grid-cols-2 auto-rows-max"></section>
         </div>`);
 
-        // Renderizar contenedores desde JSON
+        const grid = $(`#content-${opts.id}`, container);
+
         opts.json.forEach(item => {
-            let block = $("<div>", {
+            if (item.type === "div") {
+                const fullRow = $("<div>", {
+                    id: item.id,
+                    class: "col-span-full w-full"
+                });
+
+                if (item.html) {
+                    fullRow.html(item.html);
+                }
+
+                grid.append(fullRow);
+                return;
+            }
+
+            const block = $("<div>", {
                 id: item.id,
                 class: "bg-white p-2 rounded-xl shadow-md border border-gray-200 min-h-[200px] w-full"
             });
@@ -613,8 +659,8 @@ class SalesDashboard extends Templates {
             if (item.title) {
                 const defaultEmojis = {
                     'grafico': '📊',
-                    'tabla': '�',
-                    'doc': '�',
+                    'tabla': '📁',
+                    'doc': '📄',
                     'filterBar': '🔍'
                 };
 
@@ -647,11 +693,13 @@ class SalesDashboard extends Templates {
                 });
             }
 
-            $(`#content-${opts.id}`, container).append(block);
+            grid.append(block);
         });
 
         $(`#${opts.parent}`).html(container);
     }
+
+
 
     infoCard(options) {
         const defaults = {
@@ -797,7 +845,7 @@ class SalesDashboard extends Templates {
         });
         const canvasWrapper = $("<div>", {
             class: "w-full",
-            css: { height: "300px" }
+            css: { height: "400px" }
         });
         const canvas = $("<canvas>", {
             id: opts.id,
@@ -809,14 +857,15 @@ class SalesDashboard extends Templates {
         $("#" + opts.parent).html(container);
 
         const ctx = document.getElementById(opts.id).getContext("2d");
-        if (window._barChart) window._barChart.destroy();
+        if (!window._barCharts) window._barCharts = {};
+        if (window._barCharts[opts.id]) window._barCharts[opts.id].destroy();
 
         // 🎨 Colores: Azul para período 1 (consulta), Verde para período 2 (comparación)
         const colorPeriodo1 = "#103B60"; // Azul oscuro - Período de consulta
         const colorPeriodo2 = "#8CC63F"; // Verde - Período de comparación
 
         // 📊 Crear gráfico
-        window._barChart = new Chart(ctx, {
+        window._barCharts[opts.id] = new Chart(ctx, {
             type: "bar",
             data: {
                 labels: opts.labels,
@@ -834,6 +883,29 @@ class SalesDashboard extends Templates {
 
                 ]
             },
+            plugins: [{
+                id: 'barValueLabels',
+                afterDatasetsDraw: function (chart) {
+                    const ctx = chart.ctx;
+                    ctx.font = "bold 11px sans-serif";
+                    ctx.textAlign = "center";
+                    ctx.textBaseline = "bottom";
+
+                    chart.data.datasets.forEach(function (dataset, datasetIndex) {
+                        const meta = chart.getDatasetMeta(datasetIndex);
+                        if (!meta.hidden) {
+                            meta.data.forEach(function (bar, index) {
+                                const value = dataset.data[index];
+                                if (value && value > 0) {
+                                    const label = typeof formatPrice === "function" ? formatPrice(value) : value;
+                                    ctx.fillStyle = "#000";
+                                    ctx.fillText(label, bar.x, bar.y - 5);
+                                }
+                            });
+                        }
+                    });
+                }
+            }],
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
@@ -857,9 +929,18 @@ class SalesDashboard extends Templates {
                         }
                     }
                 },
+                layout: {
+                    padding: {
+                        top: 30,
+                        bottom: 10,
+                        left: 10,
+                        right: 10
+                    }
+                },
                 scales: {
                     y: {
                         beginAtZero: true,
+                        grace: '5%',
                         ticks: {
                             callback: (v) => formatPrice(v),
                             color: "#333",

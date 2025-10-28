@@ -185,12 +185,6 @@ class App extends Templates {
 
         let numero = parseFloat($('#total').text().replace(/[$,]/g, ''));
 
-        // const request = await useFetch({
-        //     url: ctrl,
-        //     data: { opc: "getCampaign", id }
-        // });
-
-
 
         this.createModalForm({
             id: "modalRegisterPayment",
