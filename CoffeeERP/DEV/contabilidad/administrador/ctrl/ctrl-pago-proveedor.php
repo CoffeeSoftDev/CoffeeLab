@@ -13,56 +13,59 @@ class ctrl extends mdl {
 
     function init() {
         return [
-            'proveedores' => $this->lsProveedores(),
-            'tipoPago' => $this->lsTipoPago()
+            'udn' => $this->lsUDN(),
+            'suppliers' => $this->lsSuppliers([$_POST['udn'] ?? 5])
         ];
     }
 
-    function lsPagos() {
+    function ls() {
         $__row = [];
         $fi = $_POST['fi'];
         $ff = $_POST['ff'];
-        $tipoPago = $_POST['tipoPago'] ?? '';
+        $udn = $_POST['udn'] ?? '';
 
         $ls = $this->listPagos([
             'fi' => $fi,
             'ff' => $ff,
-            'tipo_pago' => $tipoPago
+            'udn' => $udn
         ]);
 
         foreach ($ls as $key) {
-            $a = [];
-
-            $a[] = [
-                'class' => 'btn btn-sm btn-primary me-1',
-                'html' => '<i class="icon-pencil"></i>',
-                'onclick' => 'app.editPago(' . $key['id'] . ')'
-            ];
-
-            $a[] = [
-                'class' => 'btn btn-sm btn-danger',
-                'html' => '<i class="icon-trash"></i>',
-                'onclick' => 'app.deletePago(' . $key['id'] . ')'
+            $dropdown = [
+                [
+                    'icon' => 'icon-pencil',
+                    'text' => 'Editar',
+                    'onclick' => 'app.editPago(' . $key['id'] . ')'
+                ],
+                [
+                    'icon' => 'icon-trash',
+                    'text' => 'Eliminar',
+                    'onclick' => 'app.deletePago(' . $key['id'] . ')'
+                ]
             ];
 
             $__row[] = [
                 'id' => $key['id'],
-                'Fecha' => formatSpanishDate($key['fecha_pago'], 'normal'),
-                'Proveedor' => $key['proveedor'],
+                'Fecha' => formatSpanishDate($key['operation_date'], 'normal'),
+                'Proveedor' => $key['supplier_name'],
+                'RFC' => $key['rfc'] ?: '-',
                 'Monto' => [
-                    'html' => evaluar($key['monto']),
+                    'html' => evaluar($key['amount']),
+                    'class' => 'text-end bg-[#283341]'
+                ],
+                'Balance' => [
+                    'html' => evaluar($key['balance']),
                     'class' => 'text-end'
                 ],
-                'Tipo de Pago' => $key['tipo_pago'],
-                'Descripción' => $key['descripcion'] ?: '-',
-                'a' => $a
+                'Descripción' => $key['description'] ?: '-',
+                'dropdown' => $dropdown
             ];
         }
 
         $totales = $this->getTotalesPagos([
             'fi' => $fi,
             'ff' => $ff,
-            'tipo_pago' => $tipoPago
+            'udn' => $udn
         ]);
 
         return [
@@ -97,12 +100,23 @@ class ctrl extends mdl {
         $status = 500;
         $message = 'No se pudo registrar el pago';
 
-        $_POST['fecha_registro'] = date('Y-m-d H:i:s');
-        $_POST['usuario_id'] = $_SESSION['id_usuario'] ?? 1;
+        $_POST['active'] = 1;
 
         $create = $this->createPago($this->util->sql($_POST));
 
         if ($create) {
+            $supplierId = $_POST['supplier_id'];
+            $amount = $_POST['amount'];
+            
+            $supplier = $this->getSupplierById([$supplierId]);
+            if ($supplier) {
+                $newBalance = $supplier['balance'] - $amount;
+                $this->updateSupplierBalance($this->util->sql([
+                    'id' => $supplierId,
+                    'balance' => $newBalance
+                ], 1));
+            }
+
             $status = 200;
             $message = 'Pago registrado correctamente';
         }
@@ -118,11 +132,68 @@ class ctrl extends mdl {
         $status = 500;
         $message = 'Error al editar el pago';
 
-        $edit = $this->updatePago($this->util->sql($_POST, 1));
+        $oldPago = $this->getPagoById([$id]);
+        
+        if ($oldPago) {
+            $oldAmount = $oldPago['amount'];
+            $newAmount = $_POST['amount'];
+            $supplierId = $_POST['supplier_id'];
 
-        if ($edit) {
-            $status = 200;
-            $message = 'Pago actualizado correctamente';
+            $edit = $this->updatePago($this->util->sql($_POST, 1));
+
+            if ($edit && $oldAmount != $newAmount) {
+                $supplier = $this->getSupplierById([$supplierId]);
+                if ($supplier) {
+                    $newBalance = $supplier['balance'] + $oldAmount - $newAmount;
+                    $this->updateSupplierBalance($this->util->sql([
+                        'id' => $supplierId,
+                        'balance' => $newBalance
+                    ], 1));
+                }
+            }
+
+            if ($edit) {
+                $status = 200;
+                $message = 'Pago actualizado correctamente';
+            }
+        }
+
+        return [
+            'status' => $status,
+            'message' => $message
+        ];
+    }
+
+    function statusPago() {
+        $status = 500;
+        $message = 'No se pudo cambiar el estado del pago';
+
+        $id = $_POST['id'];
+        $newStatus = $_POST['active'];
+        
+        $pago = $this->getPagoById([$id]);
+        
+        if ($pago) {
+            $update = $this->updatePago($this->util->sql($_POST, 1));
+
+            if ($update) {
+                $supplier = $this->getSupplierById([$pago['supplier_id']]);
+                if ($supplier) {
+                    if ($newStatus == 0) {
+                        $newBalance = $supplier['balance'] + $pago['amount'];
+                    } else {
+                        $newBalance = $supplier['balance'] - $pago['amount'];
+                    }
+                    
+                    $this->updateSupplierBalance($this->util->sql([
+                        'id' => $pago['supplier_id'],
+                        'balance' => $newBalance
+                    ], 1));
+                }
+
+                $status = 200;
+                $message = $newStatus == 1 ? 'Pago activado correctamente' : 'Pago cancelado correctamente';
+            }
         }
 
         return [
@@ -135,7 +206,21 @@ class ctrl extends mdl {
         $status = 500;
         $message = 'No se pudo eliminar el pago';
 
-        $delete = $this->deletePagoById([$_POST['id']]);
+        $id = $_POST['id'];
+        $pago = $this->getPagoById([$id]);
+        
+        if ($pago && $pago['active'] == 1) {
+            $supplier = $this->getSupplierById([$pago['supplier_id']]);
+            if ($supplier) {
+                $newBalance = $supplier['balance'] + $pago['amount'];
+                $this->updateSupplierBalance($this->util->sql([
+                    'id' => $pago['supplier_id'],
+                    'balance' => $newBalance
+                ], 1));
+            }
+        }
+
+        $delete = $this->deletePagoById([$id]);
 
         if ($delete) {
             $status = 200;
@@ -147,6 +232,36 @@ class ctrl extends mdl {
             'message' => $message
         ];
     }
+
+    function getSuppliersByUdn() {
+        $udn = $_POST['udn'];
+        $suppliers = $this->lsSuppliers([$udn]);
+
+        return [
+            'status' => 200,
+            'data' => $suppliers
+        ];
+    }
+}
+
+function formatSpanishDate($date, $format = 'normal') {
+    if (!$date) return '-';
+    
+    $timestamp = strtotime($date);
+    $months = [
+        'January' => 'Enero', 'February' => 'Febrero', 'March' => 'Marzo',
+        'April' => 'Abril', 'May' => 'Mayo', 'June' => 'Junio',
+        'July' => 'Julio', 'August' => 'Agosto', 'September' => 'Septiembre',
+        'October' => 'Octubre', 'November' => 'Noviembre', 'December' => 'Diciembre'
+    ];
+    
+    $formatted = date('d F Y', $timestamp);
+    return str_replace(array_keys($months), array_values($months), $formatted);
+}
+
+function evaluar($amount) {
+    if (!$amount) return '$0.00';
+    return '$' . number_format($amount, 2);
 }
 
 $obj = new ctrl();

@@ -26,6 +26,7 @@
 
             <!-- Module Scripts -->
             <script src="src/js/kpi-ventas.js?t=<?php echo time(); ?>"></script>
+            <script src="src/js/kpi-dashboard.js?t=<?php echo time(); ?>"></script>
         
         </div>
     </main>

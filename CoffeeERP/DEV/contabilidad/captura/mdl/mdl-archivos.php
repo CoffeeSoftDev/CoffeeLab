@@ -88,7 +88,7 @@ class mdl extends CRUD {
             GROUP BY description
         ";
         
-        $results = $this->_Read($query, null);
+        $results = $this->_Read($query, []);
         
         $counts = [
             'total' => 0,

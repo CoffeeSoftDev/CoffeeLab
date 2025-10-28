@@ -2,7 +2,7 @@ let api = 'ctrl/ctrl-pago-proveedor.php';
 let app, lsProveedores, lsTipoPago;
 
 $(async () => {
-    const data = await useFetch({ url: api, data: { opc: "init" } });
+    const data = await useFetch({ url: api, data: { opc: "init", udn: 5 } });
     lsProveedores = data.proveedores;
     lsTipoPago = data.tipoPago;
 
@@ -52,7 +52,7 @@ class App extends Templates {
                     class: "col-12 col-md-3",
                     data: [
                         { id: "", valor: "Todos" },
-                        ...lsTipoPago
+                        // ...lsTipoPago
                     ],
                     onchange: 'app.lsPagos()'
                 },
@@ -62,17 +62,12 @@ class App extends Templates {
                     id: "calendar" + this.PROJECT_NAME,
                     lbl: "Fecha de pago"
                 },
-                {
-                    opc: "button",
-                    class: "col-12 col-md-2",
-                    id: "btnBuscar",
-                    text: "Buscar",
-                    onClick: () => this.lsPagos()
-                },
+
                 {
                     opc: "button",
                     class: "col-12 col-md-3",
                     id: "btnNuevoPago",
+                    className: 'w-100',
                     text: "Registrar Pago",
                     color_btn: "primary",
                     onClick: () => this.addPago()
@@ -92,10 +87,10 @@ class App extends Templates {
         this.createTable({
             parent: `container${this.PROJECT_NAME}`,
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
-            data: { 
-                opc: "lsPagos", 
-                fi: rangePicker.fi, 
-                ff: rangePicker.ff 
+            data: {
+                opc: "lsPagos",
+                fi: rangePicker.fi,
+                ff: rangePicker.ff
             },
             coffeesoft: true,
             conf: { datatable: true, pag: 15 },
@@ -274,3 +269,5 @@ class App extends Templates {
         ];
     }
 }
+
+

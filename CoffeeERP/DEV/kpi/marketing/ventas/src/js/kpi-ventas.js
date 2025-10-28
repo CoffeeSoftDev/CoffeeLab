@@ -180,10 +180,13 @@ class SalesDashboard extends Templates {
     layout() {
 
         this.dashboardComponent({
-            parent: "container-dashboard",
-            id: "dashboardComponent",
-            title: "📊 Dashboard de Ventas",
+
+            parent  : "container-dashboard",
+
+            id      : "dashboardComponent",
+            title   : "📊 Dashboard de Ventas",
             subtitle: "Análisis comparativo de ventas entre dos períodos",
+
             json: [
 
 
@@ -287,10 +290,11 @@ class SalesDashboard extends Templates {
         // filtrar clasificacion x udn 
         // this.handleCategoryChange($('#idFilterBar #udn').val());
 
-        let udn = $('#filterBarDashboard #udn').val();
-        let periodo1 = $('#filterBarDashboard #periodo1').val();
+        let udn           = $('#filterBarDashboard #udn').val();
+        let periodo1      = $('#filterBarDashboard #periodo1').val();
+        
         let [anio1, mes1] = periodo1.split('-');
-        let periodo2 = $('#filterBarDashboard #periodo2').val();
+        let periodo2      = $('#filterBarDashboard #periodo2').val();
         let [anio2, mes2] = periodo2.split('-');
 
         let mkt = await useFetch({

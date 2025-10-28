@@ -32,6 +32,7 @@
         <script src="js/productos.js?t=<?php echo time(); ?>"></script>
         <script src="js/canales.js?t=<?php echo time(); ?>"></script>
         <script src="js/pedidos.js?t=<?php echo time(); ?>"></script>
+    <script src="js/pago-proveedor.js"></script>
 
 
         </div>

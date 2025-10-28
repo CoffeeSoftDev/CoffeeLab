@@ -87,7 +87,7 @@ class Compras extends Templates {
                     className: 'w-100',
                     color_btn: 'success',
                     id       : "btnSubirArchivos",
-                    text     : "Subir archivos de compras",
+                    text     : "Subir archivos",
                     onClick  : () => console.log("Subir archivos")
                 },
                 {

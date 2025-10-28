@@ -17,7 +17,6 @@ use Dompdf\Dompdf;
 require_once('../../../conf/_Message.php');
 
 
-// sustituir 'mdl' extends de acuerdo al nombre que tiene el modelo
 class ctrl extends Pedidos{
 
     public $util;
