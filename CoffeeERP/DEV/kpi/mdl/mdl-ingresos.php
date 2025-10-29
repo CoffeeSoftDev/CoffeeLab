@@ -92,7 +92,27 @@ class mdl extends CRUD {
                 AND DATE_FORMAT(fecha_folio,'%Y-%m-%d') = ?
         ";
         $sql = $this->_Read($query, $array);
-        return !empty($sql) ? $sql[0] : null;
+        
+        if (!empty($sql)) {
+            return $sql[0];
+        }
+        
+        // Retornar estructura vacía con valores por defecto
+        return [
+            'id_folio' => null,
+            'fecha_folio' => null,
+            'id_udn' => $array[0] ?? null,
+            'alimentos' => 0,
+            'bebidas' => 0,
+            'guarniciones' => 0,
+            'domicilio' => 0,
+            'sales' => 0,
+            'id_venta' => null,
+            'noHabitaciones' => 0,
+            'Hospedaje' => 0,
+            'AyB' => 0,
+            'Diversos' => 0
+        ];
     }
 
     function getIngresosDayOfWeek($array){
@@ -264,6 +284,32 @@ class mdl extends CRUD {
 
         $sql = $this->_Read($query, $array);
 
-        return !empty($sql) ? $sql[0] : null;
+        if (!empty($sql)) {
+            return $sql[0];
+        }
+        
+        // Retornar estructura vacía con valores por defecto
+        return [
+            'id_folio' => null,
+            'fecha_folio' => null,
+            'id_udn' => $array[0] ?? null,
+            'alimentos' => 0,
+            'bebidas' => 0,
+            'guarniciones' => 0,
+            'domicilio' => 0,
+            'sales' => 0,
+            'totalAyB' => 0,
+            'id_venta' => null,
+            'noHabitaciones' => 0,
+            'Hospedaje' => 0,
+            'AyB' => 0,
+            'Diversos' => 0,
+            'RupturaHabitaciones' => 0,
+            'costoDiversos' => 0,
+            'promedio_total_ayb' => 0,
+            'porcOcupacion' => 0,
+            'promedio_alimentos' => 0,
+            'promedio_bebidas' => 0
+        ];
     }
 }
