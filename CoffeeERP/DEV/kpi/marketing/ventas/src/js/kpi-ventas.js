@@ -181,10 +181,10 @@ class SalesDashboard extends Templates {
 
         this.dashboardComponent({
 
-            parent  : "container-dashboard",
+            parent: "container-dashboard",
 
-            id      : "dashboardComponent",
-            title   : "📊 Dashboard de Ventas",
+            id: "dashboardComponent",
+            title: "📊 Dashboard de Ventas",
             subtitle: "Análisis comparativo de ventas entre dos períodos",
 
             json: [
@@ -290,11 +290,11 @@ class SalesDashboard extends Templates {
         // filtrar clasificacion x udn 
         // this.handleCategoryChange($('#idFilterBar #udn').val());
 
-        let udn           = $('#filterBarDashboard #udn').val();
-        let periodo1      = $('#filterBarDashboard #periodo1').val();
-        
+        let udn = $('#filterBarDashboard #udn').val();
+        let periodo1 = $('#filterBarDashboard #periodo1').val();
+
         let [anio1, mes1] = periodo1.split('-');
-        let periodo2      = $('#filterBarDashboard #periodo2').val();
+        let periodo2 = $('#filterBarDashboard #periodo2').val();
         let [anio2, mes2] = periodo2.split('-');
 
         let mkt = await useFetch({
@@ -2338,7 +2338,7 @@ class SalesCalendar extends Templates {
             ]
         });
     }
-    
+
     async renderCalendar() {
         // 🧠 Obtener datos
         const udn = $(`#filterBar${this.PROJECT_NAME} #udn`).val();
@@ -2346,6 +2346,9 @@ class SalesCalendar extends Templates {
             url: this._link,
             data: { opc: 'getCalendarioVentas', udn: udn }
         });
+
+        console.log('📅 Datos del backend:', data);
+        console.log('📅 Estructura semanas:', data.semanas);
 
         // 📆 Renderizar calendario
         this.calendarioVentas({
@@ -2422,7 +2425,6 @@ class SalesCalendar extends Templates {
             class: "bg-white rounded-lg shadow-md p-4 border border-gray-200"
         });
 
-        // Header con días de la semana (solo una vez)
         const diasHeader = $("<div>", {
             class: "grid grid-cols-7 gap-2 mb-4"
         });
@@ -2437,48 +2439,119 @@ class SalesCalendar extends Templates {
             );
         });
 
-        // Container para todos los días
         const diasContainer = $("<div>", {
             class: "grid grid-cols-7 gap-2"
         });
 
         if (opts.json && opts.json.length > 0) {
+            const todosDias = [];
             opts.json.forEach((semana) => {
                 semana.dias.forEach(dia => {
-                    this._ventasData.push(dia); // 🧩 se almacenan todas las ventas
-                    const diaCard = this.renderDia(dia, opts);
-                    diasContainer.append(diaCard);
+                    todosDias.push(dia);
+                    this._ventasData.push(dia);
+                });
+            });
+
+            todosDias.sort((a, b) => {
+                return moment(a.fecha, 'YYYY-MM-DD') - moment(b.fecha, 'YYYY-MM-DD');
+            });
+
+            const semanas = this.agruparPorSemanas(todosDias);
+
+            semanas.forEach(semana => {
+                semana.forEach(dia => {
+                    if (dia) {
+                        const diaCard = this.renderDia(dia, opts);
+                        diasContainer.append(diaCard);
+                    } else {
+                        diasContainer.append($("<div>", { class: "p-4" }));
+                    }
                 });
             });
         }
-
 
         calendarContainer.append(diasHeader, diasContainer);
         container.append(calendarContainer);
         $(`#${opts.parent}`).html(container);
     }
 
+    agruparPorSemanas(dias) {
+        if (!dias || dias.length === 0) return [];
+
+        const semanas = [];
+        let semanaActual = new Array(7).fill(null);
+        let primerDia = moment(dias[0].fecha, 'YYYY-MM-DD');
+        let inicioSemana = primerDia.clone().startOf('isoWeek');
+
+        dias.forEach(dia => {
+            const fecha = moment(dia.fecha, 'YYYY-MM-DD');
+            const diaSemana = fecha.isoWeekday() - 1;
+            const semanaDia = fecha.clone().startOf('isoWeek');
+
+            if (!semanaDia.isSame(inicioSemana, 'day')) {
+                const semanaCompleta = this.completarSemana(semanaActual, inicioSemana);
+                semanas.push(semanaCompleta);
+                semanaActual = new Array(7).fill(null);
+                inicioSemana = semanaDia;
+            }
+
+            semanaActual[diaSemana] = dia;
+        });
+
+        if (semanaActual.some(d => d !== null)) {
+            const semanaCompleta = this.completarSemana(semanaActual, inicioSemana);
+            semanas.push(semanaCompleta);
+        }
+
+        return semanas;
+    }
+
+    completarSemana(semana, inicioSemana) {
+        return semana.map((dia, index) => {
+            if (dia) return dia;
+
+            const fecha = inicioSemana.clone().add(index, 'days');
+            return {
+                dia: fecha.format('DD'),
+                mes: fecha.format('MM'),
+                mesAbreviado: fecha.format('MMM').toLowerCase(),
+                fecha: fecha.format('YYYY-MM-DD'),
+                diaSemana: fecha.format('dddd'),
+                total: 0,
+                totalFormateado: '-',
+                clientes: 0,
+                chequePromedio: '-',
+                isEmpty: true
+            };
+        });
+    }
+
     // 🌸 Renderiza una card diaria con estilo Rosy Light ✨
     renderDia(dia, opts) {
+        const isEmpty = dia.isEmpty || dia.total === 0;
         const total = parseFloat(dia.total) || 0;
-        const colorClass = this.highlightExtremes(total);
-        const bestCP = this.getBestChequePromedio(); // 🧠 obtenemos el mejor cheque promedio
+        const colorClass = isEmpty ? 'text-gray-400' : this.highlightExtremes(total);
+        const bestCP = this.getBestChequePromedio();
         const chequito = (dia.chequePromedio || "")
             .toString()
-            .replace(/[^\d.,-]/g, " ") // quita $ , y espacios
-            .replace(",", ".");   // normaliza coma decimal
+            .replace(/[^\d.,-]/g, " ")
+            .replace(",", ".");
 
         let cpValue = parseFloat(chequito) || 0;
 
+        const cardClass = isEmpty
+            ? `group relative rounded-2xl p-4 bg-gray-50/50 backdrop-blur-sm
+               shadow-[0_2px_8px_rgba(0,0,0,0.04)]
+               transition-all duration-300 ease-out`
+            : `group relative rounded-2xl p-4 bg-white/80 backdrop-blur-sm
+               shadow-[0_4px_16px_rgba(0,0,0,0.08)]
+               hover:shadow-[0_6px_24px_rgba(16,59,96,0.15)]
+               transition-all duration-300 ease-out cursor-pointer`;
+
         const diaCard = $("<div>", {
-            id: `card-dia-${dia.dia}`,
-            class: `
-            group relative rounded-2xl p-4 bg-white/80 backdrop-blur-sm
-            shadow-[0_4px_16px_rgba(0,0,0,0.08)]
-            hover:shadow-[0_6px_24px_rgba(16,59,96,0.15)]
-            transition-all duration-300 ease-out cursor-pointer
-        `,
-            click: () => opts?.onDayClick?.(dia)
+            id: `card-dia-${dia.dia}-${dia.mes}`,
+            class: cardClass,
+            click: isEmpty ? null : () => opts?.onDayClick?.(dia)
         });
 
         const diaNumero = $("<div>", {
