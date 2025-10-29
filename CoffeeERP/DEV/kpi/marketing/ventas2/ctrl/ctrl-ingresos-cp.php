@@ -12,7 +12,7 @@ require_once('../../../../conf/coffeSoft.php');
 
 class ctrl extends mdl {
 
-     public function apiPromediosDiarios() {
+    public function apiPromediosDiarios() {
         $response = [];
 
         $anio         = isset($_POST['anio1']) ? (int) $_POST['anio1'] : date('Y');
@@ -90,7 +90,7 @@ class ctrl extends mdl {
             'dashboard' => $this->apiDashBoard($response, $udn),
             'barras'    => $this->comparativaChequePromedio(),
             'linear'    => $this->apiLinearPromediosDiario($anio, $mes, $udn),
-            // 'barDays'   => $this->apiIngresosComparativoSemana(),
+            'barDays'   => $this->apiIngresosComparativoSemana(),
             // 'topDays'   => $this->apiTopDiasMes(),
             'topWeek'   => $this->apiTopDiasSemanaPromedio($anio, $mes, $udn)
         ];
@@ -858,6 +858,276 @@ class ctrl extends mdl {
         return $promedios;
     }
 
+    public function apiTopDiasMes($anio = null, $mes = null, $udn = null) {
+        $anio = $anio ?? (isset($_POST['anio']) ? (int) $_POST['anio'] : date('Y'));
+        $mes  = $mes  ?? (isset($_POST['mes'])  ? (int) $_POST['mes']  : date('m'));
+        $udn  = $udn  ?? (isset($_POST['udn'])  ? (int) $_POST['udn']  : 1);
+
+        // Obtener todos los registros diarios
+        $apiData = $this->apiResumenIngresosPorDia($anio, $mes, $udn);
+        $rows = $apiData['data'];
+
+        // Ordenar por total descendente
+        usort($rows, function($a, $b) {
+            return $b['total'] <=> $a['total'];
+        });
+
+        // Tomar solo los 5 primeros
+        $top5 = array_slice($rows, 0, 5);
+
+        // Definir notas según ranking
+        $notas = ["Mejor día", "Excelente", "Muy bueno", "Bueno", "Regular"];
+
+        // Armar estructura final
+        $data = [];
+        foreach ($top5 as $i => $item) {
+            $fechaObj = new DateTime($item['fecha']);
+            $data[] = [
+                'fecha'    => $fechaObj->format('d M'),
+                'dia'      => $item['dia'],
+                'clientes' => $item['clientes'],
+                'total'    => $item['total'],
+                'nota'     => $notas[$i] ?? ""
+            ];
+        }
+
+        // Texto del subtítulo
+        $mesTexto = strftime('%B', mktime(0, 0, 0, $mes, 1));
+        $subtitle = ucfirst($mesTexto) . " " . $anio . " - Top 5";
+
+        return $data;
+    }
+
+    function apiIngresosComparativoSemana($anio1 = null, $mes1 = null, $anio2 = null, $mes2 = null, $udn = null) {
+        $anio1 = $anio1 ?? (isset($_POST['anio1']) ? (int) $_POST['anio1'] : date('Y'));
+        $mes1  = $mes1  ?? (isset($_POST['mes1'])  ? (int) $_POST['mes1']  : date('m'));
+        $anio2 = $anio2 ?? (isset($_POST['anio2']) ? (int) $_POST['anio2'] : (date('Y') - 1));
+        $mes2  = $mes2  ?? (isset($_POST['mes2'])  ? (int) $_POST['mes2']  : date('m'));
+        $udn   = $udn   ?? (isset($_POST['udn'])   ? (int) $_POST['udn']   : 1);
+
+        // Período 1
+        $apiA = $this->apiResumenIngresosPorDia($anio1, $mes1, $udn);
+        $totalesA = [];
+        $conteosA = [];
+        foreach ($apiA['data'] as $row) {
+            $dia = $row['dia'];
+            if (!isset($totalesA[$dia])) {
+                $totalesA[$dia] = 0;
+                $conteosA[$dia] = 0;
+            }
+            $totalesA[$dia] += $row['total'];
+            $conteosA[$dia]++;
+        }
+
+        // Período 2
+        $apiB = $this->apiResumenIngresosPorDia($anio2, $mes2, $udn);
+        $totalesB = [];
+        $conteosB = [];
+        foreach ($apiB['data'] as $row) {
+            $dia = $row['dia'];
+            if (!isset($totalesB[$dia])) {
+                $totalesB[$dia] = 0;
+                $conteosB[$dia] = 0;
+            }
+            $totalesB[$dia] += $row['total'];
+            $conteosB[$dia]++;
+        }
+
+        // Etiquetas en orden fijo
+        $labels = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
+        $dataA  = [];
+        $dataB  = [];
+
+        foreach ($labels as $dia) {
+            $promedioA = isset($conteosA[$dia]) && $conteosA[$dia] > 0 
+                ? $totalesA[$dia] / $conteosA[$dia] 
+                : 0;
+            $promedioB = isset($conteosB[$dia]) && $conteosB[$dia] > 0 
+                ? $totalesB[$dia] / $conteosB[$dia] 
+                : 0;
+                
+            $dataA[] = round($promedioA, 2);
+            $dataB[] = round($promedioB, 2);
+        }
+
+        return [
+            'labels' => $labels,
+            'dataA'  => $dataA,
+            'dataB'  => $dataB,
+            'yearA'  => $anio2,
+            'yearB'  => $anio1
+
+        ];
+    }
+
+
+    // Comparativa de categorias.
+    function apiIngresosTotales2($udn, $anio, $mes) {
+        $fi = new DateTime($anio . '-' . $mes . '-01');
+        $hoy = clone $fi;
+        $hoy->modify('last day of this month');
+
+        $__row = [];
+        $idRow = 0;
+        
+        // Obtener la categoría seleccionada y normalizarla
+        $categoriaSeleccionada = isset($_POST['category']) ? strtolower(trim($_POST['category'])) : 'todas';
+
+        while ($fi <= $hoy) {
+            $idRow++;
+            $fecha = $fi->format('Y-m-d');
+
+            $softVentas = $this->getsoftVentas([$udn, $fecha]);
+
+            // Si no hay datos, crear un registro vacío
+            if ($softVentas === null) {
+                $softVentas = [
+                    'id_venta'       => null,
+                    'noHabitaciones' => 0,
+                    'Hospedaje'      => 0,
+                    'AyB'            => 0,
+                    'Diversos'       => 0,
+                    'alimentos'      => 0,
+                    'bebidas'        => 0,
+                    'guarniciones'   => 0,
+                    'sales'          => 0,
+                    'domicilio'      => 0
+                ];
+            }
+
+            $row = [
+                'id'    => $idRow,
+                'fecha' => $fecha,
+                'estado' => $softVentas['id_venta'] ? 'Capturado' : 'Pendiente'
+            ];
+
+            if ($udn == 1) {
+                $row['clientes'] = $softVentas['noHabitaciones'];
+                
+                // Filtrar por categoría o mostrar todas
+                if ($categoriaSeleccionada == 'todas' || $categoriaSeleccionada == '') {
+                    $row['Hospedaje'] = $softVentas['Hospedaje'];
+                    $row['AyB']       = $softVentas['AyB'];
+                    $row['Diversos']  = $softVentas['Diversos'];
+                    $row['total']     = $softVentas['Hospedaje'] + $softVentas['AyB'] + $softVentas['Diversos'];
+                } elseif ($categoriaSeleccionada == 'hospedaje') {
+                    $row['Hospedaje'] = $softVentas['Hospedaje'];
+                    $row['total']     = $softVentas['Hospedaje'];
+                } elseif ($categoriaSeleccionada == 'ayb') {
+                    $row['AyB']   = $softVentas['AyB'];
+                    $row['total'] = $softVentas['AyB'];
+                } elseif ($categoriaSeleccionada == 'diversos') {
+                    $row['Diversos'] = $softVentas['Diversos'];
+                    $row['total']    = $softVentas['Diversos'];
+                }
+
+            } elseif ($udn == 5) {
+                $row['clientes'] = $softVentas['noHabitaciones'];
+                
+                if ($categoriaSeleccionada == 'todas' || $categoriaSeleccionada == '') {
+                    $row['alimentos']    = $softVentas['alimentos'];
+                    $row['bebidas']      = $softVentas['bebidas'];
+                    $row['guarniciones'] = $softVentas['guarniciones'];
+                    $row['sales']        = $softVentas['sales'];
+                    $row['domicilio']    = $softVentas['domicilio'];
+                    $row['total']        = $softVentas['alimentos'] + $softVentas['bebidas'] + $softVentas['guarniciones'] + $softVentas['sales'] + $softVentas['domicilio'];
+                } elseif ($categoriaSeleccionada == 'alimentos' || $categoriaSeleccionada == 'cortes') {
+                    $row['alimentos'] = $softVentas['alimentos'];
+                    $row['total']     = $softVentas['alimentos'];
+                } elseif ($categoriaSeleccionada == 'bebidas') {
+                    $row['bebidas'] = $softVentas['bebidas'];
+                    $row['total']   = $softVentas['bebidas'];
+                } elseif ($categoriaSeleccionada == 'guarniciones') {
+                    $row['guarniciones'] = $softVentas['guarniciones'];
+                    $row['total']        = $softVentas['guarniciones'];
+                } elseif ($categoriaSeleccionada == 'sales' || $categoriaSeleccionada == 'sales y condimentos') {
+                    $row['sales'] = $softVentas['sales'];
+                    $row['total'] = $softVentas['sales'];
+                }
+
+            } else {
+                $row['clientes'] = $softVentas['noHabitaciones'];
+                
+                if ($categoriaSeleccionada == 'todas' || $categoriaSeleccionada === '') {
+                    $row['alimentos'] = $softVentas['alimentos'];
+                    $row['bebidas']   = $softVentas['bebidas'];
+                    $row['total']     = $softVentas['alimentos'] + $softVentas['bebidas'];
+                } elseif ($categoriaSeleccionada == 'alimentos') {
+                    $row['alimentos'] = $softVentas['alimentos'];
+                    $row['total']     = $softVentas['alimentos'];
+                } elseif ($categoriaSeleccionada == 'bebidas') {
+                    $row['bebidas'] = $softVentas['bebidas'];
+                    $row['total']   = $softVentas['bebidas'];
+                }
+            }
+
+            $__row[] = $row;
+            $fi->modify('+1 day');
+        }
+
+        return ['data' => $__row];
+    }
+
+    
+
+    function comparativaByCategory() {
+        $anioNow = $_POST['anio1'];
+        $mesNow  = $_POST['mes1'];
+        $anioOld = $_POST['anio2'];
+        $mesOld  = $_POST['mes2'];
+        $udn     = $_POST['udn'];
+        $categoria = strtolower(trim($_POST['category'] ?? 'todas'));
+
+        // Obtener datos filtrados por año y mes
+        $_POST['anio'] = $anioNow;
+        $_POST['mes']  = $mesNow;
+        $_POST['category'] = $categoria;
+        $datosNow = $this->apiIngresosTotales2($udn, $anioNow, $mesNow)['data'];
+
+        $_POST['anio'] = $anioOld;
+        $_POST['mes']  = $mesOld;
+        $_POST['category'] = $categoria;
+        $datosOld = $this->apiIngresosTotales2($udn, $anioOld, $mesOld)['data'];
+
+        // Formato de etiquetas tipo "01 Oct", "02 Oct", etc.
+        $labels = array_map(function ($d) {
+            return date('d', strtotime($d['fecha']));
+        }, $datosNow);
+
+        $tooltips = array_map(function ($d) {
+            return formatSpanishDay($d['fecha']) . ' ' . date('d', strtotime($d['fecha']));
+        }, $datosNow);
+
+        $valuesNow = array_map(fn($d) => floatval($d['total'] ?? 0), $datosNow);
+        $valuesOld = array_map(fn($d) => floatval($d['total'] ?? 0), $datosOld);
+
+        return [
+            'labels'  => $labels,
+            'tooltip' => $tooltips,
+            'datasets' => [
+                [
+                    'label' => $anioNow,
+                    'data'  => $valuesNow,
+                    'borderColor' => "#3B82F6", // azul
+                    'backgroundColor' => "rgba(59, 130, 246, 0.2)",
+                    'fill' => true,
+                    'tension' => 0.3,
+                    'pointRadius' => 4,
+                    'pointBackgroundColor' => "#3B82F6"
+                ],
+                [
+                    'label' => $anioOld,
+                    'data'  => $valuesOld,
+                    'borderColor' => "#EC4899", // rosa
+                    'backgroundColor' => "rgba(236, 72, 153, 0.2)",
+                    'fill' => true,
+                    'tension' => 0.3,
+                    'pointRadius' => 4,
+                    'pointBackgroundColor' => "#EC4899"
+                ]
+            ]
+        ];
+    }
     
 }
 
@@ -916,6 +1186,8 @@ function createElement($tag, $attributes = [], $text = null) {
 
     return $element;
 }
+
+
 
 
 // ✅ Instancia final del controlador

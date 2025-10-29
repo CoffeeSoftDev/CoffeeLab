@@ -1,6 +1,6 @@
 <?php
-require_once('../../conf/_CRUD.php');
-require_once('../../conf/_Utileria.php');
+require_once('../../../../conf/_CRUD.php');
+require_once('../../../../conf/_Utileria.php');
 
 
 class mdl extends CRUD {
@@ -92,7 +92,7 @@ class mdl extends CRUD {
                 AND DATE_FORMAT(fecha_folio,'%Y-%m-%d') = ?
         ";
         $sql = $this->_Read($query, $array);
-        return $sql[0];
+        return !empty($sql) ? $sql[0] : null;
     }
 
     function getIngresosDayOfWeek($array){
@@ -105,6 +105,9 @@ class mdl extends CRUD {
                 noHabitaciones,
                 alimentos,
                 bebidas,
+                guarniciones as complementos,
+                sales,
+                domicilio,
                  (alimentos + bebidas) as totalGral,
 
                  CASE
@@ -150,9 +153,13 @@ class mdl extends CRUD {
                 SUM(AyB) as totalAyB,
                 SUM(alimentos) as totalAlimentos,
                 SUM(bebidas) as totalBebidas,
+                SUM(guarniciones) as totalGuarniciones,
+                SUM(sales) as totalSales,
+                SUM(domicilio) as totalDomicilio,
                 SUM(Diversos) as totalDiversos,
-                (SUM(Hospedaje) + SUM(AyB) + SUM(Diversos)) AS totalGeneral,
+                ( SUM(Hospedaje) + SUM(AyB) + SUM(Diversos)) AS totalGeneral,
                 (SUM(alimentos) + SUM(bebidas) ) AS totalGralAyB,
+                (SUM(domicilio) + SUM(sales) + SUM(guarniciones) + SUM(alimentos) + SUM(bebidas) ) AS totalGral,
                 SUM(noHabitaciones) as totalHabitaciones
             FROM
             {$this->bd}soft_folio
@@ -165,7 +172,7 @@ class mdl extends CRUD {
 
         $sql = $this->_Read($query, $array);
 
-        return $sql[0];
+        return !empty($sql) ? $sql[0] : null;
     }
 
 
@@ -197,7 +204,7 @@ class mdl extends CRUD {
 
         $sql = $this->_Read($query, $array);
 
-        return $sql[0];
+        return !empty($sql) ? $sql[0] : null;
     }
 
     function getsoft_ventas($array){
@@ -257,6 +264,6 @@ class mdl extends CRUD {
 
         $sql = $this->_Read($query, $array);
 
-        return $sql[0];
+        return !empty($sql) ? $sql[0] : null;
     }
 }

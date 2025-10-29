@@ -21,25 +21,25 @@ class SalesDashboard extends Templates {
             json: [
                 { type: "div", id: "CategoryDashboard" },
 
-                // Graficos de cheque promedio.
-                {
-                    type: "grafico", id: "linearChequePromedio", title: "",
-                    content: [
-                        { class: "border px-3 py-2 rounded", type: "div", id: "filterBarChequePromedio" },
-                        { class: " mt-2", type: "div", id: "barChequePromedio" },
-                    ]
-                },
+                // // Graficos de cheque promedio.
+                // {
+                //     type: "grafico", id: "linearChequePromedio", title: "",
+                //     content: [
+                //         { class: "border px-3 py-2 rounded", type: "div", id: "filterBarChequePromedio" },
+                //         { class: " mt-2", type: "div", id: "barChequePromedio" },
+                //     ]
+                // },
 
-                {
-                    type: "grafico", id: "dailyAverageCheck", title: "",
-                    content: [
-                        { class: "border px-3 py-2 rounded", type: "div", id: "filterBarDailyAverageCheck" },
-                        { class: " mt-2", type: "div", id: "containerDailyAverageCheck" },
-                    ]
-                },
+                // {
+                //     type: "grafico", id: "dailyAverageCheck", title: "",
+                //     content: [
+                //         { class: "border px-3 py-2 rounded", type: "div", id: "filterBarDailyAverageCheck" },
+                //         { class: " mt-2", type: "div", id: "containerDailyAverageCheck" },
+                //     ]
+                // },
 
 
-                { type: "grafico", id: "containerChequePro" },
+                // { type: "grafico", id: "containerChequePro" },
                 {
                     type: "grafico", id: "barProductMargen1", title: "",
                     content: [
@@ -47,8 +47,8 @@ class SalesDashboard extends Templates {
                         { class: " mt-2", type: "div", id: "barProductMargen" },
                     ]
                 },
-                { type: "grafico", id: "ventasDiasSemana", title: "Ventas por Día de la Semana" },
-                { type: "grafico", id: "Tendencia", title: "Tendencia de Ventas" },
+                // { type: "grafico", id: "ventasDiasSemana", title: "Ventas por Día de la Semana" },
+                // { type: "grafico", id: "Tendencia", title: "Tendencia de Ventas" },
 
 
             ]
@@ -80,6 +80,7 @@ class SalesDashboard extends Templates {
 
         });
 
+        this.renderGraphicsComparative()
 
         setTimeout(() => {
             this.renderDashboard();
@@ -151,11 +152,12 @@ class SalesDashboard extends Templates {
     }
 
     async renderDashboard() {
+        this.handleCategoryChange($('#idFilterBar #udn').val());
 
-        let udn = $('#filterBarDashboard #udn').val();
-        let periodo1 = $('#filterBarDashboard #periodo1').val();
+        let udn           = $('#filterBarDashboard #udn').val();
+        let periodo1      = $('#filterBarDashboard #periodo1').val();
         let [anio1, mes1] = periodo1.split('-');
-        let periodo2 = $('#filterBarDashboard #periodo2').val();
+        let periodo2      = $('#filterBarDashboard #periodo2').val();
         let [anio2, mes2] = periodo2.split('-');
 
         let mkt = await useFetch({
@@ -173,31 +175,38 @@ class SalesDashboard extends Templates {
 
 
         // init Cards.
-
         this.showCards(mkt.dashboard);
+
+        // Comparativo por categoria.
+        this.comparativaByCategory()
 
         // Graficos cheque promedio.
 
-        this.layoutDailyAverageCheck();
-        this.layoutChequePromedio();
+        // this.layoutDailyAverageCheck();
+        // this.layoutChequePromedio();
 
-        // Graficos ventas.
+        // // Graficos ventas.
 
-        this.chequeComparativo({
-            data: mkt.barras.dataset,
-            anioA: mkt.barras.anioA,
-            anioB: mkt.barras.anioB,
-        });
+        // this.chequeComparativo({
+        //     data: mkt.barras.dataset,
+        //     anioA: mkt.barras.anioA,
+        //     anioB: mkt.barras.anioB,
+        // });
 
-        // Grafico Linear.
-        this.comparativaIngresosDiarios({ data: mkt.linear });
+        // // Grafico Linear.
+        // this.comparativaIngresosDiarios({ data: mkt.linear });
 
-        this.topDiasSemana({
-            parent: "Tendencia",
-            title: "📊 Ranking por Promedio Semanal",
-            subtitle: "Promedio de ventas por día de la semana en el mes seleccionado",
-            data: mkt.topWeek
-        });
+
+        // // // Ventas por dia de la semana .
+        // this.ventasPorDiaSemana(mkt.barDays);
+
+
+        // this.topDiasSemana({
+        //     parent  : "Tendencia",
+        //     title   : "📊 Ranking por Promedio Semanal",
+        //     subtitle: "Promedio de ventas por día de la semana en el mes seleccionado",
+        //     data    : mkt.topWeek
+        // });
 
 
     }
@@ -281,6 +290,58 @@ class SalesDashboard extends Templates {
                 return '→';
         }
     }
+
+    // Comparativa Ventas.
+    renderGraphicsComparative(){
+        this.createfilterBar({
+            parent: `filterBarProductMargen`,
+            data: [
+                {
+                    opc: "select",
+                    id: "category",
+                    lbl: "Categorias",
+                    class: "col-sm-4",
+                    // data:,
+                    onchange: `salesDashboard.comparativaByCategory()`,
+                },
+
+            ],
+        });
+
+    }
+
+    async comparativaByCategory() {
+
+        let udn           = $('#filterBarDashboard #udn').val();
+        let periodo1      = $('#filterBarDashboard #periodo1').val();
+        let [anio1, mes1] = periodo1.split('-');
+        let periodo2      = $('#filterBarDashboard #periodo2').val();
+        let [anio2, mes2] = periodo2.split('-');
+
+        let mkt = await useFetch({
+            url: api_dashboard,
+
+            data: {
+                opc     : "comparativaByCategory",
+                udn     : udn,
+                category: $('#category option:selected').text(),
+                anio1   : anio1,
+                mes1    : mes1,
+                anio2   : anio2,
+                mes2    : mes2,
+            },
+        });
+
+
+        this.linearChart({
+            parent: "barProductMargen",
+            id: "barProductMargewn",
+            title: "📈 Comparativa por Categoría",
+            data: mkt
+        });
+
+    }
+
 
 
     // Daily.
@@ -431,8 +492,6 @@ class SalesDashboard extends Templates {
     }
 
 
-
-
     // graphigs.
     chequeComparativo(options) {
         const defaults = {
@@ -576,35 +635,7 @@ class SalesDashboard extends Templates {
         })
     }
 
-    async comparativaByCategory() {
-        let udn = $('#filterBarDashboard #udn').val();
-        let periodo1 = $('#filterBarDashboard #periodo1').val();
-        let [anio1, mes1] = periodo1.split('-');
-        let periodo2 = $('#filterBarDashboard #periodo2').val();
-        let [anio2, mes2] = periodo2.split('-');
 
-        let mkt = await useFetch({
-            url: api,
-            data: {
-                opc: "comparativaByCategory",
-                udn: udn,
-                category: $('#category option:selected').text(),
-                anio1: anio1,
-                mes1: mes1,
-                anio2: anio2,
-                mes2: mes2,
-            },
-        });
-
-
-        this.linearChart({
-            parent: "barProductMargen",
-            id: "barProductMargewn",
-            title: "📈 Comparativa por Categoría",
-            data: mkt
-        });
-
-    }
 
     // components.
     dashboardComponent(options) {
@@ -1157,4 +1188,6 @@ class SalesDashboard extends Templates {
             month2
         };
     }
+
+
 }

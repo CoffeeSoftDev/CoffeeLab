@@ -1229,7 +1229,7 @@ class ctrl extends mdl {
         ];
     }
 
-   public function apiIngresosComparativoSemana($anio1 = null, $mes1 = null, $anio2 = null, $mes2 = null, $udn = null) {
+    public function apiIngresosComparativoSemana($anio1 = null, $mes1 = null, $anio2 = null, $mes2 = null, $udn = null) {
         $anio1 = $anio1 ?? (isset($_POST['anio1']) ? (int) $_POST['anio1'] : date('Y'));
         $mes1  = $mes1  ?? (isset($_POST['mes1'])  ? (int) $_POST['mes1']  : date('m'));
         $anio2 = $anio2 ?? (isset($_POST['anio2']) ? (int) $_POST['anio2'] : (date('Y') - 1));

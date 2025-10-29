@@ -222,6 +222,7 @@ class PaymentMethod extends Templates {
             }
         ];
     }
+    
 }
 
 class CashMovement extends App {
