@@ -56,8 +56,7 @@ class mdl extends CRUD {
             WHERE F.fecha_folio = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
             AND F.id_udn = ?
         ";
-        $result = $this->_Read($query, $array);
-        return !empty($result) ? $result[0]['total'] : '0.00';
+        return $this->_Read($query, $array)[0]['total'];
     }
 
     public function getComparativaChequePromedio($array) {
@@ -72,8 +71,7 @@ class mdl extends CRUD {
             AND YEAR(F.fecha_folio) = ?
             AND F.id_udn = ?
         ";
-        $result = $this->_Read($query, $array);
-        return !empty($result) ? $result[0] : ['AyB' => 0, 'Alimentos' => 0, 'Bebidas' => 0];
+        return $this->_Read($query, $array)[0];
     }
 
 
@@ -107,7 +105,7 @@ class mdl extends CRUD {
                 noHabitaciones,
                 alimentos,
                 bebidas,
-                guarniciones,
+                guarniciones as complementos,
                 sales,
                 domicilio,
                  (alimentos + bebidas) as totalGral,
@@ -155,9 +153,13 @@ class mdl extends CRUD {
                 SUM(AyB) as totalAyB,
                 SUM(alimentos) as totalAlimentos,
                 SUM(bebidas) as totalBebidas,
+                SUM(guarniciones) as totalGuarniciones,
+                SUM(sales) as totalSales,
+                SUM(domicilio) as totalDomicilio,
                 SUM(Diversos) as totalDiversos,
-                (SUM(Hospedaje) + SUM(AyB) + SUM(Diversos)) AS totalGeneral,
+                ( SUM(Hospedaje) + SUM(AyB) + SUM(Diversos)) AS totalGeneral,
                 (SUM(alimentos) + SUM(bebidas) ) AS totalGralAyB,
+                (SUM(domicilio) + SUM(sales) + SUM(guarniciones) + SUM(alimentos) + SUM(bebidas) ) AS totalGral,
                 SUM(noHabitaciones) as totalHabitaciones
             FROM
             {$this->bd}soft_folio
@@ -170,16 +172,7 @@ class mdl extends CRUD {
 
         $sql = $this->_Read($query, $array);
 
-        return !empty($sql) ? $sql[0] : [
-            'totalHospedaje' => 0,
-            'totalAyB' => 0,
-            'totalAlimentos' => 0,
-            'totalBebidas' => 0,
-            'totalDiversos' => 0,
-            'totalGeneral' => 0,
-            'totalGralAyB' => 0,
-            'totalHabitaciones' => 0
-        ];
+        return !empty($sql) ? $sql[0] : null;
     }
 
 
@@ -211,16 +204,7 @@ class mdl extends CRUD {
 
         $sql = $this->_Read($query, $array);
 
-        return !empty($sql) ? $sql[0] : [
-            'totalHospedaje' => 0,
-            'totalAlimentos' => 0,
-            'totalBebidas' => 0,
-            'totalAyB' => 0,
-            'totalDiversos' => 0,
-            'totalGeneral' => 0,
-            'totalHabitaciones' => 0,
-            'totalDias' => 0
-        ];
+        return !empty($sql) ? $sql[0] : null;
     }
 
     function getsoft_ventas($array){
@@ -233,7 +217,7 @@ class mdl extends CRUD {
 
                 alimentos,
                 bebidas,
-                guarniciones,
+                guarniciones as complementos,
                 domicilio,
 
                 sales,
