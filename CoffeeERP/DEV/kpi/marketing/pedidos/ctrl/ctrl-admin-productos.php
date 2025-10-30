@@ -21,8 +21,8 @@ class ctrl extends mdl {
     }
 
     function lsProductos() {
-        $active = $_POST['estado-productos'];
-        $udn = $_POST['udn'];
+        $active = isset($_POST['estado-productos']) ? $_POST['estado-productos'] : 1;
+        $udn = isset($_POST['udn']) ? $_POST['udn'] : null;
         $data = $this->listProductos([$active, $udn]);
         $rows = [];
 
@@ -53,7 +53,6 @@ class ctrl extends mdl {
                 'id'          => $item['id'],
                 'Nombre'      => $item['nombre'],
                 'Descripción' => $item['descripcion'],
-                'Es Servicio' => $item['es_servicio'] ? 'Sí' : 'No',
                 'UDN'         => $item['udn_nombre'],
                 'Estado'      => renderStatus($item['active']),
                 'a'           => $a
@@ -90,7 +89,6 @@ class ctrl extends mdl {
     function addProducto() {
         $status = 500;
         $message = 'No se pudo agregar el producto';
-        $_POST['date_creation'] = date('Y-m-d H:i:s');
 
         $exists = $this->existsProductoByName([$_POST['nombre'], $_POST['udn_id']]);
 

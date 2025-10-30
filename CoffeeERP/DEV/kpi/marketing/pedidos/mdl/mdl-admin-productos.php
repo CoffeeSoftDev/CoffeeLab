@@ -1,6 +1,6 @@
 <?php
-require_once '../../../conf/_CRUD.php';
-require_once '../../../conf/_Utileria.php';
+require_once '../../../../conf/_CRUD.php';
+require_once '../../../../conf/_Utileria.php';
 session_start();
 
 class mdl extends CRUD {
@@ -9,7 +9,7 @@ class mdl extends CRUD {
 
     public function __construct() {
         $this->util = new Utileria;
-        $this->bd = "rfwsmqex_pedidos.";
+        $this->bd = "rfwsmqex_marketing.";
     }
 
     function listProductos($array) {
@@ -17,19 +17,26 @@ class mdl extends CRUD {
             $this->bd . 'udn' => 'producto.udn_id = udn.idUDN'
         ];
 
+        $where = 'producto.active = ?';
+        $data = [$array[0]];
+
+        if ($array[1] !== null) {
+            $where .= ' AND producto.udn_id = ?';
+            $data[] = $array[1];
+        }
+
         return $this->_Select([
             'table'    => $this->bd . 'producto',
-            'values'   => "producto.id as id,
-                          producto.nombre AS nombre,
+            'values'   => "producto.id,
+                          producto.nombre,
                           producto.descripcion,
-                          producto.es_servicio,
                           producto.udn_id,
                           udn.UDN as udn_nombre,
                           producto.active",
             'leftjoin' => $leftjoin,
-            'where'    => 'producto.active = ? AND producto.udn_id = ?',
+            'where'    => $where,
             'order'    => ['DESC' => 'producto.id'],
-            'data'     => $array
+            'data'     => $data
         ]);
     }
 

@@ -6,7 +6,7 @@
     <link rel="icon" type="image/svg+xml" href="/alpha/src/img/alpha.png" />
     <title>Alpha</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/alpha/access/src/css/logout.css">
+    <link rel="stylesheet" href="/dev/access/src/css/logout.css">
 </head>
 
 <body class="bg-[#111928] flex items-center justify-center min-h-screen">
@@ -25,10 +25,10 @@
     <div class="hidden lg:flex w-1/2 items-center justify-center">
         <img src="/alpha/src/img/logo/huubie.svg" alt="Imagen" class="w-[50%] object-cover">
     </div>
-    <script src="/alpha/src/plugins/jquery/jquery-3.7.0.js"></script>
-    <script src="/alpha/src/js/complementos.js?t=<?php echo time(); ?>"></script>
-    <script src="/alpha/src/js/plugins.js?t=<?php echo time(); ?>"></script>
-    <script src="/alpha/src/js/coffeSoft.js?t=<?php echo time(); ?>"></script>
-    <script src="/alpha/access/src/js/logout.js"></script>
+    <script src="/dev/src/plugins/jquery/jquery-3.7.0.js"></script>
+    <script src="/dev/src/js/complementos.js?t=<?php echo time(); ?>"></script>
+    <script src="/dev/src/js/plugins.js?t=<?php echo time(); ?>"></script>
+    <script src="/dev/src/js/coffeSoft.js?t=<?php echo time(); ?>"></script>
+    <script src="/dev/access/src/js/logout.js"></script>
 </body>
 </html>

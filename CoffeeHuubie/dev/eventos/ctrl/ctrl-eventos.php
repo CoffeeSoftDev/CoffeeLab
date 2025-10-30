@@ -1,5 +1,5 @@
 <?php
-session_start();
+
 if (empty($_POST['opc'])) exit(0);
 session_start();
 header("Access-Control-Allow-Origin: *"); // Permite solicitudes de cualquier origen
