@@ -86,7 +86,9 @@ class MEvent extends CRUD {
 
     function getMenus($array) {
         $query = "
+
             SELECT 
+
                 p.id AS package_id,
                 p.name AS package,
                 p.description,
@@ -95,6 +97,7 @@ class MEvent extends CRUD {
                 pr.name AS product,
                 c.id AS idC,
                 c.classification
+
             FROM {$this->bd}evt_package AS p
             LEFT JOIN {$this->bd}evt_package_products AS pp ON p.id = pp.package_id
             LEFT JOIN {$this->bd}evt_products AS pr ON pp.products_id = pr.id
@@ -561,7 +564,7 @@ class MEvent extends CRUD {
     }
 
     // PACKAGE CHECK - GESTIÓN DE PRODUCTOS EN PAQUETES
-     function getEventsPackage($array) {
+    function getEventsPackage($array) {
         $query = "
             SELECT 
                 id

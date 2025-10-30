@@ -446,23 +446,25 @@ class ctrl extends MEvent{
             $idP = $row['package_id'];
 
             if (!isset($agrupados[$idP])) {
+
                 $agrupados[$idP] = [
-                    'id' => $row['package_id'],
-                    'nombre' => $row['package'],
-                    'descripcion' => $row['description'],
+                    'id'               => $row['package_id'],
+                    'nombre'           => $row['package'],
+                    'descripcion'      => $row['description'],
                     'precioPorPersona' => floatval($row['price_person']),
-                    'platillos' => [],
-                    'bebidas' => [],
+                    'platillos'        => [],
+                    'bebidas'          => [],
                 ];
             }
 
             $item = [
-                'id' => $row['idPr'],
+
+                'id'     => $row['idPr'],
                 'nombre' => $row['product'],
                 'precio' => 0,
             ];
 
-            if ($row['idC'] == 2) {
+            if ($row['idC'] == 2 || $row['idC'] == 11 ) {
                 $agrupados[$idP]['bebidas'][] = $item;
             } else {
                 $agrupados[$idP]['platillos'][] = $item;
@@ -603,7 +605,7 @@ class ctrl extends MEvent{
             ];
 
             // Clasifica como bebida o platillo por el idC (id de clasificación)
-            if ($row['idC'] == 2) {
+            if ($row['idC'] == 2 || $row['idC'] == 11) {
                 $agrupados[$idP]['menu']['bebidas'][] = $platillo;
             } else {
                 $agrupados[$idP]['menu']['platillos'][] = $platillo;
@@ -663,20 +665,21 @@ class ctrl extends MEvent{
 
         if (!empty($dataPackage)) {
             $addEventPackage = $this->createEventPackage($this->util->sql($dataPackage));
+           
             if ($addEventPackage == true) {
                 $success = true;
                 
-                // Vincular productos del paquete en evt_package_check y evt_check_products
-                foreach ($menus as $menu) {
-                    $package_id = $menu['menu']['id'];
-                    $events_package_id = $this->maxEventPackageId();
+                // // Vincular productos del paquete en evt_package_check y evt_check_products
+                // foreach ($menus as $menu) {
+                //     $package_id = $menu['menu']['id'];
+                //     $events_package_id = $this->maxEventPackageId();
                     
-                    $result = $this->insertPackageWithProducts($events_package_id, $package_id);
+                //     $result = $this->insertPackageWithProducts($events_package_id, $package_id);
                     
-                    if ($result['status'] !== 200) {
-                        error_log("Error al vincular productos: " . $result['message']);
-                    }
-                }
+                //     if ($result['status'] !== 200) {
+                //         error_log("Error al vincular productos: " . $result['message']);
+                //     }
+                // }
             }
         }
 
@@ -1145,6 +1148,27 @@ class ctrl extends MEvent{
             'status' => $status,
             'message' => $message
         ];
+    }
+
+    // Menu . Package
+    function addMenuPackage(){
+
+
+        return [
+            'menu' => $_POST
+        ];
+
+        // $addEventPackage = $this->createEventPackage($this->util->sql([
+        //       'package_id'    => $key['menu']['id'],
+        //       'quantity'      => $key['cantidadPersonas'],
+        //       'price'         => $precio,
+        //       'date_creation' => date('Y-m-d H:i:s'),
+        //       'event_id'      => $_POST['id_event'],
+        // ]));
+
+
+        //   $check_id = $this->insertPackageCheck($events_package_id);
+        //    $products = $this->getProductsByPackage([$package_id]);
     }
 
 
