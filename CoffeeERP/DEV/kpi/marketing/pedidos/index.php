@@ -30,6 +30,7 @@
             <script src="js/productos.js?t=<?php echo time(); ?>"></script>
             <script src="js/canales.js?t=<?php echo time(); ?>"></script>
             <script src="js/report.js?t=<?php echo time(); ?>"></script>
+            <script src="js/admin-productos.js?t=<?php echo time(); ?>"></script>
         </div>
     </main>
 </body>

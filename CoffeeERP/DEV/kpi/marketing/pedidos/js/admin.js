@@ -45,6 +45,11 @@ class Admin extends Templates {
                     id: "classifications",
                     tab: "Clasificaciones",
                 },
+                {
+                    id: "productos",
+                    tab: "Productos",
+                    onClick: () => adminProductos.render()
+                },
             ]
         });
     }
