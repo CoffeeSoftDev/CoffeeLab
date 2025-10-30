@@ -1,35 +1,47 @@
 # Implementation Plan
 
-- [ ] 1. Implementar métodos auxiliares en el modelo
+- [x] 1. Implementar métodos auxiliares en el modelo
+
+
+
 - [ ] 1.1 Crear método `getProductsByPackage` en mdl-eventos.php
   - Consultar productos activos de un paquete desde evt_package_products
   - Retornar array con product_id y quantity
   - _Requirements: 1.4_
 
+
 - [ ] 1.2 Crear método `insertPackageCheck` en mdl-eventos.php
   - Insertar registro en evt_package_check con events_package_id
   - Retornar package_check_id generado o false en caso de error
+
   - _Requirements: 1.3_
 
 - [ ] 1.3 Crear método `maxPackageCheckId` en mdl-eventos.php
   - Obtener el ID máximo de evt_package_check
+
   - Retornar el último ID insertado
   - _Requirements: 1.3_
 
 - [ ] 1.4 Crear método `insertProductCheck` en mdl-eventos.php
   - Validar que no exista duplicado (package_check_id + product_id)
+
   - Insertar producto en evt_check_products con active=1
   - Retornar true si se inserta o ya existe, false en caso de error
   - _Requirements: 1.5_
+
 
 - [ ] 1.5 Crear método `getPackageCheckByEventPackageId` en mdl-eventos.php
   - Consultar registro de evt_package_check por events_package_id
   - Retornar array con id, events_package_id y created_at
   - _Requirements: 5.1_
 
+
 - [ ] 1.6 Crear método `listProductsCheckByPackageCheckId` en mdl-eventos.php
   - Consultar productos de evt_check_products con JOIN a evt_products
   - Retornar array con check_product_id, product_id, active y product_name
+
+
+
   - _Requirements: 5.2, 5.3, 5.4_
 
 - [ ] 1.7 Crear método `updateProductCheckActive` en mdl-eventos.php
@@ -46,18 +58,27 @@
   - Obtener package_check_id mediante maxPackageCheckId
   - Consultar productos del paquete con getProductsByPackage
   - Iterar productos e insertar cada uno con insertProductCheck
+
+
+
   - Ejecutar COMMIT si todo es exitoso
   - Ejecutar ROLLBACK en caso de error
   - Retornar array con status (200/404/500), message y data
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 2.1, 2.2, 2.3, 3.1, 3.2, 3.3, 3.4, 3.5, 4.1, 4.2, 4.3, 4.4, 4.5, 4.6, 4.7_
 
-- [ ]* 2.2 Agregar manejo de excepciones con try-catch
+- [x]* 2.2 Agregar manejo de excepciones con try-catch
+
+
+
   - Capturar excepciones durante la transacción
   - Registrar errores en logs con error_log
   - Retornar mensaje descriptivo del error
   - _Requirements: 2.5, 4.6, 4.7_
 
-- [ ] 3. Integrar vinculación en controlador para agregar menús
+- [x] 3. Integrar vinculación en controlador para agregar menús
+
+
+
 - [ ] 3.1 Modificar método `addEventMenus` en ctrl-eventos.php
   - Después de insertar en evt_events_package exitosamente
   - Iterar sobre array de menús agregados
@@ -66,9 +87,13 @@
   - Registrar errores en logs si status !== 200
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
+
 - [ ] 4. Integrar vinculación en controlador para editar menús
 - [ ] 4.1 Modificar método `editEventMenus` en ctrl-eventos.php
   - Después de insertar nuevos paquetes en evt_events_package
+
+
+
   - Iterar sobre array de menús editados
   - Para cada menú, obtener package_id y events_package_id
   - Llamar a insertPackageWithProducts con ambos IDs
@@ -79,12 +104,14 @@
 - [ ] 5.1 Crear método `getProductsCheck` en ctrl-eventos.php
   - Recibir events_package_id desde POST
   - Llamar a getPackageCheckByEventPackageId para obtener package_check
+
   - Si no existe, retornar status 404 con array vacío
   - Llamar a listProductsCheckByPackageCheckId con package_check.id
   - Retornar status 200 con array de productos
   - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5_
 
-- [ ] 5.2 Crear método `updateProductCheck` en ctrl-eventos.php
+- [x] 5.2 Crear método `updateProductCheck` en ctrl-eventos.php
+
   - Recibir id y active desde POST
   - Llamar a updateProductCheckActive con datos procesados por util->sql
   - Retornar status 200 si actualización exitosa, 500 si falla

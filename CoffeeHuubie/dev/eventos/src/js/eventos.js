@@ -2009,3 +2009,68 @@ function formatSpanishDate(fecha = null, type = "normal") {
     // Devolvemos el formato según type
     return formatos[type] || formatos.short;
 }
+
+
+// Métodos para gestión de productos en paquetes
+Eventos.prototype.renderProductCheckboxList = async function(events_package_id, containerId) {
+    const response = await useFetch({
+        url: this._link,
+        data: { 
+            opc: "getProductsCheck", 
+            events_package_id: events_package_id 
+        }
+    });
+    
+    if (response.status !== 200) {
+        $(`#${containerId}`).html('<p class="text-red-500 text-xs">Error al cargar productos</p>');
+        return;
+    }
+    
+    const products = response.data;
+    
+    if (!products || products.length === 0) {
+        $(`#${containerId}`).html('<p class="text-gray-400 text-xs">No hay productos asociados</p>');
+        return;
+    }
+    
+    let html = '<div class="mt-3"><h4 class="text-sm font-semibold mb-2 text-white">Productos del paquete:</h4>';
+    
+    products.forEach(product => {
+        const checked = product.active == 1 ? 'checked' : '';
+        html += `
+            <div class="flex items-center gap-2 mb-2">
+                <input 
+                    type="checkbox" 
+                    id="product-${product.check_product_id}" 
+                    ${checked}
+                    onchange="eventos.toggleProductCheck(${product.check_product_id}, this.checked)"
+                    class="cursor-pointer"
+                />
+                <label for="product-${product.check_product_id}" class="text-sm text-gray-300 cursor-pointer">
+                    ${product.product_name}
+                </label>
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    $(`#${containerId}`).html(html);
+};
+
+Eventos.prototype.toggleProductCheck = async function(check_product_id, isChecked) {
+    const response = await useFetch({
+        url: this._link,
+        data: {
+            opc: "updateProductCheck",
+            id: check_product_id,
+            active: isChecked ? 1 : 0
+        }
+    });
+    
+    if (response.status !== 200) {
+        alert({ 
+            icon: "error", 
+            text: "Error al actualizar el producto" 
+        });
+    }
+};

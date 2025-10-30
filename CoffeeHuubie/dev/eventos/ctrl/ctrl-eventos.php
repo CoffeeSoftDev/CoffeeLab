@@ -669,17 +669,16 @@ class ctrl extends MEvent{
             if ($addEventPackage == true) {
                 $success = true;
                 
-                // // Vincular productos del paquete en evt_package_check y evt_check_products
-                // foreach ($menus as $menu) {
-                //     $package_id = $menu['menu']['id'];
-                //     $events_package_id = $this->maxEventPackageId();
+                foreach ($menus as $menu) {
+                    $package_id = $menu['menu']['id'];
+                    $events_package_id = $this->maxEventPackageId();
                     
-                //     $result = $this->insertPackageWithProducts($events_package_id, $package_id);
+                    $result = $this->insertPackageWithProducts($events_package_id, $package_id);
                     
-                //     if ($result['status'] !== 200) {
-                //         error_log("Error al vincular productos: " . $result['message']);
-                //     }
-                // }
+                    if ($result['status'] !== 200) {
+                        error_log("Error al vincular productos: " . $result['message']);
+                    }
+                }
             }
         }
 
@@ -1150,25 +1149,46 @@ class ctrl extends MEvent{
         ];
     }
 
-    // Menu . Package
-    function addMenuPackage(){
-
-
+    function getProductsCheck() {
+        $status = 500;
+        $message = 'Error al obtener productos';
+        
+        $events_package_id = $_POST['events_package_id'];
+        
+        $packageCheck = $this->getPackageCheckByEventPackageId([$events_package_id]);
+        
+        if (!$packageCheck) {
+            return [
+                'status' => 404,
+                'message' => 'No se encontró verificación para este paquete',
+                'data' => []
+            ];
+        }
+        
+        $products = $this->listProductsCheckByPackageCheckId([$packageCheck['id']]);
+        
         return [
-            'menu' => $_POST
+            'status' => 200,
+            'message' => 'Productos obtenidos correctamente',
+            'data' => $products
         ];
+    }
 
-        // $addEventPackage = $this->createEventPackage($this->util->sql([
-        //       'package_id'    => $key['menu']['id'],
-        //       'quantity'      => $key['cantidadPersonas'],
-        //       'price'         => $precio,
-        //       'date_creation' => date('Y-m-d H:i:s'),
-        //       'event_id'      => $_POST['id_event'],
-        // ]));
-
-
-        //   $check_id = $this->insertPackageCheck($events_package_id);
-        //    $products = $this->getProductsByPackage([$package_id]);
+    function updateProductCheck() {
+        $status = 500;
+        $message = 'Error al actualizar producto';
+        
+        $update = $this->updateProductCheckActive($this->util->sql($_POST, 1));
+        
+        if ($update) {
+            $status = 200;
+            $message = 'Producto actualizado correctamente';
+        }
+        
+        return [
+            'status' => $status,
+            'message' => $message
+        ];
     }
 
 

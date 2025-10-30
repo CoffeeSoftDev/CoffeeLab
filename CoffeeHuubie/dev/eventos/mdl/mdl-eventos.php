@@ -680,5 +680,59 @@ class MEvent extends CRUD {
             'data'   => $array['data']
         ]);
     }
+
+    function insertPackageWithProducts($events_package_id, $package_id) {
+        try {
+            $packageExists = $this->_Select([
+                'table'  => "{$this->bd}evt_package",
+                'values' => 'id',
+                'where'  => 'id = ?',
+                'data'   => [$package_id]
+            ]);
+
+            if (empty($packageExists)) {
+                return [
+                    'status'  => 404,
+                    'message' => 'Paquete no encontrado'
+                ];
+            }
+
+            $package_check_id = $this->insertPackageCheck($events_package_id);
+            
+            if (!$package_check_id) {
+                return [
+                    'status'  => 500,
+                    'message' => 'Error al crear registro de verificación'
+                ];
+            }
+
+            $products = $this->getProductsByPackage([$package_id]);
+            
+            $products_inserted = 0;
+            foreach ($products as $product) {
+                $result = $this->insertProductCheck($package_check_id, $product['product_id']);
+                if ($result) {
+                    $products_inserted++;
+                }
+            }
+
+            return [
+                'status'  => 200,
+                'message' => 'Paquete vinculado correctamente',
+                'data'    => [
+                    'package_check_id'   => $package_check_id,
+                    'products_inserted'  => $products_inserted
+                ]
+            ];
+
+        } catch (Exception $e) {
+            error_log("Error en insertPackageWithProducts: " . $e->getMessage());
+            
+            return [
+                'status'  => 500,
+                'message' => 'Error al procesar: ' . $e->getMessage()
+            ];
+        }
+    }
 }
 ?>
