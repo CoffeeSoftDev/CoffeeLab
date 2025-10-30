@@ -113,7 +113,8 @@
   - Retornar array con status y message
   - _Requirements: 2.3, 3.5_
 
-- [ ] 4. Implementar componente de checkboxes en frontend (eventos.js)
+- [-] 4. Implementar componente de checkboxes en frontend (eventos.js)
+
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7_
 
 - [ ] 4.1 Crear función renderProductCheckboxList()
