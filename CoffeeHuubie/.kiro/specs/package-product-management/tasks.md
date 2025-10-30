@@ -87,6 +87,9 @@
   - _Requirements: 1.1, 1.2_
 
 
+
+
+
 - [x] 3.3 Modificar función editEventMenus()
 
 
@@ -113,32 +116,40 @@
   - Retornar array con status y message
   - _Requirements: 2.3, 3.5_
 
-- [-] 4. Implementar componente de checkboxes en frontend (eventos.js)
+- [x] 4. Implementar componente de checkboxes en frontend (eventos.js)
+
 
   - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7_
 
-- [ ] 4.1 Crear función renderProductCheckboxList()
+- [x] 4.1 Crear función renderProductCheckboxList()
+
+
   - Recibir events_package_id como parámetro
   - Hacer petición useFetch a getProductsCheckByPackage
   - Agrupar productos por clasificación (platillos vs bebidas)
+
   - Generar HTML con estructura de grid (2 columnas)
   - Renderizar checkboxes con data-attributes (check-product-id, product-id)
   - Aplicar estado checked según campo active
   - Aplicar estilos CoffeeSoft (bg-[#1F2A37], text-gray-300, etc.)
+
   - _Requirements: 2.1, 2.2, 2.7_
 
 - [ ] 4.2 Implementar event handler onChange para checkboxes
   - Capturar evento change en elementos con clase .product-checkbox
   - Obtener check_product_id y nuevo estado (checked = 1, unchecked = 0)
+
   - Hacer petición useFetch a updateProductActive
   - Implementar feedback visual (animación flash) en caso de éxito
   - Revertir estado del checkbox en caso de error
   - Mostrar mensaje de error con alert() si falla la actualización
   - _Requirements: 2.3, 2.4, 2.5_
 
+
 - [ ] 4.3 Integrar renderProductCheckboxList() en showEvent()
   - Modificar la función showEvent() para incluir sección de checkboxes
   - Agregar contenedor HTML para checkboxes en el modal de detalles
+
   - Llamar a renderProductCheckboxList() después de renderizar el menú
   - Aplicar solo cuando category === "Evento" (no para subeventos)
   - _Requirements: 2.1, 2.6_

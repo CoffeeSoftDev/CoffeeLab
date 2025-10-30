@@ -638,11 +638,11 @@ class ctrl extends MEvent{
     // Vincular menú con evento.
     function addEventMenus()
     {
-        $status = 500;
+        $status  = 500;
         $message = 'Error al agregar menú.';
-        $total = $_POST['total'];
-        $menus = json_decode($_POST['menus'], true);
-        $extras = json_decode($_POST['extras'], true);
+        $total   = $_POST['total'];
+        $menus   = json_decode($_POST['menus'], true);
+        $extras  = json_decode($_POST['extras'], true);
 
         $success = false;
 
@@ -1077,10 +1077,16 @@ class ctrl extends MEvent{
     function getProductsCheckByPackage() {
         $status = 500;
         $message = 'Error al obtener productos del paquete';
+
+        // obtener evt_events_package
+
+        $events_package =  $this->getEventsPackage([
+            $_POST['event_id'],
+            $_POST['package_id']]
+        );
         
-        $events_package_id = $_POST['events_package_id'];
         
-        $check = $this->getPackageCheckByEventPackageId([$events_package_id]);
+        $check = $this->getPackageCheckByEventPackageId([$events_package['id']]);
         
         if (!$check) {
             return [
@@ -1097,9 +1103,10 @@ class ctrl extends MEvent{
         }
         
         return [
-            'status' => $status,
+            'status'  => $status,
             'message' => $message,
-            'data' => $products
+            'data'    => $products,
+            $events_package
         ];
     }
 

@@ -239,7 +239,9 @@ class Eventos extends App {
             `;
 
             $("#container-menu").html(menuVisual);
-            
+
+
+
             // Renderizar checkboxes de productos para cada paquete
             if (menuList && menuList.length > 0) {
                 menuList.forEach((pkg, index) => {
@@ -958,6 +960,8 @@ class Eventos extends App {
 
     // MENU -------------------------------------
     async newMenuLayout(id = null) {
+
+   
         let menusPrecargadosData = await useFetch({ url: link, data: { opc: "getPackages" } });
         let extrasDisponiblesData = await useFetch({ url: link, data: { opc: "getProducts" } });
         let clasificacionesData = await useFetch({ url: link, data: { opc: "getClassifications" } });
@@ -1594,12 +1598,96 @@ class Eventos extends App {
                 </ul>
               </div>
             </div>
+            <div id="product-checkboxes-container-${menu.id}" class="mt-4"></div>
             <div class="mt-6 text-right">
               <button onclick="eventos.cerrarDetallesMenu()" class="text-blue-400 hover:underline">Cerrar detalles</button>
             </div>
           </div>
         `;
         cont.html(html);
+
+        // Renderizar checkboxes de productos
+        this.renderProductCheckboxList(menu.id, `product-checkboxes-container-${menu.id}`);
+    }
+
+    async renderProductCheckboxList(package_id, parentContainer) {
+            const response = await useFetch({
+                url: link,
+                data: {
+                    opc: 'getProductsCheckByPackage',
+                    // events_package_id: id_event
+                    event_id: id_event,
+                    package_id: package_id,
+                }
+            });
+
+            console.log(response)
+
+            if (response.status !== 200) {
+                console.error('Error al obtener productos:', response.message);
+                return;
+            }
+
+            const products = response.data || [];
+
+            if (products.length === 0) {
+                $(`#${parentContainer}`).html('<p class="text-gray-400 text-sm">No hay productos configurados para este paquete</p>');
+                return;
+            }
+
+            const platillos = products.filter(p => p.id_classification !== 2);
+            const bebidas = products.filter(p => p.id_classification === 2);
+
+            const html = `
+                <div class="product-checkbox-list mt-4">
+                    <h4 class="text-white font-semibold mb-3">Gestionar productos del paquete:</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        ${platillos.length > 0 ? `
+                        <div class="bg-[#283341] p-4 rounded-lg">
+                            <h5 class="text-gray-300 font-semibold mb-3 text-sm">Platillos:</h5>
+                            <div class="space-y-2">
+                                ${platillos.map(product => `
+                                    <label class="flex items-center gap-2 cursor-pointer hover:bg-[#374151] p-2 rounded transition">
+                                        <input 
+                                            type="checkbox" 
+                                            class="product-checkbox w-4 h-4" 
+                                            data-check-product-id="${product.check_product_id}"
+                                            data-product-id="${product.product_id}"
+                                            ${product.active == 1 ? 'checked' : ''}
+                                        />
+                                        <span class="text-gray-300 text-sm">${product.product_name}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                        
+                        ${bebidas.length > 0 ? `
+                        <div class="bg-[#283341] p-4 rounded-lg">
+                            <h5 class="text-gray-300 font-semibold mb-3 text-sm">Bebidas:</h5>
+                            <div class="space-y-2">
+                                ${bebidas.map(product => `
+                                    <label class="flex items-center gap-2 cursor-pointer hover:bg-[#374151] p-2 rounded transition">
+                                        <input 
+                                            type="checkbox" 
+                                            class="product-checkbox w-4 h-4" 
+                                            data-check-product-id="${product.check_product_id}"
+                                            data-product-id="${product.product_id}"
+                                            ${product.active == 1 ? 'checked' : ''}
+                                        />
+                                        <span class="text-gray-300 text-sm">${product.product_name}</span>
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+
+            $(`#${parentContainer}`).html(html);
+
+       
     }
 
     async editMenuLayout(id) {
@@ -1700,102 +1788,22 @@ class Eventos extends App {
 
     }
 
-    // PACKAGE CHECK - GESTIÓN DE PRODUCTOS EN PAQUETES
-
-    async renderProductCheckboxList(events_package_id, parentContainer) {
-        try {
-            const response = await useFetch({
-                url: link,
-                data: {
-                    opc: 'getProductsCheckByPackage',
-                    events_package_id: events_package_id
-                }
-            });
-
-            if (response.status !== 200) {
-                console.error('Error al obtener productos:', response.message);
-                return;
-            }
-
-            const products = response.data || [];
-
-            if (products.length === 0) {
-                $(`#${parentContainer}`).html('<p class="text-gray-400 text-sm">No hay productos configurados para este paquete</p>');
-                return;
-            }
-
-            const platillos = products.filter(p => p.id_classification !== 2);
-            const bebidas = products.filter(p => p.id_classification === 2);
-
-            const html = `
-                <div class="product-checkbox-list mt-4">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        ${platillos.length > 0 ? `
-                        <div class="bg-[#1F2A37] p-4 rounded-lg">
-                            <h4 class="text-white font-semibold mb-3 text-sm">Platillos incluidos:</h4>
-                            <div id="platillos-checkboxes-${events_package_id}" class="space-y-2">
-                                ${platillos.map(product => `
-                                    <label class="flex items-center gap-2 cursor-pointer hover:bg-[#283341] p-2 rounded transition">
-                                        <input 
-                                            type="checkbox" 
-                                            class="product-checkbox w-4 h-4" 
-                                            data-check-product-id="${product.check_product_id}"
-                                            data-product-id="${product.product_id}"
-                                            ${product.active == 1 ? 'checked' : ''}
-                                        />
-                                        <span class="text-gray-300 text-sm">${product.product_name}</span>
-                                    </label>
-                                `).join('')}
-                            </div>
-                        </div>
-                        ` : ''}
-                        
-                        ${bebidas.length > 0 ? `
-                        <div class="bg-[#1F2A37] p-4 rounded-lg">
-                            <h4 class="text-white font-semibold mb-3 text-sm">Bebidas incluidas:</h4>
-                            <div id="bebidas-checkboxes-${events_package_id}" class="space-y-2">
-                                ${bebidas.map(product => `
-                                    <label class="flex items-center gap-2 cursor-pointer hover:bg-[#283341] p-2 rounded transition">
-                                        <input 
-                                            type="checkbox" 
-                                            class="product-checkbox w-4 h-4" 
-                                            data-check-product-id="${product.check_product_id}"
-                                            data-product-id="${product.product_id}"
-                                            ${product.active == 1 ? 'checked' : ''}
-                                        />
-                                        <span class="text-gray-300 text-sm">${product.product_name}</span>
-                                    </label>
-                                `).join('')}
-                            </div>
-                        </div>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
-
-            $(`#${parentContainer}`).html(html);
-
-        } catch (error) {
-            console.error('Error en renderProductCheckboxList:', error);
-            $(`#${parentContainer}`).html('<p class="text-red-400 text-sm">Error al cargar productos</p>');
-        }
-    }
 }
 
 // Event handler para checkboxes de productos
-$(document).on('change', '.product-checkbox', async function() {
+$(document).on('change', '.product-checkbox', async function () {
     const checkbox = $(this);
     const checkProductId = checkbox.data('check-product-id');
     const isActive = checkbox.is(':checked') ? 1 : 0;
-    
+
     if (!checkProductId || ![0, 1].includes(isActive)) {
         console.error('Datos inválidos para actualización');
         return;
     }
-    
+
     const label = checkbox.closest('label');
     label.addClass('opacity-50 pointer-events-none');
-    
+
     try {
         const response = await Promise.race([
             useFetch({
@@ -1806,11 +1814,11 @@ $(document).on('change', '.product-checkbox', async function() {
                     active: isActive
                 }
             }),
-            new Promise((_, reject) => 
+            new Promise((_, reject) =>
                 setTimeout(() => reject(new Error('Timeout')), 5000)
             )
         ]);
-        
+
         if (response.status === 200) {
             label.addClass('updated-flash');
             setTimeout(() => {
@@ -1829,8 +1837,64 @@ $(document).on('change', '.product-checkbox', async function() {
         alert({
             icon: 'error',
             title: 'Error de conexión',
-            text: error.message === 'Timeout' 
-                ? 'La petición tardó demasiado tiempo' 
+            text: error.message === 'Timeout'
+                ? 'La petición tardó demasiado tiempo'
+                : 'No se pudo conectar con el servidor'
+        });
+    } finally {
+        label.removeClass('opacity-50 pointer-events-none');
+    }
+});
+
+// Event handler para checkboxes de productos
+$(document).on('change', '.product-checkbox', async function () {
+    const checkbox = $(this);
+    const checkProductId = checkbox.data('check-product-id');
+    const isActive = checkbox.is(':checked') ? 1 : 0;
+
+    if (!checkProductId || ![0, 1].includes(isActive)) {
+        console.error('Datos inválidos para actualización');
+        return;
+    }
+
+    const label = checkbox.closest('label');
+    label.addClass('opacity-50 pointer-events-none');
+
+    try {
+        const response = await Promise.race([
+            useFetch({
+                url: link,
+                data: {
+                    opc: 'updateProductActive',
+                    check_product_id: checkProductId,
+                    active: isActive
+                }
+            }),
+            new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Timeout')), 5000)
+            )
+        ]);
+
+        if (response.status === 200) {
+            label.addClass('updated-flash');
+            setTimeout(() => {
+                label.removeClass('updated-flash');
+            }, 300);
+        } else {
+            checkbox.prop('checked', !isActive);
+            alert({
+                icon: 'error',
+                title: 'Error al actualizar',
+                text: response.message || 'Ocurrió un error inesperado'
+            });
+        }
+    } catch (error) {
+        checkbox.prop('checked', !isActive);
+        alert({
+            icon: 'error',
+            title: 'Error de conexión',
+            text: error.message === 'Timeout'
+                ? 'La petición tardó demasiado tiempo'
                 : 'No se pudo conectar con el servidor'
         });
     } finally {

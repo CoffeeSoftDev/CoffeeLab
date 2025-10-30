@@ -561,14 +561,29 @@ class MEvent extends CRUD {
     }
 
     // PACKAGE CHECK - GESTIÓN DE PRODUCTOS EN PAQUETES
+     function getEventsPackage($array) {
+        $query = "
+            SELECT 
+                id
+            FROM {$this->bd}evt_events_package
+            WHERE event_id = ? 
+            AND package_id = ?
+        ";
+        
+        return $this->_Read($query, $array)[0];
+    }
     
     function getProductsByPackage($array) {
-        return $this->_Select([
-            'table'  => "{$this->bd}evt_package_products",
-            'values' => 'products_id as product_id, quantity',
-            'where'  => 'package_id = ? AND active = 1',
-            'data'   => $array
-        ]);
+        $query = "
+            SELECT 
+                products_id as product_id, 
+                quantity
+            FROM {$this->bd}evt_package_products
+            WHERE package_id = ? 
+            AND active = 1
+        ";
+        
+        return $this->_Read($query, $array);
     }
 
     function insertPackageCheck($events_package_id) {
@@ -625,33 +640,33 @@ class MEvent extends CRUD {
     }
 
     function getPackageCheckByEventPackageId($array) {
-        $result = $this->_Select([
-            'table'  => "{$this->bd}evt_package_check",
-            'values' => 'id, events_package_id, created_at',
-            'where'  => 'events_package_id = ?',
-            'data'   => $array
-        ]);
+        $query = "
+            SELECT 
+                id, 
+                events_package_id, 
+                created_at
+            FROM {$this->bd}evt_package_check
+            WHERE events_package_id = ?
+        ";
         
+        $result = $this->_Read($query, $array);
         return $result[0] ?? null;
     }
 
     function listProductsCheckByPackageCheckId($array) {
-        $leftjoin = [
-            "{$this->bd}evt_products" => 'evt_check_products.product_id = evt_products.id'
-        ];
+        $query = "
+            SELECT 
+                cp.id as check_product_id,
+                cp.product_id,
+                cp.active,
+                p.name as product_name,
+                p.id_classification
+            FROM {$this->bd}evt_check_products cp
+            LEFT JOIN {$this->bd}evt_products p ON cp.product_id = p.id
+            WHERE cp.package_check_id = ?
+        ";
         
-        return $this->_Select([
-            'table'    => "{$this->bd}evt_check_products",
-            'values'   => 
-                "evt_check_products.id as check_product_id,
-                evt_check_products.product_id,
-                evt_check_products.active,
-                evt_products.name as product_name,
-                evt_products.id_classification",
-            'leftjoin' => $leftjoin,
-            'where'    => 'evt_check_products.package_check_id = ?',
-            'data'     => $array
-        ]);
+        return $this->_Read($query, $array);
     }
 
     function updateProductCheckActive($array) {

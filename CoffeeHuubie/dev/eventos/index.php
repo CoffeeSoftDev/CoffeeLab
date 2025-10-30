@@ -70,7 +70,7 @@
     <script src="<?=PATH_MENU?>src/js/navbar.js"></script>
     <script src="<?=PATH_MENU?>src/js/sidebar.js"></script>
 
- 
+     <link rel="stylesheet" href="src/css/package-check.css">
     
 
 </head>
