@@ -239,6 +239,15 @@ class Eventos extends App {
             `;
 
             $("#container-menu").html(menuVisual);
+            
+            // Renderizar checkboxes de productos para cada paquete
+            if (menuList && menuList.length > 0) {
+                menuList.forEach((pkg, index) => {
+                    const containerId = `product-checkboxes-${pkg.id}`;
+                    $(`#container-menu`).append(`<div id="${containerId}" class="mt-4"></div>`);
+                    eventos.renderProductCheckboxList(pkg.id, containerId);
+                });
+            }
         }
 
         else {

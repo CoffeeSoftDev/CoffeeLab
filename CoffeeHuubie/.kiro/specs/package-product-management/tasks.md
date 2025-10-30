@@ -108,6 +108,7 @@
   - Recibir check_product_id y active por POST
   - Validar que active sea 0 o 1
 
+
   - Llamar a updateProductCheckActive() del modelo
   - Retornar array con status y message
   - _Requirements: 2.3, 3.5_
