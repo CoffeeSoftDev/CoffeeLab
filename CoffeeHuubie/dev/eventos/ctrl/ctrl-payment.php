@@ -116,7 +116,8 @@ class Payment extends MPayment {
             'extras'   => $extras,
             'ls'       => $ls,
             'company'  => $company,
-            'clausules' => $this->listClausules([1, $_SESSION['COM']])
+            'clausules' => []
+            // 'clausules' => $this->listClausules([1, $_SESSION['COM']])
         ];
 
     }
