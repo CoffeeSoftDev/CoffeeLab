@@ -959,21 +959,22 @@ class Eventos extends App {
 
 
     // MENU -------------------------------------
+
     async newMenuLayout(id = null) {
 
 
-        let menusPrecargadosData = await useFetch({ url: link, data: { opc: "getPackages" } });
+        let menusPrecargadosData  = await useFetch({ url: link, data: { opc: "getPackages" } });
         let extrasDisponiblesData = await useFetch({ url: link, data: { opc: "getProducts" } });
-        let clasificacionesData = await useFetch({ url: link, data: { opc: "getClassifications" } });
+        let clasificacionesData   = await useFetch({ url: link, data: { opc: "getClassifications" } });
 
-        let menusPrecargados = menusPrecargadosData.data;
+        let menusPrecargados  = menusPrecargadosData.data;
         let extrasDisponibles = extrasDisponiblesData.data;
-        let clasificaciones = clasificacionesData.data;
+        let clasificaciones   = clasificacionesData.data;
 
 
         $("#containerAddMenu").append(`
             <div class="flex justify-end mb-2">
-                <button id="" onclick="window.location.href='https://huubie.com.mx/alpha/catalogos/'"
+                <button id="" onclick="window.location.href='https://huubie.com.mx/dev/catalogos/'"
                     class="flex items-center justify-center gap-2 bg-[#1A56DB] hover:bg-[#274DCD] text-white font-medium py-2 px-6 rounded-md shadow-md">
                     Panel de administración
                 </button>

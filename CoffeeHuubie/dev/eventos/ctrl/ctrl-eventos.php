@@ -1028,27 +1028,34 @@ class ctrl extends MEvent{
 
     // add Package.
     function addMenuPackage(){
+
             $status  = 500;
             $message = 'Error al agregar el paquete';
 
             $addEventPackage = $this->createEventPackage($this->util->sql([
+
                 'package_id'    => $_POST['package_id'],
                 'quantity'      => $_POST['cantidad'],
                 'price'         => $_POST['price'],
                 'date_creation' => date('Y-m-d H:i:s'),
                 'event_id'      => $_POST['id_event'],
+
             ]));
 
             if ($addEventPackage) {
+
                 $events_package_id = $this->maxEventPackageId();
                 $package_id        = $_POST['package_id'];
 
-                $result = $this->addPackageProducts($events_package_id, $package_id);
+                $result            = $this->addPackageProducts($events_package_id, $package_id);
 
                 if ($result['status'] == 200) {
+                     
                     $status  = 200;
                     $message = 'Paquete agregado correctamente con sus productos';
+                
                 } else {
+
                     $status  = $result['status'];
                     $message = $result['message'];
                 }
@@ -1057,7 +1064,9 @@ class ctrl extends MEvent{
             return [
                 'status'  => $status,
                 'message' => $result,
-                'success' => $addEventPackage
+                'success' => $addEventPackage,
+                'result'  => $result
+
             ];
     }
 
@@ -1072,17 +1081,25 @@ class ctrl extends MEvent{
         $message  = 'Error al vincular productos del paquete';
         $check_id = null;
         $inserted = 0;
+
+        $data     = [
+            'events_package_id' => $events_package_id,
+            'created_at'        => date('Y-m-d H:i:s')
+        ];
         
       
         $check_id = $this->createPackageCheck($events_package_id);
+    //    $check_id = $this->createPackageCheck($this->util->sql($data));
         $products = $this->getProductsByPackage([$package_id]);
 
         foreach ($products as $product) {
 
             $values = $this->util->sql([
+
                 'package_check_id' => $check_id,
                 'product_id'       => $product['products_id'],
                 'active'           => 1 
+
             ]);
 
             $result = $this->createProductCheck($values);
@@ -1096,8 +1113,10 @@ class ctrl extends MEvent{
             'status'            => $status,
             'message'           => $message,
             'check_id'          => $check_id,
-            'products_inserted' => $inserted
+            'products_inserted' => $inserted,
+            'data'              =>  $data
         ];
+
     }
 
     function getProductsCheckByPackage() {

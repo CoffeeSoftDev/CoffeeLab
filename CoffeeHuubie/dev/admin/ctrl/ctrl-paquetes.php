@@ -49,7 +49,7 @@ class ctrl extends mdl {
             $rows[] = [
                 'id'             => $item['id'],
                 'Paquete'        => $item['name'],
-                'Descripción'    => $item['description'],
+                // 'Descripción'    => $item['description'],
                 'Precio/Persona' => "$" . number_format($item['price_person'], 2),
                 'Fecha creación' => formatSpanishDate($item['date_creation']),
                 'a'              => $a

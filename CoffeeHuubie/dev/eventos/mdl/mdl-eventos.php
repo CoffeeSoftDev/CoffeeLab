@@ -397,9 +397,9 @@ class MEvent extends CRUD {
     function createEventPackage($array)
     {
         return $this->_Insert([
-            'table' => "{$this->bd}evt_events_package",
+            'table'  => "{$this->bd}evt_events_package",
             'values' => $array['values'],
-            'data' => $array['data']
+            'data'   => $array['data']
         ]);
     }
 
@@ -588,6 +588,7 @@ class MEvent extends CRUD {
     }
 
     function createPackageCheck($events_package_id) {
+        
         $data = [
             'events_package_id' => $events_package_id,
             'created_at'        => date('Y-m-d H:i:s')
