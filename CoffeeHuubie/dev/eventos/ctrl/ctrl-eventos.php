@@ -1101,7 +1101,8 @@ class ctrl extends MEvent{
     }
 
     function getProductsCheckByPackage() {
-        $status = 500;
+
+        $status  = 500;
         $message = 'Error al obtener productos del paquete';
 
         // obtener evt_events_package
