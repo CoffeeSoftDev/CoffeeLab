@@ -55,9 +55,6 @@
 
 
                 <div class="bg-[#DBDBDC] main-container " id="root"></div>
-
-
-                <script  src='src/js/marketing.js?t=<?php echo time(); ?>'></script>
                 <script  src='src/js/kpis.js?t=<?php echo time(); ?>'></script>
                 <script  src='src/js/kpi-costsys.js?t=<?php echo time(); ?>'></script>
                 <script  src='src/js/kpi-redes.js?t=<?php echo time(); ?>'></script>
