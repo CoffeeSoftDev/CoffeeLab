@@ -45,7 +45,7 @@ class Eventos extends App {
                 {
                     titulo: "Evento",
                     descripcion: "Dar de alta un nuevo evento",
-                    imagen: "/alpha/src/img/eventos.svg",
+                    imagen: "/dev/src/img/eventos.svg",
 
                     onClick: () => {
                         calendario.redirectToEventos();
@@ -57,11 +57,11 @@ class Eventos extends App {
                     descripcion: "Dar de alta más de un evento",
                     img: [
                         {
-                            src: "/alpha/src/img/eventos.svg",
+                            src: "/dev/src/img/eventos.svg",
                             title: 'events'
                         },
                         {
-                            src: "/alpha/src/img/eventos.svg",
+                            src: "/dev/src/img/eventos.svg",
                             title: 'events'
                         }
                     ],

@@ -51,9 +51,7 @@ class MEvent extends CRUD {
             $this->bd.'status_process' => 'evt_events.status_process_id = status_process.id',
         ];
 
-        $where = ['subsidiaries_id = ? AND date_creation BETWEEN ? AND ? '];
-
-        // FILTROS POR ESTADO
+        $where = ['subsidiaries_id = ? AND DATE(date_creation) BETWEEN ? AND ? '];
 
         if ( $array['status'] == '0') unset($array['status']);
         else $where[] = 'status_process_id = ?';
