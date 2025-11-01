@@ -1180,7 +1180,7 @@ class Eventos extends App {
                 url: this._link, data: {
                     opc             : 'addMenuPackage',
                     id_event        : id_event,
-                    cantidadPersonas: cantidad,
+                    cantidad: cantidad,
                     package_id      : idSeleccionado,
                     price           : menu.precioPorPersona,
 
@@ -1444,7 +1444,7 @@ class Eventos extends App {
                 <div class="col-span-6 flex flex-col justify-start text-left">
                   <div class="flex items-center gap-2">
                     <h4 class="font-semibold text-white truncate">${item.menu.nombre}</h4>
-                    <button onclick="eventos.verDetallesMenu(${index})" class="text-sm px-2 py-1 bg-[#333D4C] text-blue-300 hover:text-blue-100 hover:bg-[#3f4b5c] border border-gray-600 rounded-md transition-colors duration-200">
+                    <button onclick="eventos.verDetallesMenu(${item.menu.id})" class="text-sm px-2 py-1 bg-[#333D4C] text-blue-300 hover:text-blue-100 hover:bg-[#3f4b5c] border border-gray-600 rounded-md transition-colors duration-200">
                       Ver detalles
                     </button>
                   </div>
@@ -1594,9 +1594,24 @@ class Eventos extends App {
         `);
     }
 
-    verDetallesMenu(index) {
-        this.menuSeleccionadoParaVer = this.menusSeleccionados[index].menu;
-        this.renderDetallesMenu();
+    async verDetallesMenu(id_package) {
+
+        const response = await useFetch({
+            url: link,
+            data: {
+                opc: 'getProductsCheckByPackage',
+                event_id: id_event,
+                package_id: id_package,
+            }
+        });
+
+     
+        this.renderProductCheckboxList({
+            json: response.data
+        });
+
+        // this.menuSeleccionadoParaVer = this.menusSeleccionados[index].menu;
+        // this.renderDetallesMenu();
     }
 
     cerrarDetallesMenu() {
@@ -1669,82 +1684,59 @@ class Eventos extends App {
         cont.html(html);
     }
 
-    async renderProductCheckboxList(package_id, parentContainer) {
-        const response = await useFetch({
-            url: link,
-            data: {
-                opc: 'getProductsCheckByPackage',
-                // events_package_id: id_event
-                event_id: id_event,
-                package_id: package_id,
-            }
-        });
+    async renderProductCheckboxList(options) {
+        
+        const defaults = {
+            parent: "detalleMenuSeleccionado",
+            json: [],
+        };
 
-        console.log(response)
-
-        if (response.status !== 200) {
-            console.error('Error al obtener productos:', response.message);
-            return;
-        }
-
-        const products = response.data || [];
+        const opts = Object.assign({}, defaults, options);
+        const products = opts.json || [];
 
         if (products.length === 0) {
-            $(`#${parentContainer}`).html('<p class="text-gray-400 text-sm">No hay productos configurados para este paquete</p>');
+            $(`#${opts.parent}`).html('<p class="text-gray-400 text-sm">No hay productos configurados para este paquete</p>');
             return;
         }
 
         const platillos = products.filter(p => p.id_classification !== 2);
         const bebidas = products.filter(p => p.id_classification === 2);
 
-        const html = `
-                <div class="product-checkbox-list mt-4">
-                    <h4 class="text-white font-semibold mb-3">Gestionar productos del paquete:</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        ${platillos.length > 0 ? `
-                        <div class="bg-[#283341] p-4 rounded-lg">
-                            <h5 class="text-gray-300 font-semibold mb-3 text-sm">Platillos:</h5>
-                            <div class="space-y-2">
-                                ${platillos.map(product => `
-                                    <label class="flex items-center gap-2 cursor-pointer hover:bg-[#374151] p-2 rounded transition">
-                                        <input 
-                                            type="checkbox" 
-                                            class="product-checkbox w-4 h-4" 
-                                            data-check-product-id="${product.check_product_id}"
-                                            data-product-id="${product.product_id}"
-                                            ${product.active == 1 ? 'checked' : ''}
-                                        />
-                                        <span class="text-gray-300 text-sm">${product.product_name}</span>
-                                    </label>
-                                `).join('')}
-                            </div>
-                        </div>
-                        ` : ''}
-                        
-                        ${bebidas.length > 0 ? `
-                        <div class="bg-[#283341] p-4 rounded-lg">
-                            <h5 class="text-gray-300 font-semibold mb-3 text-sm">Bebidas:</h5>
-                            <div class="space-y-2">
-                                ${bebidas.map(product => `
-                                    <label class="flex items-center gap-2 cursor-pointer hover:bg-[#374151] p-2 rounded transition">
-                                        <input 
-                                            type="checkbox" 
-                                            class="product-checkbox w-4 h-4" 
-                                            data-check-product-id="${product.check_product_id}"
-                                            data-product-id="${product.product_id}"
-                                            ${product.active == 1 ? 'checked' : ''}
-                                        />
-                                        <span class="text-gray-300 text-sm">${product.product_name}</span>
-                                    </label>
-                                `).join('')}
-                            </div>
-                        </div>
-                        ` : ''}
-                    </div>
-                </div>
-            `;
+        const section = (title, items) => `
+        <div class="bg-[#283341] p-4 rounded-lg">
+            <h5 class="text-gray-300 font-semibold mb-3 text-sm">${title}:</h5>
+            <div class="space-y-2">
+            ${items.map(product => `
+                <label class="flex items-center gap-2 cursor-pointer hover:bg-[#374151] p-2 rounded transition">
+                <input 
+                    type="checkbox" 
+                    class="product-checkbox w-4 h-4" 
+                    data-check-product-id="${product.check_product_id}"
+                    data-product-id="${product.product_id}"
+                    ${product.active == 1 ? 'checked' : ''}
+                />
+                <span class="text-gray-300 text-sm">${product.product_name}</span>
+                </label>
+            `).join("")}
+            </div>
+        </div>
+        `;
 
-        $(`#${parentContainer}`).html(html);
+            const html = `
+        <div class="bg-[#1F2A37] rounded-lg border border-gray-700 shadow-md p-6 text-white product-checkbox-list mt-4">
+            <h4 class="text-white font-semibold mb-3">Gestionar productos del paquete:</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            ${platillos.length ? section("Platillos", platillos) : ""}
+            ${bebidas.length ? section("Bebidas", bebidas) : ""}
+            </div>
+
+            <div class="mt-6 text-right">
+              <button onclick="eventos.cerrarDetallesMenu()" class="text-blue-400 hover:underline">Cerrar detalles</button>
+            </div>
+        </div>
+        `;
+
+            $(`#${opts.parent}`).html(html);
 
 
     }
@@ -2012,50 +2004,50 @@ function formatSpanishDate(fecha = null, type = "normal") {
 
 
 // Métodos para gestión de productos en paquetes
-Eventos.prototype.renderProductCheckboxList = async function(events_package_id, containerId) {
-    const response = await useFetch({
-        url: this._link,
-        data: { 
-            opc: "getProductsCheck", 
-            events_package_id: events_package_id 
-        }
-    });
+// Eventos.prototype.renderProductCheckboxList = async function(events_package_id, containerId) {
+//     // const response = await useFetch({
+//     //     url: this._link,
+//     //     data: { 
+//     //         opc: "getProductsCheck", 
+//     //         events_package_id: events_package_id 
+//     //     }
+//     // });
     
-    if (response.status !== 200) {
-        $(`#${containerId}`).html('<p class="text-red-500 text-xs">Error al cargar productos</p>');
-        return;
-    }
+//     // if (response.status !== 200) {
+//     //     $(`#${containerId}`).html('<p class="text-red-500 text-xs">Error al cargar productos</p>');
+//     //     return;
+//     // }
     
-    const products = response.data;
+//     // const products = response.data;
     
-    if (!products || products.length === 0) {
-        $(`#${containerId}`).html('<p class="text-gray-400 text-xs">No hay productos asociados</p>');
-        return;
-    }
+//     // if (!products || products.length === 0) {
+//     //     $(`#${containerId}`).html('<p class="text-gray-400 text-xs">No hay productos asociados</p>');
+//     //     return;
+//     // }
     
-    let html = '<div class="mt-3"><h4 class="text-sm font-semibold mb-2 text-white">Productos del paquete:</h4>';
+//     // let html = '<div class="mt-3"><h4 class="text-sm font-semibold mb-2 text-white">Productos del paquete:</h4>';
     
-    products.forEach(product => {
-        const checked = product.active == 1 ? 'checked' : '';
-        html += `
-            <div class="flex items-center gap-2 mb-2">
-                <input 
-                    type="checkbox" 
-                    id="product-${product.check_product_id}" 
-                    ${checked}
-                    onchange="eventos.toggleProductCheck(${product.check_product_id}, this.checked)"
-                    class="cursor-pointer"
-                />
-                <label for="product-${product.check_product_id}" class="text-sm text-gray-300 cursor-pointer">
-                    ${product.product_name}
-                </label>
-            </div>
-        `;
-    });
+//     // products.forEach(product => {
+//     //     const checked = product.active == 1 ? 'checked' : '';
+//     //     html += `
+//     //         <div class="flex items-center gap-2 mb-2">
+//     //             <input 
+//     //                 type="checkbox" 
+//     //                 id="product-${product.check_product_id}" 
+//     //                 ${checked}
+//     //                 onchange="eventos.toggleProductCheck(${product.check_product_id}, this.checked)"
+//     //                 class="cursor-pointer"
+//     //             />
+//     //             <label for="product-${product.check_product_id}" class="text-sm text-gray-300 cursor-pointer">
+//     //                 ${product.product_name}
+//     //             </label>
+//     //         </div>
+//     //     `;
+//     // });
     
-    html += '</div>';
-    $(`#${containerId}`).html(html);
-};
+//     // html += '</div>';
+//     // $(`#${containerId}`).html(html);
+// };
 
 Eventos.prototype.toggleProductCheck = async function(check_product_id, isChecked) {
     const response = await useFetch({
