@@ -673,7 +673,7 @@ class ctrl extends MEvent{
                     $package_id = $menu['menu']['id'];
                     $events_package_id = $this->maxEventPackageId();
                     
-                    $result = $this->insertPackageWithProducts($events_package_id, $package_id);
+                    $result = $this->addPackageProducts($events_package_id, $package_id);
                     
                     if ($result['status'] !== 200) {
                         error_log("Error al vincular productos: " . $result['message']);
@@ -765,7 +765,7 @@ class ctrl extends MEvent{
                     $package_id = $menu['menu']['id'];
                     $events_package_id = $this->maxEventPackageId();
                     
-                    $result = $this->insertPackageWithProducts($events_package_id, $package_id);
+                    $result = $this->addPackageProducts($events_package_id, $package_id);
                     
                     if ($result['status'] !== 200) {
                         error_log("Error al vincular productos en edición: " . $result['message']);
@@ -1026,52 +1026,76 @@ class ctrl extends MEvent{
         ];
     }
 
+    // add Package.
+    function addMenuPackage(){
+            $status  = 500;
+            $message = 'Error al agregar el paquete';
+
+            $addEventPackage = $this->createEventPackage($this->util->sql([
+                'package_id'    => $_POST['package_id'],
+                'quantity'      => $_POST['cantidad'],
+                'price'         => $_POST['price'],
+                'date_creation' => date('Y-m-d H:i:s'),
+                'event_id'      => $_POST['id_event'],
+            ]));
+
+            if ($addEventPackage) {
+                $events_package_id = $this->maxEventPackageId();
+                $package_id        = $_POST['package_id'];
+
+                $result = $this->addPackageProducts($events_package_id, $package_id);
+
+                if ($result['status'] == 200) {
+                    $status  = 200;
+                    $message = 'Paquete agregado correctamente con sus productos';
+                } else {
+                    $status  = $result['status'];
+                    $message = $result['message'];
+                }
+            }
+
+            return [
+                'status'  => $status,
+                'message' => $result,
+                'success' => $addEventPackage
+            ];
+    }
+
+
+
+
     // PACKAGE CHECK - GESTIÓN DE PRODUCTOS EN PAQUETES
 
-    function insertPackageWithProducts($events_package_id, $package_id) {
-        $status = 500;
-        $message = 'Error al vincular productos del paquete';
+    function addPackageProducts($events_package_id, $package_id) {
+
+        $status   = 500;
+        $message  = 'Error al vincular productos del paquete';
         $check_id = null;
         $inserted = 0;
         
-        try {
-            $check_id = $this->insertPackageCheck($events_package_id);
-            
-            if (!$check_id) {
-                return [
-                    'status' => $status,
-                    'message' => 'Error al crear package_check'
-                ];
-            }
-            
-            $products = $this->getProductsByPackage([$package_id]);
-            
-            if (empty($products)) {
-                return [
-                    'status' => 200,
-                    'message' => 'Paquete sin productos asociados',
-                    'check_id' => $check_id,
-                    'products_inserted' => 0
-                ];
-            }
-            
-            foreach ($products as $product) {
-                $result = $this->insertProductCheck($check_id, $product['product_id']);
-                if ($result) $inserted++;
-            }
-            
-            $status = 200;
-            $message = "Se vincularon {$inserted} productos al paquete";
-            
-        } catch (Exception $e) {
-            error_log("Error en insertPackageWithProducts: " . $e->getMessage());
-            $message = 'Error: ' . $e->getMessage();
+      
+        $check_id = $this->createPackageCheck($events_package_id);
+        $products = $this->getProductsByPackage([$package_id]);
+
+        foreach ($products as $product) {
+
+            $values = $this->util->sql([
+                'package_check_id' => $check_id,
+                'product_id'       => $product['products_id'],
+                'active'           => 1 
+            ]);
+
+            $result = $this->createProductCheck($values);
+            if ($result) $inserted++;
         }
         
+        $status = 200;
+        $message = "Se vincularon {$inserted} productos al paquete";
+        
         return [
-            'status' => $status,
-            'message' => $message,
-            'check_id' => $check_id,
+            'status'            => $status,
+            'message'           => $message,
+            'check_id'          => $check_id,
             'products_inserted' => $inserted
         ];
     }

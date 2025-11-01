@@ -1174,7 +1174,7 @@ class Eventos extends App {
             eventos.renderPaquetes();
             eventos.renderResumen();
 
-            console.log('add',menu)
+           
 
             let addMenu = await useFetch({
                 url: this._link, data: {

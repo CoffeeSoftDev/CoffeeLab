@@ -579,17 +579,17 @@ class MEvent extends CRUD {
     function getProductsByPackage($array) {
         $query = "
             SELECT 
-                products_id as product_id, 
+                products_id, 
                 quantity
             FROM {$this->bd}evt_package_products
             WHERE package_id = ? 
-            AND active = 1
+          
         ";
         
         return $this->_Read($query, $array);
     }
 
-    function insertPackageCheck($events_package_id) {
+    function createPackageCheck($events_package_id) {
         $data = [
             'events_package_id' => $events_package_id,
             'created_at'        => date('Y-m-d H:i:s')
@@ -617,29 +617,13 @@ class MEvent extends CRUD {
         return $result[0]['max_id'] ?? null;
     }
 
-    function insertProductCheck($check_id, $product_id) {
-        $exists = $this->_Select([
+    function createProductCheck($array) {
+      
+         return $this->_Insert([
             'table'  => "{$this->bd}evt_check_products",
-            'values' => 'id',
-            'where'  => 'package_check_id = ? AND product_id = ?',
-            'data'   => [$check_id, $product_id]
-        ]);
-        
-        if (!empty($exists)) {
-            return true;
-        }
-        
-        $data = [
-            'package_check_id' => $check_id,
-            'product_id'       => $product_id,
-            'active'           => 1
-        ];
-        
-        return $this->_Insert([
-            'table'  => "{$this->bd}evt_check_products",
-            'values' => $this->util->sql($data)['values'],
-            'data'   => $this->util->sql($data)['data']
-        ]);
+            'values' => $array['values'],
+            'data'   => $array['data']
+        ]);  
     }
 
     function getPackageCheckByEventPackageId($array) {
@@ -681,58 +665,6 @@ class MEvent extends CRUD {
         ]);
     }
 
-    function insertPackageWithProducts($events_package_id, $package_id) {
-        try {
-            $packageExists = $this->_Select([
-                'table'  => "{$this->bd}evt_package",
-                'values' => 'id',
-                'where'  => 'id = ?',
-                'data'   => [$package_id]
-            ]);
 
-            if (empty($packageExists)) {
-                return [
-                    'status'  => 404,
-                    'message' => 'Paquete no encontrado'
-                ];
-            }
-
-            $package_check_id = $this->insertPackageCheck($events_package_id);
-            
-            if (!$package_check_id) {
-                return [
-                    'status'  => 500,
-                    'message' => 'Error al crear registro de verificación'
-                ];
-            }
-
-            $products = $this->getProductsByPackage([$package_id]);
-            
-            $products_inserted = 0;
-            foreach ($products as $product) {
-                $result = $this->insertProductCheck($package_check_id, $product['product_id']);
-                if ($result) {
-                    $products_inserted++;
-                }
-            }
-
-            return [
-                'status'  => 200,
-                'message' => 'Paquete vinculado correctamente',
-                'data'    => [
-                    'package_check_id'   => $package_check_id,
-                    'products_inserted'  => $products_inserted
-                ]
-            ];
-
-        } catch (Exception $e) {
-            error_log("Error en insertPackageWithProducts: " . $e->getMessage());
-            
-            return [
-                'status'  => 500,
-                'message' => 'Error al procesar: ' . $e->getMessage()
-            ];
-        }
-    }
 }
 ?>
