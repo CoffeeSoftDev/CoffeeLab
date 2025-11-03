@@ -623,10 +623,11 @@ class ctrl extends MEvent{
         //     }
 
             $platillo = [
-                
+
                 'id'     => $row['idPr'],
                 'nombre' => $row['product'],
-                'precio' => floatval($row['priceProduct']),
+                'precio' => floatval($row['price']),
+            //     'precio' => floatval($row['priceProduct']),
 
             ];
 
