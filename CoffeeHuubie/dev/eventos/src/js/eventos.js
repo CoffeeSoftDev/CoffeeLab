@@ -1207,6 +1207,8 @@ class Eventos extends App {
             if (eventos.menusSeleccionados.length == 0) {
                 // $("#divExtras").addClass("d-none");
             }
+
+            // eventos.
             eventos.closeDetailsMenu();
             eventos.renderPaquetes();
             eventos.renderResumen();
@@ -1422,7 +1424,7 @@ class Eventos extends App {
     // Función para renderizar paquetes seleccionados
     renderPaquetes() {
         const contenedor = $("#contentPaquetes");
-        contenedor.html(`<p>No hay paquetes seleccionados!!!!! </p>`);
+        contenedor.html(`<p>No hay paquetes seleccionados! </p>`);
 
         if (eventos.menusSeleccionados.length == 0) {
             contenedor.html(`<p>No hay menús seleccionados</p>`);
@@ -1431,6 +1433,8 @@ class Eventos extends App {
 
         contenedor.empty();
         eventos.menusSeleccionados.forEach((item, index) => {
+
+            console.log('menuList',item)
 
             const total = item.menu.precioPorPersona * item.cantidadPersonas;
             const html = `
@@ -1466,7 +1470,7 @@ class Eventos extends App {
 
                 <!-- Eliminar -->
                 <div class="col-span-1 flex justify-end">
-                  <button class="text-red-400 hover:text-red-600" onclick="eliminarMenu(${index})">
+                  <button class="text-red-400 hover:text-red-600" onclick="eliminarMenu(${index}); eventos.deletePackage(${item.menu.id})">
                     <i class="icon-trash"></i>
                   </button>
                 </div>
@@ -1748,7 +1752,16 @@ class Eventos extends App {
     }
 
 
+    async deletePackage( idPackage ) {
 
+        const response = await useFetch({
+            url: this._link,
+            data: { opc: "deletePackage", id: idPackage, evt_events_id: id_event },
+        });
+
+      
+
+    }
 
 
 

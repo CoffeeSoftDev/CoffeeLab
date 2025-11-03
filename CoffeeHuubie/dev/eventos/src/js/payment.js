@@ -795,16 +795,18 @@ class Payments extends App {
         if (opts.type == 'Event') {
             // Menús del evento principal
             opts.dataMenu.forEach(menu => {
+                const pkgDishes = Array.isArray(menu.dishes) && menu.dishes.length > 0
+                    ? menu.dishes
+                        .filter(dish => dish.active === "1")
+                        .map(dish => `<li class="mb-0.5 text-[14px] text-gray-700"> - ${dish.name}${dish.quantity ? ` <span class="text-gray-400">(${dish.quantity})</span>` : ""}</li>`)
+                        .join("")
+                    : "";
+
                 subEvents += `
                 <div class="mb-3 text-sm leading-5 ">
                     <p><strong>${menu.name || ""} (${menu.quantity || 0})</strong></p>
-                    ${Array.isArray(menu.dishes) && menu.dishes.length > 0
-                        ? `<ul class="text-[12px] mt-1 pl-6">
-                            ${menu.dishes.map(d => `<li>- ${d.name} <span class="text-gray-400">(${d.quantity})</span></li>`).join("")}
-                           </ul>`
-                        : ""
-                    }
-                    <p class="mt-2"><strong>Costo:</strong>$ ${menu.price}</p>
+                    ${pkgDishes ? `<ul class="pl-6 mt-1">${pkgDishes}</ul>` : ""}
+                    <p class="mt-2"><strong>Costo:</strong> ${formatPrice(menu.price)}</p>
                 </div>
             `;
             });

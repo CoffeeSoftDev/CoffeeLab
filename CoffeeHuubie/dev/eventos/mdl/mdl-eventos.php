@@ -403,6 +403,8 @@ class MEvent extends CRUD {
         ]);
     }
 
+ 
+
     function deleteEventPackage($array)
     {
         return $this->_Delete([

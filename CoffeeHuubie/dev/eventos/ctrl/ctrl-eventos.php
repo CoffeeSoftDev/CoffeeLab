@@ -527,8 +527,7 @@ class ctrl extends MEvent{
         ];
     }
 
-    function addProduct()
-    {
+    function addProduct(){
         $status = 500;
         $message = 'Error al agregar el producto personalizado.';
         $_POST['subsidiaries_id'] = $_SESSION['SUB']; // Asignar la sucursal actual
@@ -562,6 +561,29 @@ class ctrl extends MEvent{
         return [
             'status' => $status,
             'message' => $message
+        ];
+    }
+
+    function deletePackage() {
+        $status  = 500;
+        $message = 'No se pudo eliminar el paquete';
+
+          $events_package =  $this->getEventsPackage([ $_POST['evt_events_id'],$_POST['id']] );
+
+        // $data   = $this->util->sql(['id' => $events_package['id']], 1);
+        // $delete = $this->deleteEventPackage($data);
+
+        // if ($delete) {
+        //     $status = 200;
+        //     $message = 'Paquete eliminado correctamente';
+        // }
+
+        return [
+            'status'  => $status,
+            'message' => $message,
+            'POST'    => $_POST,
+            'evt'     =>  $events_package
+             // 'sub'     => $this->lsMenu(),
         ];
     }
 
