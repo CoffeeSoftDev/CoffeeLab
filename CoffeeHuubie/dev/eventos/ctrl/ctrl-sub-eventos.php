@@ -306,6 +306,9 @@ class ctrl extends mdl{
             $create   = $this -> createEventPackage($data);
 
             if ($create) {
+                $events_package_id = $this->maxEventPackageId();
+                $result            = $this->addPackageProducts($events_package_id, $_POST['package_id']);
+                 
                 $status  = 200;
                 $message = 'Paquete agregado correctamente';
             }
@@ -313,13 +316,12 @@ class ctrl extends mdl{
         }
 
 
-       
-      
-
+    
         return [
             'status'  => $status,
             'message' => $message,
             'exist'   => $values,
+            
             'sub'     => $this->lsMenu(),
         ];
     }
@@ -501,9 +503,89 @@ class ctrl extends mdl{
             'totalMenus'          => $totalMenus,
             'totalExtras'         => $totalExtras,
             'totalGeneral'        => $totalGeneral, // <-- Aquí está tu total general
-            'success'=>$success
+            'success'=>$success,
+            'idEvento' => $idEvent
         ];
     }
+
+     // Product List.
+    function addPackageProducts($events_package_id, $package_id) {
+
+        $status   = 500;
+        $message  = 'Error al vincular productos del paquete';
+        $check_id = null;
+        $inserted = 0;
+
+         
+        $check_id = $this->createPackageCheck($this->util->sql([
+            'events_package_id' => $events_package_id,
+            'created_at'        => date('Y-m-d H:i:s')
+        ]));
+
+
+        $listProducts = $this->getProductsByPackage([$package_id]);
+
+        foreach ($listProducts as $product) {
+
+            $values = $this->util->sql([
+
+                'package_check_id' => $check_id,
+                'product_id'       => $product['products_id'],
+                'quantity'         => $product['quantity'],
+                'active'           => 1
+
+            ]);
+
+            $result = $this->createProductCheck($values);
+            if ($result) $inserted++;
+        }
+        
+        $status = 200;
+        $message = "Se vincularon {$inserted} productos al paquete";
+        
+        return [
+            'list'            => $listProducts,
+            'message'           => $message,
+            'check_id'          => $check_id,
+            'products_inserted' => $inserted,
+        ];
+
+    }
+
+    function getProductsCheckByPackage() {
+
+        $status  = 500;
+        $message = 'Error al obtener productos del paquete';
+        $check   = $this->getPackageCheckByEventPackageId([$_POST['id']]);
+      
+        $products = $this->listProductsCheckByPackageCheckId([$check['id']]);
+       
+        return [
+            'status'  => $status,
+            'message' => $message,
+            'data'    =>  $products,
+            $check
+        ];
+    }
+
+    function updateProductActive() {
+        $status = 500;
+        $message = 'Error al actualizar estado del producto';
+    
+        $update = $this->updateProductCheckActive($this->util->sql($_POST, 1));
+        
+        if ($update) {
+            $status = 200;
+            $message = 'Estado actualizado correctamente';
+        }
+        
+        return [
+            'status' => $status,
+            'message' => $message
+        ];
+    }
+
+   
 
     // Sub Event.
 

@@ -161,6 +161,6 @@ class Calendar extends Eventos {
 
 
     redirectToEventos() {
-        window.location.href = '/alpha/eventos/?newEvent=true';
+        window.location.href = '/dev/eventos/?newEvent=true';
     }
 }

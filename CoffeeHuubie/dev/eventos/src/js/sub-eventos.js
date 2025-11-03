@@ -30,7 +30,7 @@ class SubEvent extends App {
         // Filterbar con botón regresar
         this.createfilterBar({
             parent: "filterBarSubEvent",
-            class:'border',
+            class: 'border',
             data: [
                 {
                     opc: "button",
@@ -117,7 +117,7 @@ class SubEvent extends App {
 
             data: { opc: 'addEvent' },
             json: this.jsonEvent(),
-            
+
 
             success: (response) => {
                 if (response.status == 200) {
@@ -322,7 +322,7 @@ class SubEvent extends App {
                     { id: 'Privado', valor: "Privado" }
                 ]
             },
-     
+
             {
                 opc: 'input',
                 placeholder: '0.00',
@@ -722,7 +722,99 @@ class SubEvent extends App {
 
     }
 
-   
+
+    // Details menu.
+
+  
+    async viewDetailsMenu(idEvt) {
+
+        const response = await useFetch({
+            url: this._link,
+            data: {
+                opc: 'getProductsCheckByPackage',
+                id: idEvt,
+            }
+        });
+
+        this.renderProductCheckboxList({ 
+            parent:`detalleMenuSeleccionado`,
+            json: response.data 
+        
+        });
+
+    }
+
+    renderProductCheckboxList(options) {
+
+        const defaults = {
+            parent: "detalleMenuSeleccionado",
+            json: [],
+        };
+
+        const opts = Object.assign({}, defaults, options);
+        const products = opts.json || [];
+
+        if (products.length === 0) {
+            $(`#${opts.parent}`).html('<p class="text-gray-400 text-sm">No hay productos configurados para este paquete</p>');
+            return;
+        }
+
+        const htmlProductos = products.map(product => `
+            <label class="flex items-center gap-2 cursor-pointer hover:bg-[#374151] p-2 rounded transition">
+                <input 
+                    type="checkbox" 
+                    class="product-checkbox w-4 h-4" 
+                    data-check-product-id="${product.check_product_id}"
+                    data-product-id="${product.product_id}"
+                    onchange="eventos.toggleProductList(this)"
+                    ${product.active == 1 ? 'checked' : ''}
+                />
+                <span class="text-gray-300 text-sm">${product.product_name}</span>
+            </label>
+        `).join("");
+
+        const html = `
+        <div class="bg-[#1F2A37] rounded-lg border border-gray-700 shadow-md p-6 text-white product-checkbox-list mt-4">
+            <h4 class="text-white font-semibold mb-3">Gestionar productos del paquete:</h4>
+            <div class="space-y-2">
+                ${htmlProductos}
+            </div>
+
+            <div class="mt-6 text-right">
+            <button onclick="eventos.closeDetailsMenu()" class="text-blue-400 hover:underline">Cerrar detalles</button>
+            </div>
+        </div>
+        `;
+
+        $(`#${opts.parent}`).html(html);
+    }
+
+    toggleProductList(el) {
+        const checkbox = $(el);
+        const checkProductId = checkbox.data('check-product-id');
+        const isActive = checkbox.is(':checked') ? 1 : 0;
+
+        const label = checkbox.closest('label');
+        label.addClass('opacity-50 pointer-events-none');
+
+        useFetch({
+            url: this._link,
+            data: {
+                opc: 'updateProductActive',
+                active: isActive,
+                check_product_id: checkProductId,
+            },
+            success: (response) => {
+
+                label.removeClass('opacity-50 pointer-events-none');
+            }
+        });
+    }
+
+    closeDetailsMenu() {
+        this.menuSeleccionadoParaVer = null;
+        $("#detalleMenuSeleccionado").empty();
+    }
 
   
     // Components:
@@ -750,9 +842,9 @@ class SubEvent extends App {
                 <div>
                     <h2 class="text-base font-semibold text-white">${opts.title}</h2>
                     ${opts.subtitle
-                        ? `<span class="inline-block mt-1 text-xs font-medium text-gray-300 bg-gray-700 px-2 py-1 rounded-full">${opts.subtitle}</span>`
-                        : ""
-                    }
+                ? `<span class="inline-block mt-1 text-xs font-medium text-gray-300 bg-gray-700 px-2 py-1 rounded-full">${opts.subtitle}</span>`
+                : ""
+            }
                 </div>
                 <div class="flex items-center gap-1 space-x-1">
                     <button id="btn-new-sub-event" class="bg-gray-600 hover:bg-gray-700 text-white text-xs px-3 py-2 rounded  border-r border-gray-700 focus:z-10 min-w-[120px] flex items-center justify-center gap-1 shadow-none">
@@ -930,7 +1022,7 @@ class SubEvent extends App {
 
     }
 
-    addMenus(){
+    addMenus() {
 
         alert({
             icon: "success",
@@ -959,12 +1051,7 @@ class SubEvent extends App {
         const opts = Object.assign({}, defaults, options);
 
         $(`#${opts.parent}`).empty();
-        // <div>
-        //     <label class="block text-sm font-medium text-gray-300 mb-1">Tiempos</label>
-        //     <select class="selectMenu w-full rounded-md bg-gray-800 text-white border border-gray-600 p-2">
-        //     </select>
-        // </div>
-
+     
         // Interfaz.
         const paquetes = `
             <div class="md:col-span-2 ">
@@ -977,7 +1064,7 @@ class SubEvent extends App {
             }" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div>
                         <label class="block text-sm font-medium text-gray-300 mb-1">Paquete Precargado</label>
-                        <select class="selectMenu w-full rounded-md bg-gray-800 text-white border border-gray-600 p-2">
+                        <select id="selectMenu-${opts.id}" class="selectMenu w-full rounded-md bg-gray-800 text-white border border-gray-600 p-2">
                         <option value="">Seleccione un menú</option>
                         ${opts.menus
                 .map(
@@ -1009,7 +1096,8 @@ class SubEvent extends App {
                 <div class="contentPaquetes bg-gray-900 text-gray-400 p-4 rounded-md text-center">
                     No hay menús seleccionados
                 </div>
-                <div class="detalleMenuSeleccionado-${opts.id} mt-6"></div>
+                <div id="detalleMenuSeleccionado" class="detalleMenuSeleccionado-${opts.id} mt-6"></div>
+                
                 </div>
             </div>
             </div>`;
@@ -1131,6 +1219,23 @@ class SubEvent extends App {
         // }
 
         // Eventos
+        // Inicializar Select2 en .selectMenu
+        $(`#${opts.id} .selectMenu`).select2({
+            width: '100%',
+            placeholder: 'Seleccione un menú',
+            allowClear: false,
+            dropdownParent: $(`#${opts.id}`),
+            dropdownCssClass: 'select2-dark',
+            language: {
+                noResults: function () {
+                    return "No se encontraron resultados";
+                },
+                searching: function () {
+                    return "Buscando...";
+                }
+            }
+        });
+
         $(`#${opts.id} .btnAgregarMenu`).on("click", () => opts.onAddPackage());
         $(`#${opts.id} .btnAgregarExtra`).on("click", () => opts.onAddExtra());
         $(`#${opts.id} .btnAgregarExtraPersonalizado`).on("click", () => opts.onAddExtraCustom());
@@ -1151,17 +1256,19 @@ class SubEvent extends App {
             const cardId = `menu-card-${index}`;
             const total = item.menu.precioPorPersona * item.cantidadPersonas;
 
-            // <button class="btn-ver-detalles text-sm px-2 py-1 bg-[#333D4C]
-            //                  text-blue-300 hover:text-blue-100 hover:bg-[#3f4b5c]
-            //                   border border-gray-600 rounded-md transition-colors duration-200" title="Ver detalles">Ver detalles</button>
-
+            console.log('package: -> ',item,index )
+ 
             const card = $(`
             <div id="${cardId}" class="border border-gray-700 p-3 rounded-lg bg-gray-800 mb-3">
                 <div class="grid grid-cols-12 items-center gap-3">
                     <div class="col-span-6 flex flex-col justify-start text-left">
                         <div class="flex items-center gap-2">
                             <h4 class="font-semibold text-white truncate">${item.menu.nombre}</h4>
-                          
+                            <button onclick="sub.viewDetailsMenu(${item.menu.idEvt})" class="text-sm px-2 py-1 bg-[#333D4C] 
+                                text-blue-300 hover:text-blue-100 hover:bg-[#3f4b5c] border border-gray-600 
+                                rounded-md transition-colors duration-200">
+                                Ver detalles
+                            </button>
                         </div>
                         <p class="text-gray-400 text-sm truncate">${item.menu.descripcion}</p>
                     </div>
@@ -1442,9 +1549,16 @@ class SubEvent extends App {
         if (response.status === 200) {
             this.renderPackages(id, response.sub);
             this.renderResumen(id, response.sub);
+
+            $("#selectMenu-"+id).val(null).trigger('change');
+
+            this.closeDetailsMenu() 
+
         } else {
             alert(response.message);
         }
+
+
 
     }
 
@@ -1473,7 +1587,8 @@ class SubEvent extends App {
                 opc: "updatePackageQuantity",
                 subevent_id: targetId,
                 id: menuId,
-                quantity: newQuantity
+                quantity: newQuantity,
+                evt_events_id: idEvent
             },
         });
 
@@ -1502,10 +1617,10 @@ class SubEvent extends App {
         const response = await useFetch({
             url: this._link,
             data: {
-                opc          : "addExtra",
-                product_id   : idExtra,
-                quantity     : cantidad,
-                subevent_id  : id,
+                opc: "addExtra",
+                product_id: idExtra,
+                quantity: cantidad,
+                subevent_id: id,
                 evt_events_id: idEvent
 
             },
@@ -1540,14 +1655,14 @@ class SubEvent extends App {
         const response = await useFetch({
             url: this._link,
             data: {
-                opc              : "addProduct",
-                name             : nombre,
-                price            : precio,
-                quantity         : cantidad,
+                opc: "addProduct",
+                name: nombre,
+                price: precio,
+                quantity: cantidad,
                 id_classification: clasificacion,
                 evt_events_id: idEvent,
 
-                subevent_id      : id
+                subevent_id: id
             },
         });
 
@@ -1574,7 +1689,7 @@ class SubEvent extends App {
                 opc: "deleteExtra",
                 subevent_id: targetId,
                 id: menuId,
-                evt_events_id : idEvent
+                evt_events_id: idEvent
             },
         });
 
@@ -1656,7 +1771,7 @@ class SubEvent extends App {
 
     // Components
 
-   
+
 
     cancelSubEvent(item) {
         this.swalQuestion({
@@ -1691,13 +1806,13 @@ class SubEvent extends App {
             // 📏 Información del evento
             { opc: 'input', lbl: 'Nombre del Sub Evento', id: 'name_subevent', class: 'col-6 mb-3', tipo: 'texto', required: true },
             {
-            opc: 'select', lbl: 'Tipo de evento', id: 'type_event', class: 'col-6 mb-3', data: [
-                { id: 'Abierto', valor: "Abierto" },
-                { id: 'Privado', valor: "Privado" },
-            ]
+                opc: 'select', lbl: 'Tipo de evento', id: 'type_event', class: 'col-6 mb-3', data: [
+                    { id: 'Abierto', valor: "Abierto" },
+                    { id: 'Privado', valor: "Privado" },
+                ]
             },
             { opc: "input", value: 1, lbl: "Número de personas", id: "quantity_people", class: "col-6 mb-3 ", tipo: "cifra", required: true, placeholder: "0" },
-            
+
             { opc: 'input', lbl: 'Localización', id: 'location', class: 'col-6', tipo: 'texto', required: true },
             { opc: "input", lbl: "Fecha de inicio", id: "date_start", class: "col-4 mb-3", type: "date", required: true },
             { opc: 'input', lbl: 'Hora de inicio', id: 'time_start', tipo: 'hora', type: "time", class: 'col-4 mb-3', required: true },

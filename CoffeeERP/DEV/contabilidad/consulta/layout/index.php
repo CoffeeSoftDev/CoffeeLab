@@ -5,8 +5,9 @@
 ?>
 
 <!-- CoffeeSoft Framework -->
-<script src="../../src/js/coffeSoft.js"></script>
-<script src="../../src/js/plugins.js"></script>
+<script src="../../../../DEV/src/js/coffeeSoft.js"></script>
+<script src="https://rawcdn.githack.com/SomxS/Grupo-Varoch/refs/heads/main/src/js/plugins.js"></script>
+<script src="https://www.plugins.erp-varoch.com/ERP/JS/complementos.js"></script>
 
 <body>
     <?php require_once('../../layout/navbar.php'); ?>
@@ -27,7 +28,10 @@
             <div class=" main-container" id="root"></div>
 
           <!-- Módulos del Sistema -->
-        <script src="js/archivos.js?t=<?php echo time(); ?>"></script>
+        <!-- <script src="js/ventas.js?t=<?php echo time(); ?>"></script> -->
+        <script src="js/compras.js?t=<?php echo time(); ?>"></script> 
+      <script src="js/archivos.js?t=<?php echo time(); ?>"></script>
+        <script src="js/salidas-almacen.js?t=<?php echo time(); ?>"></script>
 
         
         

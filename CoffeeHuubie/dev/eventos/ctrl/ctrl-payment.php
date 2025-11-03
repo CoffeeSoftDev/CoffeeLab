@@ -38,12 +38,30 @@ class Payment extends MPayment {
             $type = 'SubEvent';
             foreach($ls as $key){
 
-
                 $menu   = $this -> getPackagesBySubEventId([$key['id']]);
-                $dishes = $this -> getProductsPackageId([$menu[0]['package_id']]);
                 $extras = $this -> getExtrasBySubEventId([$key['id']]);
 
-                $menu['dishes'] = $dishes;
+                // // Obtener productos desde evt_check_products
+                // $dishes = [];
+                // if (!empty($menu[0]['id'])) {
+                //     $check = $this->getPackageCheckByEventPackageId([$menu[0]['id']]);
+                //     if ($check) {
+                //         $dishes = $this->listProductsCheckByPackageCheckId([$check['id']]);
+                //     }
+                // }
+
+                foreach($menu as &$listMenu){
+
+                    $check = $this->getPackageCheckByEventPackageId([$listMenu['id']]);
+                    $dishes = $this->listProductsCheckByPackageCheckId([$check['id']]);
+                    $listMenu['dishes'] = $dishes;
+
+                }
+                unset($listMenu);
+
+
+                // $menu['dishes'] = $dishes;
+                
                 $SubEvent[] = [
 
                     'id'              => $key['id'],
@@ -75,7 +93,14 @@ class Payment extends MPayment {
             $data = [];
             foreach($lsPackage as $menu){
                 
-                $dishes = $this->getProductsPackageId([$menu['idPackage']]);
+                // Obtener productos desde evt_check_products
+                $dishes = [];
+                if (!empty($menu['id'])) {
+                    $check = $this->getPackageCheckByEventPackageId([$menu['id']]);
+                    if ($check) {
+                        $dishes = $this->listProductsCheckByPackageCheckId([$check['id']]);
+                    }
+                }
 
                 $data[] = [
                     'idPackage'     => $menu['idPackage'],

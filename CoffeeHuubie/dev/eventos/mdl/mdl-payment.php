@@ -482,6 +482,39 @@ class MPayment extends CRUD {
         ]);
     }
 
+    // Package Check Products
+
+    function getPackageCheckByEventPackageId($array) {
+        $query = "
+            SELECT 
+                id, 
+                events_package_id, 
+                created_at
+            FROM {$this->bd}evt_package_check
+            WHERE events_package_id = ?
+        ";
+        
+        $result = $this->_Read($query, $array);
+        return $result[0] ?? null;
+    }
+
+    function listProductsCheckByPackageCheckId($array) {
+        $query = "
+            SELECT 
+                cp.active,
+                p.name ,
+                p.price,
+                cp.quantity,
+                cp.package_check_id as package_id
+                
+            FROM {$this->bd}evt_check_products cp
+            LEFT JOIN {$this->bd}evt_products p ON cp.product_id = p.id
+            WHERE cp.package_check_id = ?
+        ";
+        
+        return $this->_Read($query, $array);
+    }
+
     // Clausules.
 
     function listClausules($array){

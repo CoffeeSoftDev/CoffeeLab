@@ -1,50 +1,16 @@
 let api = 'ctrl/ctrl-archivos.php';
-let app, dashboardFiles, adminFiles;
-let modules, lsudn, counts;
-
-// -- salidas de almacen.
-let api_warehouse = 'ctrl/ctrl-salidas-almacen.php';
-let warehouseOutput;
-let products;
-
-// -- compras.
-
-let api_compras = 'ctrl/ctrl-compras.php';
-let compras;
-
-let purchaseTypes, methodPay, udn, productClass, suppliers, products_compras;
-
-
-
+let app;
+let modules, lsudn, counts, userLevel;
 
 $(async () => {
     const data = await useFetch({ url: api, data: { opc: "init" } });
-    modules = data.modules;
-    lsudn   = data.udn;
-    counts  = data.counts;
+    modules   = data.modules;
+    lsudn     = data.udn;
+    counts    = data.counts;
+    userLevel = data.userLevel;
 
     app = new App(api, "root");
-
-    adminFiles = new AdminFiles(api, "root");
     app.render();
-
-    // almacen.
-    const data_alm        = await useFetch({ url: api_warehouse, data: { opc: "init" } });
-          products        = data_alm.products;
-          warehouseOutput = new AdminWarehouseOutput(api_warehouse, "root");
-    warehouseOutput.render();
-
-    // compras.
-
-    const data_compras = await useFetch({ url: api_compras, data: { opc: "init" } });
-    purchaseTypes = data_compras.purchaseTypes;
-    methodPay = data_compras.methodPay;
-    udn = data_compras.udn;
-    productClass = data_compras.productClass;
-
-    compras = new Compras(api_compras, "root");
-    compras.render()
-
 });
 
 class App extends Templates {
@@ -55,8 +21,9 @@ class App extends Templates {
 
     render() {
         this.layout();
-        adminFiles.render();
-      
+        this.filterBar();
+        this.renderTotalCards();
+        this.lsFiles();
     }
 
     layout() {
@@ -65,250 +32,69 @@ class App extends Templates {
             id: this.PROJECT_NAME,
             class: "w-full",
             card: {
-                filterBar: { class: "w-full", id: "filterBarArchivos" },
-                container: { class: "w-full h-full", id: "containerArchivos" }
+                filterBar: { class: "w-full mb-3 p-3", id: `filterBar${this.PROJECT_NAME}` },
+                container: { class: "w-full h-full p-2", id: `container${this.PROJECT_NAME}` }
             }
         });
 
-        this.headerBarUser({
-            parent: `filterBarArchivos`,
-            title: "📦 Módulo de Archivos",
-            subtitle: "Gestiona y visualiza archivos del sistema.",
-            onClick: () => window.location.href = '../administrador/home.php'
-        });
-
-        this.tabLayout({
-            parent: `containerArchivos`,
-            id: `tabs${this.PROJECT_NAME}`,
-            theme: "light",
-            class: '',
-            type: "short",
-            json: [
-                {
-                    id: "admin",
-                    tab: "Administrador de archivos",
-                    // onClick: () => adminFiles.lsFiles()
-                },
-                {
-                    id: "salidas-almacen",
-                    tab: "Salidas de almacén",
-                    // onClick: () => adminFiles.lsFiles()
-                },
-                {
-                    id: "compras",
-                    tab: "Compras",
-                    active: true,
-
-                    // onClick: () => adminFiles.lsFiles()
-                },
-
-                {
-                    id: "ventas",
-                    tab: "Ventas",
-                    // onClick: () => adminFiles.lsFiles()
-                },
-                {
-                    id: "clientes",
-                    tab: "Clientes",
-                    // onClick: () => adminFiles.lsFiles()
-                },
-              
-              
-                {
-                    id: "proveedor",
-                    tab: "Pagos a proveedor",
-                    onClick: () => adminFiles.lsFiles()
-                },
-                
-            
-            
-            ]
-        });
-
-        $('#content-tabsarchivos').removeClass('h-screen');
+        $(`#filterBar${this.PROJECT_NAME}`).prepend(`<div id="cardTotals" class="mb-5"></div>`);
     }
 
-    headerBar(options) {
-        const defaults = {
-            parent: "root",
-            title: "Título por defecto",
-            subtitle: "Subtítulo por defecto",
-            icon: "icon-home",
-            textBtn: "Inicio",
-            classBtn: "bg-blue-600 hover:bg-blue-700",
-            onClick: null
-        };
-
-        const opts = Object.assign({}, defaults, options);
-
-        const container = $("<div>", {
-            class: "flex justify-between items-center px-2 pt-3 pb-3"
-        });
-
-        const leftSection = $("<div>").append(
-            $("<h2>", {
-                class: "text-2xl font-semibold",
-                text: opts.title
-            }),
-            $("<p>", {
-                class: "text-gray-400",
-                text: opts.subtitle
-            })
-        );
-
-        const rightSection = $("<div>").append(
-            $("<button>", {
-                class: `${opts.classBtn} text-white font-semibold px-4 py-2 rounded transition flex items-center`,
-                html: `<i class="${opts.icon} mr-2"></i>${opts.textBtn}`,
-                click: () => {
-                    if (typeof opts.onClick === "function") {
-                        opts.onClick();
-                    }
-                }
-            })
-        );
-
-        container.append(leftSection, rightSection);
-        $(`#${opts.parent}`).html(container);
-    }
-
-    headerBarUser(options) {
-        const defaults = {
-            parent: "root",
-            userName: "Usuario",
-            userGreeting: "Bienvenido",
-            userSubtitle: "Fecha de captura",
-            captureDate: new Date().toLocaleDateString('es-MX', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            }),
-            icon: "icon-arrow-left",
-            textBtn: "Menú principal",
-            classBtn: "bg-[#2196F3] hover:bg-[#1976D2]",
-            onClick: null
-        };
-
-        const opts = Object.assign({}, defaults, options);
-
-        const container = $("<div>", {
-            class: "flex justify-between items-center px-4 py-3 bg-white border-b border-gray-200"
-        });
-
-        const leftSection = $("<div>", {
-            class: "flex items-center gap-3"
-        });
-
-        const backButton = $("<button>", {
-            class: `${opts.classBtn} text-white font-semibold px-3 py-2 rounded transition flex items-center gap-2`,
-            html: `<i class="${opts.icon}"></i> ${opts.textBtn}`,
-            click: () => {
-                if (typeof opts.onClick === "function") {
-                    opts.onClick();
-                }
+    filterBar() {
+        const filterData = [
+            {
+                opc: "input-calendar",
+                class: "col-sm-3",
+                id: `calendar${this.PROJECT_NAME}`,
+                lbl: "Rango de fechas:"
+            },
+            {
+                opc: "select",
+                id: "module",
+                lbl: "Módulo:",
+                class: "col-sm-3",
+                data: [{ id: "", valor: "Mostrar todos los archivos" }, ...modules],
+                onchange: `app.lsFiles()`
             }
+        ];
+
+        if (userLevel >= 3) {
+            filterData.push({
+                opc: "select",
+                id: "udn",
+                lbl: "Unidad de Negocio:",
+                class: "col-sm-3",
+                data: [{ id: "", valor: "Todas las UDN" }, ...lsudn],
+                onchange: `app.lsFiles()`
+            });
+        }
+
+       
+
+        this.createfilterBar({
+            parent: `filterBar${this.PROJECT_NAME}`,
+            data: filterData
         });
 
-        const userInfo = $("<div>", {
-            class: "ml-3"
-        }).append(
-            $("<h2>", {
-                class: "text-lg font-semibold text-gray-800",
-                text: `${opts.userGreeting}, ${opts.userName}`
-            }),
-            $("<p>", {
-                class: "text-sm text-gray-500",
-                text: opts.captureDate
-            })
-        );
-
-        leftSection.append(backButton, userInfo);
-
-        const rightSection = $("<div>", {
-            class: "flex items-center gap-2"
+        const dateType = userLevel === 1 ? 'simple' : 'all';
+        
+        dataPicker({
+            parent: `calendar${this.PROJECT_NAME}`,
+            type: dateType,
+            onSelect: () => this.lsFiles()
         });
-
-        const dateLabel = $("<div>", {
-            class: "text-right"
-        }).append(
-            $("<p>", {
-                class: "text-xs text-gray-500 mb-1",
-                text: opts.userSubtitle
-            }),
-            $("<div>", {
-                class: "flex items-center gap-2 bg-gray-50 border border-gray-300 rounded px-3 py-1"
-            }).append(
-                $("<input>", {
-                    type: "date",
-                    class: "bg-transparent border-none text-sm focus:outline-none",
-                    value: new Date().toISOString().split('T')[0]
-                }),
-                $("<i>", {
-                    class: "icon-calendar text-gray-600"
-                })
-            )
-        );
-
-        rightSection.append(dateLabel);
-
-        container.append(leftSection, rightSection);
-        $(`#${opts.parent}`).html(container);
-    }
-}
-
-
-class AdminFiles extends App {
-    constructor(link, div_modulo) {
-        super(link, div_modulo);
-        this.PROJECT_NAME = "admin";
     }
 
-    render() {
-        this.layout();
-        this.filterBarFiles();
-        this.lsFiles();
-    }
-
-    layout() {
-        this.primaryLayout({
-            parent: `container-admin`,
-            id: this.PROJECT_NAME,
-            class: 'w-full',
-            card: {
-                filterBar: { class: 'w-full  pb-2', id: `filterBar${this.PROJECT_NAME}` },
-                container: { class: 'w-full my-2 h-full', id: `container${this.PROJECT_NAME}` }
-            }
-        });
-
-        $(`#filterBar${this.PROJECT_NAME}`).prepend(`
-            <div id="cardFiles" class="p-3 ">
-               
-            </div>
-        `);
-
-        this.showCards();
-
-    }
-
-
-
-    async showCards() {
-        const data = await useFetch({
-            url: api,
-            data: { opc: "getFileCounts" }
-        });
-
-
+    renderTotalCards() {
         this.infoCard({
-            parent: "cardFiles",
+            parent: "cardTotals",
             theme: "light",
             json: [
                 {
                     id: "kpiTotal",
                     title: "Archivos totales",
                     data: {
-                        value: data.total ?? 12,
+                        value: counts.total || 0,
                         color: "text-[#103B60]"
                     }
                 },
@@ -316,99 +102,102 @@ class AdminFiles extends App {
                     id: "kpiVentas",
                     title: "Archivos de ventas",
                     data: {
-                        value: data.ventas ??5,
-                        color: "text-[#8CC63F]"
+                        value: counts.ventas || 0,
+                        color: "text-green-600"
                     }
                 },
                 {
                     id: "kpiCompras",
                     title: "Archivos de compras",
                     data: {
-                        value: data.compras ?? 3,
+                        value: counts.compras || 0,
                         color: "text-blue-600"
-                    }
-                },
-                {
-                    id: "kpiProveedores",
-                    title: "Archivos de proveedores",
-                    data: {
-                        value: data.proveedores ?? 2,
-                        color: "text-orange-600"
                     }
                 },
                 {
                     id: "kpiAlmacen",
                     title: "Archivos de almacén",
                     data: {
-                        value: data.almacen ?? 2,
+                        value: counts.almacen || 0,
                         color: "text-purple-600"
+                    }
+                },
+                {
+                    id: "kpiTesoreria",
+                    title: "Archivos de tesorería",
+                    data: {
+                        value: counts.tesoreria || 0,
+                        color: "text-orange-600"
                     }
                 }
             ]
         });
     }
 
+    lsFiles() {
+        const rangePicker = getDataRangePicker(`calendar${this.PROJECT_NAME}`);
+        const module = $(`#filterBar${this.PROJECT_NAME} #module`).val();
+        const udn = $(`#filterBar${this.PROJECT_NAME} #udn`).val();
 
-
-
-    filterBarFiles() {
-        this.createfilterBar({
-            parent: `filterBar${this.PROJECT_NAME}`,
-            data: [
-                {
-                    opc: "select",
-                    id: "module",
-                    lbl: "",
-                    class: "col-sm-2",
-                    data: [{ id: "", valor: "Mostrar todas los archivos" }, ...modules],
-                    onchange: `adminFiles.lsFiles()`
-                },
-                // {
-                //     opc: "input",
-                //     id: "search",
-                //     lbl: "Buscar",
-                //     tipo: "texto",
-                //     class: "col-sm-6",
-                //     placeholder: "Nombre del archivo...",
-                //     onkeyup: `adminFiles.lsFiles()`
-                // },
-                {
-                    opc: "button",
-                    class: "col-sm-2",
-                    id: "btnRefresh",
-                    text: "Actualizar",
-                    color_btn: "primary",
-                    onClick: () => this.lsFiles()
-                }
-            ]
+        this.createTable({
+            parent: `container${this.PROJECT_NAME}`,
+            idFilterBar: `filterBar${this.PROJECT_NAME}`,
+            data: { 
+                opc: 'ls', 
+                fi: rangePicker.fi, 
+                ff: rangePicker.ff,
+             
+            },
+            coffeesoft: true,
+            conf: { datatable: true, pag: 25 },
+            attr: {
+                id: `tb${this.PROJECT_NAME}`,
+                theme: 'corporativo',
+             
+                center: [1, 5],
+                right: [6]
+            }
         });
     }
 
-    lsFiles() {
-        const module = $(`#filterBar${this.PROJECT_NAME} #module`).val();
-        const search = $(`#filterBar${this.PROJECT_NAME} #search`).val();
+    async downloadFile(id) {
+        try {
+            const response = await useFetch({
+                url: api,
+                data: { opc: 'downloadFile', id: id }
+            });
 
-        this.createTable({
-            parent: `containeradmin`,
-            idFilterBar: `filterBar${this.PROJECT_NAME}`,
-            data: { opc: 'ls', module: module, search: search },
-            coffeesoft: true,
-            conf: { datatable: true, pag: 15 },
-            attr: {
-                id: `tbFiles`,
-                theme: 'corporativo',
-                // title: '📋 Lista de Archivos',
-                // subtitle: 'Archivos registrados en el sistema',
-                center: [0, 3]
+            if (response.status === 200) {
+                window.open(response.url, '_blank');
+                alert({
+                    icon: "success",
+                    text: "Descarga iniciada correctamente",
+                    btn1: true,
+                    btn1Text: "Aceptar"
+                });
+            } else {
+                alert({
+                    icon: "error",
+                    text: response.message,
+                    btn1: true,
+                    btn1Text: "Ok"
+                });
             }
-        });
+        } catch (error) {
+            alert({
+                icon: "error",
+                text: "Error de conexión. Intente nuevamente.",
+                btn1: true,
+                btn1Text: "Ok"
+            });
+        }
     }
 
     deleteFile(id) {
         this.swalQuestion({
             opts: {
                 title: "¿Está seguro de querer eliminar el archivo?",
-                text: "Esta acción no se puede deshacer.",
+                text: "Esta acción no se puede deshacer y se registrará en el sistema.",
                 icon: "warning"
             },
             data: {
@@ -425,7 +214,7 @@ class AdminFiles extends App {
                             btn1Text: "Aceptar"
                         });
                         this.lsFiles();
-                        dashboardFiles.renderDashboard();
+                        this.updateCounts();
                     } else {
                         alert({
                             icon: "error",
@@ -439,19 +228,21 @@ class AdminFiles extends App {
         });
     }
 
-    viewFile(id, src) {
-        const fileUrl = '../../../' + src;
+    viewFile(id, path) {
+        const fileUrl = '../../../' + path;
         window.open(fileUrl, '_blank');
     }
 
-    downloadFile(id, src) {
-        const fileUrl = '../../../' + src;
-        const link = document.createElement('a');
-        link.href = fileUrl;
-        link.download = src.split('/').pop();
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    async updateCounts() {
+        const data = await useFetch({
+            url: api,
+            data: { opc: "getFileCounts" }
+        });
+
+        if (data.status === 200) {
+            counts = data.data;
+            this.renderTotalCards();
+        }
     }
 
     // Components.
@@ -468,7 +259,7 @@ class AdminFiles extends App {
         const isDark = opts.theme === "dark";
         const cardBase = isDark
             ? "bg-[#1F2A37] text-white border rounded "
-            : "bg-white text-gray-800  border rounded";
+            : "bg-white text-gray-800 border rounded ";
         const titleColor = isDark ? "text-gray-300" : "text-gray-600";
 
         const renderCard = (card, i = "") => {
@@ -482,7 +273,7 @@ class AdminFiles extends App {
             });
             const value = $("<p>", {
                 id: card.id || "",
-                class: `text-2xl font-bold ${card.data?.color || "text-gray-800"}`,
+                class: `text-2xl text-end font-bold ${card.data?.color || "text-gray-800"}`,
                 text: card.data?.value
             });
             box.append(title, value);
@@ -500,5 +291,4 @@ class AdminFiles extends App {
 
         $(`#${opts.parent}`).html(container);
     }
-   
 }
