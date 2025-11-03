@@ -1,7 +1,7 @@
 let api = 'ctrl/ctrl-clientes.php';
 let app;
 
-let clients, movementTypes, paymentMethods;
+let clients, movementTypes, paymentMethods, accessLevel, userId, userName;
 
 $(async () => {
     const data = await useFetch({ 
@@ -12,6 +12,9 @@ $(async () => {
     clients = data.clients;
     movementTypes = data.movementTypes;
     paymentMethods = data.paymentMethods;
+    accessLevel = data.accessLevel || 1;
+    userId = data.userId || 1;
+    userName = data.userName || 'Usuario';
 
     app = new App(api, "root");
     app.render();
@@ -21,11 +24,45 @@ class App extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "clientes";
+        this.accessLevel = accessLevel;
     }
 
     render() {
         this.layout();
         this.renderDashboard();
+        this.applyAccessLevelRestrictions();
+    }
+    
+    applyAccessLevelRestrictions() {
+        if (this.accessLevel >= 3) {
+            $('#btnNuevoMovimiento').hide();
+            $('#btnAddMovimiento').hide();
+        }
+        
+        if (this.accessLevel >= 2) {
+            this.showAccessLevelInfo();
+        }
+    }
+    
+    showAccessLevelInfo() {
+        const levelNames = {
+            1: 'Captura',
+            2: 'Gerencia',
+            3: 'Contabilidad/Dirección',
+            4: 'Administración'
+        };
+        
+        const levelName = levelNames[this.accessLevel] || 'Desconocido';
+        const infoHtml = `
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-2 mb-3">
+                <p class="text-sm text-blue-800">
+                    <i class="icon-user mr-2"></i>
+                    <strong>${userName}</strong> - Nivel de acceso: <strong>${levelName}</strong>
+                </p>
+            </div>
+        `;
+        
+        $(`#filterBar${this.PROJECT_NAME}`).append(infoHtml);
     }
 
     layout() {
@@ -46,34 +83,42 @@ class App extends Templates {
             </div>
         `);
 
+        const tabs = [
+            {
+                id: "dashboard",
+                tab: "Dashboard",
+                active: true,
+                onClick: () => this.renderDashboard()
+            },
+            {
+                id: "movimientos",
+                tab: "Movimientos",
+                onClick: () => this.renderMovimientos()
+            }
+        ];
+        
+        if (this.accessLevel >= 2) {
+            tabs.push({
+                id: "concentrado",
+                tab: "Concentrado",
+                onClick: () => this.renderConcentrado()
+            });
+        }
+
         this.tabLayout({
             parent: `container${this.PROJECT_NAME}`,
             id: `tabs${this.PROJECT_NAME}`,
             theme: "light",
             type: "short",
-            json: [
-                {
-                    id: "dashboard",
-                    tab: "Dashboard",
-                    active: true,
-                    onClick: () => this.renderDashboard()
-                },
-                {
-                    id: "movimientos",
-                    tab: "Movimientos",
-                    onClick: () => this.renderMovimientos()
-                },
-                {
-                    id: "concentrado",
-                    tab: "Concentrado",
-                    onClick: () => this.renderConcentrado()
-                }
-            ]
+            json: tabs
         });
     }
 
     renderDashboard() {
         const container = $(`#container-dashboard`);
+        const showConcentradoBtn = this.accessLevel >= 2;
+        const showNewMovementBtn = this.accessLevel <= 2;
+        
         container.html(`
             <div class="p-4">
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
@@ -92,20 +137,29 @@ class App extends Templates {
                 </div>
                 
                 <div class="flex gap-3 mb-4">
-                    <button id="btnConcentrado" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition">
-                        <i class="icon-chart mr-2"></i>Concentrado de clientes
-                    </button>
-                    <button id="btnNuevoMovimiento" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">
-                        <i class="icon-plus mr-2"></i>Registrar nuevo movimiento
-                    </button>
+                    ${showConcentradoBtn ? `
+                        <button id="btnConcentrado" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition">
+                            <i class="icon-chart mr-2"></i>Concentrado de clientes
+                        </button>
+                    ` : ''}
+                    ${showNewMovementBtn ? `
+                        <button id="btnNuevoMovimiento" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition">
+                            <i class="icon-plus mr-2"></i>Registrar nuevo movimiento
+                        </button>
+                    ` : ''}
                 </div>
                 
                 <div id="dashboardTable"></div>
             </div>
         `);
 
-        $('#btnConcentrado').on('click', () => this.renderConcentrado());
-        $('#btnNuevoMovimiento').on('click', () => this.addMovimiento());
+        if (showConcentradoBtn) {
+            $('#btnConcentrado').on('click', () => this.renderConcentrado());
+        }
+        
+        if (showNewMovementBtn) {
+            $('#btnNuevoMovimiento').on('click', () => this.addMovimiento());
+        }
 
         this.updateDashboardTotals();
         this.lsMovimientos('dashboardTable');
@@ -138,64 +192,79 @@ class App extends Templates {
     }
 
     filterBarMovimientos() {
+        const filterData = [
+            {
+                opc: "input",
+                type: "date",
+                id: "capture_date",
+                lbl: "Fecha de captura",
+                class: "col-12 col-md-4",
+                onchange: "app.lsMovimientos('tableMovimientos')"
+            }
+        ];
+        
+        if (this.accessLevel <= 2) {
+            filterData.push({
+                opc: "button",
+                id: "btnAddMovimiento",
+                text: "Nuevo movimiento",
+                class: "col-12 col-md-3",
+                className: "w-full",
+                color_btn: "primary",
+                onClick: () => this.addMovimiento()
+            });
+        }
+        
         this.createfilterBar({
             parent: "filterBarMovimientos",
-            data: [
-                {
-                    opc: "input",
-                    type: "date",
-                    id: "capture_date",
-                    lbl: "Fecha de captura",
-                    class: "col-12 col-md-4",
-                    onchange: "app.lsMovimientos('tableMovimientos')"
-                },
-                {
-                    opc: "button",
-                    id: "btnAddMovimiento",
-                    text: "Nuevo movimiento",
-                    class: "col-12 col-md-3",
-                    className: "w-full",
-                    color_btn: "primary",
-                    onClick: () => this.addMovimiento()
-                }
-            ]
+            data: filterData
         });
 
         setTimeout(() => {
-            $('#capture_date').val(moment().format('YYYY-MM-DD'));
+            const today = moment().format('YYYY-MM-DD');
+            $('#capture_date').val(today);
+            
+            if (this.accessLevel === 1) {
+                $('#capture_date').attr('max', today);
+            }
         }, 100);
     }
 
     filterBarConcentrado() {
+        const filterData = [
+            {
+                opc: "input",
+                type: "date",
+                id: "start_date",
+                lbl: "Fecha inicial",
+                class: "col-12 col-md-3",
+                onchange: "app.lsConcentrado()"
+            },
+            {
+                opc: "input",
+                type: "date",
+                id: "end_date",
+                lbl: "Fecha final",
+                class: "col-12 col-md-3",
+                onchange: "app.lsConcentrado()"
+            }
+        ];
+        
+        if (this.accessLevel >= 2) {
+            filterData.push({
+                opc: "button",
+                id: "btnExportExcel",
+                text: "Exportar a Excel",
+                class: "col-12 col-md-3",
+                className: "w-full",
+                color_btn: "success",
+                onClick: () => this.exportToExcel()
+            });
+        }
+        
         this.createfilterBar({
             parent: "filterBarConcentrado",
-            data: [
-                {
-                    opc: "input",
-                    type: "date",
-                    id: "start_date",
-                    lbl: "Fecha inicial",
-                    class: "col-12 col-md-3",
-                    onchange: "app.lsConcentrado()"
-                },
-                {
-                    opc: "input",
-                    type: "date",
-                    id: "end_date",
-                    lbl: "Fecha final",
-                    class: "col-12 col-md-3",
-                    onchange: "app.lsConcentrado()"
-                },
-                {
-                    opc: "button",
-                    id: "btnExportExcel",
-                    text: "Exportar a Excel",
-                    class: "col-12 col-md-3",
-                    className: "w-full",
-                    color_btn: "success",
-                    onClick: () => this.exportToExcel()
-                }
-            ]
+            data: filterData
         });
 
         setTimeout(() => {
@@ -264,6 +333,14 @@ class App extends Templates {
     }
 
     addMovimiento() {
+        if (this.accessLevel >= 3) {
+            alert({ 
+                icon: "warning", 
+                text: "No tiene permisos para registrar movimientos" 
+            });
+            return;
+        }
+        
         this.createModalForm({
             id: 'formMovimientoAdd',
             data: { opc: 'addMovimiento', udn: 1 },
@@ -277,6 +354,8 @@ class App extends Templates {
                     alert({ icon: "success", text: response.message });
                     this.lsMovimientos('tableMovimientos');
                     this.updateDashboardTotals();
+                } else if (response.status === 403) {
+                    alert({ icon: "warning", text: response.message });
                 } else {
                     alert({ icon: "error", text: response.message });
                 }
@@ -289,6 +368,14 @@ class App extends Templates {
     }
 
     async editMovimiento(id) {
+        if (this.accessLevel >= 3) {
+            alert({ 
+                icon: "warning", 
+                text: "No tiene permisos para editar movimientos" 
+            });
+            return;
+        }
+        
         const request = await useFetch({ 
             url: this._link, 
             data: { opc: "getMovimiento", id } 
@@ -313,6 +400,8 @@ class App extends Templates {
                     alert({ icon: "success", text: response.message });
                     this.lsMovimientos('tableMovimientos');
                     this.updateDashboardTotals();
+                } else if (response.status === 403) {
+                    alert({ icon: "warning", text: response.message });
                 } else {
                     alert({ icon: "error", text: response.message });
                 }
@@ -389,6 +478,14 @@ class App extends Templates {
     }
 
     deleteMovimiento(id) {
+        if (this.accessLevel >= 3) {
+            alert({ 
+                icon: "warning", 
+                text: "No tiene permisos para eliminar movimientos" 
+            });
+            return;
+        }
+        
         this.swalQuestion({
             opts: {
                 title: "¿Está seguro?",
@@ -402,6 +499,8 @@ class App extends Templates {
                         alert({ icon: "success", text: response.message });
                         this.lsMovimientos('tableMovimientos');
                         this.updateDashboardTotals();
+                    } else if (response.status === 403) {
+                        alert({ icon: "warning", text: response.message });
                     } else {
                         alert({ icon: "error", text: response.message });
                     }

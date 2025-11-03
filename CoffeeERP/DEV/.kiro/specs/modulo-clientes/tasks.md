@@ -208,20 +208,25 @@
     - _Requirements: 2.6, 4.5_
 
 - [ ] 5. Implement access level control
-  - [ ] 5.1 Implement session-based access validation
+  - [x] 5.1 Implement session-based access validation
+
+
     - Add access level validation in controller `init()` method
     - Store user access level in session
     - _Requirements: 5.1, 5.6_
+
 
   - [ ] 5.2 Implement level 1 (Captura) restrictions
     - Restrict to current date movements only
     - Allow register, modify, and view operations
     - Hide consolidated report and export options
+
     - _Requirements: 5.2_
 
   - [ ] 5.3 Implement level 2 (Gerencia) permissions
     - Allow access to consolidated report
     - Enable export to Excel functionality
+
     - Allow viewing all date ranges
     - _Requirements: 5.3_
 
@@ -230,10 +235,12 @@
     - Disable edit and delete operations
 
 
+
     - Allow viewing and exporting only
     - _Requirements: 5.4_
 
-  - [ ] 5.5 Implement level 4 (Administración) permissions
+  - [x] 5.5 Implement level 4 (Administración) permissions
+
     - Enable client management functionality
     - Add module lock/unlock controls
     - Allow all operations across all UDNs

@@ -12,18 +12,41 @@ class ctrl extends mdl {
 
     function init() {
         $udn = $_POST['udn'];
+        $accessLevel = $_SESSION['access_level'] ?? 1;
         
         return [
             'clients' => $this->listClients([1, $udn]),
             'movementTypes' => $this->lsMovementTypes(),
-            'paymentMethods' => $this->lsPaymentMethods()
+            'paymentMethods' => $this->lsPaymentMethods(),
+            'accessLevel' => $accessLevel,
+            'userId' => $_SESSION['user_id'] ?? 1,
+            'userName' => $_SESSION['user_name'] ?? 'Usuario'
         ];
+    }
+    
+    function validateAccessLevel($requiredLevel) {
+        $userLevel = $_SESSION['access_level'] ?? 1;
+        
+        if ($userLevel < $requiredLevel) {
+            return [
+                'status' => 403,
+                'message' => 'No tiene permisos para realizar esta acción'
+            ];
+        }
+        
+        return ['status' => 200];
     }
 
     function ls() {
+        $accessValidation = $this->validateAccessLevel(1);
+        if ($accessValidation['status'] !== 200) {
+            return $accessValidation;
+        }
+        
         $__row = [];
         $captureDate = $_POST['capture_date'];
         $udn = $_POST['udn'];
+        $accessLevel = $_SESSION['access_level'] ?? 1;
         
         $ls = $this->listMovements([1, $captureDate, $udn]);
         
@@ -36,17 +59,19 @@ class ctrl extends mdl {
                 'onclick' => 'app.viewMovimiento(' . $key['id'] . ')'
             ];
             
-            $a[] = [
-                'class'   => 'btn btn-sm btn-primary me-1',
-                'html'    => '<i class="icon-pencil"></i>',
-                'onclick' => 'app.editMovimiento(' . $key['id'] . ')'
-            ];
-            
-            $a[] = [
-                'class'   => 'btn btn-sm btn-danger',
-                'html'    => '<i class="icon-trash"></i>',
-                'onclick' => 'app.deleteMovimiento(' . $key['id'] . ')'
-            ];
+            if ($accessLevel <= 2) {
+                $a[] = [
+                    'class'   => 'btn btn-sm btn-primary me-1',
+                    'html'    => '<i class="icon-pencil"></i>',
+                    'onclick' => 'app.editMovimiento(' . $key['id'] . ')'
+                ];
+                
+                $a[] = [
+                    'class'   => 'btn btn-sm btn-danger',
+                    'html'    => '<i class="icon-trash"></i>',
+                    'onclick' => 'app.deleteMovimiento(' . $key['id'] . ')'
+                ];
+            }
             
             $__row[] = [
                 'id'              => $key['id'],
@@ -71,6 +96,11 @@ class ctrl extends mdl {
     }
 
     function lsConcentrado() {
+        $accessValidation = $this->validateAccessLevel(2);
+        if ($accessValidation['status'] !== 200) {
+            return $accessValidation;
+        }
+        
         $__row = [];
         $startDate = $_POST['start_date'];
         $endDate = $_POST['end_date'];
@@ -109,6 +139,11 @@ class ctrl extends mdl {
     }
 
     function addMovimiento() {
+        $accessValidation = $this->validateAccessLevel(1);
+        if ($accessValidation['status'] !== 200) {
+            return $accessValidation;
+        }
+        
         $status = 500;
         $message = 'Error al registrar el movimiento';
         
@@ -170,6 +205,19 @@ class ctrl extends mdl {
     }
 
     function editMovimiento() {
+        $accessValidation = $this->validateAccessLevel(1);
+        if ($accessValidation['status'] !== 200) {
+            return $accessValidation;
+        }
+        
+        $accessLevel = $_SESSION['access_level'] ?? 1;
+        if ($accessLevel >= 3) {
+            return [
+                'status' => 403,
+                'message' => 'Los usuarios de nivel Contabilidad/Dirección no pueden modificar registros'
+            ];
+        }
+        
         $status = 500;
         $message = 'Error al editar el movimiento';
         
@@ -262,6 +310,19 @@ class ctrl extends mdl {
     }
 
     function deleteMovimiento() {
+        $accessValidation = $this->validateAccessLevel(1);
+        if ($accessValidation['status'] !== 200) {
+            return $accessValidation;
+        }
+        
+        $accessLevel = $_SESSION['access_level'] ?? 1;
+        if ($accessLevel >= 3) {
+            return [
+                'status' => 403,
+                'message' => 'Los usuarios de nivel Contabilidad/Dirección no pueden eliminar registros'
+            ];
+        }
+        
         $status = 500;
         $message = 'Error al eliminar el movimiento';
         
