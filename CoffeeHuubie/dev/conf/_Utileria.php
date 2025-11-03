@@ -157,8 +157,8 @@ class Utileria{
         ];
 
         // Generar las versiones cortas automáticamente con `array_map()`
-        $shortWeeks = array_map(fn($m) => mb_substr($m, 0, 3, 'UTF-8'), $weeks);
-
+        //$shortWeeks = array_map(fn($m) => mb_substr($m, 0, 3, 'UTF-8'), $weeks);
+        $shortWeeks = [];
         // Validar si el número es válido
         if (!isset($weeks[$num])) return "Mes inválido";
 

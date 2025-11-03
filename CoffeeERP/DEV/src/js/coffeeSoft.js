@@ -2339,6 +2339,51 @@ class Components extends Complements {
         $(`#${opts.parent}`).html(container);
     }
 
+    infoCard(options) {
+        const defaults = {
+            parent: "root",
+            id: "infoCardKPI",
+            class: "",
+            theme: "light",
+            json: []
+        };
+        const opts = Object.assign({}, defaults, options);
+        const isDark = opts.theme === "dark";
+        const cardBase = isDark
+            ? "bg-[#1F2A37] text-white border rounded "
+            : "bg-white text-gray-800 border rounded ";
+        const titleColor = isDark ? "text-gray-300" : "text-gray-600";
+
+        const renderCard = (card, i = "") => {
+            const box = $("<div>", {
+                id: `${opts.id}_${i}`,
+                class: `${cardBase} p-4`
+            });
+            const title = $("<p>", {
+                class: `text-sm ${titleColor}`,
+                text: card.title
+            });
+            const value = $("<p>", {
+                id: card.id || "",
+                class: `text-2xl text-end font-bold ${card.data?.color || "text-gray-800"}`,
+                text: card.data?.value
+            });
+            box.append(title, value);
+            return box;
+        };
+
+        const container = $("<div>", {
+            id: opts.id,
+            class: `grid grid-cols-2 md:grid-cols-5 gap-4 ${opts.class}`
+        });
+
+        opts.json.forEach((item, i) => {
+            container.append(renderCard(item, i));
+        });
+
+        $(`#${opts.parent}`).html(container);
+    }
+
 
 }
 

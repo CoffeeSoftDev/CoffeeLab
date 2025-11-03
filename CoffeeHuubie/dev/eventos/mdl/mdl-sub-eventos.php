@@ -555,4 +555,112 @@ class mdl extends CRUD {
             'data' => $array['data']
         ]);
     }
+
+    // Package check product list
+
+    function getEventsPackage($array) {
+        $query = "
+            SELECT 
+                id
+            FROM {$this->bd}evt_events_package
+            WHERE event_id = ? 
+            AND package_id = ?
+        ";
+        
+        return $this->_Read($query, $array)[0];
+    }
+
+
+    function maxEventPackageId(){
+        return $this->_Select([
+            'table'  => "{$this->bd}evt_events_package",
+            'values' => 'MAX(id) AS id',
+        ])[0]['id'];
+    }
+
+    function createPackageCheck($array) {
+              
+        $result = $this->_Insert([
+            'table'  => "{$this->bd}evt_package_check",
+            'values' => $array['values'],
+            'data'   => $array['data']
+        ]);  
+           
+        if ($result) {
+            return $this->maxPackageCheckId();
+        }
+        
+        return false;
+    }
+
+    function maxPackageCheckId() {
+        $result = $this->_Select([
+            'table'  => "{$this->bd}evt_package_check",
+            'values' => 'MAX(id) as max_id'
+        ]);
+        
+        return $result[0]['max_id'] ?? null;
+    }
+
+    function getProductsByPackage($array) {
+        $query = "
+            SELECT 
+                products_id, 
+                quantity
+            FROM {$this->bd}evt_package_products
+            WHERE package_id = ? 
+          
+        ";
+        
+        return $this->_Read($query, $array);
+    }
+
+    function createProductCheck($array) {
+      
+         return $this->_Insert([
+            'table'  => "{$this->bd}evt_check_products",
+            'values' => $array['values'],
+            'data'   => $array['data']
+        ]);  
+    }
+
+    function getPackageCheckByEventPackageId($array) {
+        $query = "
+            SELECT 
+                id, 
+                events_package_id, 
+                created_at
+            FROM {$this->bd}evt_package_check
+            WHERE events_package_id = ?
+        ";
+        
+        $result = $this->_Read($query, $array);
+        return $result[0] ?? null;
+    }
+
+    function listProductsCheckByPackageCheckId($array) {
+        $query = "
+            SELECT 
+                cp.id as check_product_id,
+                cp.product_id,
+                cp.active,
+                p.name as product_name,
+                p.id_classification
+            FROM {$this->bd}evt_check_products cp
+            LEFT JOIN {$this->bd}evt_products p ON cp.product_id = p.id
+            WHERE cp.package_check_id = ?
+        ";
+        
+        return $this->_Read($query, $array);
+    }
+
+    function updateProductCheckActive($array) {
+        return $this->_Update([
+            'table'  => "{$this->bd}evt_check_products",
+            'values' => $array['values'],
+            'where'  => 'id = ?',
+            'data'   => $array['data']
+        ]);
+    }
+
 }

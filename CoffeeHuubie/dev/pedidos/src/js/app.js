@@ -19,10 +19,8 @@ $(async () => {
     normal = new CatalogProduct(api_catalogo, 'root');
 
     app.render();
-    // app.actualizarFechaHora();
+    app.actualizarFechaHora();
 
-    // idFolio = 25;
-    // app.editOrder(idFolio);
 
     setInterval(() => {
         app.actualizarFechaHora();
@@ -46,10 +44,10 @@ class App extends Templates {
             parent: "root",
             id: this.PROJECT_NAME,
             class: 'flex mx-2 my-2 p-2',
-            heightPreset: 'viewport', // Usa el preset estándar
+            heightPreset: 'viewport',
             card: {
                 filterBar: { class: 'w-full my-3 ', id: 'filterBar' },
-                container: { class: 'w-100 h-full my-3 bg-[#1F2A37] rounded p-3', id: 'container' + this.PROJECT_NAME }
+                container: { class: 'w-full my-3 bg-[#1F2A37] h-screen rounded p-3', id: 'container' + this.PROJECT_NAME }
             }
         });
 
@@ -95,6 +93,17 @@ class App extends Templates {
 
                 {
                     opc: "button",
+                    id: "btnDailyClose",
+                    text: "Cierre del día",
+                    class: "col-sm-2",
+                    className: 'w-100',
+                    color_btn: 'success',
+                    icono: "icon-receipt",
+                    onClick: () => this.generateDailyClose()
+                },
+
+                {
+                    opc: "button",
                     className: "w-100",
                     class: "col-sm-2",
                     color_btn: "secondary",
@@ -105,15 +114,7 @@ class App extends Templates {
                     }
                 },
 
-                {
-                    opc: "button",
-                    id: "btnDailyClose",
-                    text: "Cierre del día",
-                    class: "col-sm-2",
-                    className: "bg-amber-500 hover:bg-amber-600 text-white font-semibold w-100",
-                    icono: "icon-receipt",
-                    onClick: () => this.generateDailyClose()
-                },
+
 
             ]
         });
@@ -467,8 +468,8 @@ class App extends Templates {
             methods: {
                 send: (response) => {
                     if (response.status === 200) {
-                        this.updateBadgeUI(orderId, newStatus);
-
+                        // this.updateBadgeUI(orderId, newStatus);
+                        this.ls()
                         alert({
                             icon: 'success',
                             title: 'Estado actualizado',
@@ -490,28 +491,7 @@ class App extends Templates {
         });
     }
 
-    updateBadgeUI(orderId, newStatus) {
-        const badge = $(`span[data-order-id="${orderId}"]`);
 
-        if (badge.length === 0) return;
-
-        const isDelivered = newStatus === 1;
-        const bgColor = isDelivered ? 'bg-green-500' : 'bg-red-500';
-        const icon = isDelivered ? 'icon-ok' : 'icon-cancel';
-        const text = isDelivered ? 'Entregado' : 'No entregado';
-
-        const folio = badge.closest('tr').find('td:eq(1)').text();
-
-        badge.fadeOut(200, function () {
-            $(this)
-                .removeClass('bg-green-500 bg-red-500')
-                .addClass(bgColor)
-                .attr('data-delivered', newStatus)
-                .attr('onclick', `app.handleDeliveryClick(${orderId}, ${newStatus}, '${folio}')`)
-                .html(`<i class="${icon}"></i> ${text}`)
-                .fadeIn(200);
-        });
-    }
 
     jsonOrder() {
         return [
@@ -1666,14 +1646,7 @@ class App extends Templates {
         bootbox.dialog({
             title: `<i class="icon-calendar"></i> Cierre del Día - Pedidos de Pastelería`,
             message: modalContent,
-            // size: 'large',
-            closeButton: true,
-            buttons: {
-                close: {
-                    label: 'Cerrar',
-                    className: 'btn-secondary'
-                }
-            }
+            closeButton: true
         });
 
         $('#btnGenerateTicket').on('click', () => {
@@ -1760,7 +1733,6 @@ class App extends Templates {
 
                 <div class="mt-6 text-center text-xs text-gray-500">
                     <p>Generado: ${moment().format('DD/MM/YYYY HH:mm:ss')}</p>
-                    <p class="mt-2">¡Gracias por usar CoffeeSoft!</p>
                 </div>
             </div>
         `;
@@ -1827,7 +1799,6 @@ class App extends Templates {
 
                 <div class="mt-6 text-center text-xs text-gray-500">
                     <p>Generado: ${moment().format('DD/MM/YYYY HH:mm:ss')}</p>
-                    <p class="mt-2">¡Gracias por usar CoffeeSoft!</p>
                 </div>
             </div>
         `;
@@ -1853,10 +1824,6 @@ class App extends Templates {
                         printWindow.print();
                         return false;
                     }
-                },
-                close: {
-                    label: 'Cerrar',
-                    className: 'btn-secondary'
                 }
             }
         });

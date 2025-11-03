@@ -403,6 +403,8 @@ class MEvent extends CRUD {
         ]);
     }
 
+ 
+
     function deleteEventPackage($array)
     {
         return $this->_Delete([
@@ -412,12 +414,31 @@ class MEvent extends CRUD {
         ]);
     }
 
-    function maxEventPackageId()
-    {
+    function maxEventPackageId(){
         return $this->_Select([
             'table'  => "{$this->bd}evt_events_package",
             'values' => 'MAX(id) AS id',
         ])[0]['id'];
+    }
+
+    function getEventPackageByEventAndPackage($array)
+    {
+        return $this->_Select([
+            'table'  => "{$this->bd}evt_events_package",
+            'values' => 'id, quantity, price',
+            'where'  => 'event_id = ? AND package_id = ? AND product_id IS NULL',
+            'data'   => $array
+        ]);
+    }
+
+    function updateEventPackage($array)
+    {
+        return $this->_Update([
+            'table'  => "{$this->bd}evt_events_package",
+            'values' => $array['values'],
+            'where'  => $array['where'],
+            'data'   => $array['data']
+        ]);
     }
 
 
@@ -587,19 +608,14 @@ class MEvent extends CRUD {
         return $this->_Read($query, $array);
     }
 
-    function createPackageCheck($events_package_id) {
-        
-        $data = [
-            'events_package_id' => $events_package_id,
-            'created_at'        => date('Y-m-d H:i:s')
-        ];
-        
+    function createPackageCheck($array) {
+              
         $result = $this->_Insert([
             'table'  => "{$this->bd}evt_package_check",
-            'values' => $this->util->sql($data)['values'],
-            'data'   => $this->util->sql($data)['data']
-        ]);
-        
+            'values' => $array['values'],
+            'data'   => $array['data']
+        ]);  
+           
         if ($result) {
             return $this->maxPackageCheckId();
         }

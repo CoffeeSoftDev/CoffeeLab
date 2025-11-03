@@ -1,5 +1,4 @@
 <?php
-session_start();
 
 if (empty($_POST['opc'])) exit(0);
 
@@ -12,436 +11,409 @@ require_once '../mdl/mdl-clientes.php';
 class ctrl extends mdl {
 
     function init() {
+        $udn = $_POST['udn'];
+        $accessLevel = $_SESSION['access_level'] ?? 1;
+        
         return [
-            'udn'            => $this->lsUDN(),
-            'movementTypes'  => $this->lsMovementTypes(),
-            'paymentMethods' => $this->lsPaymentMethods()
+            'clients' => $this->listClients([1, $udn]),
+            'movementTypes' => $this->lsMovementTypes(),
+            'paymentMethods' => $this->lsPaymentMethods(),
+            'accessLevel' => $accessLevel,
+            'userId' => $_SESSION['user_id'] ?? 1,
+            'userName' => $_SESSION['user_name'] ?? 'Usuario'
         ];
     }
+    
+    function validateAccessLevel($requiredLevel) {
+        $userLevel = $_SESSION['access_level'] ?? 1;
+        
+        if ($userLevel < $requiredLevel) {
+            return [
+                'status' => 403,
+                'message' => 'No tiene permisos para realizar esta acción'
+            ];
+        }
+        
+        return ['status' => 200];
+    }
 
-    function lsMovements() {
+    function ls() {
+        $accessValidation = $this->validateAccessLevel(1);
+        if ($accessValidation['status'] !== 200) {
+            return $accessValidation;
+        }
+        
         $__row = [];
+        $captureDate = $_POST['capture_date'];
         $udn = $_POST['udn'];
-        $movementType = isset($_POST['movement_type']) ? $_POST['movement_type'] : '';
-
-        $ls = $this->listMovements([$udn]);
-
+        $accessLevel = $_SESSION['access_level'] ?? 1;
+        
+        $ls = $this->listMovements([1, $captureDate, $udn]);
+        
         foreach ($ls as $key) {
-            if (!empty($movementType) && $key['movement_type'] != $movementType) {
-                continue;
+            $a = [];
+            
+            $a[] = [
+                'class'   => 'btn btn-sm btn-info me-1',
+                'html'    => '<i class="icon-eye"></i>',
+                'onclick' => 'app.viewMovimiento(' . $key['id'] . ')'
+            ];
+            
+            if ($accessLevel <= 2) {
+                $a[] = [
+                    'class'   => 'btn btn-sm btn-primary me-1',
+                    'html'    => '<i class="icon-pencil"></i>',
+                    'onclick' => 'app.editMovimiento(' . $key['id'] . ')'
+                ];
+                
+                $a[] = [
+                    'class'   => 'btn btn-sm btn-danger',
+                    'html'    => '<i class="icon-trash"></i>',
+                    'onclick' => 'app.deleteMovimiento(' . $key['id'] . ')'
+                ];
             }
-
+            
             $__row[] = [
                 'id'              => $key['id'],
-                'Cliente'         => $key['customer_name'],
+                'Cliente'         => $key['client_name'],
                 'Tipo'            => renderMovementType($key['movement_type']),
-                'Forma de pago'   => $key['method_pay'],
+                'Método de pago'  => renderPaymentMethod($key['payment_method']),
                 'Monto'           => [
                     'html'  => evaluar($key['amount']),
                     'class' => 'text-end'
                 ],
-                'dropdown' => dropdown($key['id'])
+                'a'               => $a
             ];
         }
+        
+        $totals = $this->getDailyTotals([$captureDate, $udn]);
+        
+        return [
+            'row'    => $__row,
+            'ls'     => $ls,
+            'totals' => $totals
+        ];
+    }
 
+    function lsConcentrado() {
+        $accessValidation = $this->validateAccessLevel(2);
+        if ($accessValidation['status'] !== 200) {
+            return $accessValidation;
+        }
+        
+        $__row = [];
+        $startDate = $_POST['start_date'];
+        $endDate = $_POST['end_date'];
+        $udn = $_POST['udn'];
+        
+        $ls = $this->getConsolidatedReport([$startDate, $endDate, $udn]);
+        
+        foreach ($ls as $key) {
+            $__row[] = [
+                'id'              => $key['id'],
+                'Cliente'         => $key['client_name'],
+                'Saldo inicial'   => [
+                    'html'  => evaluar($key['initial_balance']),
+                    'class' => 'text-end'
+                ],
+                'Consumos'        => [
+                    'html'  => evaluar($key['total_consumptions']),
+                    'class' => 'text-end bg-green-100 text-green-800'
+                ],
+                'Pagos'           => [
+                    'html'  => evaluar($key['total_payments']),
+                    'class' => 'text-end bg-orange-100 text-orange-800'
+                ],
+                'Saldo final'     => [
+                    'html'  => evaluar($key['final_balance']),
+                    'class' => 'text-end font-bold'
+                ],
+                'Movimientos'     => $key['movement_count']
+            ];
+        }
+        
         return [
             'row' => $__row,
             'ls'  => $ls
         ];
     }
 
-    function getMovement() {
-        $id = $_POST['id'];
-        $status = 404;
-        $message = 'Movimiento no encontrado';
+    function addMovimiento() {
+        $accessValidation = $this->validateAccessLevel(1);
+        if ($accessValidation['status'] !== 200) {
+            return $accessValidation;
+        }
+        
+        $status = 500;
+        $message = 'Error al registrar el movimiento';
+        
+        try {
+            if (empty($_POST['client_id']) || empty($_POST['amount'])) {
+                return [
+                    'status' => 400,
+                    'message' => 'Faltan campos obligatorios'
+                ];
+            }
+            
+            if ($_POST['movement_type'] !== 'consumo' && $_POST['payment_method'] === 'n/a') {
+                return [
+                    'status' => 400,
+                    'message' => 'Debe seleccionar un método de pago válido para pagos y abonos'
+                ];
+            }
+            
+            $currentBalance = $this->getClientBalance([$_POST['client_id']]);
+            
+            $newBalance = $this->calculateNewBalance(
+                $currentBalance,
+                $_POST['movement_type'],
+                $_POST['amount']
+            );
+            
+            $_POST['previous_balance'] = $currentBalance;
+            $_POST['new_balance'] = $newBalance;
+            $_POST['capture_date'] = $_POST['capture_date'] ?? date('Y-m-d');
+            $_POST['created_by'] = $_SESSION['user_id'] ?? 1;
+            $_POST['active'] = 1;
+            
+            $create = $this->createMovement($this->util->sql($_POST));
+            
+            if ($create) {
+                $this->updateClientBalance([$newBalance, $_POST['client_id']]);
+                
+                $this->logMovementAction($this->util->sql([
+                    'movement_id' => $create,
+                    'client_id' => $_POST['client_id'],
+                    'action' => 'create',
+                    'user_id' => $_SESSION['user_id'] ?? 1,
+                    'new_data' => json_encode($_POST)
+                ]));
+                
+                $status = 200;
+                $message = 'Movimiento registrado correctamente';
+            }
+            
+        } catch (Exception $e) {
+            $status = 500;
+            $message = 'Error del servidor: ' . $e->getMessage();
+        }
+        
+        return [
+            'status' => $status,
+            'message' => $message
+        ];
+    }
+
+    function editMovimiento() {
+        $accessValidation = $this->validateAccessLevel(1);
+        if ($accessValidation['status'] !== 200) {
+            return $accessValidation;
+        }
+        
+        $accessLevel = $_SESSION['access_level'] ?? 1;
+        if ($accessLevel >= 3) {
+            return [
+                'status' => 403,
+                'message' => 'Los usuarios de nivel Contabilidad/Dirección no pueden modificar registros'
+            ];
+        }
+        
+        $status = 500;
+        $message = 'Error al editar el movimiento';
+        
+        try {
+            $id = $_POST['id'];
+            $oldMovement = $this->getMovementById([$id]);
+            
+            if (!$oldMovement) {
+                return [
+                    'status' => 404,
+                    'message' => 'Movimiento no encontrado'
+                ];
+            }
+            
+            if ($_POST['movement_type'] !== 'consumo' && $_POST['payment_method'] === 'n/a') {
+                return [
+                    'status' => 400,
+                    'message' => 'Debe seleccionar un método de pago válido'
+                ];
+            }
+            
+            $currentBalance = $this->getClientBalance([$_POST['client_id']]);
+            
+            $balanceWithoutOldMovement = $this->reverseMovement(
+                $currentBalance,
+                $oldMovement['movement_type'],
+                $oldMovement['amount']
+            );
+            
+            $newBalance = $this->calculateNewBalance(
+                $balanceWithoutOldMovement,
+                $_POST['movement_type'],
+                $_POST['amount']
+            );
+            
+            $_POST['previous_balance'] = $balanceWithoutOldMovement;
+            $_POST['new_balance'] = $newBalance;
+            $_POST['updated_by'] = $_SESSION['user_id'] ?? 1;
+            
+            $update = $this->updateMovement($this->util->sql($_POST, 1));
+            
+            if ($update) {
+                $this->updateClientBalance([$newBalance, $_POST['client_id']]);
+                
+                $this->logMovementAction($this->util->sql([
+                    'movement_id' => $id,
+                    'client_id' => $_POST['client_id'],
+                    'action' => 'update',
+                    'user_id' => $_SESSION['user_id'] ?? 1,
+                    'old_data' => json_encode($oldMovement),
+                    'new_data' => json_encode($_POST)
+                ]));
+                
+                $status = 200;
+                $message = 'Movimiento actualizado correctamente';
+            }
+            
+        } catch (Exception $e) {
+            $status = 500;
+            $message = 'Error del servidor: ' . $e->getMessage();
+        }
+        
+        return [
+            'status' => $status,
+            'message' => $message
+        ];
+    }
+
+    function getMovimiento() {
+        $status = 500;
+        $message = 'Error al obtener el movimiento';
         $data = null;
-
-        $movement = $this->getMovementById([$id]);
-
+        
+        $movement = $this->getMovementById([$_POST['id']]);
+        
         if ($movement) {
             $status = 200;
             $message = 'Movimiento encontrado';
-            
-            $currentBalance = floatval($movement['current_balance']);
-            $amount = floatval($movement['amount']);
-            
-            if ($movement['movement_type'] == 'Consumo a crédito') {
-                $newBalance = $currentBalance + $amount;
-            } else {
-                $newBalance = $currentBalance - $amount;
-            }
-            
-            $movement['new_balance'] = $newBalance;
             $data = $movement;
+        } else {
+            $status = 404;
+            $message = 'Movimiento no encontrado';
         }
-
-        return [
-            'status'  => $status,
-            'message' => $message,
-            'data'    => $data
-        ];
-    }
-
-    function addMovement() {
-        $status = 500;
-        $message = 'Error al registrar el movimiento';
-
-        $udn = $_POST['udn'];
-        $customerId = $_POST['customer_id'];
-        $movementType = $_POST['movement_type'];
-        $amount = floatval($_POST['amount']);
-
-        $dailyClosure = $this->getCurrentDailyClosure([$udn]);
-        if (!$dailyClosure) {
-            return [
-                'status' => 400,
-                'message' => 'No hay corte diario activo para esta unidad de negocio'
-            ];
-        }
-
-        $customer = $this->getCustomerById([$customerId]);
-        if (!$customer || $customer['active'] != 1) {
-            return [
-                'status' => 404,
-                'message' => 'Cliente no encontrado o inactivo'
-            ];
-        }
-
-        if ($movementType == 'Consumo a crédito') {
-            $_POST['method_pay'] = 'N/A';
-        }
-
-        if ($movementType == 'Pago total' || $movementType == 'Anticipo') {
-            $currentBalance = floatval($customer['balance']);
-            if ($amount > $currentBalance) {
-                return [
-                    'status' => 400,
-                    'message' => 'El monto excede la deuda actual del cliente'
-                ];
-            }
-        }
-
-        $_POST['daily_closure_id'] = $dailyClosure['id'];
-        $_POST['created_at'] = date('Y-m-d H:i:s');
-        $_POST['updated_by'] = $_SESSION['user_name'] ?? 'Sistema';
-
-        $create = $this->createMovement($this->util->sql($_POST));
-
-        if ($create) {
-            $currentBalance = floatval($customer['balance']);
-            
-            if ($movementType == 'Consumo a crédito') {
-                $newBalance = $currentBalance + $amount;
-            } else {
-                $newBalance = $currentBalance - $amount;
-            }
-
-            $this->updateCustomerBalance([$newBalance, $customerId]);
-
-            $status = 200;
-            $message = 'Movimiento registrado correctamente';
-        }
-
+        
         return [
             'status' => $status,
             'message' => $message,
-            'new_balance' => $newBalance ?? 0
+            'data' => $data
         ];
     }
 
-    function editMovement() {
-        $status = 500;
-        $message = 'Error al actualizar el movimiento';
-
-        $id = $_POST['id'];
-        $newAmount = floatval($_POST['amount']);
-        $newMovementType = $_POST['movement_type'];
-
-        $originalMovement = $this->getMovementById([$id]);
-        if (!$originalMovement) {
+    function deleteMovimiento() {
+        $accessValidation = $this->validateAccessLevel(1);
+        if ($accessValidation['status'] !== 200) {
+            return $accessValidation;
+        }
+        
+        $accessLevel = $_SESSION['access_level'] ?? 1;
+        if ($accessLevel >= 3) {
             return [
-                'status' => 404,
-                'message' => 'Movimiento no encontrado'
+                'status' => 403,
+                'message' => 'Los usuarios de nivel Contabilidad/Dirección no pueden eliminar registros'
             ];
         }
-
-        $customerId = $originalMovement['customer_id'];
-        $customer = $this->getCustomerById([$customerId]);
-        $currentBalance = floatval($customer['balance']);
-
-        $originalAmount = floatval($originalMovement['amount']);
-        $originalType = $originalMovement['movement_type'];
-
-        if ($originalType == 'Consumo a crédito') {
-            $currentBalance -= $originalAmount;
-        } else {
-            $currentBalance += $originalAmount;
-        }
-
-        if ($newMovementType == 'Consumo a crédito') {
-            $_POST['method_pay'] = 'N/A';
-            $newBalance = $currentBalance + $newAmount;
-        } else {
-            if ($newAmount > $currentBalance) {
-                return [
-                    'status' => 400,
-                    'message' => 'El monto excede la deuda actual del cliente'
-                ];
-            }
-            $newBalance = $currentBalance - $newAmount;
-        }
-
-        $_POST['updated_by'] = $_SESSION['user_name'] ?? 'Sistema';
-
-        $update = $this->updateMovement($this->util->sql($_POST, 1));
-
-        if ($update) {
-            $this->updateCustomerBalance([$newBalance, $customerId]);
-            $status = 200;
-            $message = 'Movimiento actualizado correctamente';
-        }
-
-        return [
-            'status' => $status,
-            'message' => $message
-        ];
-    }
-
-    function deleteMovement() {
+        
         $status = 500;
         $message = 'Error al eliminar el movimiento';
-
-        $id = $_POST['id'];
-
-        $movement = $this->getMovementById([$id]);
-        if (!$movement) {
-            return [
-                'status' => 404,
-                'message' => 'Movimiento no encontrado'
-            ];
-        }
-
-        $customerId = $movement['customer_id'];
-        $customer = $this->getCustomerById([$customerId]);
-        $currentBalance = floatval($customer['balance']);
-        $amount = floatval($movement['amount']);
-
-        if ($movement['movement_type'] == 'Consumo a crédito') {
-            $newBalance = $currentBalance - $amount;
-        } else {
-            $newBalance = $currentBalance + $amount;
-        }
-
-        $delete = $this->deleteMovementById([$id]);
-
-        if ($delete) {
-            $this->updateCustomerBalance([$newBalance, $customerId]);
-            $status = 200;
-            $message = 'Movimiento eliminado correctamente';
-        }
-
-        return [
-            'status' => $status,
-            'message' => $message
-        ];
-    }
-
-    function lsCustomers() {
-        $__row = [];
-        $udn = $_POST['udn'];
-        $active = isset($_POST['active']) ? $_POST['active'] : 1;
-
-        $ls = $this->listCustomers([$udn, $active]);
-
-        foreach ($ls as $key) {
-            $a = [];
-
-            if ($key['active'] == 1) {
-                $a[] = [
-                    'class'   => 'btn btn-sm btn-primary me-1',
-                    'html'    => '<i class="icon-pencil"></i>',
-                    'onclick' => 'customerManager.editCustomer(' . $key['id'] . ')'
-                ];
-
-                $a[] = [
-                    'class'   => 'btn btn-sm btn-danger',
-                    'html'    => '<i class="icon-toggle-on"></i>',
-                    'onclick' => 'customerManager.statusCustomer(' . $key['id'] . ', ' . $key['active'] . ')'
-                ];
-            } else {
-                $a[] = [
-                    'class'   => 'btn btn-sm btn-outline-danger',
-                    'html'    => '<i class="icon-toggle-off"></i>',
-                    'onclick' => 'customerManager.statusCustomer(' . $key['id'] . ', ' . $key['active'] . ')'
-                ];
-            }
-
-            $__row[] = [
-                'id'           => $key['id'],
-                'Nombre'       => $key['name'],
-                'Saldo Actual' => [
-                    'html'  => evaluar($key['balance']),
-                    'class' => 'text-end'
-                ],
-                'Estado'       => renderStatus($key['active']),
-                'a'            => $a
-            ];
-        }
-
-        return [
-            'row' => $__row,
-            'ls'  => $ls
-        ];
-    }
-
-    function getCustomer() {
-        $id = $_POST['id'];
-        $status = 404;
-        $message = 'Cliente no encontrado';
-        $data = null;
-
-        $customer = $this->getCustomerById([$id]);
-
-        if ($customer) {
-            $status = 200;
-            $message = 'Cliente encontrado';
-            $data = $customer;
-        }
-
-        return [
-            'status'  => $status,
-            'message' => $message,
-            'data'    => $data
-        ];
-    }
-
-    function addCustomer() {
-        $status = 500;
-        $message = 'Error al registrar el cliente';
-
-        $name = $_POST['name'];
-        $udn = $_POST['udn_id'];
-
-        $exists = $this->existsCustomerByName([$name, $udn]);
-
-        if ($exists) {
-            return [
-                'status' => 409,
-                'message' => 'Ya existe un cliente con ese nombre en esta unidad de negocio'
-            ];
-        }
-
-        $_POST['balance'] = 0.00;
-        $_POST['active'] = 1;
-
-        $create = $this->createCustomer($this->util->sql($_POST));
-
-        if ($create) {
-            $status = 200;
-            $message = 'Cliente registrado correctamente';
-        }
-
-        return [
-            'status' => $status,
-            'message' => $message
-        ];
-    }
-
-    function editCustomer() {
-        $status = 500;
-        $message = 'Error al actualizar el cliente';
-
-        $update = $this->updateCustomer($this->util->sql($_POST, 1));
-
-        if ($update) {
-            $status = 200;
-            $message = 'Cliente actualizado correctamente';
-        }
-
-        return [
-            'status' => $status,
-            'message' => $message
-        ];
-    }
-
-    function statusCustomer() {
-        $status = 500;
-        $message = 'Error al cambiar el estado del cliente';
-
-        $id = $_POST['id'];
-        $newStatus = $_POST['active'];
-
-        if ($newStatus == 0) {
-            $customer = $this->getCustomerById([$id]);
-            if ($customer && floatval($customer['balance']) > 0) {
+        
+        try {
+            $id = $_POST['id'];
+            $movement = $this->getMovementById([$id]);
+            
+            if (!$movement) {
                 return [
-                    'status' => 400,
-                    'message' => 'No se puede desactivar un cliente con saldo pendiente'
+                    'status' => 404,
+                    'message' => 'Movimiento no encontrado'
                 ];
             }
+            
+            $delete = $this->deleteMovementById([0, $id]);
+            
+            if ($delete) {
+                $currentBalance = $this->getClientBalance([$movement['client_id']]);
+                $newBalance = $this->reverseMovement(
+                    $currentBalance,
+                    $movement['movement_type'],
+                    $movement['amount']
+                );
+                
+                $this->updateClientBalance([$newBalance, $movement['client_id']]);
+                
+                $this->logMovementAction($this->util->sql([
+                    'movement_id' => $id,
+                    'client_id' => $movement['client_id'],
+                    'action' => 'delete',
+                    'user_id' => $_SESSION['user_id'] ?? 1,
+                    'old_data' => json_encode($movement)
+                ]));
+                
+                $status = 200;
+                $message = 'Movimiento eliminado correctamente';
+            }
+            
+        } catch (Exception $e) {
+            $status = 500;
+            $message = 'Error del servidor: ' . $e->getMessage();
         }
-
-        $update = $this->updateCustomer($this->util->sql($_POST, 1));
-
-        if ($update) {
-            $status = 200;
-            $message = 'Estado del cliente actualizado correctamente';
-        }
-
+        
         return [
             'status' => $status,
             'message' => $message
         ];
     }
 
-    function getDashboardTotals() {
-        $udn = $_POST['udn'];
+    function calculateNewBalance($currentBalance, $movementType, $amount) {
+        if ($movementType === 'consumo') {
+            return $currentBalance + $amount;
+        } else {
+            return $currentBalance - $amount;
+        }
+    }
 
-        $query = "
-            SELECT 
-                SUM(CASE WHEN movement_type = 'Consumo a crédito' THEN amount ELSE 0 END) as total_consumos,
-                SUM(CASE WHEN movement_type IN ('Anticipo', 'Pago total') AND method_pay = 'Efectivo' THEN amount ELSE 0 END) as total_efectivo,
-                SUM(CASE WHEN movement_type IN ('Anticipo', 'Pago total') AND method_pay = 'Banco' THEN amount ELSE 0 END) as total_banco
-            FROM {$this->bd}detail_credit_customer dcm
-            INNER JOIN {$this->bd}daily_closure dc ON dcm.daily_closure_id = dc.id
-            WHERE dc.udn_id = ?
-        ";
-
-        $result = $this->_Read($query, [$udn]);
-
-        return [
-            'total_consumos'  => $result[0]['total_consumos'] ?? 0,
-            'total_efectivo'  => $result[0]['total_efectivo'] ?? 0,
-            'total_banco'     => $result[0]['total_banco'] ?? 0
-        ];
+    function reverseMovement($currentBalance, $movementType, $amount) {
+        if ($movementType === 'consumo') {
+            return $currentBalance - $amount;
+        } else {
+            return $currentBalance + $amount;
+        }
     }
 }
 
-function dropdown($id) {
-    return [
-        ['icon' => 'icon-eye', 'text' => 'Ver detalle', 'onclick' => "app.viewDetail($id)"],
-        ['icon' => 'icon-pencil', 'text' => 'Editar', 'onclick' => "app.editMovement($id)"],
-        ['icon' => 'icon-trash', 'text' => 'Eliminar', 'onclick' => "app.deleteMovement($id)"]
-    ];
-}
-
-function renderStatus($active) {
-    if ($active == 1) {
-        return '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-[#014737] text-[#3FC189]">Activo</span>';
-    } else {
-        return '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-[#721c24] text-[#ba464d]">Inactivo</span>';
-    }
-}
+// Complements
 
 function renderMovementType($type) {
-    $colors = [
-        'Consumo a crédito' => 'bg-[#8a4600] text-[#f0ad28]',
-        'Anticipo'          => 'bg-[#014737] text-[#3FC189]',
-        'Pago total'        => 'bg-[#003360] text-[#4A9EFF]'
+    $types = [
+        'consumo' => '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-green-100 text-green-800">Consumo a crédito</span>',
+        'abono_parcial' => '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-blue-100 text-blue-800">Abono parcial</span>',
+        'pago_total' => '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-purple-100 text-purple-800">Pago total</span>',
+        'anticipo' => '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-yellow-100 text-yellow-800">Anticipo</span>'
     ];
+    
+    return $types[$type] ?? '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-gray-100 text-gray-800">Desconocido</span>';
+}
 
-    $color = $colors[$type] ?? 'bg-gray-500 text-white';
-    return '<span class="px-2 py-1 rounded-md text-sm font-semibold ' . $color . '">' . $type . '</span>';
+function renderPaymentMethod($method) {
+    $methods = [
+        'n/a' => '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-gray-100 text-gray-600">N/A</span>',
+        'efectivo' => '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-green-100 text-green-800">Efectivo</span>',
+        'banco' => '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-blue-100 text-blue-800">Banco</span>'
+    ];
+    
+    return $methods[$method] ?? '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-gray-100 text-gray-800">Desconocido</span>';
+}
+
+function evaluar($amount) {
+    return '$' . number_format($amount, 2);
 }
 
 $obj = new ctrl();

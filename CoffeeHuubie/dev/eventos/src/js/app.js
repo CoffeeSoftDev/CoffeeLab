@@ -207,7 +207,7 @@ class App extends Templates {
         });
     }
     redirectToEventos() {
-        window.location.href = '/alpha/eventos/?newEvent=true';
+        window.location.href = '/dev/eventos/?newEvent=true';
     }
 }
 

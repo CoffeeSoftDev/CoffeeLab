@@ -94,12 +94,6 @@
             }
         }
 
-        /* Ocultar scrollbar en DataTables */
-        .dataTables_wrapper,
-        .dataTables_scrollBody,
-        .table-responsive {
-            overflow: hidden !important;
-        }
 
         /* Ocultar scrollbar en toda la aplicación */
         ::-webkit-scrollbar {
@@ -113,11 +107,11 @@
         }
 
         /* Específico para las tablas */
-        #tbPedidos_wrapper,
+      /*  #tbPedidos_wrapper,
         #tbPedidos_wrapper .dataTables_scrollBody,
         .table-container {
             overflow: hidden !important;
-        }
+        }*/
     </style>
     
 

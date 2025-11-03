@@ -9,7 +9,7 @@ header("Access-Control-Allow-Headers: Content-Type"); // Encabezados permitidos
 // incluir tu modelo
 require_once '../mdl/mdl-eventos.php';
 
-// sustituir 'mdl' extends de acuerdo al nombre que tiene el modelo
+
 $encode = [];
 
 class ctrl extends MEvent{
@@ -527,8 +527,7 @@ class ctrl extends MEvent{
         ];
     }
 
-    function addProduct()
-    {
+    function addProduct(){
         $status = 500;
         $message = 'Error al agregar el producto personalizado.';
         $_POST['subsidiaries_id'] = $_SESSION['SUB']; // Asignar la sucursal actual
@@ -562,6 +561,29 @@ class ctrl extends MEvent{
         return [
             'status' => $status,
             'message' => $message
+        ];
+    }
+
+    function deletePackage() {
+        $status  = 500;
+        $message = 'No se pudo eliminar el paquete';
+
+          $events_package =  $this->getEventsPackage([ $_POST['evt_events_id'],$_POST['id']] );
+
+        // $data   = $this->util->sql(['id' => $events_package['id']], 1);
+        // $delete = $this->deleteEventPackage($data);
+
+        // if ($delete) {
+        //     $status = 200;
+        //     $message = 'Paquete eliminado correctamente';
+        // }
+
+        return [
+            'status'  => $status,
+            'message' => $message,
+            'POST'    => $_POST,
+            'evt'     =>  $events_package
+             // 'sub'     => $this->lsMenu(),
         ];
     }
 
@@ -1026,54 +1048,53 @@ class ctrl extends MEvent{
         ];
     }
 
-    // add Package.
+    // add Product List.
     function addMenuPackage(){
 
             $status  = 500;
             $message = 'Error al agregar el paquete';
 
-            $addEventPackage = $this->createEventPackage($this->util->sql([
+            $existingPackage = $this->getEventPackageByEventAndPackage([
+                $_POST['id_event'],
+                $_POST['package_id']
+            ]);
 
-                'package_id'    => $_POST['package_id'],
-                'quantity'      => $_POST['cantidad'],
-                'price'         => $_POST['price'],
-                'date_creation' => date('Y-m-d H:i:s'),
-                'event_id'      => $_POST['id_event'],
-
-            ]));
-
-            if ($addEventPackage) {
-
-                $events_package_id = $this->maxEventPackageId();
-                $package_id        = $_POST['package_id'];
-
-                $result            = $this->addPackageProducts($events_package_id, $package_id);
-
-                if ($result['status'] == 200) {
-                     
-                    $status  = 200;
-                    $message = 'Paquete agregado correctamente con sus productos';
+            if (!empty($existingPackage)) {
+                $newQuantity = $existingPackage[0]['quantity'] + $_POST['cantidad'];
                 
-                } else {
+                $updateEventPackage = $this->updateEventPackage($this->util->sql([
+                    'quantity' => $newQuantity,
+                    'id'       => $existingPackage[0]['id']
+                ], 1));
 
-                    $status  = $result['status'];
-                    $message = $result['message'];
+                if ($updateEventPackage) {
+                    $status  = 200;
+                    $message = 'Paquete actualizado correctamente';
+                }
+
+            } else {
+                $addEventPackage = $this->createEventPackage($this->util->sql([
+                    'package_id'    => $_POST['package_id'],
+                    'quantity'      => $_POST['cantidad'],
+                    'price'         => $_POST['price'],
+                    'date_creation' => date('Y-m-d H:i:s'),
+                    'event_id'      => $_POST['id_event'],
+                ]));
+
+                if ($addEventPackage) {
+                    $events_package_id = $this->maxEventPackageId();
+                    $result            = $this->addPackageProducts($events_package_id, $_POST['package_id']);
+                    
+                    $status  = 200;
+                    $message = 'Paquete agregado correctamente';
                 }
             }
-
+                        
             return [
                 'status'  => $status,
-                'message' => $result,
-                'success' => $addEventPackage,
-                'result'  => $result
-
+                'message' => $message
             ];
     }
-
-
-
-
-    // PACKAGE CHECK - GESTIÓN DE PRODUCTOS EN PAQUETES
 
     function addPackageProducts($events_package_id, $package_id) {
 
@@ -1082,23 +1103,23 @@ class ctrl extends MEvent{
         $check_id = null;
         $inserted = 0;
 
-        $data     = [
+         
+        $check_id = $this->createPackageCheck($this->util->sql([
             'events_package_id' => $events_package_id,
             'created_at'        => date('Y-m-d H:i:s')
-        ];
-        
-      
-        $check_id = $this->createPackageCheck($events_package_id);
-    //    $check_id = $this->createPackageCheck($this->util->sql($data));
-        $products = $this->getProductsByPackage([$package_id]);
+        ]));
 
-        foreach ($products as $product) {
+
+        $listProducts = $this->getProductsByPackage([$package_id]);
+
+        foreach ($listProducts as $product) {
 
             $values = $this->util->sql([
 
                 'package_check_id' => $check_id,
                 'product_id'       => $product['products_id'],
-                'active'           => 1 
+                'quantity'         => $product['quantity'],
+                'active'           => 1
 
             ]);
 
@@ -1114,44 +1135,40 @@ class ctrl extends MEvent{
             'message'           => $message,
             'check_id'          => $check_id,
             'products_inserted' => $inserted,
-            'data'              =>  $data
         ];
 
     }
+
 
     function getProductsCheckByPackage() {
 
         $status  = 500;
         $message = 'Error al obtener productos del paquete';
 
-        // obtener evt_events_package
-
-        $events_package =  $this->getEventsPackage([
-            $_POST['event_id'],
-            $_POST['package_id']]
-        );
+    
+        $events_package =  $this->getEventsPackage([ $_POST['event_id'],$_POST['package_id']] );
         
         
         $check = $this->getPackageCheckByEventPackageId([$events_package['id']]);
         
-        if (!$check) {
-            return [
-                'status' => 404,
-                'message' => 'No se encontró registro de control'
-            ];
-        }
+        // if (!$check) {
+        //     return [
+        //         'status' => 404,
+        //         'message' => 'No se encontró registro de control'
+        //     ];
+        // }
         
         $products = $this->listProductsCheckByPackageCheckId([$check['id']]);
         
-        if ($products) {
-            $status = 200;
-            $message = 'Productos obtenidos correctamente';
-        }
+        // if ($products) {
+        //     $status = 200;
+        //     $message = 'Productos obtenidos correctamente';
+        // }
         
         return [
             'status'  => $status,
             'message' => $message,
-            'data'    => $products,
+            'data'    =>  $products,
             $events_package
         ];
     }
@@ -1159,28 +1176,8 @@ class ctrl extends MEvent{
     function updateProductActive() {
         $status = 500;
         $message = 'Error al actualizar estado del producto';
-        
-        $check_product_id = $_POST['check_product_id'];
-        $active = $_POST['active'];
-        
-        if (!in_array($active, [0, 1], true)) {
-            return [
-                'status' => 400,
-                'message' => 'Valor de active inválido'
-            ];
-        }
-        
-        if (!is_numeric($check_product_id)) {
-            return [
-                'status' => 400,
-                'message' => 'ID inválido'
-            ];
-        }
-        
-        $update = $this->updateProductCheckActive($this->util->sql([
-            'active' => $active,
-            'id' => $check_product_id
-        ], 1));
+    
+        $update = $this->updateProductCheckActive($this->util->sql($_POST, 1));
         
         if ($update) {
             $status = 200;

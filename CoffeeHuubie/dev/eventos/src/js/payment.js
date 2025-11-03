@@ -106,7 +106,7 @@ class Payments extends App {
                     <\/script>
                 </body>
                 </html>`);
-          
+
             // window.print();
             // window.close();
 
@@ -143,13 +143,15 @@ class Payments extends App {
             message:
                 '<div class="flex justify-content-end  mt-3" id="containerButtons"></div><div class="flex justify-content-center  mt-3" id="containerPDF"></div> ',
             id: "modalDocument",
-        }); 
+        });
 
 
         let data = await useFetch({
             url: this._link,
             data: { opc: 'getFormatedEvent', idEvent: id, }
         });
+
+        console.log('print', data.SubEvent)
 
         this.createPDFComponent({
             parent: "containerPDF",
@@ -170,11 +172,11 @@ class Payments extends App {
         // // Función para imprimir y cerrar el modal correctamente
         let printDiv = () => {
 
-          let divToPrint = document.getElementById("containerPdfEvent");
-          let popupWin = window.open("", "_blank");
+            let divToPrint = document.getElementById("containerPdfEvent");
+            let popupWin = window.open("", "_blank");
 
-          popupWin.document.open();
-          
+            popupWin.document.open();
+
             popupWin.document.write(`
                 <html>
                 <head>
@@ -201,8 +203,8 @@ class Payments extends App {
                     <\/script>
                 </body>
                 </html>`);
-          
-            
+
+
 
             popupWin.document.close();
 
@@ -232,9 +234,9 @@ class Payments extends App {
         let tr = $(event.target).closest("tr");
 
         // Obtiene la celda de la cantidad (columna 5)
-        let saldo         = tr.find("td").eq(5).text();
+        let saldo = tr.find("td").eq(5).text();
         let saldoOriginal = tr.find("td").eq(5).text().replace(/[^0-9.-]+/g, "");
-        let total         = parseFloat(saldoOriginal);
+        let total = parseFloat(saldoOriginal);
 
         this.createModalForm({
             id: "modalRegisterPayment",
@@ -410,7 +412,7 @@ class Payments extends App {
 
     renderResumenPagos(totales) {
         const totalPagado = totales?.pagado ?? 0;
-        const discount    = totales?.discount ?? 0;
+        const discount = totales?.discount ?? 0;
         const totalEvento = totales?.total ?? 0;
 
         // El total sin descuento es el total actual + lo descontado
@@ -793,16 +795,18 @@ class Payments extends App {
         if (opts.type == 'Event') {
             // Menús del evento principal
             opts.dataMenu.forEach(menu => {
+                const pkgDishes = Array.isArray(menu.dishes) && menu.dishes.length > 0
+                    ? menu.dishes
+                        .filter(dish => dish.active === "1")
+                        .map(dish => `<li class="mb-0.5 text-[14px] text-gray-700"> - ${dish.name}${dish.quantity ? ` <span class="text-gray-400">(${dish.quantity})</span>` : ""}</li>`)
+                        .join("")
+                    : "";
+
                 subEvents += `
                 <div class="mb-3 text-sm leading-5 ">
                     <p><strong>${menu.name || ""} (${menu.quantity || 0})</strong></p>
-                    ${Array.isArray(menu.dishes) && menu.dishes.length > 0
-                        ? `<ul class="text-[12px] mt-1 pl-6">
-                            ${menu.dishes.map(d => `<li>- ${d.name} <span class="text-gray-400">(${d.quantity})</span></li>`).join("")}
-                           </ul>`
-                        : ""
-                    }
-                    <p class="mt-2"><strong>Costo:</strong>$ ${menu.price}</p>
+                    ${pkgDishes ? `<ul class="pl-6 mt-1">${pkgDishes}</ul>` : ""}
+                    <p class="mt-2"><strong>Costo:</strong> ${formatPrice(menu.price)}</p>
                 </div>
             `;
             });
@@ -847,30 +851,31 @@ class Payments extends App {
 
                     let menuPackages = "";
 
-                    if (sub.menu && typeof sub.menu === 'object' && Object.keys(sub.menu).some(key => !isNaN(key))) {
-                        menuPackages = Object.entries(sub.menu)
-                            .filter(([key]) => !isNaN(key))
-                            .map(([key, pkg]) => {
-                                const pkgDishes = (sub.menu.dishes || [])
-                                    .filter(dish => dish.package_id === pkg.package_id)
-                                    .map(dish => `<li class="mb-0.5 text-[12px] text-gray-600">${dish.name}${dish.quantity ? ` <span class="text-gray-400">(${dish.quantity})</span>` : ""}</li>`)
-                                    .join("");
+                    if (Array.isArray(sub.menu) && sub.menu.length > 0) {
+                        menuPackages = sub.menu.map(pkg => {
+                            const pkgDishes = Array.isArray(pkg.dishes) && pkg.dishes.length > 0
+                                ? pkg.dishes
+                                    .filter(dish => dish.active === "1")
+                                    .map(dish => `<li class="mb-0.5 text-[14px] text-gray-700">
+                                        - ${dish.name}${dish.quantity ? ` <span class="text-gray-400">(${dish.quantity})</span>` : ""}</li>`)
+                                    .join("")
+                                : "";
 
-                                return `
-                                <div class="">
-                                    <div class="text-[14px] text-black mb-1">${pkg.name || "Paquete"}</div>
-                                    <ul class="pl-5">${pkgDishes}</ul>
-                                </div>`;
-                            }).join("");
+                            return `
+                            <div class="mb-2">
+                                <div class="text-[14px] text-black mb-1">${pkg.name || "Paquete"} <span class="text-gray-400">(${pkg.quantity || 0})</span></div>
+                                ${pkgDishes ? `<ul class="pl-5">${pkgDishes}</ul>` : ""}
+                            </div>`;
+                        }).join("");
                     }
 
-                    const extraItems = Array.isArray(sub.extras) && sub.extras.length > 0
+                    const extraItems = Array.isArray(sub.extra) && sub.extra.length > 0
                         ? `
                         <div class="mt-2 text-sm">
                             <p class="font-semibold">Extras</p>
                             <ul class="list-disc list-inside pl-6">
-                                ${sub.extras.map(extra => `
-                                    <li class="text-gray-700 text-[12px]">
+                                ${sub.extra.map(extra => `
+                                    <li class="text-gray-700 text-[14px] font-semibold">
                                         ${extra.name || ""} (${extra.quantity || 0})
                                     </li>`).join("")}
                             </ul>
@@ -885,10 +890,10 @@ class Payments extends App {
                     <div class="mb-3 text-sm leading-5">
                         <p><strong>${sub.name_subevent || ""} para ${sub.quantity_people || 0} personas</strong>
                         (${sub.time_start || "-"} a ${sub.time_end || "-"} horas)</p>
-                        <p class="text-capitalize font-semibold">${sub.location || ""}</p>
+                        <p class="text-capitalize font-semibold">Lugar: ${sub.location || ""}</p>
                         ${menuPackages}
                         ${extraItems}
-                        <p class="mt-2"><strong>Costo:</strong> ${costo}</p>
+                        <p class="mt-2"><strong>Costo:</strong> ${formatPrice(sub.total_pay)}</p>
                     </div>
                 `;
                 });
@@ -956,7 +961,7 @@ class Payments extends App {
         templateClauses += `</ul></div>`;
 
         // --- DOCUMENTO FINAL ---
-      const docs = `
+        const docs = `
         <div id="containerPdfEvent"> 
         <div id="docEvent"
             class="flex flex-col justify-between px-12 py-10 bg-white text-gray-800 shadow-lg rounded-lg"
@@ -969,7 +974,7 @@ class Payments extends App {
             </div>
 
             <!-- Cláusulas y Totales -->
-            <div class="w-full pl-[120px] mt-10 flex items-stretch gap-2">
+            <div class="w-full pl-[120px] mt-5 flex items-stretch gap-2">
                 
                 <!-- Cláusulas -->
                 <div class="w-3/4 pr-2 border-r border-gray-200">

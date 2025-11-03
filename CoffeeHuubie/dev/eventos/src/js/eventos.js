@@ -963,13 +963,13 @@ class Eventos extends App {
     async newMenuLayout(id = null) {
 
 
-        let menusPrecargadosData  = await useFetch({ url: link, data: { opc: "getPackages" } });
+        let menusPrecargadosData = await useFetch({ url: link, data: { opc: "getPackages" } });
         let extrasDisponiblesData = await useFetch({ url: link, data: { opc: "getProducts" } });
-        let clasificacionesData   = await useFetch({ url: link, data: { opc: "getClassifications" } });
+        let clasificacionesData = await useFetch({ url: link, data: { opc: "getClassifications" } });
 
-        let menusPrecargados  = menusPrecargadosData.data;
+        let menusPrecargados = menusPrecargadosData.data;
         let extrasDisponibles = extrasDisponiblesData.data;
-        let clasificaciones   = clasificacionesData.data;
+        let clasificaciones = clasificacionesData.data;
 
 
         $("#containerAddMenu").append(`
@@ -1168,22 +1168,21 @@ class Eventos extends App {
                 this.menusSeleccionados.push({ menu, cantidadPersonas: cantidad });
             }
 
-            // $("#divExtras").removeClass("d-none");
-            $("#selectMenu").val("");
+            $("#selectMenu").val(null).trigger('change');
             $("#cantidadPersonas").val(1);
 
             eventos.renderPaquetes();
             eventos.renderResumen();
 
-           
+
 
             let addMenu = await useFetch({
                 url: this._link, data: {
-                    opc             : 'addMenuPackage',
-                    id_event        : id_event,
+                    opc: 'addMenuPackage',
+                    id_event: id_event,
                     cantidad: cantidad,
-                    package_id      : idSeleccionado,
-                    price           : menu.precioPorPersona,
+                    package_id: idSeleccionado,
+                    price: menu.precioPorPersona,
 
                 }
             });
@@ -1208,7 +1207,9 @@ class Eventos extends App {
             if (eventos.menusSeleccionados.length == 0) {
                 // $("#divExtras").addClass("d-none");
             }
-            eventos.cerrarDetallesMenu();
+
+            // eventos.
+            eventos.closeDetailsMenu();
             eventos.renderPaquetes();
             eventos.renderResumen();
         };
@@ -1423,7 +1424,7 @@ class Eventos extends App {
     // Función para renderizar paquetes seleccionados
     renderPaquetes() {
         const contenedor = $("#contentPaquetes");
-        contenedor.html(`<p>No hay paquetes seleccionados!!!!! </p>`);
+        contenedor.html(`<p>No hay paquetes seleccionados! </p>`);
 
         if (eventos.menusSeleccionados.length == 0) {
             contenedor.html(`<p>No hay menús seleccionados</p>`);
@@ -1433,8 +1434,7 @@ class Eventos extends App {
         contenedor.empty();
         eventos.menusSeleccionados.forEach((item, index) => {
 
-            console.log('menu: ', item)
-
+            console.log('menuList',item)
 
             const total = item.menu.precioPorPersona * item.cantidadPersonas;
             const html = `
@@ -1445,7 +1445,7 @@ class Eventos extends App {
                 <div class="col-span-6 flex flex-col justify-start text-left">
                   <div class="flex items-center gap-2">
                     <h4 class="font-semibold text-white truncate">${item.menu.nombre}</h4>
-                    <button onclick="eventos.verDetallesMenu(${item.menu.id})" class="text-sm px-2 py-1 bg-[#333D4C] text-blue-300 hover:text-blue-100 hover:bg-[#3f4b5c] border border-gray-600 rounded-md transition-colors duration-200">
+                    <button onclick="eventos.viewDetailsMenu(${item.menu.id})" class="text-sm px-2 py-1 bg-[#333D4C] text-blue-300 hover:text-blue-100 hover:bg-[#3f4b5c] border border-gray-600 rounded-md transition-colors duration-200">
                       Ver detalles
                     </button>
                   </div>
@@ -1470,7 +1470,7 @@ class Eventos extends App {
 
                 <!-- Eliminar -->
                 <div class="col-span-1 flex justify-end">
-                  <button class="text-red-400 hover:text-red-600" onclick="eliminarMenu(${index})">
+                  <button class="text-red-400 hover:text-red-600" onclick="eliminarMenu(${index}); eventos.deletePackage(${item.menu.id})">
                     <i class="icon-trash"></i>
                   </button>
                 </div>
@@ -1542,8 +1542,6 @@ class Eventos extends App {
         eventos.renderResumen();
     }
 
-    // Render resumen con cantidad de extras y precio total
-
     renderResumen() {
         const contenedor = $("#contentResumen");
         const menus = eventos.menusSeleccionados;
@@ -1595,7 +1593,10 @@ class Eventos extends App {
         `);
     }
 
-    async verDetallesMenu(id_package) {
+
+    // View Product List.
+
+    async viewDetailsMenu(id_package) {
 
         const response = await useFetch({
             url: link,
@@ -1606,16 +1607,81 @@ class Eventos extends App {
             }
         });
 
-     
-        this.renderProductCheckboxList({
-            json: response.data
-        });
+        this.renderProductCheckboxList({ json: response.data });
 
-        // this.menuSeleccionadoParaVer = this.menusSeleccionados[index].menu;
-        // this.renderDetallesMenu();
     }
 
-    cerrarDetallesMenu() {
+    renderProductCheckboxList(options) {
+
+        const defaults = {
+            parent: "detalleMenuSeleccionado",
+            json: [],
+        };
+
+        const opts = Object.assign({}, defaults, options);
+        const products = opts.json || [];
+
+        if (products.length === 0) {
+            $(`#${opts.parent}`).html('<p class="text-gray-400 text-sm">No hay productos configurados para este paquete</p>');
+            return;
+        }
+
+        const htmlProductos = products.map(product => `
+            <label class="flex items-center gap-2 cursor-pointer hover:bg-[#374151] p-2 rounded transition">
+                <input 
+                    type="checkbox" 
+                    class="product-checkbox w-4 h-4" 
+                    data-check-product-id="${product.check_product_id}"
+                    data-product-id="${product.product_id}"
+                    onchange="eventos.toggleProductList(this)"
+                    ${product.active == 1 ? 'checked' : ''}
+                />
+                <span class="text-gray-300 text-sm">${product.product_name}</span>
+            </label>
+        `).join("");
+
+        const html = `
+        <div class="bg-[#1F2A37] rounded-lg border border-gray-700 shadow-md p-6 text-white product-checkbox-list mt-4">
+            <h4 class="text-white font-semibold mb-3">Gestionar productos del paquete:</h4>
+            <div class="space-y-2">
+                ${htmlProductos}
+            </div>
+
+            <div class="mt-6 text-right">
+            <button onclick="eventos.closeDetailsMenu()" class="text-blue-400 hover:underline">Cerrar detalles</button>
+            </div>
+        </div>
+        `;
+
+        $(`#${opts.parent}`).html(html);
+    }
+
+    toggleProductList(el) {
+        const checkbox = $(el);
+        const checkProductId = checkbox.data('check-product-id');
+        const isActive = checkbox.is(':checked') ? 1 : 0;
+
+        const label = checkbox.closest('label');
+        label.addClass('opacity-50 pointer-events-none');
+
+        useFetch({
+            url: this._link,
+            data: {
+                opc: 'updateProductActive',
+                active: isActive,
+                check_product_id: checkProductId,
+            },
+            success: (response) => {
+
+                label.removeClass('opacity-50 pointer-events-none');
+            }
+        });
+    }
+
+
+
+
+    closeDetailsMenu() {
         this.menuSeleccionadoParaVer = null;
         $("#detalleMenuSeleccionado").empty();
     }
@@ -1678,69 +1744,26 @@ class Eventos extends App {
             </div>
 
             <div class="mt-6 text-right">
-              <button onclick="eventos.cerrarDetallesMenu()" class="text-blue-400 hover:underline">Cerrar detalles</button>
+              <button onclick="eventos.closeDetailsMenu()" class="text-blue-400 hover:underline">Cerrar detalles</button>
             </div>
           </div>
         `;
         cont.html(html);
     }
 
-    async renderProductCheckboxList(options) {
-        
-        const defaults = {
-            parent: "detalleMenuSeleccionado",
-            json: [],
-        };
 
-        const opts = Object.assign({}, defaults, options);
-        const products = opts.json || [];
+    async deletePackage( idPackage ) {
 
-        if (products.length === 0) {
-            $(`#${opts.parent}`).html('<p class="text-gray-400 text-sm">No hay productos configurados para este paquete</p>');
-            return;
-        }
+        const response = await useFetch({
+            url: this._link,
+            data: { opc: "deletePackage", id: idPackage, evt_events_id: id_event },
+        });
 
-        const platillos = products.filter(p => p.id_classification !== 2);
-        const bebidas = products.filter(p => p.id_classification === 2);
-
-        const section = (title, items) => `
-        <div class="bg-[#283341] p-4 rounded-lg">
-            <h5 class="text-gray-300 font-semibold mb-3 text-sm">${title}:</h5>
-            <div class="space-y-2">
-            ${items.map(product => `
-                <label class="flex items-center gap-2 cursor-pointer hover:bg-[#374151] p-2 rounded transition">
-                <input 
-                    type="checkbox" 
-                    class="product-checkbox w-4 h-4" 
-                    data-check-product-id="${product.check_product_id}"
-                    data-product-id="${product.product_id}"
-                    ${product.active == 1 ? 'checked' : ''}
-                />
-                <span class="text-gray-300 text-sm">${product.product_name}</span>
-                </label>
-            `).join("")}
-            </div>
-        </div>
-        `;
-
-            const html = `
-        <div class="bg-[#1F2A37] rounded-lg border border-gray-700 shadow-md p-6 text-white product-checkbox-list mt-4">
-            <h4 class="text-white font-semibold mb-3">Gestionar productos del paquete:</h4>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            ${platillos.length ? section("Platillos", platillos) : ""}
-            ${bebidas.length ? section("Bebidas", bebidas) : ""}
-            </div>
-
-            <div class="mt-6 text-right">
-              <button onclick="eventos.cerrarDetallesMenu()" class="text-blue-400 hover:underline">Cerrar detalles</button>
-            </div>
-        </div>
-        `;
-
-            $(`#${opts.parent}`).html(html);
-
+      
 
     }
+
+
 
     async editMenuLayout(id) {
         // 📦 Obtener los menús y extras del evento desde el backend
@@ -1842,117 +1865,6 @@ class Eventos extends App {
 
 }
 
-// Event handler para checkboxes de productos
-$(document).on('change', '.product-checkbox', async function () {
-    const checkbox = $(this);
-    const checkProductId = checkbox.data('check-product-id');
-    const isActive = checkbox.is(':checked') ? 1 : 0;
-
-    if (!checkProductId || ![0, 1].includes(isActive)) {
-        console.error('Datos inválidos para actualización');
-        return;
-    }
-
-    const label = checkbox.closest('label');
-    label.addClass('opacity-50 pointer-events-none');
-
-    try {
-        const response = await Promise.race([
-            useFetch({
-                url: link,
-                data: {
-                    opc: 'updateProductActive',
-                    check_product_id: checkProductId,
-                    active: isActive
-                }
-            }),
-            new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Timeout')), 5000)
-            )
-        ]);
-
-        if (response.status === 200) {
-            label.addClass('updated-flash');
-            setTimeout(() => {
-                label.removeClass('updated-flash');
-            }, 300);
-        } else {
-            checkbox.prop('checked', !isActive);
-            alert({
-                icon: 'error',
-                title: 'Error al actualizar',
-                text: response.message || 'Ocurrió un error inesperado'
-            });
-        }
-    } catch (error) {
-        checkbox.prop('checked', !isActive);
-        alert({
-            icon: 'error',
-            title: 'Error de conexión',
-            text: error.message === 'Timeout'
-                ? 'La petición tardó demasiado tiempo'
-                : 'No se pudo conectar con el servidor'
-        });
-    } finally {
-        label.removeClass('opacity-50 pointer-events-none');
-    }
-});
-
-// Event handler para checkboxes de productos
-$(document).on('change', '.product-checkbox', async function () {
-    const checkbox = $(this);
-    const checkProductId = checkbox.data('check-product-id');
-    const isActive = checkbox.is(':checked') ? 1 : 0;
-
-    if (!checkProductId || ![0, 1].includes(isActive)) {
-        console.error('Datos inválidos para actualización');
-        return;
-    }
-
-    const label = checkbox.closest('label');
-    label.addClass('opacity-50 pointer-events-none');
-
-    try {
-        const response = await Promise.race([
-            useFetch({
-                url: link,
-                data: {
-                    opc: 'updateProductActive',
-                    check_product_id: checkProductId,
-                    active: isActive
-                }
-            }),
-            new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Timeout')), 5000)
-            )
-        ]);
-
-        if (response.status === 200) {
-            label.addClass('updated-flash');
-            setTimeout(() => {
-                label.removeClass('updated-flash');
-            }, 300);
-        } else {
-            checkbox.prop('checked', !isActive);
-            alert({
-                icon: 'error',
-                title: 'Error al actualizar',
-                text: response.message || 'Ocurrió un error inesperado'
-            });
-        }
-    } catch (error) {
-        checkbox.prop('checked', !isActive);
-        alert({
-            icon: 'error',
-            title: 'Error de conexión',
-            text: error.message === 'Timeout'
-                ? 'La petición tardó demasiado tiempo'
-                : 'No se pudo conectar con el servidor'
-        });
-    } finally {
-        label.removeClass('opacity-50 pointer-events-none');
-    }
-});
 
 function formatSpanishDate(fecha = null, type = "normal") {
     let date;
@@ -2004,66 +1916,3 @@ function formatSpanishDate(fecha = null, type = "normal") {
 }
 
 
-// Métodos para gestión de productos en paquetes
-// Eventos.prototype.renderProductCheckboxList = async function(events_package_id, containerId) {
-//     // const response = await useFetch({
-//     //     url: this._link,
-//     //     data: { 
-//     //         opc: "getProductsCheck", 
-//     //         events_package_id: events_package_id 
-//     //     }
-//     // });
-    
-//     // if (response.status !== 200) {
-//     //     $(`#${containerId}`).html('<p class="text-red-500 text-xs">Error al cargar productos</p>');
-//     //     return;
-//     // }
-    
-//     // const products = response.data;
-    
-//     // if (!products || products.length === 0) {
-//     //     $(`#${containerId}`).html('<p class="text-gray-400 text-xs">No hay productos asociados</p>');
-//     //     return;
-//     // }
-    
-//     // let html = '<div class="mt-3"><h4 class="text-sm font-semibold mb-2 text-white">Productos del paquete:</h4>';
-    
-//     // products.forEach(product => {
-//     //     const checked = product.active == 1 ? 'checked' : '';
-//     //     html += `
-//     //         <div class="flex items-center gap-2 mb-2">
-//     //             <input 
-//     //                 type="checkbox" 
-//     //                 id="product-${product.check_product_id}" 
-//     //                 ${checked}
-//     //                 onchange="eventos.toggleProductCheck(${product.check_product_id}, this.checked)"
-//     //                 class="cursor-pointer"
-//     //             />
-//     //             <label for="product-${product.check_product_id}" class="text-sm text-gray-300 cursor-pointer">
-//     //                 ${product.product_name}
-//     //             </label>
-//     //         </div>
-//     //     `;
-//     // });
-    
-//     // html += '</div>';
-//     // $(`#${containerId}`).html(html);
-// };
-
-Eventos.prototype.toggleProductCheck = async function(check_product_id, isChecked) {
-    const response = await useFetch({
-        url: this._link,
-        data: {
-            opc: "updateProductCheck",
-            id: check_product_id,
-            active: isChecked ? 1 : 0
-        }
-    });
-    
-    if (response.status !== 200) {
-        alert({ 
-            icon: "error", 
-            text: "Error al actualizar el producto" 
-        });
-    }
-};

@@ -103,8 +103,8 @@ class Pedidos extends MPedidos{
                 ],
 
                 'Fecha de entrega' => formatSpanishDate($order['date_order']),
-                'Hora de entrega'         => $order['time_order'] ,
-                'Estado'          => status($order['idStatus']),
+                'Hora de entrega'  => $order['time_order'],
+                'Estado'           => status($order['idStatus']),
                 
              
                 
