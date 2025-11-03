@@ -29,7 +29,7 @@
 
           <!-- Módulos del Sistema -->
      
-        <script src="js/salidas-almacen.js?t=<?php echo time(); ?>"></script>
+        <script src="js/almacen.js?t=<?php echo time(); ?>"></script>
 
         
         

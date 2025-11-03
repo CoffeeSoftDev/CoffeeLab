@@ -410,7 +410,7 @@ class MEvent extends CRUD {
         return $this->_Delete([
             'table' => "{$this->bd}evt_events_package",
             'where' => $array['where'],
-            'data' => $array['data']
+            'data'  => $array['data']
         ]);
     }
 

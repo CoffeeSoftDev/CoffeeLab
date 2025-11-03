@@ -570,19 +570,20 @@ class ctrl extends MEvent{
 
           $events_package =  $this->getEventsPackage([ $_POST['evt_events_id'],$_POST['id']] );
 
-        // $data   = $this->util->sql(['id' => $events_package['id']], 1);
-        // $delete = $this->deleteEventPackage($data);
+        $data   = $this->util->sql(['id' => $events_package['id']], 1);
 
-        // if ($delete) {
-        //     $status = 200;
-        //     $message = 'Paquete eliminado correctamente';
-        // }
+        $delete = $this->deleteEventPackage($data);
+
+        if ($delete) {
+            $status = 200;
+            $message = 'Paquete eliminado correctamente';
+        }
 
         return [
             'status'  => $status,
             'message' => $message,
             'POST'    => $_POST,
-            'evt'     =>  $events_package
+            'evt'     => $delete
              // 'sub'     => $this->lsMenu(),
         ];
     }
