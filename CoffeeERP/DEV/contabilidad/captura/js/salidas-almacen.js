@@ -1,4 +1,25 @@
 
+let api = 'ctrl/ctrl-archivos.php';
+let modules, lsudn, counts;
+// -- salidas de almacen.
+let api_warehouse = 'ctrl/ctrl-salidas-almacen.php';
+let warehouseOutput;
+let products;
+
+
+$(async () => {
+    const data = await useFetch({ url: api, data: { opc: "init" } });
+    modules = data.modules;
+    lsudn = data.udn;
+    counts = data.counts;
+
+    // almacen.
+    const data_alm = await useFetch({ url: api_warehouse, data: { opc: "init" } });
+    products = data_alm.products;
+    warehouseOutput = new AdminWarehouseOutput(api_warehouse, "root");
+    warehouseOutput.render();
+
+});
 
 class AdminWarehouseOutput extends Templates {
     constructor(link, div_modulo) {
@@ -14,8 +35,8 @@ class AdminWarehouseOutput extends Templates {
 
     layout() {
         this.primaryLayout({
-            parent: `container-salidas-almacen`,
-            // parent: `root`,
+            // parent: `container-salidas-almacen`,
+            parent: `root`,
             id: this.PROJECT_NAME,
             class: 'w-full',
             card: {
