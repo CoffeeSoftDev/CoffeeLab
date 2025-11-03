@@ -13,15 +13,19 @@
   - _Requirements: 1.1, 2.1, 3.1, 4.1, 6.1_
 
 - [ ] 2. Implement data model layer (mdl-clientes.php)
-  - [ ] 2.1 Create base model class extending CRUD
+  - [x] 2.1 Create base model class extending CRUD
+
+
     - Initialize database connection with `$this->bd = "rfwsmqex_contabilidad."`
     - Initialize utility class `$this->util = new Utileria()`
     - _Requirements: 1.1, 2.1_
+
 
   - [ ] 2.2 Implement client management methods
     - Write `listClients($filters)` to retrieve active clients by UDN
     - Write `getClientById($id)` to get client details
     - Write `getClientBalance($clientId)` to retrieve current balance
+
     - _Requirements: 2.1, 2.2, 4.1_
 
   - [ ] 2.3 Implement movement management methods
@@ -29,34 +33,43 @@
     - Write `createMovement($data)` to insert new movement record
     - Write `updateMovement($data)` to update existing movement
     - Write `deleteMovementById($id)` to soft delete movement
+
     - Write `getMovementById($id)` to retrieve movement details
     - _Requirements: 2.1, 2.7, 3.1, 3.2, 4.1_
 
   - [ ] 2.4 Implement balance calculation methods
     - Write `calculateClientBalance($clientId, $date)` to calculate balance at specific date
+
+
     - Write `getConsolidatedReport($filters)` to generate consolidated data by date range
     - Write `updateClientBalance($data)` to update client's current balance
     - _Requirements: 2.7, 4.5, 6.3_
 
-  - [ ] 2.5 Implement filter and utility methods
+  - [x] 2.5 Implement filter and utility methods
+
+
     - Write `lsMovementTypes()` to get movement type options
     - Write `lsPaymentMethods()` to get payment method options
     - Write `logMovementAction($data)` to log audit trail
+
     - _Requirements: 1.5, 2.1, 3.5_
 
 - [ ] 3. Implement controller layer (ctrl-clientes.php)
-  - [ ] 3.1 Create base controller class extending mdl
+  - [x] 3.1 Create base controller class extending mdl
+
     - Set up session validation
     - Initialize controller with required dependencies
     - _Requirements: 1.1, 5.6_
 
   - [ ] 3.2 Implement initialization method
     - Write `init()` to load clients, movement types, and payment methods for filters
+
     - Return data structure for frontend consumption
     - _Requirements: 1.1, 2.1_
 
   - [ ] 3.3 Implement movement listing method
     - Write `ls()` to retrieve movements for selected date
+
     - Format data for table display with proper columns
     - Generate action buttons (view, edit, delete) based on user permissions
     - Calculate and return daily totals (consumptions, cash payments, bank payments)
@@ -65,6 +78,7 @@
   - [ ] 3.4 Implement consolidated report method
     - Write `lsConcentrado()` to generate consolidated report by date range
     - Calculate initial balance, total consumptions, total payments, and final balance per client
+
     - Format data with color-coded columns for consumptions (green) and payments (orange)
     - _Requirements: 6.1, 6.2, 6.3, 6.8_
 
@@ -72,16 +86,20 @@
     - Write `addMovimiento()` to create new movement
     - Validate required fields (client_id, movement_type, amount)
     - Validate payment method based on movement type (N/A for consumo, Efectivo/Banco for payments)
+
     - Calculate new balance based on movement type
     - Update client balance after successful creation
     - Log audit entry
     - _Requirements: 2.1, 2.4, 2.5, 2.6, 2.7, 2.8_
+
 
   - [ ] 3.6 Implement movement editing method
     - Write `editMovimiento()` to update existing movement
     - Validate movement data
     - Recalculate client balance
     - Update movement record
+
+
     - Log audit entry
     - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
@@ -89,15 +107,19 @@
     - Write `getMovimiento()` to retrieve movement details by ID
     - Include client information, movement data, and audit information
     - Calculate and return financial summary (previous balance, amount, new balance)
+
+
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
   - [ ] 3.8 Implement movement deletion method
     - Write `deleteMovimiento()` to soft delete movement
+
     - Log deletion action with user and timestamp
     - Recalculate client balance after deletion
     - _Requirements: 3.4, 3.5, 3.6_
 
-  - [ ] 3.9 Implement utility methods
+  - [x] 3.9 Implement utility methods
+
     - Write `dropdown($id, $status)` to generate action buttons
     - Write `renderMovementType($type)` to render movement type badges
     - Write `renderPaymentMethod($method)` to render payment method badges
@@ -105,11 +127,13 @@
     - Write `validateMovementType()` to validate movement type and payment method combination
     - _Requirements: 1.4, 2.4, 2.5_
 
+
 - [ ] 4. Implement frontend application (clientes.js)
   - [ ] 4.1 Create main App class extending Templates
     - Initialize with `PROJECT_NAME = "clientes"`
     - Set up API link to `ctrl/ctrl-clientes.php`
     - Implement constructor with link and div_modulo parameters
+
     - _Requirements: 1.1_
 
   - [ ] 4.2 Implement initialization and layout methods
@@ -118,12 +142,14 @@
     - Write `layout()` to create primary layout with tab structure (Dashboard, Movimientos, Concentrado)
     - _Requirements: 1.1, 1.3_
 
+
   - [ ] 4.3 Implement dashboard tab
     - Write `renderDashboard()` to display dashboard with KPI cards
     - Create three info cards: Total consumos, Total pagos efectivo, Total pagos banco
     - Add buttons: "Concentrado de clientes" and "Registrar nuevo movimiento"
     - Update cards automatically when date changes
     - _Requirements: 1.2, 1.3, 1.6_
+
 
   - [ ] 4.4 Implement movements tab
     - Write `filterBarMovimientos()` to create filter bar with date picker and movement type filter
@@ -132,11 +158,13 @@
     - Add action buttons: view details, edit, delete
     - _Requirements: 1.4, 1.5, 1.6, 5.1_
 
+
   - [ ] 4.5 Implement movement registration form
     - Write `addMovimiento()` to show modal form for new movement
     - Write `jsonMovimiento()` to define form structure with fields: Cliente, Deuda actual (readonly), Tipo de movimiento, Método de pago, Cantidad, Descripción
     - Implement dynamic payment method behavior: disable for "Consumo", enable for "Abono parcial" and "Pago total"
     - Validate all required fields before submission
+
     - Show success/error messages after submission
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.8, 2.9_
 
@@ -145,6 +173,7 @@
     - Fetch movement data using `getMovimiento()` API call
     - Use same form structure as add form with autofill
     - Prevent changing client association
+
     - Update table after successful edit
     - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
@@ -199,6 +228,8 @@
   - [ ] 5.4 Implement level 3 (Contabilidad/Dirección) permissions
     - Add UDN filter to all views
     - Disable edit and delete operations
+
+
     - Allow viewing and exporting only
     - _Requirements: 5.4_
 
