@@ -3,10 +3,11 @@ let app, warehouseReport, fileUpload;
 let products, productClass, businessUnits;
 
 $(async () => {
-    const data = await useFetch({ url: api, data: { opc: "init" } });
-    products      = data.products;
-    productClass  = data.productClass;
-    businessUnits = data.businessUnits;
+    
+    const data          = await useFetch({ url: api, data: { opc: "init" } });
+          products      = data.products;
+          productClass  = data.productClass;
+          businessUnits = data.businessUnits;
 
     app = new App(api, "root");
     // warehouseReport = new WarehouseReport(api, "root");
