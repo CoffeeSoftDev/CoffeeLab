@@ -1016,7 +1016,7 @@ class AdminProductos extends Templates {
 
     layout() {
         this.primaryLayout({
-            parent: `container-productos`,
+            parent: `container-products`,
             id: this.PROJECT_NAME,
             class: 'w-full',
             card: {

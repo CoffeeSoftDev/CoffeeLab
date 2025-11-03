@@ -604,65 +604,68 @@ class ctrl extends MEvent{
 
         // Agrupar paquetes por id del paquete
         $agrupados = [];
+
         foreach ($paquetesRaw as $row) {
             $idP = $row['package_id'];
 
-            if (!isset($agrupados[$idP])) {
-                $agrupados[$idP] = [
-                    'menu' => [
-                        'id' => $row['package_id'],
-                        'nombre' => $row['package'],
-                        'descripcion' => $row['description'],
-                        'precioPorPersona' => floatval($row['price_person']),
-                        'platillos' => [],
-                        'bebidas' => [],
-                    ],
-                    'cantidadPersonas' => intval($row['quantity']),
-                ];
-            }
+        //     if (!isset($agrupados[$idP])) {
+        //         $agrupados[$idP] = [
+        //             'menu' => [
+        //                 'id' => $row['package_id'],
+        //                 'nombre' => $row['package'],
+        //                 'descripcion' => $row['description'],
+        //                 'precioPorPersona' => floatval($row['price_person']),
+        //                 'platillos' => [],
+        //                 'bebidas' => [],
+        //             ],
+        //             'cantidadPersonas' => intval($row['quantity']),
+        //         ];
+        //     }
 
             $platillo = [
-                'id' => $row['idPr'],
+                
+                'id'     => $row['idPr'],
                 'nombre' => $row['product'],
                 'precio' => floatval($row['priceProduct']),
+
             ];
 
-            // Clasifica como bebida o platillo por el idC (id de clasificación)
-            if ($row['idC'] == 2 || $row['idC'] == 11) {
-                $agrupados[$idP]['menu']['bebidas'][] = $platillo;
-            } else {
-                $agrupados[$idP]['menu']['platillos'][] = $platillo;
-            }
+        //     // Clasifica como bebida o platillo por el idC (id de clasificación)
+        //     if ($row['idC'] == 2 || $row['idC'] == 11) {
+        //         $agrupados[$idP]['menu']['bebidas'][] = $platillo;
+        //     } else {
+        //         $agrupados[$idP]['menu']['platillos'][] = $platillo;
+        //     }
         }
 
-        // Convertir a array de valores
-        foreach ($agrupados as $item) {
-            $menus[] = $item;
-        }
+        // // Convertir a array de valores
+        // foreach ($agrupados as $item) {
+        //     $menus[] = $item;
+        // }
 
-        // Formatear productos individuales (extras)
-        foreach ($productosRaw as $row) {
-            $extras[] = [
-                'id' => $row['product_id'],
-                'nombre' => $row['nombre'],
-                'precio' => floatval($row['precioUnitario']),
-                'cantidad' => intval($row['quantity']),
-                'id_clasificacion' => $row['id_clasificacion'],
-                'custom' => false,
-            ];
-        }
+        // // Formatear productos individuales (extras)
+        // foreach ($productosRaw as $row) {
+        //     $extras[] = [
+        //         'id' => $row['product_id'],
+        //         'nombre' => $row['nombre'],
+        //         'precio' => floatval($row['precioUnitario']),
+        //         'cantidad' => intval($row['quantity']),
+        //         'id_clasificacion' => $row['id_clasificacion'],
+        //         'custom' => false,
+        //     ];
+        // }
 
         return [
-            'status' => 200,
+            'status'  => 200,
             'message' => 'Datos cargados correctamente.',
-            'menus' => $menus,
-            'extras' => $extras,
+            'menus'   => $menus,
+            'extras'  => $extras,
+            'package' => $paquetesRaw
         ];
     }
 
     // Vincular menú con evento.
-    function addEventMenus()
-    {
+    function addEventMenus(){
         $status  = 500;
         $message = 'Error al agregar menú.';
         $total   = $_POST['total'];
@@ -746,8 +749,7 @@ class ctrl extends MEvent{
     }
 
     // Editar menú de evento
-    function editEventMenus()
-    {
+    function editEventMenus(){
         $status = 500;
         $message = 'Error al editar menú.';
         $total = $_POST['total'];
@@ -1082,18 +1084,19 @@ class ctrl extends MEvent{
                     'event_id'      => $_POST['id_event'],
                 ]));
 
-                if ($addEventPackage) {
+            //     if ($addEventPackage) {
                     $events_package_id = $this->maxEventPackageId();
                     $result            = $this->addPackageProducts($events_package_id, $_POST['package_id']);
                     
                     $status  = 200;
                     $message = 'Paquete agregado correctamente';
-                }
+            //     }
             }
                         
             return [
                 'status'  => $status,
-                'message' => $message
+                'message' => $message,
+           
             ];
     }
 
@@ -1104,11 +1107,13 @@ class ctrl extends MEvent{
         $check_id = null;
         $inserted = 0;
 
-         
-        $check_id = $this->createPackageCheck($this->util->sql([
+        $values   = $this->util->sql([
             'events_package_id' => $events_package_id,
             'created_at'        => date('Y-m-d H:i:s')
-        ]));
+        ]);
+
+
+        $check_id = $this->createPackageCheck($values);
 
 
         $listProducts = $this->getProductsByPackage([$package_id]);
@@ -1132,10 +1137,10 @@ class ctrl extends MEvent{
         $message = "Se vincularon {$inserted} productos al paquete";
         
         return [
-            'status'            => $status,
+            // 'status'            => $status,
             'message'           => $message,
             'check_id'          => $check_id,
-            'products_inserted' => $inserted,
+            'products_inserted' =>   $listProducts ,
         ];
 
     }
@@ -1167,10 +1172,10 @@ class ctrl extends MEvent{
         // }
         
         return [
-            'status'  => $status,
-            'message' => $message,
+            // 'status'  => $status,
+            // 'message' => $message,
             'data'    =>  $products,
-            $events_package
+           $check
         ];
     }
 

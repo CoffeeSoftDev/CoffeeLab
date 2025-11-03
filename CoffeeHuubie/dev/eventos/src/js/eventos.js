@@ -1622,7 +1622,11 @@ class Eventos extends App {
         const products = opts.json || [];
 
         if (products.length === 0) {
-            $(`#${opts.parent}`).html('<p class="text-gray-400 text-sm">No hay productos configurados para este paquete</p>');
+            $(`#${opts.parent}`).html(`
+                <div class="p-3 border rounded ">
+                    <p class="text-gray-400 text-sm">No hay productos configurados para este paquete</p>
+                </div>
+            `);
             return;
         }
 

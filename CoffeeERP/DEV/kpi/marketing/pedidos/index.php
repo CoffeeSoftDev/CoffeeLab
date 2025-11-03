@@ -13,9 +13,11 @@
     <?php require_once('../../../layout/navbar.php'); ?>
 
     <main>
+
         <section id="sidebar"></section>
 
         <div id="main__content">
+
             <nav aria-label='breadcrumb'>
                 <ol class='breadcrumb'>
                     <li class='breadcrumb-item text-uppercase text-muted'>KPI</li>
@@ -25,12 +27,11 @@
 
             <div class=" main-container" id="root"></div>
 
-          <!-- Módulos del Sistema -->
+            <!-- Módulos del Sistema -->
+        
             <script src="js/pedidos.js?t=<?php echo time(); ?>"></script>
-            <script src="js/productos.js?t=<?php echo time(); ?>"></script>
-            <script src="js/canales.js?t=<?php echo time(); ?>"></script>
             <script src="js/report.js?t=<?php echo time(); ?>"></script>
-            <script src="js/admin-productos.js?t=<?php echo time(); ?>"></script>
+
         </div>
     </main>
 </body>

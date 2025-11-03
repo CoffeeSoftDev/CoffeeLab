@@ -329,8 +329,7 @@ class MEvent extends CRUD {
 
 
     // RELACION EVENTO - PAQUETE (O PRODUCTO)
-    function getEventPackage($array)
-    {
+    function getEventPackage($array){
         $values = '
         	ep.id AS idRelation,
             event_id,
