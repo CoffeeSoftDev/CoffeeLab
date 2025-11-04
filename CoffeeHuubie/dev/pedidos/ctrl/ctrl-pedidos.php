@@ -1094,7 +1094,7 @@ class Pedidos extends MPedidos{
         ];
     }
 
-    function getDailySummary() {
+    function getDailyClose() {
         $status  = 500;
         $message = 'Error al obtener resumen del día';
         $data    = null;
@@ -1116,26 +1116,32 @@ class Pedidos extends MPedidos{
             'subsidiaries_id' => $subsidiaries_id
         ]);
         
-        // Verificar que los datos de pagos se obtengan correctamente
-        if ($summary && $summary['total_orders'] > 0) {
-            $status  = 200;
-            $message = 'Resumen obtenido correctamente';
-            $data    = [
-                'total_sales'     => $summary['total_sales'],
-                'card_sales'      => $summary['card_sales'],
-                'cash_sales'      => $summary['cash_sales'],
-                'transfer_sales'  => $summary['transfer_sales'],
-                'total_orders'    => $summary['total_orders']
-            ];
-        } else {
-            $status  = 404;
-            $message = 'No hay pedidos registrados para esta fecha';
-        }
+        // // Verificar que los datos de pagos se obtengan correctamente
+        // if ($summary && $summary['total_orders'] > 0) {
+        //     $status  = 200;
+        //     $message = 'Resumen obtenido correctamente';
+        //     $data    = [
+        //         'total_sales'     => $summary['total_sales'],
+        //         'card_sales'      => $summary['card_sales'],
+        //         'cash_sales'      => $summary['cash_sales'],
+        //         'transfer_sales'  => $summary['transfer_sales'],
+        //         'total_orders'    => $summary['total_orders']
+        //     ];
+        // } else {
+        //     $status  = 404;
+        //     $message = 'No hay pedidos registrados para esta fecha';
+        // }
         
         return [
             'status'  => $status,
-            'message' => $message,
-            'data'    => $data
+            // 'message' => $message,
+            // 'data'    => $data,
+
+            'values'  => [
+                // 'date'            => $date,
+                // 'subsidiaries_id' => $subsidiaries_id,
+                'sumary'          =>  $summary
+             ]
         ];
     }
 
