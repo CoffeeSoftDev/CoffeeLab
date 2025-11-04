@@ -1070,10 +1070,10 @@ class MPedidos extends CRUD {
 
     function updateOrderDeliveryStatus($data) {
         return $this->_Update([
-            'table' => "{$this->bd}order",
+            'table'  => "{$this->bd}order",
             'values' => 'is_delivered = ?',
-            'where' => 'id = ?',
-            'data' => [
+            'where'  => 'id = ?',
+            'data'   => [
                 $data['is_delivered'],
                 $data['id']
             ]
@@ -1087,7 +1087,7 @@ class MPedidos extends CRUD {
                 COUNT(*) as total_orders,
                 SUM(total_pay) as total_sales
             FROM {$this->bd}`order`
-            WHERE DATE(date_order) = ?
+            WHERE DATE_FORMAT(date_order, '%Y-%m-%d') = ?
             AND subsidiaries_id = ?
             AND status != 4
         ";
@@ -1103,50 +1103,51 @@ class MPedidos extends CRUD {
         ];
         
         // 2. Obtener pagos reales agrupados por método de pago
-        $queryPayments = "
-            SELECT 
-                pp.method_pay_id,
-                SUM(pp.pay) as total_paid
-            FROM {$this->bd}order_payments pp
-            INNER JOIN {$this->bd}`order` po ON pp.order_id = po.id
-            WHERE DATE(po.date_order) = ?
-            AND po.subsidiaries_id = ?
-            AND po.status != 4
-            GROUP BY pp.method_pay_id
-        ";
+        // $queryPayments = "
+        //     SELECT 
+        //         pp.method_pay_id,
+        //         SUM(pp.pay) as total_paid
+        //     FROM {$this->bd}order_payments pp
+        //     INNER JOIN {$this->bd}`order` po ON pp.order_id = po.id
+        //     WHERE DATE(po.date_order) = ?
+        //     AND po.subsidiaries_id = ?
+        //     AND po.status != 4
+        //     GROUP BY pp.method_pay_id
+        // ";
         
-        $payments = $this->_Read($queryPayments, [
-            $params['date'],
-            $params['subsidiaries_id']
-        ]);
+        // $payments = $this->_Read($queryPayments, [
+        //     $params['date'],
+        //     $params['subsidiaries_id']
+        // ]);
         
-        // 3. Mapear pagos por método (1=Efectivo, 2=Tarjeta, 3=Transferencia)
-        $card_sales = 0;
-        $cash_sales = 0;
-        $transfer_sales = 0;
+        // // 3. Mapear pagos por método (1=Efectivo, 2=Tarjeta, 3=Transferencia)
+        // $card_sales = 0;
+        // $cash_sales = 0;
+        // $transfer_sales = 0;
         
-        if (is_array($payments)) {
-            foreach ($payments as $payment) {
-                switch ($payment['method_pay_id']) {
-                    case 1:
-                        $cash_sales = $payment['total_paid'];
-                        break;
-                    case 2:
-                        $card_sales = $payment['total_paid'];
-                        break;
-                    case 3:
-                        $transfer_sales = $payment['total_paid'];
-                        break;
-                }
-            }
-        }
+        // if (is_array($payments)) {
+        //     foreach ($payments as $payment) {
+        //         switch ($payment['method_pay_id']) {
+        //             case 1:
+        //                 $cash_sales = $payment['total_paid'];
+        //                 break;
+        //             case 2:
+        //                 $card_sales = $payment['total_paid'];
+        //                 break;
+        //             case 3:
+        //                 $transfer_sales = $payment['total_paid'];
+        //                 break;
+        //         }
+        //     }
+        // }
         
         return [
-            'total_orders' => $ordersData['total_orders'],
-            'total_sales' => $ordersData['total_sales'],
-            'card_sales' => $card_sales,
-            'cash_sales' => $cash_sales,
-            'transfer_sales' => $transfer_sales
+            'order' => $orders
+            // 'total_orders' => $ordersData['total_orders'],
+            // 'total_sales' => $ordersData['total_sales'],
+            // 'card_sales' => $card_sales,
+            // 'cash_sales' => $cash_sales,
+            // 'transfer_sales' => $transfer_sales
         ];
     }
 

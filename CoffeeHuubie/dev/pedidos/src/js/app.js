@@ -99,7 +99,7 @@ class App extends Templates {
                     className: 'w-100',
                     color_btn: 'success',
                     icono: "icon-receipt",
-                    onClick: () => this.generateDailyClose()
+                    onClick: () => this.printDailyClose()
                 },
 
                 {
@@ -1625,7 +1625,9 @@ class App extends Templates {
         }
     }
 
-    generateDailyClose() {
+    // Cierre de pedido
+
+    printDailyClose() {
         const today = moment().format('YYYY-MM-DD');
 
         const modalContent = `
@@ -1656,8 +1658,8 @@ class App extends Templates {
             
             <div id="ticketContainer">
                 <div class="text-center text-gray-400 py-10">
-                    <i class="icon-doc-text text-5xl mb-3"></i>
-                    <p>Selecciona una fecha y presiona "Consultar"</p>
+                    <i class="icon-doc-text text-5xl mb-5"></i>
+                    <p class="mt-5">Selecciona una fecha y presiona "Consultar"</p>
                 </div>
             </div>
         `;
@@ -1665,22 +1667,16 @@ class App extends Templates {
         bootbox.dialog({
             title: `<i class="icon-calendar"></i> Cierre del Día - Pedidos de Pastelería`,
             message: modalContent,
+            size:'large',
             closeButton: true
         });
 
         // Evento para consultar datos
         $('#btnConsultData').on('click', () => {
             const selectedDate = $('#dailyCloseDate').val();
-            if (selectedDate) {
-                this.loadDailyCloseData(selectedDate);
-            } else {
-                alert({
-                    icon: "warning",
-                    text: "Por favor selecciona una fecha",
-                    btn1: true,
-                    btn1Text: "Ok"
-                });
-            }
+          
+                this.viewDailyClose(selectedDate);
+          
         });
 
         // Evento para imprimir (solo funciona si está habilitado)
@@ -1691,21 +1687,14 @@ class App extends Templates {
         });
     }
 
-    async loadDailyCloseData(date) {
-        // Mostrar indicador de carga
-        $('#ticketContainer').html(`
-            <div class="text-center py-10">
-                <div class="spinner-border text-blue-600" role="status"></div>
-                <p class="text-gray-600 mt-3">Consultando datos...</p>
-            </div>
-        `);
 
+
+
+    async viewDailyClose(date) {
+       
         const request = await useFetch({
             url: this._link,
-            data: {
-                opc: "getDailySummary",
-                date: date
-            }
+            data: {  opc: "getDailyClose",  date: date  }
         });
 
         if (request.status === 200) {
@@ -1732,6 +1721,10 @@ class App extends Templates {
                 .addClass('opacity-50 cursor-not-allowed');
         }
     }
+
+
+
+
 
     renderDailyCloseTicketInModal(data, date) {
         const formattedDate = moment(date).format('DD [de] MMMM [de] YYYY');
