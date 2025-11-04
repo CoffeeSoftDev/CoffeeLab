@@ -1081,36 +1081,73 @@ class MPedidos extends CRUD {
     }
 
     function getDailySalesMetrics($params) {
-        $query = "
-           SELECT 
-            COUNT(DISTINCT o.id) AS total_orders,
-            SUM(op.pay - IFNULL(o.discount, 0)) AS total_sales,
-
-            -- 💳 Ventas por tarjeta
-            SUM(CASE WHEN op.method_pay_id = 1 THEN op.pay ELSE 0 END) AS card_sales,
-
-            -- 💵 Ventas en efectivo
-            SUM(CASE WHEN op.method_pay_id = 2 THEN op.pay ELSE 0 END) AS cash_sales,
-
-            -- 🔄 Ventas por transferencia
-            SUM(CASE WHEN op.method_pay_id = 3 THEN op.pay ELSE 0 END) AS transfer_sales
-
-        FROM {$this->bd}`order` o
-        LEFT JOIN {$this->bd}`order_payments` op ON o.id = op.order_id
-
-        WHERE DATE(o.date_creation) = ?
-        AND o.subsidiaries_id = ?
-        AND o.status != 4
-
-        GROUP BY DATE(o.date_creation);
+        // 1. Obtener total de ventas y número de pedidos
+        $queryOrders = "
+            SELECT 
+                COUNT(*) as total_orders,
+                SUM(total_pay) as total_sales
+            FROM {$this->bd}`order`
+            WHERE DATE(date_order) = ?
+            AND subsidiaries_id = ?
+            AND status != 4
         ";
         
-        $result = $this->_Read($query, [
+        $orders = $this->_Read($queryOrders, [
             $params['date'],
             $params['subsidiaries_id']
         ]);
         
-        return is_array($result) && !empty($result) ? $result[0] : null;
+        $ordersData = is_array($orders) && !empty($orders) ? $orders[0] : [
+            'total_orders' => 0,
+            'total_sales' => 0
+        ];
+        
+        // 2. Obtener pagos reales agrupados por método de pago
+        $queryPayments = "
+            SELECT 
+                pp.method_pay_id,
+                SUM(pp.pay) as total_paid
+            FROM {$this->bd}order_payments pp
+            INNER JOIN {$this->bd}`order` po ON pp.order_id = po.id
+            WHERE DATE(po.date_order) = ?
+            AND po.subsidiaries_id = ?
+            AND po.status != 4
+            GROUP BY pp.method_pay_id
+        ";
+        
+        $payments = $this->_Read($queryPayments, [
+            $params['date'],
+            $params['subsidiaries_id']
+        ]);
+        
+        // 3. Mapear pagos por método (1=Efectivo, 2=Tarjeta, 3=Transferencia)
+        $card_sales = 0;
+        $cash_sales = 0;
+        $transfer_sales = 0;
+        
+        if (is_array($payments)) {
+            foreach ($payments as $payment) {
+                switch ($payment['method_pay_id']) {
+                    case 1:
+                        $cash_sales = $payment['total_paid'];
+                        break;
+                    case 2:
+                        $card_sales = $payment['total_paid'];
+                        break;
+                    case 3:
+                        $transfer_sales = $payment['total_paid'];
+                        break;
+                }
+            }
+        }
+        
+        return [
+            'total_orders' => $ordersData['total_orders'],
+            'total_sales' => $ordersData['total_sales'],
+            'card_sales' => $card_sales,
+            'cash_sales' => $cash_sales,
+            'transfer_sales' => $transfer_sales
+        ];
     }
 
 }

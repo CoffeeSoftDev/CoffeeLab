@@ -9,7 +9,7 @@ class mdl extends CRUD {
 
     public function __construct() {
         $this->util = new Utileria;
-        $this->bd = "rfwsmqex_contabilidad.";
+        $this->bd = "rfwsmqex_contabilidad2.";
     }
 
     // Módulos Desbloqueados

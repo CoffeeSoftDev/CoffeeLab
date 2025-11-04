@@ -9,7 +9,7 @@ class mdl extends CRUD {
 
     public function __construct() {
         $this->util = new Utileria;
-        $this->bd = "rfwsmqex_contabilidad.";
+        $this->bd = "rfwsmqex_gvsl_finanzas2.";
     }
 
     function lsUDN() {
@@ -87,8 +87,7 @@ class mdl extends CRUD {
                 product.active,
                 product_class.name AS product_class_name
             FROM {$this->bd}product
-            LEFT JOIN {$this->bd}product_class ON product.class_insumo_id = product_class.id
-            WHERE udn_id = ?
+            LEFT JOIN {$this->bd}product_class ON product.product_class_id = product_class.id
             ORDER BY product.id DESC
         ";
         
@@ -109,7 +108,7 @@ class mdl extends CRUD {
             SELECT id
             FROM {$this->bd}product
             WHERE LOWER(name) = LOWER(?)
-            AND class_insumo_id = ?
+            AND product_class_id = ?
             AND active = 1
         ";
 

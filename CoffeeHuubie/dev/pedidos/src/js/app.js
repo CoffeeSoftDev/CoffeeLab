@@ -431,6 +431,19 @@ class App extends Templates {
             data: { opc: "getOrderDetails", id: id }
         });
 
+        const modal = bootbox.dialog({
+            closeButton: true,
+            title: ` <div class="flex items-center gap-2 text-white text-lg font-semibold">
+                        <i class="icon-print text-blue-400 text-xl"></i>
+                        Imprimir
+                    </div>`,
+            message: `
+                <div class="p-3">
+                    <div id="containerPrintOrder"></div>
+                </div>
+            `
+        });
+
 
 
         normal.ticketPasteleria({
@@ -1616,7 +1629,7 @@ class App extends Templates {
         const today = moment().format('YYYY-MM-DD');
 
         const modalContent = `
-            <div class="mb-4 p-3  rounded">
+            <div class="mb-4 p-3 rounded">
                 <div class="flex items-center gap-3">
                     <div>
                         <label class="font-semibold text-sm mb-1 block">Seleccionar fecha:</label>
@@ -1628,8 +1641,14 @@ class App extends Templates {
                         />
                     </div>
                     <button 
-                        id="btnGenerateTicket" 
+                        id="btnConsultData" 
                         class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded transition mt-auto">
+                        <i class="icon-search"></i> Consultar
+                    </button>
+                    <button 
+                        id="btnPrintTicket" 
+                        class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded transition mt-auto opacity-50 cursor-not-allowed"
+                        disabled>
                         <i class="icon-print"></i> Imprimir
                     </button>
                 </div>
@@ -1638,7 +1657,7 @@ class App extends Templates {
             <div id="ticketContainer">
                 <div class="text-center text-gray-400 py-10">
                     <i class="icon-doc-text text-5xl mb-3"></i>
-                    <p>Selecciona una fecha y presiona "Imprimir"</p>
+                    <p>Selecciona una fecha y presiona "Consultar"</p>
                 </div>
             </div>
         `;
@@ -1649,7 +1668,8 @@ class App extends Templates {
             closeButton: true
         });
 
-        $('#btnGenerateTicket').on('click', () => {
+        // Evento para consultar datos
+        $('#btnConsultData').on('click', () => {
             const selectedDate = $('#dailyCloseDate').val();
             if (selectedDate) {
                 this.loadDailyCloseData(selectedDate);
@@ -1662,13 +1682,21 @@ class App extends Templates {
                 });
             }
         });
+
+        // Evento para imprimir (solo funciona si está habilitado)
+        $('#btnPrintTicket').on('click', () => {
+            if (!$('#btnPrintTicket').prop('disabled')) {
+                this.printDailyCloseTicket();
+            }
+        });
     }
 
     async loadDailyCloseData(date) {
+        // Mostrar indicador de carga
         $('#ticketContainer').html(`
             <div class="text-center py-10">
                 <div class="spinner-border text-blue-600" role="status"></div>
-                <p class="text-gray-600 mt-3">Generando reporte...</p>
+                <p class="text-gray-600 mt-3">Consultando datos...</p>
             </div>
         `);
 
@@ -1681,14 +1709,27 @@ class App extends Templates {
         });
 
         if (request.status === 200) {
+            // Renderizar ticket
             this.renderDailyCloseTicketInModal(request.data, date);
+
+            // Habilitar botón de impresión
+            $('#btnPrintTicket')
+                .prop('disabled', false)
+                .removeClass('opacity-50 cursor-not-allowed')
+                .addClass('hover:bg-green-700');
         } else {
+            // Mostrar mensaje de error
             $('#ticketContainer').html(`
                 <div class="text-center py-10">
                     <i class="icon-attention text-5xl text-gray-400 mb-3"></i>
                     <p class="text-gray-600">${request.message || "No hay pedidos registrados para esta fecha"}</p>
                 </div>
             `);
+
+            // Mantener botón deshabilitado
+            $('#btnPrintTicket')
+                .prop('disabled', true)
+                .addClass('opacity-50 cursor-not-allowed');
         }
     }
 
@@ -1738,10 +1779,6 @@ class App extends Templates {
         `;
 
         $('#ticketContainer').html(ticketHtml);
-
-        $('#btnGenerateTicket').html('<i class="icon-print"></i> Imprimir Ticket').off('click').on('click', () => {
-            this.printDailyCloseTicket();
-        });
     }
 
     printDailyCloseTicket() {

@@ -21,12 +21,12 @@ $(async () => {
     lsmodules = data.modules;
 
     app          = new App(api, "root");
-    salesAccount = new SalesAccountManager(api_cta, "root");
-    supplier     = new AdminSupplier(api_supplier, "root");
-    client       = new Clientes(api_cliente, "root");
-    formasPago   = new PaymentMethod(api_efectivo, "root");
-    moneda       = new AdminForeignCurrency(api_moneda, "root");
-    banco        = new AdminBankAccounts(api_banco, "root");
+    // salesAccount = new SalesAccountManager(api_cta, "root");
+    // supplier     = new AdminSupplier(api_supplier, "root");
+    // client       = new Clientes(api_cliente, "root");
+    // formasPago   = new PaymentMethod(api_efectivo, "root");
+    // moneda       = new AdminForeignCurrency(api_moneda, "root");
+    // banco        = new AdminBankAccounts(api_banco, "root");
 
     // Compras modules - Instanciar primero las clases que ComprasCta necesita
     mayorAccount = new MayorAccount(api_compra, "root");
@@ -60,13 +60,13 @@ class App extends Templates {
 
 
         // initial.
-        salesAccount.render();
-        client.render();
-        supplier.render();
+        // salesAccount.render();
+        // client.render();
+        // supplier.render();
 
-        formasPago.render();
-        moneda.render();
-        banco.render();
+        // formasPago.render();
+        // moneda.render();
+        // banco.render();
 
 
 
@@ -126,12 +126,13 @@ class App extends Templates {
                 {
                     id: "desbloqueo",
                     tab: "Desbloqueo de módulos",
-                    active: true,
+                   
                     onClick: () => this.lsModulesUnlocked()
                 },
                 {
                     id: "cta",
                     tab: "Cuenta de ventas",
+              
                     onClick: () => salesAccount.lsSalesAccount()
                 },
                 {
@@ -149,7 +150,7 @@ class App extends Templates {
                     id: "compras",
                     tab: "Compras",
                    
-
+                    active: true,
                     onClick: () => console.log("Compras")
                 },
                 {

@@ -1099,7 +1099,16 @@ class Pedidos extends MPedidos{
         $message = 'Error al obtener resumen del día';
         $data    = null;
         
-        $date            = $_POST['date'] ?? date('Y-m-d');
+        // Validar que la fecha esté presente
+        if (empty($_POST['date'])) {
+            return [
+                'status'  => 400,
+                'message' => 'La fecha es requerida',
+                'data'    => null
+            ];
+        }
+        
+        $date            = $_POST['date'];
         $subsidiaries_id = $_SESSION['SUB'] ?? 4;
         
         $summary = $this->getDailySalesMetrics([
@@ -1107,19 +1116,26 @@ class Pedidos extends MPedidos{
             'subsidiaries_id' => $subsidiaries_id
         ]);
         
+        // Verificar que los datos de pagos se obtengan correctamente
         if ($summary && $summary['total_orders'] > 0) {
             $status  = 200;
             $message = 'Resumen obtenido correctamente';
-            $data    = $summary;
+            $data    = [
+                'total_sales'     => $summary['total_sales'],
+                'card_sales'      => $summary['card_sales'],
+                'cash_sales'      => $summary['cash_sales'],
+                'transfer_sales'  => $summary['transfer_sales'],
+                'total_orders'    => $summary['total_orders']
+            ];
         } else {
             $status  = 404;
             $message = 'No hay pedidos registrados para esta fecha';
         }
         
         return [
-            'status' => $status,
+            'status'  => $status,
             'message' => $message,
-            'data' => $data
+            'data'    => $data
         ];
     }
 

@@ -147,9 +147,8 @@ class ctrl extends mdl {
 
     function lsSubAccount() {
         $__row = [];
-        $udn = $_POST['udn'];
         
-        $ls = $this->listProduct([$udn]);
+        $ls = $this->listProduct([]);
 
         foreach ($ls as $key) {
             $__row[] = [
