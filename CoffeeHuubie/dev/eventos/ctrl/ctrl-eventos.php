@@ -608,19 +608,19 @@ class ctrl extends MEvent{
         foreach ($paquetesRaw as $row) {
             $idP = $row['package_id'];
 
-        //     if (!isset($agrupados[$idP])) {
-        //         $agrupados[$idP] = [
-        //             'menu' => [
-        //                 'id' => $row['package_id'],
-        //                 'nombre' => $row['package'],
-        //                 'descripcion' => $row['description'],
-        //                 'precioPorPersona' => floatval($row['price_person']),
-        //                 'platillos' => [],
-        //                 'bebidas' => [],
-        //             ],
-        //             'cantidadPersonas' => intval($row['quantity']),
-        //         ];
-        //     }
+            if (!isset($agrupados[$idP])) {
+                $agrupados[$idP] = [
+                    'menu' => [
+                        'id' => $row['package_id'],
+                        'nombre' => $row['package'],
+                        'descripcion' => $row['description'],
+                        'precioPorPersona' => floatval($row['price_person']),
+                        'platillos' => [],
+                        'bebidas' => [],
+                    ],
+                    'cantidadPersonas' => intval($row['quantity']),
+                ];
+            }
 
             $platillo = [
 
@@ -631,37 +631,37 @@ class ctrl extends MEvent{
 
             ];
 
-        //     // Clasifica como bebida o platillo por el idC (id de clasificación)
-        //     if ($row['idC'] == 2 || $row['idC'] == 11) {
-        //         $agrupados[$idP]['menu']['bebidas'][] = $platillo;
-        //     } else {
-        //         $agrupados[$idP]['menu']['platillos'][] = $platillo;
-        //     }
+            // Clasifica como bebida o platillo por el idC (id de clasificación)
+            if ($row['idC'] == 2 || $row['idC'] == 11) {
+                $agrupados[$idP]['menu']['bebidas'][] = $platillo;
+            } else {
+                $agrupados[$idP]['menu']['platillos'][] = $platillo;
+            }
         }
 
-        // // Convertir a array de valores
-        // foreach ($agrupados as $item) {
-        //     $menus[] = $item;
-        // }
+        // Convertir a array de valores
+        foreach ($agrupados as $item) {
+            $menus[] = $item;
+        }
 
-        // // Formatear productos individuales (extras)
-        // foreach ($productosRaw as $row) {
-        //     $extras[] = [
-        //         'id' => $row['product_id'],
-        //         'nombre' => $row['nombre'],
-        //         'precio' => floatval($row['precioUnitario']),
-        //         'cantidad' => intval($row['quantity']),
-        //         'id_clasificacion' => $row['id_clasificacion'],
-        //         'custom' => false,
-        //     ];
-        // }
+        // Formatear productos individuales (extras)
+        foreach ($productosRaw as $row) {
+            $extras[] = [
+                'id' => $row['product_id'],
+                'nombre' => $row['nombre'],
+                'precio' => floatval($row['precioUnitario']),
+                'cantidad' => intval($row['quantity']),
+                'id_clasificacion' => $row['id_clasificacion'],
+                'custom' => false,
+            ];
+        }
 
         return [
             'status'  => 200,
             'message' => 'Datos cargados correctamente.',
             'menus'   => $menus,
             'extras'  => $extras,
-            'package' => $paquetesRaw
+            'package' => $agrupados
         ];
     }
 

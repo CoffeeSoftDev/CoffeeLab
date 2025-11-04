@@ -77,8 +77,8 @@ class Eventos extends App {
     }
 
 
-    // EVENTO -----------------------------------
-    // Ver
+    // EVENTO .
+
     async showEvent(id, category) {
         let response = await useFetch({
             url: this._link,
@@ -481,6 +481,7 @@ class Eventos extends App {
         });
 
         this.newEventLayout();
+        this.newMenuLayout();
     }
 
     newEventLayout() {
@@ -685,6 +686,9 @@ class Eventos extends App {
                 // $("#btnsForm").addClass("d-none");
                 $("#btnsFormMenu").removeClass("d-none");
                 id_event = response.data.id;
+
+                this.newMenuLayout(id_event)
+
             } else {
                 alert({
                     icon: "error",
@@ -962,6 +966,24 @@ class Eventos extends App {
 
     async newMenuLayout(id = null) {
 
+        
+
+        if (!id_event || id_event === 0) {
+            $("#containerAddMenu").html(`
+                <div class="flex flex-col items-center justify-center py-16 px-4">
+                    <div class="w-24 h-24 bg-[#8B5CF6] rounded-full flex items-center justify-center mb-6">
+                        <i class="icon-calendar text-white text-5xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-white mb-3">Sin Eventos Activos</h2>
+                    <p class="text-gray-400 text-center max-w-md mb-6">
+                        Para comenzar a agregar menús y productos, primero necesitas 
+                        <span class="text-[#60A5FA] font-semibold cursor-pointer hover:underline" onclick="eventos.init()">crear un nuevo evento</span>.
+                    </p>
+                </div>
+            `);
+            return;
+        }
+
 
         let menusPrecargadosData = await useFetch({ url: link, data: { opc: "getPackages" } });
         let extrasDisponiblesData = await useFetch({ url: link, data: { opc: "getProducts" } });
@@ -1176,16 +1198,6 @@ class Eventos extends App {
 
 
 
-            let addMenu = await useFetch({
-                url: this._link, data: {
-                    opc: 'addMenuPackage',
-                    id_event: id_event,
-                    cantidad: cantidad,
-                    package_id: idSeleccionado,
-                    price: menu.precioPorPersona,
-
-                }
-            });
 
 
         });
@@ -1419,7 +1431,11 @@ class Eventos extends App {
                 }
             });
         });
+
     }
+
+
+
 
     // Función para renderizar paquetes seleccionados
     renderPaquetes() {
@@ -1434,7 +1450,7 @@ class Eventos extends App {
         contenedor.empty();
         eventos.menusSeleccionados.forEach((item, index) => {
 
-            console.log('menuList',item)
+            console.log('menuList', item)
 
             const total = item.menu.precioPorPersona * item.cantidadPersonas;
             const html = `
@@ -1756,14 +1772,14 @@ class Eventos extends App {
     }
 
 
-    async deletePackage( idPackage ) {
+    async deletePackage(idPackage) {
 
         const response = await useFetch({
             url: this._link,
             data: { opc: "deletePackage", id: idPackage, evt_events_id: id_event },
         });
 
-      
+
 
     }
 

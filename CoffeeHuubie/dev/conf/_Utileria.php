@@ -339,34 +339,41 @@ function formatSpanishDay($fecha = null){
 }
 
 function formatSpanishDate($fecha = null, $type = 'short') {
-    setlocale(LC_TIME, 'es_ES.UTF-8'); // Establecer localización a español
-
     if ($fecha === null) {
-        $fecha = date('Y-m-d'); // Si no hay fecha, usar la actual
+        $fecha = date('Y-m-d');
     }
 
     $marcaTiempo = strtotime($fecha);
     $hoy = date('Y-m-d');
     $ayer = date('Y-m-d', strtotime('-1 day'));
-    $antier = date('Y-m-d', strtotime('-2 days'));
 
-    // Verificar si la fecha es hoy o antier
     if ($fecha == $hoy) {
         return "Hoy";
     } elseif ($fecha == $ayer) {
         return "Ayer";
     }
 
-    // Formatos de fecha en español
-    $formatos = [
-        'short'  => "%d/%b/%Y",          // Ejemplo: 01/ene/2025
-        'normal' => "%d de %B del %Y",   // Ejemplo: 01 de enero del 2025
+    $meses = [
+        1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
+        5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
+        9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
     ];
 
-    // Usar el formato adecuado o 'short' por defecto
-    $formatoFecha = $formatos[$type] ?? $formatos['short'];
+    $mesesCortos = [
+        1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr',
+        5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago',
+        9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dic'
+    ];
 
-    return strftime($formatoFecha, $marcaTiempo);
+    $dia = date('d', $marcaTiempo);
+    $mes = (int)date('m', $marcaTiempo);
+    $anio = date('Y', $marcaTiempo);
+
+    if ($type === 'normal') {
+        return "$dia de {$meses[$mes]} del $anio";
+    }
+
+    return "$dia/{$mesesCortos[$mes]}/$anio";
 }
 
 

@@ -1,9 +1,9 @@
 let url_session = "/dev/access/ctrl/ctrl-access.php";
 
 $(() => {
-    updateSession();
-    setInterval(checkSession, 600000); // cada 10 minutos
-    $(document).on('click', () => updateSession());
+    // updateSession();
+    // setInterval(checkSession, 600000); // cada 10 minutos
+    // $(document).on('click', () => updateSession());
 });
 
 async function checkSession() {
