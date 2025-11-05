@@ -504,8 +504,6 @@ class App extends Templates {
         });
     }
 
-
-
     jsonOrder() {
         return [
             {
@@ -1628,34 +1626,10 @@ class App extends Templates {
     // Cierre de pedido
 
     printDailyClose() {
-        const today = moment().format('YYYY-MM-DD');
+
 
         const modalContent = `
-            <div class="mb-4 p-3 rounded">
-                <div class="flex items-center gap-3">
-                    <div>
-                        <label class="font-semibold text-sm mb-1 block">Seleccionar fecha:</label>
-                        <input 
-                            type="date" 
-                            id="dailyCloseDate" 
-                            class="form-control"
-                            value="${today}"
-                        />
-                    </div>
-                    <button 
-                        id="btnConsultData" 
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded transition mt-auto">
-                        <i class="icon-search"></i> Consultar
-                    </button>
-                    <button 
-                        id="btnPrintTicket" 
-                        class="bg-green-600 hover:bg-green-700 text-white font-semibold px-4 py-2 rounded transition mt-auto opacity-50 cursor-not-allowed"
-                        disabled>
-                        <i class="icon-print"></i> Imprimir
-                    </button>
-                </div>
-            </div>
-            
+            <div id="filterBarDailyClose" class="mb-3"></div>
             <div id="ticketContainer">
                 <div class="text-center text-gray-400 py-10">
                     <i class="icon-doc-text text-5xl mb-5"></i>
@@ -1667,39 +1641,69 @@ class App extends Templates {
         bootbox.dialog({
             title: `<i class="icon-calendar"></i> Cierre del Día - Pedidos de Pastelería`,
             message: modalContent,
-            size:'large',
             closeButton: true
         });
 
-        // Evento para consultar datos
-        $('#btnConsultData').on('click', () => {
-            const selectedDate = $('#dailyCloseDate').val();
-          
-                this.viewDailyClose(selectedDate);
-          
+        // Crear filterBar con componentes de CoffeeSoft
+        this.createfilterBar({
+            parent: 'filterBarDailyClose',
+            data: [
+                {
+                    opc: "input-calendar",
+                    id: "calendarDailyClose",
+                    lbl: "Seleccionar fecha:",
+                    class: "col-sm-9 mb-2"
+                },
+
+                {
+                    opc: "button",
+                    id: "btnPrintTicket",
+                    text: "Imprimir",
+                    class: "col-sm-3",
+                    className: "opacity-50 w-100 cursor-not-allowed",
+                    color_btn: "primary",
+                    icono: "icon-print",
+                    disabled: true,
+                    onClick: () => {
+                        if (!$('#btnPrintTicket').prop('disabled')) {
+                            this.printDailyCloseTicket();
+                        }
+                    }
+                }
+            ]
         });
 
-        // Evento para imprimir (solo funciona si está habilitado)
-        $('#btnPrintTicket').on('click', () => {
-            if (!$('#btnPrintTicket').prop('disabled')) {
-                this.printDailyCloseTicket();
-            }
+        // Configurar dataPicker con fecha de hoy
+        dataPicker({
+            parent: "calendarDailyClose",
+            type: 'simple',
+            startDate: moment(),
+            locale: {
+                format: 'YYYY-MM-DD'
+            },
+            onSelect: (start, end) => {
+                this.viewDailyClose();
+            },
         });
+
+
+        this.viewDailyClose();
     }
 
 
+    async viewDailyClose() {
 
+        let rangePicker = getDataRangePicker("calendarDailyClose");
+        let date = rangePicker.fi;
 
-    async viewDailyClose(date) {
-       
         const request = await useFetch({
             url: this._link,
-            data: {  opc: "getDailyClose",  date: date  }
+            data: { opc: "getDailyClose", date: date }
         });
 
         if (request.status === 200) {
             // Renderizar ticket
-            this.renderDailyCloseTicketInModal(request.data, date);
+            this.ticketDailyClose({ data: request.data, date: date });
 
             // Habilitar botón de impresión
             $('#btnPrintTicket')
@@ -1723,254 +1727,291 @@ class App extends Templates {
     }
 
 
+    ticketDailyClose(options) {
+        const defaults = {
+            parent: "ticketContainer",
+            id: "ticketDailyClose",
+            class: "bg-white p-4 rounded-lg shadow font-mono text-gray-900 py-5",
+            date: moment().format("YYYY-MM-DD"),
+            data: {
+                total_sales: 0,
+                card_sales: 0,
+                cash_sales: 0,
+                transfer_sales: 0,
+                total_orders: 0
+            }
+        };
+
+        const opts = Object.assign({}, defaults, options);
+        const d = opts.data;
+        const fecha = opts.date;
+
+        function formatPrice(value) {
+            return `$${parseFloat(value || 0).toFixed(2)}`;
+        }
+
+        const formattedDate = moment(fecha).format('DD [de] MMMM [de] YYYY');
+
+        const layout = $("<div>", {
+            id: 'layoutPrintCloseTicket',
+            class: 'p-2'
+        });
 
 
+        const container = $("<div>", {
+            id: opts.id,
+            class: opts.class
+        });
 
-    renderDailyCloseTicketInModal(data, date) {
-        const formattedDate = moment(date).format('DD [de] MMMM [de] YYYY');
+        const header = `
+        <div class="flex flex-col items-center mb-4">
+            <img src="../src/img/logo/logo.png" alt="CoffeeSoft Logo" class="w-20 mb-1" />
+            <h1 class="text-lg font-bold">PEDIDOS DE PASTELERÍA</h1>
+            <div class="text-xs text-gray-600">Cierre del Día</div>
+            <div class="text-xs text-gray-600">${formattedDate}</div>
+        </div>
+    `;
 
-        const ticketHtml = `
-            <div id="ticketPasteleria" class="bg-white text-gray-800 p-6 rounded-lg max-w-md mx-auto">
-                <div class="text-center mb-6">
-                    <img src="../src/img/logo/logo.png" alt="CoffeeSoft Logo" class="h-16 mx-auto mb-3">
-                    <h2 class="text-xl font-bold text-gray-800">PEDIDOS DE PASTELERÍA</h2>
-                    <p class="text-sm text-gray-600">Cierre del Día</p>
-                    <p class="text-sm text-gray-600">${formattedDate}</p>
-                </div>
+        // Calcular total de formas de pago
+        const totalPaymentMethods = parseFloat(d.cash_sales || 0) + parseFloat(d.card_sales || 0) + parseFloat(d.transfer_sales || 0);
 
-                <div class="border-t-2 border-dashed border-gray-300 pt-4 space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-700 font-medium">🧁 Venta total del día:</span>
-                        <span class="text-lg font-bold text-green-600">${formatPrice(data.total_sales || 0)}</span>
-                    </div>
-
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-700">💳 Ingresos por tarjeta:</span>
-                        <span class="font-semibold">${formatPrice(data.card_sales || 0)}</span>
-                    </div>
-
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-700">💵 Ingresos en efectivo:</span>
-                        <span class="font-semibold">${formatPrice(data.cash_sales || 0)}</span>
-                    </div>
-
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-700">🔄 Ingresos por transferencia:</span>
-                        <span class="font-semibold">${formatPrice(data.transfer_sales || 0)}</span>
-                    </div>
-
-                    <div class="border-t-2 border-gray-300 pt-3 flex justify-between items-center">
-                        <span class="text-gray-700 font-medium">📦 Número de pedidos:</span>
-                        <span class="text-lg font-bold text-blue-600">${data.total_orders || 0}</span>
-                    </div>
-                </div>
-
-                <div class="mt-6 text-center text-xs text-gray-500">
-                    <p>Generado: ${moment().format('DD/MM/YYYY HH:mm:ss')}</p>
-                </div>
+        const resumen = `
+        <div class="text-sm space-y-2">
+             <div class="flex justify-between items-center">
+                <div class="font-semibold">EFECTIVO:</div>
+                <div>${formatPrice(d.cash_sales)}</div>
             </div>
-        `;
 
-        $('#ticketContainer').html(ticketHtml);
+            <div class="flex justify-between items-center">
+                <div class="font-semibold">TARJETA:</div>
+                <div>${formatPrice(d.card_sales)}</div>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <div class="font-semibold">TRANSFERENCIA:</div>
+                <div>${formatPrice(d.transfer_sales)}</div>
+            </div>
+
+            <hr class="border-dashed border-t my-2" />
+
+            <div class="flex justify-between items-center pt-1">
+                <div class="font-semibold">TOTAL FORMAS DE PAGO:</div>
+                <div class="text-lg font-bold">${formatPrice(totalPaymentMethods)}</div>
+            </div>
+
+            <div class="flex justify-between items-center pt-1">
+                <div class="font-semibold">NÚMERO DE PEDIDOS:</div>
+                <div class="text-lg font-bold">${d.total_orders}</div>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <div class="font-semibold">VENTA TOTAL DEL DÍA:</div>
+                <div class="text-lg font-bold">${formatPrice(d.total_sales)}</div>
+            </div>
+        </div>
+    `;
+
+        const footer = `
+        <div class="text-center mt-6 text-xs font-bold text-gray-900 space-y-1">
+            <p class="mt-2">GRACIAS POR SU PREFERENCIA</p>
+            <p>ESTE NO ES UN COMPROBANTE FISCAL</p>
+            <p class="text-purple-800 text-sm">Huubie</p>
+            <p class="text-gray-500 font-normal text-[10px] mt-1">
+                Generado: ${moment().format('DD/MM/YYYY HH:mm:ss')}
+            </p>
+        </div>
+    `;
+
+        container.append(header);
+        container.append(resumen);
+        container.append(footer);
+
+        layout.append(container);
+
+        $(`#${opts.parent}`).html(layout);
     }
 
     printDailyCloseTicket() {
-        const printContent = document.getElementById('ticketPasteleria').innerHTML;
-        const printWindow = window.open('', '', 'height=600,width=800');
+        // Obtener solo el contenido del ticket (sin el layout wrapper)
+        const ticketContent = document.getElementById('ticketDailyClose');
+
+        if (!ticketContent) {
+            alert({
+                icon: "warning",
+                text: "No hay ticket para imprimir. Por favor consulta primero.",
+                btn1: true,
+                btn1Text: "Ok"
+            });
+            return;
+        }
+
+        const printWindow = window.open('', '', 'height=600,width=400');
         printWindow.document.write('<html><head><title>Cierre del Día</title>');
-        printWindow.document.write('<style>body{font-family:Arial,sans-serif;padding:20px;max-width:400px;margin:0 auto;}</style>');
+        printWindow.document.write(`
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    padding: 20px;
+                    max-width: 400px;
+                    margin: 0 auto;
+                }
+                .bg-white { background-color: white; }
+                .p-4 { padding: 1rem; }
+                .rounded-lg { border-radius: 0.5rem; }
+                .shadow { box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+                .font-mono { font-family: 'Courier New', monospace; }
+                .text-gray-900 { color: #111827; }
+                .flex { display: flex; }
+                .flex-col { flex-direction: column; }
+                .items-center { align-items: center; }
+                .justify-between { justify-content: space-between; }
+                .mb-4 { margin-bottom: 1rem; }
+                .mb-1 { margin-bottom: 0.25rem; }
+                .w-20 { width: 5rem; }
+                .text-lg { font-size: 1.125rem; }
+                .text-sm { font-size: 0.875rem; }
+                .text-xs { font-size: 0.75rem; }
+                .font-bold { font-weight: bold; }
+                .font-semibold { font-weight: 600; }
+                .text-gray-600 { color: #4B5563; }
+                .text-gray-500 { color: #6B7280; }
+                .text-purple-800 { color: #6B21A8; }
+                .space-y-2 > * + * { margin-top: 0.5rem; }
+                .space-y-1 > * + * { margin-top: 0.25rem; }
+                .text-center { text-align: center; }
+                .mt-6 { margin-top: 1.5rem; }
+                .mt-2 { margin-top: 0.5rem; }
+                .mt-1 { margin-top: 0.25rem; }
+                .pt-1 { padding-top: 0.25rem; }
+                hr { border: 0; border-top: 1px dashed #D1D5DB; margin: 0.5rem 0; }
+                @media print {
+                    body { padding: 0; }
+                }
+            </style>
+        `);
         printWindow.document.write('</head><body>');
-        printWindow.document.write(printContent);
+        printWindow.document.write(ticketContent.outerHTML);
         printWindow.document.write('</body></html>');
         printWindow.document.close();
+
         setTimeout(() => {
             printWindow.print();
         }, 250);
     }
 
-    renderDailyCloseTicket(data, date) {
-        const formattedDate = moment(date).format('DD [de] MMMM [de] YYYY');
-
-        const ticketHtml = `
-            <div id="ticketPasteleria" class="bg-white text-gray-800 p-6 rounded-lg max-w-md mx-auto">
-                <div class="text-center mb-6">
-                    <img src="../src/img/logo/logo.png" alt="CoffeeSoft Logo" class="h-16 mx-auto mb-3">
-                    <h2 class="text-xl font-bold text-gray-800">PEDIDOS DE PASTELERÍA</h2>
-                    <p class="text-sm text-gray-600">Cierre del Día</p>
-                    <p class="text-sm text-gray-600">${formattedDate}</p>
-                </div>
-
-                <div class="border-t-2 border-dashed border-gray-300 pt-4 space-y-3">
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-700 font-medium">🧁 Venta total del día:</span>
-                        <span class="text-lg font-bold text-green-600">${formatPrice(data.total_sales || 0)}</span>
-                    </div>
-
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-700">💳 Ingresos por tarjeta:</span>
-                        <span class="font-semibold">${formatPrice(data.card_sales || 0)}</span>
-                    </div>
-
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-700">💵 Ingresos en efectivo:</span>
-                        <span class="font-semibold">${formatPrice(data.cash_sales || 0)}</span>
-                    </div>
-
-                    <div class="flex justify-between items-center">
-                        <span class="text-gray-700">🔄 Ingresos por transferencia:</span>
-                        <span class="font-semibold">${formatPrice(data.transfer_sales || 0)}</span>
-                    </div>
-
-                    <div class="border-t-2 border-gray-300 pt-3 flex justify-between items-center">
-                        <span class="text-gray-700 font-medium">📦 Número de pedidos:</span>
-                        <span class="text-lg font-bold text-blue-600">${data.total_orders || 0}</span>
-                    </div>
-                </div>
-
-                <div class="mt-6 text-center text-xs text-gray-500">
-                    <p>Generado: ${moment().format('DD/MM/YYYY HH:mm:ss')}</p>
-                </div>
-            </div>
-        `;
-
-        bootbox.dialog({
-            title: `<i class="icon-receipt"></i> Cierre del Día - ${formattedDate}`,
-            message: ticketHtml,
-            size: 'large',
-            closeButton: true,
-            buttons: {
-                print: {
-                    label: '<i class="icon-print"></i> Imprimir',
-                    className: 'btn-primary',
-                    callback: function () {
-                        const printContent = document.getElementById('ticketPasteleria').innerHTML;
-                        const printWindow = window.open('', '', 'height=600,width=800');
-                        printWindow.document.write('<html><head><title>Cierre del Día</title>');
-                        printWindow.document.write('<style>body{font-family:Arial,sans-serif;padding:20px;}</style>');
-                        printWindow.document.write('</head><body>');
-                        printWindow.document.write(printContent);
-                        printWindow.document.write('</body></html>');
-                        printWindow.document.close();
-                        printWindow.print();
-                        return false;
-                    }
-                }
-            }
-        });
-    }
 }
 
-class Order extends Templates {
-    constructor(link, divModule) {
-        super(link, divModule);
-        this.PROJECT_NAME = "Pedidos";
-    }
+// class Order extends Templates {
+//     constructor(link, divModule) {
+//         super(link, divModule);
+//         this.PROJECT_NAME = "Pedidos";
+//     }
 
 
 
-    // Payments.
+//     // Payments.
 
-    addPayment(id) {
+//     addPayment(id) {
 
-        let tr = $(event.target).closest("tr");
+//         let tr = $(event.target).closest("tr");
 
-        // Obtiene la celda de la cantidad (columna 5)
-        let saldo = tr.find("td").eq(5).text();
-        let saldoOriginal = tr.find("td").eq(5).text().replace(/[^0-9.-]+/g, "");
-        let total = parseFloat(saldoOriginal);
+//         // Obtiene la celda de la cantidad (columna 5)
+//         let saldo = tr.find("td").eq(5).text();
+//         let saldoOriginal = tr.find("td").eq(5).text().replace(/[^0-9.-]+/g, "");
+//         let total = parseFloat(saldoOriginal);
 
-        this.createModalForm({
-            id: "modalRegisterPayment",
-            bootbox: { title: "Registrar Pago", id: "registerPaymentModal", size: "medium" },
-            data: { opc: 'addPayment', total: total, evt_events_id: id },
-            json: [
-                {
-                    opc: "input",
-                    type: "number",
-                    id: "pay",
-                    lbl: "Pago",
-                    class: "col-12 mb-3",
-                    placeholder: "$ 0",
-                    required: true,
-                    min: 0, // 📛 Evita valores negativos desde el input
-                    onkeyup: 'payment.updateSaldoEvent(' + saldoOriginal + ')'
-                },
-                {
-                    opc: "select",
-                    id: "type",
-                    lbl: "Tipo de pago",
-                    class: "col-12 mb-3",
-                    data: [
-                        { id: "2", valor: "Anticipo" },
-                        { id: "1", valor: "Abono" },
+//         this.createModalForm({
+//             id: "modalRegisterPayment",
+//             bootbox: { title: "Registrar Pago", id: "registerPaymentModal", size: "medium" },
+//             data: { opc: 'addPayment', total: total, evt_events_id: id },
+//             json: [
+//                 {
+//                     opc: "input",
+//                     type: "number",
+//                     id: "pay",
+//                     lbl: "Pago",
+//                     class: "col-12 mb-3",
+//                     placeholder: "$ 0",
+//                     required: true,
+//                     min: 0, // 📛 Evita valores negativos desde el input
+//                     onkeyup: 'payment.updateSaldoEvent(' + saldoOriginal + ')'
+//                 },
+//                 {
+//                     opc: "select",
+//                     id: "type",
+//                     lbl: "Tipo de pago",
+//                     class: "col-12 mb-3",
+//                     data: [
+//                         { id: "2", valor: "Anticipo" },
+//                         { id: "1", valor: "Abono" },
 
-                    ],
-                    required: true
-                },
+//                     ],
+//                     required: true
+//                 },
 
 
-                {
-                    opc: "select",
-                    id: "method_pay_id",
-                    lbl: "Método de pago",
-                    class: "col-12 mb-3",
-                    data: [
-                        { id: "1", valor: "Efectivo" },
-                        { id: "2", valor: "Tarjeta" },
-                        { id: "3", valor: "Transferencia" }
-                    ],
-                    required: true
-                },
-                {
-                    opc: "div",
-                    id: "dueAmount",
-                    class: "col-12 text-center bg-gray-800 text-white p-2 rounded",
-                    html: `<strong>Adeudado</strong><br> <span id="SaldoEvent">${saldo}</span>`
-                }
-            ],
-            success: (response) => {
-                if (response.status == 200) {
-                    alert({ icon: "success", text: response.message, btn1: true, btn1Text: "Ok" });
-                    app.ls();
-                } else {
-                    alert({ icon: "error", text: response.message, btn1: true, btn1Text: "Ok" });
-                }
-            }
-        });
+//                 {
+//                     opc: "select",
+//                     id: "method_pay_id",
+//                     lbl: "Método de pago",
+//                     class: "col-12 mb-3",
+//                     data: [
+//                         { id: "1", valor: "Efectivo" },
+//                         { id: "2", valor: "Tarjeta" },
+//                         { id: "3", valor: "Transferencia" }
+//                     ],
+//                     required: true
+//                 },
+//                 {
+//                     opc: "div",
+//                     id: "dueAmount",
+//                     class: "col-12 text-center bg-gray-800 text-white p-2 rounded",
+//                     html: `<strong>Adeudado</strong><br> <span id="SaldoEvent">${saldo}</span>`
+//                 }
+//             ],
+//             success: (response) => {
+//                 if (response.status == 200) {
+//                     alert({ icon: "success", text: response.message, btn1: true, btn1Text: "Ok" });
+//                     app.ls();
+//                 } else {
+//                     alert({ icon: "error", text: response.message, btn1: true, btn1Text: "Ok" });
+//                 }
+//             }
+//         });
 
-        $("#btnSuccess").addClass("text-white");
-        $("#btnExit").addClass("text-white");
-    }
+//         $("#btnSuccess").addClass("text-white");
+//         $("#btnExit").addClass("text-white");
+//     }
 
-    updateSaldoEvent(saldo) {
-        let payInput = document.getElementById("pay");
-        let saldoElement = document.getElementById("SaldoEvent");
-        let pagarBtn = document.querySelector(".bootbox .btn-primary");
+//     updateSaldoEvent(saldo) {
+//         let payInput = document.getElementById("pay");
+//         let saldoElement = document.getElementById("SaldoEvent");
+//         let pagarBtn = document.querySelector(".bootbox .btn-primary");
 
-        if (payInput && saldoElement && pagarBtn) {
-            let saldoOriginal = parseFloat(saldo) || 0;
-            let pago = parseFloat(payInput.value) || 0;
+//         if (payInput && saldoElement && pagarBtn) {
+//             let saldoOriginal = parseFloat(saldo) || 0;
+//             let pago = parseFloat(payInput.value) || 0;
 
-            // ⛔ Bloquear si el valor es negativo
-            if (pago < 0) {
-                payInput.value = 0;
-                pago = 0;
-            }
+//             // ⛔ Bloquear si el valor es negativo
+//             if (pago < 0) {
+//                 payInput.value = 0;
+//                 pago = 0;
+//             }
 
-            let nuevoSaldo = saldoOriginal - pago;
+//             let nuevoSaldo = saldoOriginal - pago;
 
-            saldoElement.textContent = formatPrice(nuevoSaldo);
+//             saldoElement.textContent = formatPrice(nuevoSaldo);
 
-            if (nuevoSaldo < 0) {
-                saldoElement.classList.add("text-danger");
-            } else {
-                saldoElement.classList.remove("text-danger");
-            }
+//             if (nuevoSaldo < 0) {
+//                 saldoElement.classList.add("text-danger");
+//             } else {
+//                 saldoElement.classList.remove("text-danger");
+//             }
 
-            pagarBtn.disabled = nuevoSaldo < 0 || pago <= 0;
-        }
-    }
+//             pagarBtn.disabled = nuevoSaldo < 0 || pago <= 0;
+//         }
+//     }
 
-}
+// }
 
 

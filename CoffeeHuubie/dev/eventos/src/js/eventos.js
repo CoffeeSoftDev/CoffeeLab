@@ -961,13 +961,11 @@ class Eventos extends App {
         });
     }
 
+    
 
     // MENU -------------------------------------
 
     async newMenuLayout(id = null) {
-
-        
-
         if (!id_event || id_event === 0) {
             $("#containerAddMenu").html(`
                 <div class="flex flex-col items-center justify-center py-16 px-4">

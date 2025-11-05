@@ -1,11 +1,11 @@
-let api            = 'ctrl/ctrl-admin.php';
-let api_cta        = 'ctrl/ctrl-cuenta-venta.php';
-let api_cliente    = 'ctrl/ctrl-cliente.php';
-let api_supplier   = 'ctrl/ctrl-proveedores.php';
-let api_efectivo   = 'ctrl/ctrl-efectivo.php';
+let api = 'ctrl/ctrl-admin.php';
+let api_cta = 'ctrl/ctrl-cuenta-venta.php';
+let api_cliente = 'ctrl/ctrl-cliente.php';
+let api_supplier = 'ctrl/ctrl-proveedores.php';
+let api_efectivo = 'ctrl/ctrl-efectivo.php';
 let api_formasPago = 'ctrl/ctrl-formasPago.php';
-let api_moneda     = 'ctrl/ctrl-moneda.php';
-let api_banco      = 'ctrl/ctrl-banco.php';
+let api_moneda = 'ctrl/ctrl-moneda.php';
+let api_banco = 'ctrl/ctrl-banco.php';
 // vars.
 let app, salesAccount, client, moneda, banco, compras, cashMovement, supplier, formasPago;
 let lsudn, udn, lsmodules;
@@ -20,7 +20,7 @@ $(async () => {
     udn = data.udn;
     lsmodules = data.modules;
 
-    app          = new App(api, "root");
+    app = new App(api, "root");
     // salesAccount = new SalesAccountManager(api_cta, "root");
     // supplier     = new AdminSupplier(api_supplier, "root");
     // client       = new Clientes(api_cliente, "root");
@@ -67,13 +67,6 @@ class App extends Templates {
         // formasPago.render();
         // moneda.render();
         // banco.render();
-
-
-
-       
-      
-       
-
 
     }
 
@@ -126,13 +119,12 @@ class App extends Templates {
                 {
                     id: "desbloqueo",
                     tab: "Desbloqueo de módulos",
-                   
+                    active: true,
                     onClick: () => this.lsModulesUnlocked()
                 },
                 {
                     id: "cta",
                     tab: "Cuenta de ventas",
-              
                     onClick: () => salesAccount.lsSalesAccount()
                 },
                 {
@@ -149,8 +141,8 @@ class App extends Templates {
                 {
                     id: "compras",
                     tab: "Compras",
-                   
-                    active: true,
+
+
                     onClick: () => console.log("Compras")
                 },
                 {
@@ -179,7 +171,7 @@ class App extends Templates {
             data: [
                 {
                     opc: "button",
-                    class: "col-12 col-md-2",
+                    class: "col-12 col-md-3",
                     id: "btnDesbloquear",
                     className: 'w-full',
                     text: "Desbloquear módulo",
@@ -188,7 +180,7 @@ class App extends Templates {
                 },
                 {
                     opc: "button",
-                    class: "col-12 col-md-2",
+                    class: "col-12 col-md-3",
                     id: "btnHorarios",
                     className: 'w-full bg-orange-400 hover:bg-orange-700 text-white',
 
@@ -248,6 +240,7 @@ class App extends Templates {
     }
 
     jsonUnlockForm() {
+        const today = moment().format('YYYY-MM-DD');
         return [
             {
                 opc: "input",
@@ -255,6 +248,7 @@ class App extends Templates {
                 lbl: "Fecha solicitada",
                 type: "date",
                 class: "col-12 mb-3",
+                value: today,
                 required: true
             },
             {

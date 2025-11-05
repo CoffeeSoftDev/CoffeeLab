@@ -1080,7 +1080,7 @@ class MPedidos extends CRUD {
         ]);
     }
 
-    function getDailySalesMetrics($params) {
+    function getDailySalesMetrics($array) {
         // 1. Obtener total de ventas y número de pedidos
         $queryOrders = "
             SELECT 
@@ -1092,10 +1092,7 @@ class MPedidos extends CRUD {
             AND status != 4
         ";
         
-        $orders = $this->_Read($queryOrders, [
-            $params['date'],
-            $params['subsidiaries_id']
-        ]);
+        $orders = $this->_Read($queryOrders, $array);
         
         $ordersData = is_array($orders) && !empty($orders) ? $orders[0] : [
             'total_orders' => 0,
@@ -1103,51 +1100,49 @@ class MPedidos extends CRUD {
         ];
         
         // 2. Obtener pagos reales agrupados por método de pago
-        // $queryPayments = "
-        //     SELECT 
-        //         pp.method_pay_id,
-        //         SUM(pp.pay) as total_paid
-        //     FROM {$this->bd}order_payments pp
-        //     INNER JOIN {$this->bd}`order` po ON pp.order_id = po.id
-        //     WHERE DATE(po.date_order) = ?
-        //     AND po.subsidiaries_id = ?
-        //     AND po.status != 4
-        //     GROUP BY pp.method_pay_id
-        // ";
+        $queryPayments = "
+            SELECT 
+                pp.method_pay_id,
+                SUM(pp.pay) as total_paid
+            FROM {$this->bd}order_payments pp
+            INNER JOIN {$this->bd}`order` po ON pp.order_id = po.id
+            WHERE DATE_FORMAT(date_order, '%Y-%m-%d') = ?
+            AND po.subsidiaries_id = ?
+            AND po.status != 4
+            GROUP BY pp.method_pay_id
+        ";
         
-        // $payments = $this->_Read($queryPayments, [
-        //     $params['date'],
-        //     $params['subsidiaries_id']
-        // ]);
+        $payments = $this->_Read($queryPayments,$array);
         
-        // // 3. Mapear pagos por método (1=Efectivo, 2=Tarjeta, 3=Transferencia)
-        // $card_sales = 0;
-        // $cash_sales = 0;
-        // $transfer_sales = 0;
+        // 3. Mapear pagos por método (1=Efectivo, 2=Tarjeta, 3=Transferencia)
+        $card_sales = 0;
+        $cash_sales = 0;
+        $transfer_sales = 0;
         
-        // if (is_array($payments)) {
-        //     foreach ($payments as $payment) {
-        //         switch ($payment['method_pay_id']) {
-        //             case 1:
-        //                 $cash_sales = $payment['total_paid'];
-        //                 break;
-        //             case 2:
-        //                 $card_sales = $payment['total_paid'];
-        //                 break;
-        //             case 3:
-        //                 $transfer_sales = $payment['total_paid'];
-        //                 break;
-        //         }
-        //     }
-        // }
+        if (is_array($payments)) {
+            foreach ($payments as $payment) {
+                switch ($payment['method_pay_id']) {
+                    case 1:
+                        $cash_sales = $payment['total_paid'];
+                        break;
+                    case 2:
+                        $card_sales = $payment['total_paid'];
+                        break;
+                    case 3:
+                        $transfer_sales = $payment['total_paid'];
+                        break;
+                }
+            }
+        }
         
         return [
-            'order' => $orders
-            // 'total_orders' => $ordersData['total_orders'],
-            // 'total_sales' => $ordersData['total_sales'],
-            // 'card_sales' => $card_sales,
-            // 'cash_sales' => $cash_sales,
-            // 'transfer_sales' => $transfer_sales
+            'order'          => $orders,
+            'payments'       => $payments,
+            'total_orders'   => $ordersData['total_orders'],
+            'total_sales'    => $ordersData['total_sales'],
+            'card_sales'     => $card_sales,
+            'cash_sales'     => $cash_sales,
+            'transfer_sales' => $transfer_sales
         ];
     }
 
