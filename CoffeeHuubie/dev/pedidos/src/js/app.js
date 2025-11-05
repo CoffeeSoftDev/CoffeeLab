@@ -110,7 +110,7 @@ class App extends Templates {
                     id: "btnCalendario",
                     text: "Calendario",
                     onClick: () => {
-                        window.location.href = '../calendario/index.php'
+                        window.location.href = '../pedidos/calendario/index.php'
                     }
                 },
 

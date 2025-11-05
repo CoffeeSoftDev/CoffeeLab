@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="<?=PATH_BASE?>src/css/buttons.css" />
     <link rel="stylesheet" href="<?=PATH_BASE?>src/css/colors.css" />
 
-      <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 
 
     <link rel="stylesheet" href="<?=PATH_BASE?>src/plugins/sweetalert2/sweetalert2.min.css" />
