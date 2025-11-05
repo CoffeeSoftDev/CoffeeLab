@@ -1098,50 +1098,37 @@ class Pedidos extends MPedidos{
         $status  = 500;
         $message = 'Error al obtener resumen del día';
         $data    = null;
+     
         
-        // Validar que la fecha esté presente
-        if (empty($_POST['date'])) {
-            return [
-                'status'  => 400,
-                'message' => 'La fecha es requerida',
-                'data'    => null
-            ];
-        }
-        
-        $date            = $_POST['date'];
         $subsidiaries_id = $_SESSION['SUB'] ?? 4;
         
         $summary = $this->getDailySalesMetrics([
-            'date'            => $date,
-            'subsidiaries_id' => $subsidiaries_id
+            $_POST['date'],
+           $subsidiaries_id
         ]);
         
-        // // Verificar que los datos de pagos se obtengan correctamente
-        // if ($summary && $summary['total_orders'] > 0) {
-        //     $status  = 200;
-        //     $message = 'Resumen obtenido correctamente';
-        //     $data    = [
-        //         'total_sales'     => $summary['total_sales'],
-        //         'card_sales'      => $summary['card_sales'],
-        //         'cash_sales'      => $summary['cash_sales'],
-        //         'transfer_sales'  => $summary['transfer_sales'],
-        //         'total_orders'    => $summary['total_orders']
-        //     ];
-        // } else {
-        //     $status  = 404;
-        //     $message = 'No hay pedidos registrados para esta fecha';
-        // }
+        // Verificar que los datos de pagos se obtengan correctamente
+        if ($summary && $summary['total_orders'] > 0) {
+            $status  = 200;
+            $message = 'Resumen obtenido correctamente';
+            $data    = [
+                'total_sales'     => $summary['total_sales'],
+                'card_sales'      => $summary['card_sales'],
+                'cash_sales'      => $summary['cash_sales'],
+                'transfer_sales'  => $summary['transfer_sales'],
+                'total_orders'    => $summary['total_orders']
+            ];
+        } else {
+            $status  = 404;
+            $message = 'No hay pedidos registrados para esta fecha';
+        }
         
         return [
             'status'  => $status,
-            // 'message' => $message,
-            // 'data'    => $data,
+            'message' => $message,
+            'data'    => $summary,
 
-            'values'  => [
-                // 'date'            => $date,
-                // 'subsidiaries_id' => $subsidiaries_id,
-                'sumary'          =>  $summary
-             ]
+         
         ];
     }
 
