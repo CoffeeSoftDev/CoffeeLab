@@ -20,7 +20,7 @@ class mdl extends CRUD {
         $where = 'producto.active = ?';
         $data = [$array[0]];
 
-        if ($array[1] !== null) {
+        if ($array[1] !== null && $array[1] != '') {
             $where .= ' AND producto.udn_id = ?';
             $data[] = $array[1];
         }

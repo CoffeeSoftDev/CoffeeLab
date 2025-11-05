@@ -451,10 +451,7 @@ class App extends Templates {
             data: {
                 head: pos.order[0],
                 products: pos.data.products,
-                paymentMethods: [
-                    { method_pay: "Tarjeta", pay: 200 },
-                    { method_pay: "Efectivo", pay: 100 }
-                ]
+                paymentMethods: pos.data.paymentMethods || []
             }
         })
 

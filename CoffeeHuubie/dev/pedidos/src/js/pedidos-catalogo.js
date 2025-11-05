@@ -1709,7 +1709,7 @@ class CatalogProduct extends Pos {
                 return `
                 <hr class="border-dashed border-t my-2" />
                 <div class="text-right text-sm mt-4 space-y-1">
-                    <div class="text-xl font-bold">RESTANTE: ${formatPrice(total)}</div>
+                    <div class="text-xl font-bold">TOTAL: ${formatPrice(total)}</div>
                 </div>`;
             }
 

@@ -1071,7 +1071,11 @@ class AdminProductos extends Templates {
         this.createTable({
             parent: `container${this.PROJECT_NAME}`,
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
-            data: { opc: "lsProductos" },
+            data: { 
+                opc: "lsProductos",
+                'estado-productos': $(`#filterBar${this.PROJECT_NAME} #estado-productos`).val() || 1,
+                udn: $(`#filterBar${this.PROJECT_NAME} #udn`).val() || null
+            },
             coffeesoft: true,
             conf: { datatable: true, pag: 15 },
             attr: {
@@ -1079,8 +1083,8 @@ class AdminProductos extends Templates {
                 theme: 'corporativo',
                 title: 'Lista de Productos',
                 subtitle: 'Productos registrados en el sistema',
-                center: [3, 5],
-                right: [6]
+                center: [2, 4],
+                right: [5]
             },
         });
     }
@@ -1211,19 +1215,6 @@ class AdminProductos extends Templates {
                 text: "valor",
                 value: "id",
                 required: true
-            },
-            {
-                opc: "checkbox",
-                id: "es_servicio",
-                lbl: "Es un servicio",
-                class: "col-12 mb-3"
-            },
-            {
-                opc: "checkbox",
-                id: "active",
-                lbl: "Activo",
-                class: "col-12 mb-3",
-                checked: true
             }
         ];
     }

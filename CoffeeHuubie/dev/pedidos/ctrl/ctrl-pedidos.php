@@ -293,6 +293,12 @@ class Pedidos extends MPedidos{
                 $products = ['data' => ''];
             }
             
+            // Obtener métodos de pago del pedido
+            $paymentMethods = $this->getMethodPayment([$orderId]);
+            if ($paymentMethods === null || !is_array($paymentMethods)) {
+                $paymentMethods = [];
+            }
+            
             $data = [
                 
                 'order' => array_merge($orderData, [
@@ -304,6 +310,7 @@ class Pedidos extends MPedidos{
                 ]),
 
                 'products' => $products,
+                'paymentMethods' => $paymentMethods,
                 'summary' => [
                     'total'    => $total,
                     'paid'     => $totalPagado,

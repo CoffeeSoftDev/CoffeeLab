@@ -93,6 +93,7 @@ class ctrl extends mdl {
         $exists = $this->existsProductoByName([$_POST['nombre'], $_POST['udn_id']]);
 
         if (!$exists) {
+            $_POST['active'] = 1;
             $create = $this->createProducto($this->util->sql($_POST));
             if ($create) {
                 $status = 200;
