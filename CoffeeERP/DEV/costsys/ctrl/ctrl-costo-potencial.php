@@ -50,10 +50,10 @@ class ctrl extends Costsys{
         $mes                  = $_POST['Mes'];
         $year                 = $_POST['Anio'];
         $idClasificacion      = $_POST['Clasificacion'];
-        $subClasificacion     = $_POST['Subclasificacion'];
+        $subClasificacion     = isset($_POST['Subclasificacion']) ? $_POST['Subclasificacion'] : 0;
 
         $productosModificados = false;
-        $mostrar              = $_POST['mostrar'];
+        $mostrar              = isset($_POST['mostrar']) ? $_POST['mostrar'] : 0;
 
 
         //  Variables de tablero de control 
@@ -67,27 +67,27 @@ class ctrl extends Costsys{
         $mcBajo                 = 0;
 
 
-        if (!isset($tablero)) {
+        if (!isset($tablero) || empty($tablero)) {
 
 
             $data = $this->insertTablero($idClasificacion, $mes, $year);
 
             $tablero = $this->selectTablero([$idClasificacion, $mes, $year]);
 
-            $desplazamientoPromedio = $tablero['desplazamientoPromedio'];
-            $costoBajo              = $tablero['CostoProduccionBajo'];
-            $costoAlto              = $tablero['CostoProduccionAlto'];
-            $mcBajo                 = $tablero['MargenContribucionBajo'];
-            $mcAlto                 = $tablero['MargenContribucionAlto'];
+            $desplazamientoPromedio = isset($tablero['desplazamientoPromedio']) ? $tablero['desplazamientoPromedio'] : 0;
+            $costoBajo              = isset($tablero['CostoProduccionBajo']) ? $tablero['CostoProduccionBajo'] : 0;
+            $costoAlto              = isset($tablero['CostoProduccionAlto']) ? $tablero['CostoProduccionAlto'] : 0;
+            $mcBajo                 = isset($tablero['MargenContribucionBajo']) ? $tablero['MargenContribucionBajo'] : 0;
+            $mcAlto                 = isset($tablero['MargenContribucionAlto']) ? $tablero['MargenContribucionAlto'] : 0;
 
 
         } else {
 
-            $desplazamientoPromedio = $tablero['desplazamientoPromedio'];
-            $costoAlto              = $tablero['CostoProduccionBajo'];
-            $costoBajo              = $tablero['CostoProduccionAlto'];
-            $mcBajo                 = $tablero['MargenContribucionBajo'];
-            $mcAlto                 = $tablero['MargenContribucionAlto'];
+            $desplazamientoPromedio = isset($tablero['desplazamientoPromedio']) ? $tablero['desplazamientoPromedio'] : 0;
+            $costoAlto              = isset($tablero['CostoProduccionBajo']) ? $tablero['CostoProduccionBajo'] : 0;
+            $costoBajo              = isset($tablero['CostoProduccionAlto']) ? $tablero['CostoProduccionAlto'] : 0;
+            $mcBajo                 = isset($tablero['MargenContribucionBajo']) ? $tablero['MargenContribucionBajo'] : 0;
+            $mcAlto                 = isset($tablero['MargenContribucionAlto']) ? $tablero['MargenContribucionAlto'] : 0;
         }
 
 
@@ -245,6 +245,90 @@ class ctrl extends Costsys{
             'tablero' => $tablero
         ];
 
+    }
+
+    function lsConsultaCostoPotencial(){
+
+        $__row   = [];
+        
+        $mes                  = $_POST['Mes'];
+        $year                 = $_POST['Anio'];
+        $idClasificacion      = $_POST['Clasificacion'];
+
+        $tablero = $this->selectTablero([$idClasificacion, $mes, $year]);
+
+        $desplazamientoPromedio = isset($tablero['desplazamientoPromedio']) ? $tablero['desplazamientoPromedio'] : 0;
+        $costoAlto              = isset($tablero['CostoProduccionAlto']) ? $tablero['CostoProduccionAlto'] : 0;
+        $costoBajo              = isset($tablero['CostoProduccionBajo']) ? $tablero['CostoProduccionBajo'] : 0;
+        $mcAlto                 = isset($tablero['MargenContribucionAlto']) ? $tablero['MargenContribucionAlto'] : 0;
+        $mcBajo                 = isset($tablero['MargenContribucionBajo']) ? $tablero['MargenContribucionBajo'] : 0;
+
+        $subClasificacion = $this->listSubClasificacion([$idClasificacion]);
+        array_unshift($subClasificacion, ['id' => 0, 'nombre' => 'SIN SUBCLASIFICACION']);
+
+        foreach ($subClasificacion as $sub) {
+
+            $__row[] = array(
+                'id'               => $sub['id'],
+                'nombre'           => $sub['nombre'],
+                'p.venta'          => '',
+                'p.venta sin iva'  => '',
+                'costo '           => '',
+                '% cost'           => '',
+                'mc'               => '',
+                'desplazamiento'   => '',
+                'ventas estimadas' => '',
+                'costo estimado'   => '',
+                'mc estimado'      => '',
+                'opc'=> 1
+            );
+
+            if ($sub['id'] != 0):
+                $productos = $this->lsCostoPotencialSubClasificacion([$mes, $year, $sub['id']]);
+            else:
+                $productos = $this->lsCostoPotencialReceta([$mes, $year, $idClasificacion]);
+            endif;
+
+            foreach ($productos as $_key) {
+
+                $impuestos = $_key['iva'] + $_key['ieps'];
+                $pVentaIVA = $_key['precioVenta'] / (1 + ($impuestos / 100));
+                
+                $costo           = $_key['costo'];
+                $porcentajeCosto = ($costo / $pVentaIVA) * 100;
+                $mc              = $pVentaIVA - $costo;
+                $desplazamiento  = $_key['desplazamiento'];
+                $ventasEstimadas = $pVentaIVA * $desplazamiento;
+                $costoEstimado   = $costo * $desplazamiento;
+                $mcEstimado      = $mc * $desplazamiento;
+
+                $bgPorcentajeCosto = determinarBgCosto($porcentajeCosto, $costoAlto, $costoBajo);
+                $bgMC              = determinarBgMC($mc, $mcAlto, $mcBajo);
+                $bgDesplazamiento  = getDesplazamientoClass($desplazamiento, $desplazamientoPromedio);
+
+                $__row[] = array(
+                    'id'               => $sub['id'],
+                    'nombre'           => $_key['nombre'],
+                    'p.venta'          => ['html' => evaluar($_key['precioVenta']), 'class' => 'text-end'],
+                    'p.venta sin iva'  => ['html' => evaluar($pVentaIVA), 'class' => 'text-end'],
+                    'costo '           => ['class' => 'text-end', 'html' => evaluar($costo)],
+                    '% cost'           => ['class' => 'text-end ' . $bgPorcentajeCosto, 'html' => evaluar2($porcentajeCosto) . ' %'],
+                    'mc'               => ['class' => 'text-end ' . $bgMC, 'html' => evaluar2($mc)],
+                    'desplazamiento'   => ['class' => $bgDesplazamiento . ' text-end', 'html' => $desplazamiento],
+                    'ventas estimadas' => ['class' => 'text-end', 'html' => evaluar($ventasEstimadas)],
+                    'costo estimado'   => ['class' => 'text-end', 'html' => evaluar($costoEstimado)],
+                    'mc estimado'      => ['class' => 'text-end', 'html' => evaluar($mcEstimado)],
+                    'opc' => 0
+                );
+            }
+        }
+
+        return [
+            "thead"    => ['Producto', 'P.venta', 'P.venta sin iva', 'Costo', 'Costo %', 'MC', 'Desplazamiento', 'Ventas estimadas', 'Costo estimado', 'MC estimado'],
+            "row"      => $__row,
+            'frm_head' => "<small><strong>Conectado a: </strong> {$this->bd2}</small>",
+            'tablero'  => $tablero
+        ];
     }
 
     function lsTablero(){

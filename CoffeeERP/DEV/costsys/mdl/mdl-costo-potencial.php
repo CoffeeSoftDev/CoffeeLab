@@ -243,7 +243,7 @@ class Costsys extends CRUD {
             'ventasEstimadas' => $ventasEstimadas,
             'costoEstimado'   => $costoEstimado,
             'mcEstimado'      => $mcEstimado,
-            'desplazamiento'  => $desplazamientoPromedio,
+            'desplazamiento'  => $data['desplazamiento'],
             'total'           => $total,
 
 

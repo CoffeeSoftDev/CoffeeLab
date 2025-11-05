@@ -213,6 +213,19 @@ class CostSys extends Templates {
             },
 
             {
+                tab: "Consulta Costo Potencial",
+                id: "tab-consulta-costsys",
+                fn: "costsys.lsConsultaCostoPotencial()",
+                
+                contenedor: [
+                    {
+                        id: "contentConsultaCostoPotencial",
+                        class: "col-12",
+                    },
+                ],
+            },
+
+            {
                 tab: "Tablero de Control",
                 id: "tab-tablero-control",
                 fn: "tablero.lsTableroControl()",
@@ -275,7 +288,18 @@ class CostSys extends Templates {
                     ],
                 },
 
-
+                {
+                    tab: "Consulta Costo Potencial",
+                    id: "tab-consulta-costsys",
+                    fn: "costsys.lsConsultaCostoPotencial()",
+                    
+                    contenedor: [
+                        {
+                            id: "contentConsultaCostoPotencial",
+                            class: "col-12",
+                        },
+                    ],
+                },
 
                 {
                     tab: "Menu costsys",
@@ -363,6 +387,132 @@ class CostSys extends Templates {
 
         // this.collapseTable('tbCostsys');
         this.getTablero();
+    }
+
+    lsConsultaCostoPotencial() {
+
+        fn_ajax(
+            {
+                tipo: "text",
+                opc: "lsConsultaCostoPotencial",
+                Mes: $("#Mes").val(),
+                Anio: $("#Anio").val(),
+                Clasificacion: $("#Clasificacion").val(),
+                Subclasificacion: $("#Subclasificacion").val()
+            },
+            this._link
+        ).then((data) => {
+            
+            $("#contentConsultaCostoPotencial").html(`
+                <div id="cardsConsultaCP" class="row mb-4"></div>
+                <div id="tableConsultaCP"></div>
+            `);
+
+            this.renderCardsConsulta(data.cards);
+
+            $("#tableConsultaCP").rpt_json_table2({
+                data: data,
+                color: "bg-default",
+                right: [3, 4, 6, 8, 9, 10],
+                center: [5, 7],
+                extends: true,
+                f_size: 12,
+                id: "tbConsultaCostsys"
+            });
+
+            data_table_costsys('#tbConsultaCostsys');
+        });
+    }
+
+    renderCardsConsulta(cards) {
+        let html = '';
+
+        cards.forEach((card, index) => {
+            const diferencia = card.ventasEstimadasPropuesto - card.ventasEstimadasActual;
+            const porcentajeDif = card.ventasEstimadasActual > 0 
+                ? ((diferencia / card.ventasEstimadasActual) * 100).toFixed(2) 
+                : 0;
+            
+            const colorDif = diferencia >= 0 ? 'text-success' : 'text-danger';
+            const iconDif = diferencia >= 0 ? '↑' : '↓';
+
+            const colors = [
+                'border-primary',
+                'border-success', 
+                'border-info',
+                'border-warning',
+                'border-danger',
+                'border-secondary'
+            ];
+
+            const colorClass = colors[index % colors.length];
+
+            html += `
+                <div class="col-12 col-md-6 col-lg-4 mb-3">
+                    <div class="card ${colorClass}" style="border-left: 4px solid;">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary mb-3">
+                                <i class="icon-folder-open"></i> ${card.nombre}
+                            </h5>
+                            
+                            <div class="mb-3">
+                                <small class="text-muted d-block">Productos en grupo</small>
+                                <h6 class="mb-0"><i class="icon-box"></i> ${card.cantidadProductos} productos</h6>
+                            </div>
+
+                            <div class="row mb-2">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Ventas Actual</small>
+                                    <strong class="text-dark">${evaluar(card.ventasEstimadasActual)}</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Ventas Propuesta</small>
+                                    <strong class="text-primary">${evaluar(card.ventasEstimadasPropuesto)}</strong>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Costo Actual</small>
+                                    <strong class="text-dark">${evaluar(card.costoEstimadoActual)}</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">Costo Propuesto</small>
+                                    <strong class="text-primary">${evaluar(card.costoEstimadoPropuesto)}</strong>
+                                </div>
+                            </div>
+
+                            <div class="row mb-2">
+                                <div class="col-6">
+                                    <small class="text-muted d-block">MC Actual</small>
+                                    <strong class="text-dark">${evaluar(card.mcEstimadoActual)}</strong>
+                                </div>
+                                <div class="col-6">
+                                    <small class="text-muted d-block">MC Propuesto</small>
+                                    <strong class="text-success">${evaluar(card.mcEstimadoPropuesto)}</strong>
+                                </div>
+                            </div>
+
+                            <div class="mb-2">
+                                <small class="text-muted d-block">Desplazamiento Promedio</small>
+                                <strong class="text-info">${card.desplazamientoPromedio.toFixed(2)}</strong>
+                            </div>
+
+                            <hr>
+                            
+                            <div class="text-center">
+                                <small class="text-muted d-block">Diferencia</small>
+                                <h5 class="${colorDif} mb-0">
+                                    ${iconDif} ${evaluar(Math.abs(diferencia))} (${porcentajeDif}%)
+                                </h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+
+        $("#cardsConsultaCP").html(html);
     }
 
     collapseTable(idTable) {

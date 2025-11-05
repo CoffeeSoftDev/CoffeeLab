@@ -26,7 +26,7 @@ class aux_cp extends CRUD
         #realizamos la búsqueda de las primeras subrecetas
 
         // #validamos que se encontro idSubreceta si no es igual a 0
-        if ($busquedaSubreceta != 0) {
+        if ($busquedaSubreceta != 0 && is_array($busquedaSubreceta)) {
             #anexamos los idSubreceta al final del array declarado arriba
             $lsSubReceta = array_merge($busquedaSubreceta);
         }
@@ -173,13 +173,18 @@ class aux_cp extends CRUD
 
     function SelectRendimientoSubreceta($idSubreceta)
     {
-        $value = null;
+        $value = ['rendimiento' => 0];
         $array = array($idSubreceta);
         $query = "SELECT rendimiento FROM {$this->bd_erp}subreceta WHERE idSubreceta = ?";
         $sql = $this->_Read($query, $array);
-        foreach ($sql as $key => $value)
-            ;
-        if (!isset ($value)) {
+        
+        if (is_array($sql) && !empty($sql)) {
+            foreach ($sql as $key => $item) {
+                $value = $item;
+            }
+        }
+        
+        if (!isset($value['rendimiento'])) {
             $value['rendimiento'] = 0;
         }
 
@@ -188,13 +193,18 @@ class aux_cp extends CRUD
 
     function SelectCantidadSubreceta($idSubreceta1, $idSubreceta2)
     {
-        $value = null;
+        $value = ['cantidad' => 0];
         $array = array($idSubreceta1, $idSubreceta2);
         $query = "SELECT cantidad FROM {$this->bd_erp}subreceta_subreceta WHERE id_Subreceta1 = ? AND id_Subreceta2 = ?";
         $sql = $this->_Read($query, $array);
-        foreach ($sql as $key => $value)
-            ;
-        if (!isset ($value)) {
+        
+        if (is_array($sql) && !empty($sql)) {
+            foreach ($sql as $key => $item) {
+                $value = $item;
+            }
+        }
+        
+        if (!isset($value['cantidad'])) {
             $value['cantidad'] = 0;
         }
 
@@ -213,6 +223,11 @@ class aux_cp extends CRUD
 
         // #realizamos la búsqueda de las primeras subrecetas
         $busquedaSubreceta = $this->select_idSubreceta($idReceta);
+        
+        // Validar que sea un array
+        if (!is_array($busquedaSubreceta)) {
+            $busquedaSubreceta = [];
+        }
 
         $totalSub       = [];
         $SubxSub        = [];
@@ -327,8 +342,10 @@ class aux_cp extends CRUD
 
         $respuesta = array();
 
-        foreach ($sql as $key => $value) {
-            $respuesta[$key] = $value['id_Subreceta'];
+        if (is_array($sql) && !empty($sql)) {
+            foreach ($sql as $key => $value) {
+                $respuesta[$key] = $value['id_Subreceta'];
+            }
         }
 
         if (count($respuesta) >= 1) {
@@ -354,24 +371,36 @@ class aux_cp extends CRUD
         id_Receta = ?";
         $sql = $this->_Read($query, $array);
 
-        foreach ($sql as $key => $value)
-            ;
-        if (!isset ($value['total'])) {
+        $value = ['total' => 0];
+        
+        if (is_array($sql) && !empty($sql)) {
+            foreach ($sql as $key => $item) {
+                $value = $item;
+            }
+        }
+        
+        if (!isset($value['total'])) {
             $value['total'] = 0;
         }
+        
         return $value['total'];
 
     }
 
     function SelectCantidadReceta($idReceta, $idSubreceta)
     {
-        $value = null;
+        $value = ['cantidad' => 0];
         $array = array($idReceta, $idSubreceta);
         $query = "SELECT cantidad FROM {$this->bd_erp}recetas_subrecetas WHERE id_Receta = ? AND id_Subreceta = ?";
         $sql = $this->_Read($query, $array);
-        foreach ($sql as $key => $value)
-            ;
-        if (!isset ($value)) {
+        
+        if (is_array($sql) && !empty($sql)) {
+            foreach ($sql as $key => $item) {
+                $value = $item;
+            }
+        }
+        
+        if (!isset($value['cantidad'])) {
             $value['cantidad'] = 0;
         }
 
