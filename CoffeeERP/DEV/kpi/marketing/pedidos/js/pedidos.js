@@ -1073,16 +1073,14 @@ class AdminProductos extends Templates {
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
             data: { 
                 opc: "lsProductos",
-                'estado-productos': $(`#filterBar${this.PROJECT_NAME} #estado-productos`).val() || 1,
-                udn: $(`#filterBar${this.PROJECT_NAME} #udn`).val() || null
+             
             },
             coffeesoft: true,
             conf: { datatable: true, pag: 15 },
             attr: {
                 id: `tbProductos`,
                 theme: 'corporativo',
-                title: 'Lista de Productos',
-                subtitle: 'Productos registrados en el sistema',
+             
                 center: [2, 4],
                 right: [5]
             },

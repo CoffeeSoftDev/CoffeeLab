@@ -13,10 +13,6 @@ class mdl extends CRUD {
     }
 
     function listProductos($array) {
-        $leftjoin = [
-            $this->bd . 'udn' => 'producto.udn_id = udn.idUDN'
-        ];
-
         $where = 'producto.active = ?';
         $data = [$array[0]];
 
@@ -25,19 +21,21 @@ class mdl extends CRUD {
             $data[] = $array[1];
         }
 
-        return $this->_Select([
-            'table'    => $this->bd . 'producto',
-            'values'   => "producto.id,
-                          producto.nombre,
-                          producto.descripcion,
-                          producto.udn_id,
-                          udn.UDN as udn_nombre,
-                          producto.active",
-            'leftjoin' => $leftjoin,
-            'where'    => $where,
-            'order'    => ['DESC' => 'producto.id'],
-            'data'     => $data
-        ]);
+        $query = "
+            SELECT 
+                producto.id,
+                producto.nombre,
+                producto.descripcion,
+                producto.udn_id,
+                udn.UDN as udn_nombre,
+                producto.active
+            FROM {$this->bd}producto
+            LEFT JOIN udn ON producto.udn_id = udn.idUDN
+            WHERE {$where}
+            ORDER BY producto.id DESC
+        ";
+
+        return $this->_Read($query, $data);
     }
 
     function getProductoById($id) {
