@@ -1,4 +1,4 @@
-const api = 'ctrl/ctrl-pedidos.php';
+const api           = 'ctrl/ctrl-pedidos.php';
 const api_dashboard = 'ctrl/ctrl-dashboard-order.php';
 const api_productos = 'ctrl/ctrl-admin-productos.php';
 
@@ -23,7 +23,6 @@ $(async () => {
     report         = new Report(api_report, "root");
     admin          = new Admin(api_canal, "root");
     dashboardOrder = new DashboardOrder(api_dashboard, "root");
-    
     adminProductos = new AdminProductos(api_productos, "root");
     
     
@@ -80,7 +79,7 @@ class App extends Templates {
                 {
                     id: "pedidos",
                     tab: "Pedidos",
-                    active: true,
+                   
                     onClick: () => pedidos.render()
                 },
                 {
@@ -95,6 +94,7 @@ class App extends Templates {
                 {
                     id: "products",
                     tab: "Productos",
+                    active: true,
                 },
             ]
         });
@@ -104,7 +104,6 @@ class App extends Templates {
 
     redirectToHome() {
         const base = window.location.origin + '/DEV';
-        // window.location.href = `${base}/kpi/marketing.php`;
         window.location.href = `http://localhost/CoffeeLab/CoffeeERP/DEV/kpi/marketing.php`;
     }
 
@@ -1003,6 +1002,7 @@ class Pedidos extends Templates {
 }
 
 class AdminProductos extends Templates {
+
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "AdminProductos";
@@ -1090,25 +1090,30 @@ class AdminProductos extends Templates {
     }
 
     addProducto() {
+
         this.createModalForm({
-            id: 'formProductoAdd',
-            data: { opc: 'addProducto' },
-            bootbox: {
-                title: 'Agregar Producto',
-            },
-            json: this.jsonProducto(),
+
+            id     : 'formProductoAdd',
+            data   : { opc: 'addProducto' },
+            bootbox: {  title: 'Agregar Producto'},
+            json   : this.jsonProducto(),
+
             success: (response) => {
                 if (response.status === 200) {
                     alert({ icon: "success", text: response.message });
                     this.lsProductos();
+
                 } else {
+
                     alert({
-                        icon: response.status === 409 ? "warning" : "error",
-                        title: "Oops!...",
-                        text: response.message,
-                        btn1: true,
+                        icon    : response.status === 409 ? "warning": "error",
+                        title   : "Oops!...",
+                        text    : response.message,
+                        btn1    : true,
                         btn1Text: "Ok"
                     });
+
+                    
                 }
             }
         });
@@ -1193,6 +1198,16 @@ class AdminProductos extends Templates {
     jsonProducto() {
         return [
             {
+                opc: "select",
+                id: "udn_id",
+                lbl: "Unidad de Negocio",
+                class: "col-12 mb-3",
+                data: lsudn,
+                text: "valor",
+                value: "id",
+                required: true
+            },
+            {
                 opc: "input",
                 id: "nombre",
                 lbl: "Nombre del Producto",
@@ -1206,18 +1221,10 @@ class AdminProductos extends Templates {
                 class: "col-12 mb-3",
                 rows: 3
             },
-            {
-                opc: "select",
-                id: "udn_id",
-                lbl: "Unidad de Negocio",
-                class: "col-12 mb-3",
-                data: lsudn,
-                text: "valor",
-                value: "id",
-                required: true
-            }
+          
         ];
     }
+
 }
 
 
