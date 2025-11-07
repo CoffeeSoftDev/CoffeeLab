@@ -1932,16 +1932,16 @@ class Components extends Complements {
                 inactive: "text-gray-600 hover:bg-white"
             },
             button: {
-                base: "", // sin fondo de contenedor
+                base: "bg-gray-100  p-1 rounded-lg inline-flex shadow-blue-500/50",
                 active: "bg-blue-600 text-white",
-                inactive: "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                inactive: " text-gray-600 hover:bg-gray-50"
             }
         };
 
         const sizes = {
             large: "rounded-lg flex gap-1 px-1 py-1 w-full text-sm",
             short: "rounded-lg flex gap-1 px-1 py-1 text-sm",
-            button: "flex flex-wrap gap-2" // para botones
+            button: "gap-1" // gap entre botones
         };
 
         const themeStyle = themes[opts.type] || themes[opts.theme];
@@ -1955,11 +1955,16 @@ class Components extends Complements {
         opts.json.forEach(tab => {
             const isActive = tab.active || false;
 
+            const buttonClass = opts.type === 'button'
+                ? `transition-all duration-200 text-sm font-medium rounded-md px-4 py-2 
+                   ${isActive ? themeStyle.active : themeStyle.inactive}`
+                : `transition text-sm font-medium rounded px-3 py-2 
+                   ${isActive ? themeStyle.active : themeStyle.inactive}`;
+
             const tabButton = $("<button>", {
                 id: `tab-${tab.id}`,
                 html: tab.icon ? `<i class='${tab.icon} mr-2 h-4 w-4'></i>${tab.tab}` : tab.tab,
-                class: `transition text-sm font-medium rounded px-3 py-2 
-                ${isActive ? themeStyle.active : themeStyle.inactive}`,
+                class: buttonClass,
                 "data-state": isActive ? "active" : "inactive",
                 click: () => {
                     $(`#${opts.id} button`).each(function () {

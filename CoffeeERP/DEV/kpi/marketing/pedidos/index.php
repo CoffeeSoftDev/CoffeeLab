@@ -5,7 +5,7 @@
 
 
 <!-- CoffeeSoft Framework -->
-<script src="https://erp-varoch.com/ERP24/gestor-de-actividades/src/js/CoffeeSoft.js"></script>
+<script src="../../../src/js/coffeeSoft.js"></script>
 <script src="https://rawcdn.githack.com/SomxS/Grupo-Varoch/refs/heads/main/src/js/plugins.js"></script>
 <script src="https://www.plugins.erp-varoch.com/ERP/JS/complementos.js"></script>
 
@@ -31,6 +31,7 @@
         
             <script src="js/pedidos.js?t=<?php echo time(); ?>"></script>
             <script src="js/report.js?t=<?php echo time(); ?>"></script>
+            <script src="js/administrador.js?t=<?php echo time(); ?>"></script>
 
         </div>
     </main>
