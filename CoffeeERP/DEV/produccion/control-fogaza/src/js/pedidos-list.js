@@ -903,6 +903,320 @@ class ListaPedidos extends App {
 
     }
 
+    async getImageOrder(id) {
+        try {
+            const response = await useFetch({
+                url: this._link,
+                data: { opc: 'getImageOrder', id: id }
+            });
+            
+            if (response.status === 200) {
+                this.showImagesOrder({ data: response.data });
+            } else {
+                alert({
+                    icon: 'error',
+                    title: 'Error',
+                    text: response.message || 'No se pudieron cargar las imágenes'
+                });
+            }
+        } catch (error) {
+            console.error('Error al obtener imágenes:', error);
+            alert({
+                icon: 'error',
+                title: 'Error de conexión',
+                text: 'No se pudo conectar con el servidor'
+            });
+        }
+    }
+
+    showImagesOrder(options) {
+        const defaults = {
+            parent: "body",
+            id: "modalImageOrder",
+            data: {
+                order: {},
+                images: {}
+            }
+        };
+
+        const opts = Object.assign({}, defaults, options);
+        const order = opts.data.order || {};
+        const images = opts.data.images || {};
+
+        const modalOverlay = $("<div>", {
+            id: opts.id,
+            class: "fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4",
+            click: function(e) {
+                if (e.target === this) {
+                    $(this).remove();
+                }
+            }
+        });
+
+        const modalContent = $("<div>", {
+            class: "bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto"
+        });
+
+        const header = $("<div>", {
+            class: "border-b border-gray-200 p-6"
+        }).html(`
+            <div class="flex items-center justify-between mb-2">
+                <h2 class="text-2xl font-bold text-gray-800">${order.name || 'Pedido'}</h2>
+                <button class="close-modal text-gray-400 hover:text-gray-600 text-3xl font-bold leading-none">
+                    ×
+                </button>
+            </div>
+            <p class="text-sm text-gray-600">
+                <span class="font-semibold">Folio:</span> ${order.folio || 'N/A'} | 
+                <span class="font-semibold">Precio Total:</span> ${formatPrice(order.price || 0)}
+            </p>
+        `);
+
+        const body = $("<div>", {
+            class: "p-6"
+        });
+
+        const imagesGrid = $("<div>", {
+            class: "grid grid-cols-1 md:grid-cols-2 gap-6 mb-6"
+        });
+
+        const referenceSection = $("<div>", {
+            class: "border border-gray-200 rounded-lg p-4"
+        });
+
+        referenceSection.append(`
+            <div class="flex items-center gap-2 mb-3">
+                <i class="icon-image text-blue-600 text-xl"></i>
+                <span class="font-semibold text-gray-700">Foto de Referencia</span>
+            </div>
+        `);
+
+        if (images.reference) {
+            const refImg = $("<img>", {
+                src: images.reference,
+                class: "w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity",
+                alt: "Foto de referencia",
+                click: () => {
+                    this.lightboxImage({
+                        images: [
+                            { src: images.reference, label: "Foto de Referencia" },
+                            { src: images.production, label: "Foto de Producción" }
+                        ].filter(img => img.src),
+                        currentIndex: 0
+                    });
+                },
+                error: function() {
+                    $(this).replaceWith(`
+                        <div class="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
+                            <div class="text-center text-gray-500">
+                                <i class="icon-alert-circle text-4xl mb-2"></i>
+                                <p>Error al cargar imagen</p>
+                            </div>
+                        </div>
+                    `);
+                }
+            });
+            referenceSection.append(refImg);
+        } else {
+            referenceSection.append(`
+                <div class="flex items-center justify-center h-64 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                    <div class="text-center text-gray-400">
+                        <i class="icon-image text-5xl mb-2"></i>
+                        <p>Sin foto de referencia</p>
+                    </div>
+                </div>
+            `);
+        }
+
+        const productionSection = $("<div>", {
+            class: "border border-gray-200 rounded-lg p-4"
+        });
+
+        productionSection.append(`
+            <div class="flex items-center gap-2 mb-3">
+                <i class="icon-birthday text-pink-600 text-xl"></i>
+                <span class="font-semibold text-gray-700">Foto de Producción</span>
+            </div>
+        `);
+
+        if (images.production) {
+            const prodImg = $("<img>", {
+                src: images.production,
+                class: "w-full h-auto rounded-lg cursor-pointer hover:opacity-90 transition-opacity",
+                alt: "Foto de producción",
+                click: () => {
+                    const validImages = [
+                        { src: images.reference, label: "Foto de Referencia" },
+                        { src: images.production, label: "Foto de Producción" }
+                    ].filter(img => img.src);
+                    
+                    this.lightboxImage({
+                        images: validImages,
+                        currentIndex: validImages.findIndex(img => img.src === images.production)
+                    });
+                },
+                error: function() {
+                    $(this).replaceWith(`
+                        <div class="flex items-center justify-center h-64 bg-gray-100 rounded-lg">
+                            <div class="text-center text-gray-500">
+                                <i class="icon-alert-circle text-4xl mb-2"></i>
+                                <p>Error al cargar imagen</p>
+                            </div>
+                        </div>
+                    `);
+                }
+            });
+            productionSection.append(prodImg);
+        } else {
+            productionSection.append(`
+                <div class="flex items-center justify-center h-64 bg-yellow-50 rounded-lg border-2 border-dashed border-yellow-300">
+                    <div class="text-center text-yellow-600">
+                        <i class="icon-clock text-5xl mb-2"></i>
+                        <p class="font-semibold">Foto de producción pendiente</p>
+                    </div>
+                </div>
+            `);
+        }
+
+        imagesGrid.append(referenceSection, productionSection);
+        body.append(imagesGrid);
+
+        const footer = $("<div>", {
+            class: "border-t border-gray-200 p-6 bg-gray-50"
+        });
+
+        footer.html(`
+            <h3 class="font-semibold text-gray-700 mb-3">Detalles del Pedido</h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                    <span class="text-gray-500">Cliente:</span>
+                    <p class="font-semibold text-gray-800">${order.cliente || 'N/A'}</p>
+                </div>
+                <div>
+                    <span class="text-gray-500">Fecha de Entrega:</span>
+                    <p class="font-semibold text-gray-800">${order.fecha_entrega || 'N/A'} ${order.horapedido || ''}</p>
+                </div>
+                <div>
+                    <span class="text-gray-500">Estado:</span>
+                    <p class="font-semibold text-gray-800">${order.estado || 'N/A'}</p>
+                </div>
+                <div>
+                    <span class="text-gray-500">Canal:</span>
+                    <p class="font-semibold text-gray-800">${order.canal || 'N/A'}</p>
+                </div>
+            </div>
+        `);
+
+        modalContent.append(header, body, footer);
+        modalOverlay.append(modalContent);
+
+        $(opts.parent).append(modalOverlay);
+
+        modalOverlay.find('.close-modal').on('click', function() {
+            modalOverlay.remove();
+        });
+
+        $(document).on('keydown.modalImage', function(e) {
+            if (e.key === 'Escape') {
+                modalOverlay.remove();
+                $(document).off('keydown.modalImage');
+            }
+        });
+    }
+
+    lightboxImage(options) {
+        const defaults = {
+            images: [],
+            currentIndex: 0
+        };
+
+        const opts = Object.assign({}, defaults, options);
+        let currentIndex = opts.currentIndex;
+
+        const lightboxOverlay = $("<div>", {
+            id: "lightboxImage",
+            class: "fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-90",
+            click: function(e) {
+                if (e.target === this || $(e.target).hasClass('close-lightbox')) {
+                    $(this).remove();
+                    $(document).off('keydown.lightbox');
+                }
+            }
+        });
+
+        const lightboxContent = $("<div>", {
+            class: "relative max-w-6xl max-h-[90vh] w-full h-full flex items-center justify-center p-4"
+        });
+
+        const closeBtn = $("<button>", {
+            class: "close-lightbox absolute top-4 right-4 text-white text-4xl font-bold hover:text-gray-300 z-10",
+            html: "×"
+        });
+
+        const imageContainer = $("<div>", {
+            class: "relative w-full h-full flex items-center justify-center"
+        });
+
+        const updateImage = (index) => {
+            currentIndex = index;
+            const currentImage = opts.images[index];
+            
+            imageContainer.html(`
+                <img src="${currentImage.src}" 
+                     alt="${currentImage.label}" 
+                     class="max-w-full max-h-full object-contain rounded-lg shadow-2xl">
+                <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black bg-opacity-70 text-white px-4 py-2 rounded-full text-sm">
+                    ${currentImage.label} (${index + 1}/${opts.images.length})
+                </div>
+            `);
+        };
+
+        if (opts.images.length > 1) {
+            const prevBtn = $("<button>", {
+                class: "absolute left-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-70 transition",
+                html: "<i class='icon-left-open text-2xl'></i>",
+                click: function(e) {
+                    e.stopPropagation();
+                    currentIndex = (currentIndex - 1 + opts.images.length) % opts.images.length;
+                    updateImage(currentIndex);
+                }
+            });
+
+            const nextBtn = $("<button>", {
+                class: "absolute right-4 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-50 text-white p-3 rounded-full hover:bg-opacity-70 transition",
+                html: "<i class='icon-right-open text-2xl'></i>",
+                click: function(e) {
+                    e.stopPropagation();
+                    currentIndex = (currentIndex + 1) % opts.images.length;
+                    updateImage(currentIndex);
+                }
+            });
+
+            lightboxContent.append(prevBtn, nextBtn);
+        }
+
+        updateImage(currentIndex);
+
+        lightboxContent.prepend(closeBtn);
+        lightboxContent.append(imageContainer);
+        lightboxOverlay.append(lightboxContent);
+
+        $("body").append(lightboxOverlay);
+
+        $(document).on('keydown.lightbox', function(e) {
+            if (e.key === 'Escape') {
+                lightboxOverlay.remove();
+                $(document).off('keydown.lightbox');
+            } else if (e.key === 'ArrowLeft' && opts.images.length > 1) {
+                currentIndex = (currentIndex - 1 + opts.images.length) % opts.images.length;
+                updateImage(currentIndex);
+            } else if (e.key === 'ArrowRight' && opts.images.length > 1) {
+                currentIndex = (currentIndex + 1) % opts.images.length;
+                updateImage(currentIndex);
+            }
+        });
+    }
+
     // Components coffeeSoft.
     createdTable(options) {
 

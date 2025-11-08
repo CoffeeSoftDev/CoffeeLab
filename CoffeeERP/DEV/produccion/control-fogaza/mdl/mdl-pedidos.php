@@ -487,6 +487,35 @@ class Pedidos extends CRUD{
         ]);
     }
 
+    function getOrderImagesById($array) {
+        $query = "
+            SELECT 
+                pf.idLista AS id,
+                pf.folio,
+                c.Name_Cliente AS cliente,
+                pf.fechapedido AS fecha_entrega,
+                pf.Status AS estado,
+                'Local' AS canal,
+                pf.Total AS price,
+                pp.name,
+                pp.imageCatalog AS reference_image,
+                pp.image AS production_image,
+                pp.portion,
+                pp.costo,
+                pf.anticipo,
+                pf.observacion,
+                TIME_FORMAT(pf.horapedido, '%h:%i %p') AS horapedido
+            FROM {$this->bd}pedidofolio pf
+            INNER JOIN {$this->bd}clientes c ON pf.id_cliente = c.idCliente
+            LEFT JOIN {$this->bd}pedido_productos pp ON pf.idLista = pp.id_folio
+            WHERE pf.idLista = ?
+            LIMIT 1
+        ";
+        
+        $result = $this->_Read($query, $array);
+        return !empty($result) ? $result[0] : null;
+    }
+
 
 
 

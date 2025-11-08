@@ -225,6 +225,12 @@ class ctrl extends listPedidos{
             // 🎯 Acciones
             $a = [
                 [
+                    'class'   => ' mx-0 text-[18px] pointer text-info',
+                    'html'    => '<i class="icon-picture"></i>',
+                    'onclick' => 'pedidos.getImageOrder(' . $key['id'] . ')',
+                    'title'   => 'Ver Fotos'
+                ],
+                [
                     'class'   => ' mx-0 text-[18px] pointer text-primary',
                     'html'    => '<i class="icon-print"></i>',
                     'onclick' => 'pedidos.printOrder(' . $key['id'] . ')',
@@ -310,6 +316,12 @@ class ctrl extends listPedidos{
         foreach ($ls as $key) {
 
             $a = [
+                [
+                    'class'   => ' mx-0 px-2 pointer text-info',
+                    'html'    => '<i class="icon-picture"></i>',
+                    'onclick' => 'pedidos.getImageOrder(' . $key['id'] . ')',
+                    'title'   => 'Ver Fotos'
+                ],
                 [
                     'class'   => ' mx-0 px-2 pointer text-primary',
                     'html'    => '<i class="icon-shop"></i>',

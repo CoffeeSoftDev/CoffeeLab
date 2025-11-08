@@ -704,6 +704,77 @@ function diasFaltantes($fechaFutura) {
     return "{$diferencia->days} días restantes";
 }
 
+function getImageOrder() {
+    $status = 500;
+    $message = 'Error al obtener datos del pedido';
+    $data = null;
+    
+    try {
+        $id = $_POST['id'] ?? null;
+        
+        if (!$id || !is_numeric($id)) {
+            return [
+                'status' => 400,
+                'message' => 'ID de pedido no válido',
+                'data' => null
+            ];
+        }
+        
+        $orderData = $this->getOrderImagesById([$id]);
+        
+        if ($orderData) {
+            $baseUrl = 'https://erp-varoch.com/';
+            
+            $referenceImage = null;
+            if (!empty($orderData['reference_image'])) {
+                $referenceImage = $baseUrl . $orderData['reference_image'];
+            }
+            
+            $productionImage = null;
+            if (!empty($orderData['production_image'])) {
+                $productionImage = $baseUrl . $orderData['production_image'];
+            }
+            
+            $status = 200;
+            $message = 'Datos obtenidos correctamente';
+            $data = [
+                'order' => [
+                    'id' => $orderData['id'],
+                    'folio' => $orderData['folio'],
+                    'name' => $orderData['name'] ?? 'Sin nombre',
+                    'price' => floatval($orderData['price'] ?? 0),
+                    'cliente' => $orderData['cliente'],
+                    'fecha_entrega' => $orderData['fecha_entrega'],
+                    'estado' => getEstatus($orderData['estado']),
+                    'canal' => $orderData['canal'],
+                    'portion' => $orderData['portion'] ?? '',
+                    'costo' => floatval($orderData['costo'] ?? 0),
+                    'anticipo' => floatval($orderData['anticipo'] ?? 0),
+                    'observacion' => $orderData['observacion'] ?? '',
+                    'horapedido' => $orderData['horapedido'] ?? ''
+                ],
+                'images' => [
+                    'reference' => $referenceImage,
+                    'production' => $productionImage
+                ]
+            ];
+        } else {
+            $status = 404;
+            $message = 'Pedido no encontrado';
+        }
+    } catch (Exception $e) {
+        $status = 500;
+        $message = 'Error interno del servidor';
+        error_log('Error en getImageOrder: ' . $e->getMessage());
+    }
+    
+    return [
+        'status' => $status,
+        'message' => $message,
+        'data' => $data
+    ];
+}
+
  function addSelectGroup($data){
 
         $txt = '<div class="input-group w-100">';
