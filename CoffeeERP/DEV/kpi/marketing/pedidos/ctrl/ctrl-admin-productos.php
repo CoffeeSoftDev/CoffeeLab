@@ -33,19 +33,19 @@ class ctrl extends mdl {
                 $a[] = [
                     'class'   => 'btn btn-sm btn-primary me-1',
                     'html'    => '<i class="icon-pencil"></i>',
-                    'onclick' => 'adminProductos.editProducto(' . $item['id'] . ')'
+                    'onclick' => 'product.editProducto(' . $item['id'] . ')'
                 ];
 
                 $a[] = [
                     'class'   => 'btn btn-sm btn-danger',
                     'html'    => '<i class="icon-toggle-on"></i>',
-                    'onclick' => 'adminProductos.statusProducto(' . $item['id'] . ', ' . $item['active'] . ')'
+                    'onclick' => 'product.statusProducto(' . $item['id'] . ', ' . $item['active'] . ')'
                 ];
             } else {
                 $a[] = [
                     'class'   => 'btn btn-sm btn-outline-danger',
                     'html'    => '<i class="icon-toggle-off"></i>',
-                    'onclick' => 'adminProductos.statusProducto(' . $item['id'] . ', ' . $item['active'] . ')'
+                    'onclick' => 'product.statusProducto(' . $item['id'] . ', ' . $item['active'] . ')'
                 ];
             }
 
@@ -145,16 +145,24 @@ class ctrl extends mdl {
     }
 }
 
-function renderStatus($estatus) {
-    switch ($estatus) {
+function renderStatus($status) {
+    switch ($status) {
         case 1:
-            return '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-[#014737] text-[#3FC189]">Activo</span>';
+            return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                        <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+                        Activo
+                    </span>';
         case 0:
-            return '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-[#721c24] text-[#ba464d]">Inactivo</span>';
+            return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-700">
+                        <span class="w-2 h-2 bg-red-500 rounded-full"></span>
+                        Inactivo
+                    </span>';
         default:
-            return '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-gray-500 text-white">Desconocido</span>';
+            return '<span class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700">
+                        <span class="w-2 h-2 bg-gray-500 rounded-full"></span>
+                        Desconocido
+                    </span>';
     }
 }
-
 $obj = new ctrl();
 echo json_encode($obj->{$_POST['opc']}());

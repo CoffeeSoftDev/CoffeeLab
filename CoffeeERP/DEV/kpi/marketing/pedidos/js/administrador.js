@@ -30,7 +30,13 @@ class Admin extends Templates {
                 {
                     id: "products",
                     tab: "Productos",
-                    onClick: () => products.lsProducts()
+                    onClick: () => product.lsProductos()
+                },
+
+                {
+                    id: "upload",
+                    tab: "Subir registros",
+                    // onClick: () => product.lsProductos()
                 },
 
 
@@ -81,10 +87,10 @@ class Channel extends Admin {
                     opc: "select",
                     id: "active",
                     lbl: "Estado",
-                    class: "col-sm-3",
+                    class: "col-sm-2",
                     data: [
-                        { id: "1", valor: "Activos" },
-                        { id: "0", valor: "Inactivos" }
+                        { id: "1", valor: "Activo" },
+                        { id: "0", valor: "Inactivo" }
                     ],
                     onchange: `channel.lsCanales()`
                 },
@@ -265,20 +271,20 @@ class Products extends Admin {
                     opc: "select",
                     id: "udn",
                     lbl: "Unidad de Negocio",
-                    class: "col-12 col-md-3",
+                    class: "col-12 col-md-2",
                     data: lsudn,
-                    onchange: 'adminProductos.lsProductos()'
+                    onchange: 'product.lsProductos()'
                 },
                 {
                     opc: "select",
                     id: "estado-productos",
                     lbl: "Estado",
-                    class: "col-12 col-md-3",
+                    class: "col-12 col-md-2",
                     data: [
-                        { id: "1", valor: "Disponibles" },
-                        { id: "0", valor: "No disponibles" }
+                        { id: "1", valor: "Activo" },
+                        { id: "0", valor: "Inactivo" }
                     ],
-                    onchange: 'adminProductos.lsProductos()'
+                    onchange: 'product.lsProductos()'
                 },
                 {
                     opc: "button",
@@ -306,8 +312,7 @@ class Products extends Admin {
             attr: {
                 id: `tbProductos`,
                 theme: 'corporativo',
-                title: 'Lista de Productos',
-                subtitle: 'Productos registrados en el sistema',
+               
                 center: [2, 4],
                 right: [5]
             },

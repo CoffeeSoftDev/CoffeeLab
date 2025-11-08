@@ -1,5 +1,4 @@
-// let canales;
-const apiCanales = 'ctrl/ctrl-canales.php';
+
 
 // $(async () => {
 //     canales = new Canales(apiCanales, 'root');

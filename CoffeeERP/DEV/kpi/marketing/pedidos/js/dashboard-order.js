@@ -30,9 +30,9 @@ $(async () => {
     `);
     $('head').append(style);
 
-    const data = await useFetch({ url: api, data: { opc: "init" } });
-    udn = data.udn;
-    lsudn = data.udn;
+    // const data = await useFetch({ url: api, data: { opc: "init" } });
+    // udn = data.udn;
+    // lsudn = data.udn;
 
     // app = new App(api, "root");
     

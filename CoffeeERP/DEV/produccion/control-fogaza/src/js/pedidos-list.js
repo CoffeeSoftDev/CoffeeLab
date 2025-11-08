@@ -11,23 +11,7 @@ class ListaPedidos extends App {
     }
 
     layout() {
-        // this.layoutWithCards({
-
-        //     parent: 'tab-lista-pedidos',
-
-        //     cardtable: {
-        //         className: 'col-8 ',
-        //         filterBar: { id: 'filterBarPedidos' },
-        //         container: { id: 'containerListPedidos', class:'w-100' },
-        //     },
-
-        //     cardticket: {
-        //         className: 'col-4 line',
-        //         filterBar: { id: 'filterBarTicket' },
-        //         message: { id: 'containerMessage',class:'h-full' },
-        //         container: { id: 'containerTicketPedidos', class:'col-12 p-2' },
-        //     }
-        // });
+        
 
         this.primaryLayout({
             parent: 'tab-lista-pedidos',

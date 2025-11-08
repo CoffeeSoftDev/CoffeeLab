@@ -30,19 +30,19 @@ class ctrl extends mdl {
                 $a[] = [
                     'class'   => 'btn btn-sm btn-primary me-1',
                     'html'    => '<i class="icon-pencil"></i>',
-                    'onclick' => 'admin.editCanal(' . $key['id'] . ')'
+                    'onclick' => 'channel.editCanal(' . $key['id'] . ')'
                 ];
                 
                 $a[] = [
                     'class' => 'btn btn-sm btn-danger',
                     'html' => '<i class="icon-toggle-on"></i>',
-                    'onclick' => 'admin.statusCanal(' . $key['id'] . ', ' . $key['active'] . ')'
+                    'onclick' => 'channel.statusCanal(' . $key['id'] . ', ' . $key['active'] . ')'
                 ];
             } else {
                 $a[] = [
                     'class' => 'btn btn-sm btn-outline-danger',
                     'html' => '<i class="icon-toggle-off"></i>',
-                    'onclick' => 'admin.statusCanal(' . $key['id'] . ', ' . $key['active'] . ')'
+                    'onclick' => 'channel.statusCanal(' . $key['id'] . ', ' . $key['active'] . ')'
                 ];
             }
             

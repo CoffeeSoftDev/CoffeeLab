@@ -2,23 +2,23 @@ let api_report = 'ctrl/ctrl-report.php';
 let api_canal = 'ctrl/ctrl-canal.php';
 
 
-$(async () => {
+// $(async () => {
 
-    const data = await useFetch({ url: api, data: { opc: "init" } });
-    lsUDN = data.udn;
-    lsCanales = data.canales;
-    lsAños = data.años;
+//     const data = await useFetch({ url: api, data: { opc: "init" } });
+//     lsUDN = data.udn;
+//     lsCanales = data.canales;
+//     lsAños = data.años;
 
-    // Obtener datos para dashboard
-    const dashboardData = await useFetch({ url: api_dashboard, data: { opc: "init" } });
-    lsudn = dashboardData.udn;
+//     // Obtener datos para dashboard
+//     const dashboardData = await useFetch({ url: api_dashboard, data: { opc: "init" } });
+//     lsudn = dashboardData.udn;
 
-    // app = new AppTemporal(api_report, "root");
-    report = new Report(api_report, "root");
-    admin = new Admin(api_canal, "root");
-    dashboardOrder = new DashboardOrder(api_dashboard, "root");
+//     // app = new AppTemporal(api_report, "root");
+//     report = new Report(api_report, "root");
+//     admin = new Admin(api_canal, "root");
+//     dashboardOrder = new DashboardOrder(api_dashboard, "root");
 
-});
+// });
 
 class AppTemporal extends Templates {
     constructor(link, div_modulo) {
