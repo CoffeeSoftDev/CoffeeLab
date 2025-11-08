@@ -29,6 +29,10 @@ class ctrlCalendario extends MCalendarioPedidos{
             if ($key['is_delivered'] == 1) {
                 $delivered = 'Entregado';
             }
+            $type = 'Envío a Domicilio';
+            if ($key['delivery_type'] == 1) {
+                $type = 'Recogida en Tienda';
+            }
             // Agregar un dia a la fecha de fin
             // $key['end'] = date('Y-m-d', strtotime($key['end'] . ' +1 day'));
             $event[] = [
@@ -40,6 +44,7 @@ class ctrlCalendario extends MCalendarioPedidos{
                 'location' => $key['location'],
                 'client'   => $key['name_client'],
                 'delivery' => $delivered,
+                'type'     => $type,
                 'color'    => $color
             ];
         }

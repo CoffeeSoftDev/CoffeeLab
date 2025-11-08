@@ -98,19 +98,22 @@ class App extends Templates {
     }
 
     renderEventContent(arg) {
+        let envio_domicilio = arg.event.extendedProps.type  == 'Envío a Domicilio' ? true : false;
+        let entregado = arg.event.extendedProps.delivery == 'Entregado' ? true : false;
+
         let titleEl = document.createElement("div");
-        let clientEl = document.createElement("div");
+        let deliveryEl = document.createElement("div");
         let timeEl = document.createElement("div");
 
         titleEl.classList.add("font-12", "font-bold");
-        clientEl.classList.add("font-10", "text-gray-200");
+        deliveryEl.classList.add("font-10", "text-gray-200");
         timeEl.classList.add("font-10", "text-gray-200");
 
         titleEl.innerHTML = arg.event.title;
-        clientEl.innerHTML = "<i class='icon-motorcycle'></i> " + arg.event.extendedProps.delivery;
+        deliveryEl.innerHTML =  (envio_domicilio ? "<i class='icon-motorcycle'></i> " : "<i class='icon-shop'></i> ") + arg.event.extendedProps.delivery;
         timeEl.innerHTML = "<i class='icon-clock'></i> " + arg.event.extendedProps.hour;
 
-        return { domNodes: [titleEl, clientEl, timeEl] };
+        return { domNodes: [titleEl, deliveryEl, timeEl] };
     }
 
     customizeCalendarAppearance() {
