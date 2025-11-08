@@ -8,9 +8,9 @@ class Admin extends Templates {
 
     render() {
         this.layout();
-     
-      channel.render();
-      product.render();
+
+        channel.render();
+        product.render();
     }
 
     layout() {
@@ -24,7 +24,7 @@ class Admin extends Templates {
                 {
                     id: "channel",
                     tab: "Canal de ventas",
-                    active: true,
+
                     onClick: () => channel.lsCanales()
                 },
                 {
@@ -34,8 +34,9 @@ class Admin extends Templates {
                 },
 
                 {
-                    id: "upload",
+                    id: "migration",
                     tab: "Subir registros",
+                    active: true,
                     // onClick: () => product.lsProductos()
                 },
 
@@ -49,11 +50,11 @@ class Admin extends Templates {
 
 }
 
-class Channel extends Admin {
+class AdminChannel extends Admin {
 
     constructor(link, div_modulo) {
         super(link, div_modulo);
-        this.PROJECT_NAME = "Admin";
+        this.PROJECT_NAME = "AdminChannel";
         this.currentReportType = "pedidos";
     }
 
@@ -75,7 +76,7 @@ class Channel extends Admin {
             }
         });
 
-       
+
     }
 
     filterBar() {
@@ -232,10 +233,10 @@ class Channel extends Admin {
 
 }
 
-class Products extends Admin {
+class AdminProducts extends Admin {
     constructor(link, div_modulo) {
         super(link, div_modulo);
-        this.PROJECT_NAME = "AdminProductos";
+        this.PROJECT_NAME = "AdminProducts";
     }
 
     render() {
@@ -298,7 +299,7 @@ class Products extends Admin {
     }
 
     lsProductos() {
-        
+
         this.createTable({
             parent: `container${this.PROJECT_NAME}`,
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
@@ -312,7 +313,7 @@ class Products extends Admin {
             attr: {
                 id: `tbProductos`,
                 theme: 'corporativo',
-               
+
                 center: [2, 4],
                 right: [5]
             },
@@ -448,5 +449,54 @@ class Products extends Admin {
             }
         ];
     }
+}
+
+class Migration extends Admin {
+
+    constructor(link, div_modulo) {
+        super(link, div_modulo);
+        this.PROJECT_NAME = "Migration";
+    }
+
+    render() {
+        this.layout();
+        this.filterBar();
+        // this.lsProductos();
+    }
+
+    layout() {
+        this.primaryLayout({
+            parent: `container-migration`,
+            id: this.PROJECT_NAME,
+            class: 'w-full',
+            card: {
+                filterBar: { class: 'w-full  pb-2', id: `filterBar${this.PROJECT_NAME}` },
+                container: { class: 'w-full my-2 h-full', id: `container${this.PROJECT_NAME}` }
+            }
+        });
+
+
+    }
+
+    filterBar() {
+
+        this.createfilterBar({
+            parent: `filterBar${this.PROJECT_NAME}`,
+            data: [
+                {
+                    opc: "input-file",
+                    text: "Subir archivo",
+                    id: "btnSubir",
+                    color_btn: " bg-orange-400 hover:bg-orange-600 text-white",
+                    fn: "migration.fileUpload()",
+                    class: "col-12 col-sm-6 col-lg-2",
+                },
+                
+            ]
+        });
+
+
+    }
+
 }
 

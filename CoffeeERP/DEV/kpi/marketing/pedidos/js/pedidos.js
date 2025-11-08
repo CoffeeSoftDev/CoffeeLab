@@ -1,20 +1,25 @@
-const api           = 'ctrl/ctrl-pedidos.php';
+const api = 'ctrl/ctrl-pedidos.php';
 const api_dashboard = 'ctrl/ctrl-dashboard-order.php';
-const api_productos = 'ctrl/ctrl-admin-productos.php';
 
-const apiCanales = 'ctrl/ctrl-canal.php';
 
-let  app,pedidos, dashboard, producto, canal,dashboardOrder;
+
+
+let app, pedidos, dashboard, producto, canal, dashboardOrder;
 let canales, productos, campanas, lsudn, udn, redes_sociales, anuncios;
 
-let adminProductos;
 
-let admin,channel,product;
+
+// - tab administrador.
+let admin, channel, product, migration;
+const api_productos = 'ctrl/ctrl-admin-productos.php';
+const apiCanales    = 'ctrl/ctrl-canal.php';
+
+
 
 $(async () => {
 
     const data = await useFetch({ url: api, data: { opc: "init" } });
-    
+
     udn            = data.udn;
     lsudn          = data.udn;
     canales        = data.canales;
@@ -25,26 +30,25 @@ $(async () => {
 
 
     // Instancias.
-    app            = new App(api, "root");
+    app = new App(api, "root");
 
 
-    // pedidos        = new Pedidos(api, 'root');
+    pedidos        = new Pedidos(api, 'root');
     // report         = new Report(api_report, "root");
     // dashboardOrder = new DashboardOrder(api_dashboard, "root");
     // adminProductos = new AdminProductos(api_productos, "root");
 
     // administrador.
-    admin   = new Admin(api, "root");
-    channel = new Channel(apiCanales, "root");
-    product = new Products(api_productos, "root");
+    admin = new Admin(api, "root");
+    channel = new AdminChannel(apiCanales, "root");
+    product = new AdminProducts(api_productos, "root");
+    migration = new Migration(api, "root");
 
 
-    
-    
     app.render();
     admin.render();
 
-
+    migration.render();
     // report.render();
     // dashboardOrder.render();
 
@@ -95,7 +99,7 @@ class App extends Templates {
                 {
                     id: "pedidos",
                     tab: "Pedidos",
-                   
+
                     onClick: () => pedidos.render()
                 },
                 {
@@ -104,15 +108,15 @@ class App extends Templates {
                     onClick: () => report.lsResumenPedidos()
                 },
                 {
-                    id : "admin",
+                    id: "admin",
                     tab: "Administrador",
                     active: true,
 
                 },
-               
+
             ]
         });
-        
+
         $('#content-tabsPedidos').removeClass('h-screen');
     }
 
@@ -173,7 +177,7 @@ class Pedidos extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "Pedido";
-        this.productosFiltrados =  [];
+        this.productosFiltrados = [];
     }
 
     render() {
@@ -493,7 +497,7 @@ class Pedidos extends Templates {
                         return {
                             opc: 'apiSearchClientes',
                             search: params.term || ''
-                 
+
                         };
                     },
                     processResults: function (data) {
@@ -571,7 +575,7 @@ class Pedidos extends Templates {
                 validationInputForNumber('#monto');
             });
 
-            window.updateProductosByUdnAdd = function(udnId) {
+            window.updateProductosByUdnAdd = function (udnId) {
                 // Actualizar productos
                 pedidos.productosFiltrados = productos.filter(p => p.udn_id == udnId);
                 const options = pedidos.productosFiltrados.map(r => `<option value="${r.id}">${r.valor}</option>`).join('');
@@ -596,7 +600,7 @@ class Pedidos extends Templates {
                 $('#anuncio_id').val('');
                 $('#selectedAnuncio').html('<span class="text-gray-400">Seleccione un anuncio...</span>');
             };
-        
+
         }, 100);
     }
 
@@ -854,7 +858,7 @@ class Pedidos extends Templates {
                 }
             }
 
-            window.updateProductosByUdnEdit = function() {
+            window.updateProductosByUdnEdit = function () {
                 const udnId = $('#udn_id_edit').val();
                 // Actualizar productos
                 const productosFiltrados = productos.filter(p => p.udn_id == udnId);

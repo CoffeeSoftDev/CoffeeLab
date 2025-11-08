@@ -906,7 +906,7 @@ class ListaPedidos extends App {
     async getImageOrder(id) {
         try {
             const response = await useFetch({
-                url: this._link,
+                url : ctrl,
                 data: { opc: 'getImageOrder', id: id }
             });
             
