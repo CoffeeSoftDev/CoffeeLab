@@ -7,7 +7,7 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 
 require_once '../mdl/mdl-pedidos.php';
-
+require_once '../../../../conf/coffeSoft.php';
 class ctrl extends mdl {
 
     function init() {
@@ -17,7 +17,8 @@ class ctrl extends mdl {
             'productos'      => $this-> lsProductos([1]),
             'campanas'       => $this-> lsCampanas([1]),
             'redes_sociales' => $this-> lsSocialNetworks([]),
-            'anuncios'       => $this-> lsAnuncios()
+            'anuncios'       => $this-> lsAnuncios(),
+            'clients'        => $this-> getAllClients()
         ];
     }
 
@@ -54,7 +55,7 @@ class ctrl extends mdl {
 
             $row = [
                 'id'       => $key['id'],
-                'Fecha pedido'    => date('d/m/Y', strtotime($key['fecha_pedido'])),
+                'Fecha pedido'    => formatSpanishDate($key['fecha_pedido'],'short'),
                 'Creado el'  => date('d/m/Y H:i', strtotime($key['fecha_creacion'])),
                 'Cliente'  => $key['cliente_nombre'],
                 'Teléfono' => $key['cliente_telefono'],
@@ -99,21 +100,32 @@ class ctrl extends mdl {
             // Determinar el cliente_id
             $clienteId = null;
             $clienteData = [];
+            
             // Si viene cliente_id, es un cliente existente
             if (!empty($_POST['cliente_id'])) {
                 $clienteId = $_POST['cliente_id'];
-            } else if (!empty($_POST['cliente_nombre'])) {
-                    // Si no viene cliente_id, crear un nuevo cliente
-                    // Verificar que no exista un cliente con el mismo nombre y teléfono
-                    $clienteExistente = $this->searchClientesByName([$_POST['cliente_nombre']]);
-                    if (!empty($clienteExistente)) {
-                        return [
-                            'status' => 400,
-                            'message' => 'Ya existe un cliente con ese nombre o teléfono'
-                        ];
-                    }
-
-                    // 🧩 Limpiar valores y convertir 'null' o vacío a NULL real
+            } else if (!empty($_POST['cliente_nombre']) || !empty($_POST['cliente_telefono'])) {
+                // Buscar cliente existente por teléfono
+                $clienteExistente = null;
+                if (!empty($_POST['cliente_telefono'])) {
+                    $clienteExistente = $this->getClienteByPhone([$_POST['cliente_telefono']]);
+                }
+                
+                if ($clienteExistente) {
+                    // Cliente existe, actualizar sus datos
+                    $clienteId = $clienteExistente['id'];
+                    
+                    $clienteData = [
+                        'nombre'           => $this->sanitize($_POST['cliente_nombre'] ?? null),
+                        'telefono'         => $this->sanitize($_POST['cliente_telefono'] ?? null),
+                        'correo'           => $this->sanitize($_POST['cliente_correo'] ?? null),
+                        'fecha_cumpleaños' => $this->sanitize($_POST['cliente_cumpleaños'] ?? null),
+                        'id'               => $clienteId
+                    ];
+                    
+                    $this->updateCliente($this->util->sql($clienteData, 1));
+                } else {
+                    // Cliente no existe, crear uno nuevo
                     $clienteData = [
                         'nombre'           => $this->sanitize($_POST['cliente_nombre'] ?? null),
                         'telefono'         => $this->sanitize($_POST['cliente_telefono'] ?? null),
@@ -123,8 +135,9 @@ class ctrl extends mdl {
                         'udn_id'           => $_POST['udn_id']
                     ];
 
-                    $clientecito = $this->createCliente($this->util->sql($clienteData));
+                    $this->createCliente($this->util->sql($clienteData));
                     $clienteId = $this->maxCliente();
+                }
             } else {
                 return [
                     'status' => 400,
@@ -224,12 +237,12 @@ class ctrl extends mdl {
             
             // Actualizar datos del pedido
             $pedidoData = [
-                'monto' => $_POST['monto'],
+                'monto'           => $_POST['monto'],
                 'envio_domicilio' => $_POST['envio_domicilio'],
-                'fecha_pedido' => $_POST['fecha_pedido'],
-                'canal_id' => $_POST['canal_id'],
-                'red_social_id' => $_POST['red_social_id'],
-                'anuncio_id' => $_POST['anuncio_id'] ?? null
+                'fecha_pedido'    => $_POST['fecha_pedido'],
+                'canal_id'        => $_POST['canal_id'],
+                'red_social_id'   => $_POST['red_social_id'],
+                'anuncio_id'      => $_POST['anuncio_id'] ?? null
             ];
             
             // Actualizar cliente si viene un nuevo cliente_id
@@ -452,9 +465,6 @@ function renderEnvio($envio_domicilio) {
     }
 }
 
-function evaluar($value) {
-    return '$' . number_format($value, 2, '.', ',');
-}
 
 function canalSVG($canalNombre) {
     if (!$canalNombre) return '';

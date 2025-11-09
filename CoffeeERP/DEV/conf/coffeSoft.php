@@ -63,20 +63,42 @@ function formatSpanishDateAll($fecha = null) {
     return $fechaFormateada;
 }
 
-function formatSpanishDate($fecha = null) {
-    setlocale(LC_TIME, 'es_ES.UTF-8'); // Establecer la localización a español
-
+function formatSpanishDate($fecha = null, $type = 'short') {
     if ($fecha === null) {
-        $fecha = date('Y-m-d'); // Utilizar la fecha actual si no se proporciona una fecha específica
+        $fecha = date('Y-m-d');
     }
 
-    // Convertir la cadena de fecha a una marca de tiempo
     $marcaTiempo = strtotime($fecha);
+    $hoy = date('Y-m-d');
+    $ayer = date('Y-m-d', strtotime('-1 day'));
 
-    $formatoFecha = "%d/%B/%Y"; // Formato de fecha en español
-    $fechaFormateada = strftime($formatoFecha, $marcaTiempo);
+    if ($fecha == $hoy) {
+        return "Hoy";
+    } elseif ($fecha == $ayer) {
+        return "Ayer";
+    }
 
-    return $fechaFormateada;
+    $meses = [
+        1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
+        5 => 'Mayo', 6 => 'Junio', 7 => 'Julio', 8 => 'Agosto',
+        9 => 'Septiembre', 10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
+    ];
+
+    $mesesCortos = [
+        1 => 'Ene', 2 => 'Feb', 3 => 'Mar', 4 => 'Abr',
+        5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Ago',
+        9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dic'
+    ];
+
+    $dia = date('d', $marcaTiempo);
+    $mes = (int)date('m', $marcaTiempo);
+    $anio = date('Y', $marcaTiempo);
+
+    if ($type === 'normal') {
+        return "$dia de {$meses[$mes]} del $anio";
+    }
+
+    return "$dia/{$mesesCortos[$mes]}/$anio";
 }
 
 function formatSpanishNoDay($fecha = null){

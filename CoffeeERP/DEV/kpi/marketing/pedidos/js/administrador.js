@@ -19,6 +19,7 @@ class Admin extends Templates {
             parent: `container-admin`,
             id: `tabs${this.PROJECT_NAME}`,
             theme: "light",
+            class: "h-full",
             type: "button",
             json: [
                 {
@@ -44,6 +45,9 @@ class Admin extends Templates {
             ]
         });
 
+        setTimeout(() => {
+            $('#content-tabsAdmin').addClass('h-full flex flex-col');
+        }, 100);
 
     }
 
@@ -69,10 +73,10 @@ class AdminChannel extends Admin {
         this.primaryLayout({
             parent: "container-channel",
             id: this.PROJECT_NAME,
-            class: "w-full",
+            class: "h-full flex flex-col",
             card: {
                 filterBar: { class: "w-full ", id: "filterBar" + this.PROJECT_NAME },
-                container: { class: "w-full h-full", id: "container" + this.PROJECT_NAME }
+                container: { class: "w-full flex-1 overflow-auto", id: "container" + this.PROJECT_NAME }
             }
         });
 
@@ -111,7 +115,7 @@ class AdminChannel extends Admin {
     lsCanales() {
         this.createTable({
             parent: "container" + this.PROJECT_NAME,
-            idFilterBar: "filterBarAdmin",
+            idFilterBar: "filterBarAdminChannel",
             data: { opc: "lsCanales" },
             coffeesoft: true,
             conf: { datatable: true, pag: 15 },
@@ -249,10 +253,10 @@ class AdminProducts extends Admin {
         this.primaryLayout({
             parent: `container-products`,
             id: this.PROJECT_NAME,
-            class: 'w-full',
+            class: 'h-full flex flex-col',
             card: {
                 filterBar: { class: 'w-full border-b pb-2', id: `filterBar${this.PROJECT_NAME}` },
-                container: { class: 'w-full my-2 h-full', id: `container${this.PROJECT_NAME}` }
+                container: { class: 'w-full flex-1 overflow-auto', id: `container${this.PROJECT_NAME}` }
             }
         });
 
@@ -468,10 +472,10 @@ class Migration extends Admin {
         this.primaryLayout({
             parent: `container-migration`,
             id: this.PROJECT_NAME,
-            class: 'w-full',
+            class: 'h-full flex flex-col',
             card: {
                 filterBar: { class: 'w-full  pb-2', id: `filterBar${this.PROJECT_NAME}` },
-                container: { class: 'w-full my-2 h-full', id: `container${this.PROJECT_NAME}` }
+                container: { class: 'w-full flex-1 overflow-auto', id: `container${this.PROJECT_NAME}` }
             }
         });
 
@@ -484,6 +488,14 @@ class Migration extends Admin {
             parent: `filterBar${this.PROJECT_NAME}`,
             data: [
                 {
+                    opc: "select",
+                    id: "udn",
+                    lbl: "Unidad de Negocio",
+                    class: "col-12 col-md-2",
+                    data: lsudn,
+                    onchange: 'migration.ls()'
+                },
+                {
                     opc: "input-file",
                     text: "Subir archivo",
                     id: "btnSubir",
@@ -491,7 +503,7 @@ class Migration extends Admin {
                     fn: "migration.fileUpload()",
                     class: "col-12 col-sm-6 col-lg-2",
                 },
-                
+
             ]
         });
 

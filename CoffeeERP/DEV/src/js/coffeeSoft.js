@@ -1911,7 +1911,7 @@ class Components extends Complements {
             },
             content: { class: '', id: '' },
             renderContainer: true,
-
+            tab_container:{class:''},
             json: [
                 { id: "TAB1", tab: "TAB1", icon: "", active: true, onClick: () => { } },
                 { id: "TAB2", tab: "TAB2", icon: "", onClick: () => { } },
@@ -1994,13 +1994,14 @@ class Components extends Complements {
         if (opts.renderContainer) {
             const contentContainer = $("<div>", {
                 id: `content-${opts.id}`,
-                class: `mt-2 ${opts.content.class}`,
+                class: `mt-2 h-screens ${opts.content.class}`,
             });
 
             opts.json.forEach(tab => {
+                const borderClass = opts.type === 'button' ? '' : 'border';
                 const contentView = $("<div>", {
                     id: `container-${tab.id}`,
-                    class: `hidden p-3 h-full rounded-lg`,
+                    class: `hidden p-3 border ${tab.class ?? ''} rounded-lg`,
                     html: tab.content || ""
                 });
                 contentContainer.append(contentView);

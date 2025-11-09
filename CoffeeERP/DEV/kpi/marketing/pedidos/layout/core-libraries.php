@@ -5,6 +5,11 @@
 <script src="../../../src/plugin/bootstrap-5/js/bootstrap.min.js"></script>
 <script src="../../../src/plugin/bootstrap-5/js/bootstrap.bundle.js"></script>
 
+ <!-- autocomplete -->
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+
 <!-- UI Plugins -->
 <script src="../../../src/plugin/select2/bootstrap/select2.min.js"></script>
 <script src="../../../src/plugin/bootbox.min.js"></script>

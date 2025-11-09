@@ -81,6 +81,22 @@ class mdl extends CRUD {
         return $this->_Read($query, null);
     }
 
+    // Clients.
+    function getAllClients(){
+        $query = "
+            SELECT
+                id,
+                nombre as name,
+                telefono as phone,
+                correo as email,
+                fecha_cumpleaños 
+            FROM
+            {$this->bd}cliente
+            WHERE active = 1 ";
+
+        return $this->_Read($query,null);
+    }
+
     function searchClientes($array) {
         $query = "
             SELECT 
@@ -197,6 +213,15 @@ class mdl extends CRUD {
             'data' => $array
         ]);
         return $result[0] ?? null;
+    }
+
+    function updateCliente($array) {
+        return $this->_Update([
+            'table' => $this->bd . 'cliente',
+            'values' => $array['values'],
+            'where' => 'id = ?',
+            'data' => $array['data']
+        ]);
     }
 
     function createPedido($array) {

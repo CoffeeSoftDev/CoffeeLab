@@ -2,7 +2,9 @@
   "mcpServers": {
     "mysql": {
       "command": "uvx",
-      "args": ["mcp-server-mysql"],
+      "args": [
+        "mcp-server-mysql"
+      ],
       "env": {
         "MYSQL_HOST": "127.0.0.1",
         "MYSQL_PORT": "3306",
@@ -10,7 +12,7 @@
         "MYSQL_PASSWORD": " ",
         "MYSQL_DATABASE": "fayxzvov_coffee"
       },
-      "disabled": false,
+      "disabled": true,
       "autoApprove": []
     }
   }

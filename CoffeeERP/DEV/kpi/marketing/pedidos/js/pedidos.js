@@ -1,25 +1,21 @@
 const api = 'ctrl/ctrl-pedidos.php';
 const api_dashboard = 'ctrl/ctrl-dashboard-order.php';
 
+let app, pedidos, dashboard, canal, dashboardOrder;
+let canales, productos, campanas, lsudn, udn, redes_sociales, anuncios,clients;
 
-
-
-let app, pedidos, dashboard, producto, canal, dashboardOrder;
-let canales, productos, campanas, lsudn, udn, redes_sociales, anuncios;
-
-
+// - tab report.
+let api_report = 'ctrl/ctrl-report.php';
 
 // - tab administrador.
 let admin, channel, product, migration;
 const api_productos = 'ctrl/ctrl-admin-productos.php';
 const apiCanales    = 'ctrl/ctrl-canal.php';
 
-
-
 $(async () => {
 
     const data = await useFetch({ url: api, data: { opc: "init" } });
-
+    // vars.
     udn            = data.udn;
     lsudn          = data.udn;
     canales        = data.canales;
@@ -27,31 +23,27 @@ $(async () => {
     campanas       = data.campanas;
     redes_sociales = data.redes_sociales;
     anuncios       = data.anuncios;
-
+    clients        = data.clients || [];
 
     // Instancias.
-    app = new App(api, "root");
-
-
+    app            = new App(api, "root");
     pedidos        = new Pedidos(api, 'root');
-    // report         = new Report(api_report, "root");
-    // dashboardOrder = new DashboardOrder(api_dashboard, "root");
-    // adminProductos = new AdminProductos(api_productos, "root");
-
+    report         = new Report(api_report, "root");
+    dashboardOrder = new DashboardOrder(api_dashboard, "root");
+    
     // administrador.
-    admin = new Admin(api, "root");
-    channel = new AdminChannel(apiCanales, "root");
-    product = new AdminProducts(api_productos, "root");
+    admin     = new Admin(api, "root");
+    channel   = new AdminChannel(apiCanales, "root");
+    product   = new AdminProducts(api_productos, "root");
     migration = new Migration(api, "root");
 
-
     app.render();
+    pedidos.render();
+    report.render();
+    dashboardOrder.render();
+    
     admin.render();
-
     migration.render();
-    // report.render();
-    // dashboardOrder.render();
-
 
 });
 
@@ -69,10 +61,9 @@ class App extends Templates {
         this.primaryLayout({
             parent: "root",
             id: this.PROJECT_NAME,
-            class: "w-full",
             card: {
                 filterBar: { class: "w-full", id: "filterBarPedidos" },
-                container: { class: "w-full h-full p-3", id: "containerPedidos" },
+                container: { class: "w-full flex-1 overflow-hidden", id: "containerPedidos" },
             },
         });
 
@@ -88,17 +79,21 @@ class App extends Templates {
             id: `tabs${this.PROJECT_NAME}`,
             theme: "light",
             class: '',
+            content:{
+            },
             type: "short",
             json: [
                 {
                     id: "dashboard",
                     tab: "Dashboard",
-                    class: "mb-1",
+                    class: 'h-full',
                     onClick: () => dashboardOrder.renderDashboard()
                 },
                 {
                     id: "pedidos",
                     tab: "Pedidos",
+                    class:'h-full',
+                    active: true,
 
                     onClick: () => pedidos.render()
                 },
@@ -110,14 +105,13 @@ class App extends Templates {
                 {
                     id: "admin",
                     tab: "Administrador",
-                    active: true,
-
+                  
                 },
 
             ]
         });
 
-        $('#content-tabsPedidos').removeClass('h-screen');
+        $('#content-tabsPedidos').addClass('h-full flex flex-col');
     }
 
     redirectToHome() {
@@ -172,7 +166,6 @@ class App extends Templates {
     }
 }
 
-
 class Pedidos extends Templates {
     constructor(link, div_modulo) {
         super(link, div_modulo);
@@ -191,8 +184,8 @@ class Pedidos extends Templates {
             parent: `container-pedidos`,
             id: this.PROJECT_NAME,
             card: {
-                filterBar: { class: 'w-full border-b pb-2', id: `filterBar${this.PROJECT_NAME}` },
-                container: { class: 'w-full my-2 h-full', id: `container${this.PROJECT_NAME}` }
+                filterBar: { class: 'w-full pb-3', id: `filterBar${this.PROJECT_NAME}` },
+                container: { class: 'w-full h-full', id: `container${this.PROJECT_NAME}` }
             }
         });
     }
@@ -209,7 +202,7 @@ class Pedidos extends Templates {
                     opc: "select",
                     id: "udn_id",
                     lbl: "Unidad de Negocio",
-                    class: "col-sm-3",
+                    class: "col-sm-2",
                     data: udn,
                     onchange: `pedidos.lsPedidos()`,
                 },
@@ -307,7 +300,7 @@ class Pedidos extends Templates {
                 
                 <div class="col-12 col-lg-4 mb-3">
                     <label class="form-label">Fecha de pedido</label>
-                    <input type="date" class="form-control" id="fecha_pedido" required>
+                    <input type="date" class="form-control" id="fecha_pedido" value="${new Date().toISOString().split('T')[0]}" required>
                 </div>
                 
                 <div class="col-12 col-lg-4 mb-3">
@@ -333,8 +326,9 @@ class Pedidos extends Templates {
                 <div class="col-12 col-lg-4 mb-3">
                     <label class="form-label">Tipo de entrega</label>
                     <select class="form-control" id="envio_domicilio" required>
-                        <option value="1">Envío a domicilio</option>
                         <option value="0">Recoger en establecimiento</option>
+                        <option value="1">Envío a domicilio</option>
+                        <option value="2">No aplica</option>
                     </select>
                 </div>
                   <div class="col-12 col-lg-4 mb-3">
@@ -375,23 +369,25 @@ class Pedidos extends Templates {
                 
                 <div class="col-12 fw-bold text-lg mb-3 border-b pb-2 mt-3">Información del cliente</div>
                 
-                <div class="col-12 col-lg-6 mb-3">
+                <!-- <div class="col-12 col-lg-6 mb-3">
                     <label class="form-label">Buscar Cliente</label>
                     <select class="form-control" id="cliente_select" style="width: 100%">
                         <option value="">Buscar cliente existente...</option>
                     </select>
                     <input type="hidden" id="cliente_id" value="">
-                </div>
-                
-                <div class="col-12 col-lg-6 mb-3">
-                    <label class="form-label">Nombre del cliente</label>
-                    <input type="text" class="form-control" id="cliente_nombre" required>
-                </div>
-                
+                </div> -->
+
                 <div class="col-12 col-lg-4 mb-3">
                     <label class="form-label">Teléfono</label>
                     <input type="tel" class="form-control" id="cliente_telefono" required>
                 </div>
+                
+                <div class="col-12 col-lg-4 mb-3">
+                    <label class="form-label">Nombre del cliente</label>
+                    <input type="text" class="form-control" id="cliente_nombre" required>
+                </div>
+                
+              
                 
                 <div class="col-12 col-lg-4 mb-3">
                     <label class="form-label">Correo electrónico</label>
@@ -419,15 +415,15 @@ class Pedidos extends Templates {
                     className: 'btn-primary',
                     callback: async () => {
                         const formData = {
-                            opc: 'addPedido',
-                            fecha_pedido: $('#fecha_pedido').val(),
-                            canal_id: $('#canal_id').val(),
-                            monto: $('#monto').val(),
-                            udn_id: $('#udn_id').val(),
+                            opc            : 'addPedido',
+                            fecha_pedido   : $('#fecha_pedido').val(),
+                            canal_id       : $('#canal_id').val(),
+                            monto          : $('#monto').val(),
+                            udn_id         : $('#udn_id').val(),
                             envio_domicilio: $('#envio_domicilio').val(),
-                            producto_id: $('#producto_id').val(), // Array de productos
-                            anuncio_id: $('#anuncio_id').val() || null,
-                            red_social_id: $('#red_social_id').val()
+                            producto_id    : $('#producto_id').val(),          // Array de productos
+                            anuncio_id     : $('#anuncio_id').val() || null,
+                            red_social_id  : $('#red_social_id').val()
                         };
 
                         // Si hay un cliente seleccionado, solo enviar el ID
@@ -474,6 +470,65 @@ class Pedidos extends Templates {
             // Obtener el contenedor del modal de bootbox
             const modalContainer = $('.bootbox.modal');
 
+            // Autocomplete para nombre de cliente
+            $('#cliente_nombre').autocomplete({
+                source: clients.map(client => ({
+                    label: client.name,
+                    value: client.name,
+                    phone: client.phone,
+                    email: client.email,
+                    birthday: client.fecha_cumpleaños
+                })),
+                minLength: 2,
+                appendTo: modalContainer,
+                select: function (event, ui) {
+                    $('#cliente_telefono').val(ui.item.phone || '');
+                    $('#cliente_correo').val(ui.item.email || '');
+                    $('#cliente_cumpleaños').val(ui.item.birthday ? ui.item.birthday.split(' ')[0] : '');
+                    return true;
+                }
+            });
+
+            // Autocomplete para teléfono de cliente
+            $('#cliente_telefono').autocomplete({
+                source: clients.map(client => ({
+                    label: `${client.phone} - ${client.name}`,
+                    value: client.phone,
+                    name: client.name,
+                    email: client.email,
+                    birthday: client.fecha_cumpleaños
+                })),
+                minLength: 3,
+                appendTo: modalContainer,
+                select: function (event, ui) {
+                    $('#cliente_nombre').val(ui.item.name || '');
+                    $('#cliente_correo').val(ui.item.email || '');
+                    $('#cliente_cumpleaños').val(ui.item.birthday ? ui.item.birthday.split(' ')[0] : '');
+                    return true;
+                }
+            });
+
+            // Limpiar campos cuando se borra el nombre
+            $('#cliente_nombre').on('input', function() {
+                if ($(this).val().trim() === '') {
+                    $('#cliente_telefono').val('');
+                    $('#cliente_correo').val('');
+                    $('#cliente_cumpleaños').val('');
+                }
+            });
+
+            // Limpiar campos cuando se borra el teléfono
+            $('#cliente_telefono').on('input', function() {
+                if ($(this).val().trim() === '') {
+                    $('#cliente_nombre').val('');
+                    $('#cliente_correo').val('');
+                    $('#cliente_cumpleaños').val('');
+                }
+            });
+
+
+
+
             // Inicializar Select2 para productos (múltiple)
             $('#producto_id').select2({
                 placeholder: 'Seleccione productos...',
@@ -482,64 +537,64 @@ class Pedidos extends Templates {
                 dropdownParent: modalContainer
             });
 
-            // Inicializar Select2 para clientes con búsqueda AJAX
-            $('#cliente_select').select2({
-                placeholder: 'Buscar cliente por nombre o teléfono...',
-                allowClear: true,
-                width: '100%',
-                dropdownParent: modalContainer,
-                ajax: {
-                    url: api,
-                    type: 'POST',
-                    dataType: 'json',
-                    delay: 250,
-                    data: function (params) {
-                        return {
-                            opc: 'apiSearchClientes',
-                            search: params.term || ''
+            // // Inicializar Select2 para clientes con búsqueda AJAX
+            // $('#cliente_select').select2({
+            //     placeholder: 'Buscar cliente por nombre o teléfono...',
+            //     allowClear: true,
+            //     width: '100%',
+            //     dropdownParent: modalContainer,
+            //     ajax: {
+            //         url: api,
+            //         type: 'POST',
+            //         dataType: 'json',
+            //         delay: 250,
+            //         data: function (params) {
+            //             return {
+            //                 opc: 'apiSearchClientes',
+            //                 search: params.term || ''
 
-                        };
-                    },
-                    processResults: function (data) {
-                        return {
-                            results: data.results || []
-                        };
-                    },
-                    cache: true
-                },
-                minimumInputLength: 2
-            });
+            //             };
+            //         },
+            //         processResults: function (data) {
+            //             return {
+            //                 results: data.results || []
+            //             };
+            //         },
+            //         cache: true
+            //     },
+            //     minimumInputLength: 2
+            // });
 
-            // Cuando se selecciona un cliente, rellenar los campos
-            $('#cliente_select').on('select2:select', async function (e) {
-                const clienteId = e.params.data.id;
-                selectedClienteId = clienteId;
-                $('#cliente_id').val(clienteId);
+            // // Cuando se selecciona un cliente, rellenar los campos
+            // $('#cliente_select').on('select2:select', async function (e) {
+            //     const clienteId = e.params.data.id;
+            //     selectedClienteId = clienteId;
+            //     $('#cliente_id').val(clienteId);
 
-                // Obtener datos completos del cliente
-                const response = await useFetch({
-                    url: api,
-                    data: { opc: 'getCliente', id: clienteId }
-                });
+            //     // Obtener datos completos del cliente
+            //     const response = await useFetch({
+            //         url: api,
+            //         data: { opc: 'getCliente', id: clienteId }
+            //     });
 
-                if (response.status === 200 && response.data) {
-                    const cliente = response.data;
-                    $('#cliente_nombre').val(cliente.text || '').prop('readonly', true);
-                    $('#cliente_telefono').val(cliente.telefono || '').prop('readonly', true);
-                    $('#cliente_correo').val(cliente.correo || '').prop('readonly', true);
-                    $('#cliente_cumpleaños').val(cliente.fecha_cumpleaños ? cliente.fecha_cumpleaños.split(' ')[0] : '').prop('readonly', true);
-                }
-            });
+            //     if (response.status === 200 && response.data) {
+            //         const cliente = response.data;
+            //         $('#cliente_nombre').val(cliente.text || '').prop('readonly', true);
+            //         $('#cliente_telefono').val(cliente.telefono || '').prop('readonly', true);
+            //         $('#cliente_correo').val(cliente.correo || '').prop('readonly', true);
+            //         $('#cliente_cumpleaños').val(cliente.fecha_cumpleaños ? cliente.fecha_cumpleaños.split(' ')[0] : '').prop('readonly', true);
+            //     }
+            // });
 
-            // Cuando se limpia la selección, habilitar campos para nuevo cliente
-            $('#cliente_select').on('select2:clear', function () {
-                selectedClienteId = null;
-                $('#cliente_id').val('');
-                $('#cliente_nombre').val('').prop('readonly', false);
-                $('#cliente_telefono').val('').prop('readonly', false);
-                $('#cliente_correo').val('').prop('readonly', false);
-                $('#cliente_cumpleaños').val('').prop('readonly', false);
-            });
+            // // Cuando se limpia la selección, habilitar campos para nuevo cliente
+            // $('#cliente_select').on('select2:clear', function () {
+            //     selectedClienteId = null;
+            //     $('#cliente_id').val('');
+            //     $('#cliente_nombre').val('').prop('readonly', false);
+            //     $('#cliente_telefono').val('').prop('readonly', false);
+            //     $('#cliente_correo').val('').prop('readonly', false);
+            //     $('#cliente_cumpleaños').val('').prop('readonly', false);
+            // });
 
             // Dropdown de anuncios
             $('#dropdownAnuncioBtn').on('click', function (e) {
@@ -1018,7 +1073,6 @@ class Pedidos extends Templates {
     }
 
 }
-
 
 function validationInputForNumber(selector) {
     const value = $(selector).val();
