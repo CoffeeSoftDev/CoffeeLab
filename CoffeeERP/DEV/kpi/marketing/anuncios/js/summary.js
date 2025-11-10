@@ -101,56 +101,56 @@ class CampaignSummary extends Templates {
         const grouped = response.grouped;
         const totals = response.totals[0];
 
-        let rowCampañas = '<tr><th class="bg-blue-100 border border-gray-300 rounded-tl-xl"></th>';
-        let rowAnuncios = '<tr><th class="text-left px-3 py-2 bg-blue-100 border border-gray-300 font-medium">Anuncios</th>';
-        let rowClasif = '<tr><th class="text-left px-3 py-2 bg-blue-50 border border-gray-300 font-medium">Clasificación</th>';
-        let rowClics = '<tr><th class="text-left px-3 py-2 bg-white border border-gray-300 font-medium">Resultados (clics)</th>';
-        let rowInversion = '<tr><th class="text-left px-3 py-2 bg-white border border-gray-300 font-medium">Inversión</th>';
-        let rowCPC = '<tr><th class="text-left px-3 py-2 bg-white border border-gray-300 font-medium">CPC</th>';
-        let rowTotalCampaña = '<tr><th class="font-bold px-3 py-2 bg-blue-50 border border-gray-300">Total de resultados x campaña</th>';
+        let rowCampañas = '<tr><th class="bg-blue-100 border-1 border-gray-400 rounded-tl-xl"></th>';
+        let rowAnuncios = '<tr><th class="text-left px-3 py-2 bg-blue-100 border-1 border-gray-400 font-medium">Anuncios</th>';
+        let rowClasif = '<tr><th class="text-left px-3 py-2 bg-blue-50 border-1 border-gray-400 font-medium">Clasificación</th>';
+        let rowClics = '<tr><th class="text-left px-3 py-2 bg-white border-1 border-gray-400 font-medium">Resultados (clics)</th>';
+        let rowInversion = '<tr><th class="text-left px-3 py-2 bg-white border-1 border-gray-400 font-medium">Inversión</th>';
+        let rowCPC = '<tr><th class="text-left px-3 py-2 bg-white border-1 border-gray-400 font-medium">CPC</th>';
+        let rowTotalCampaña = '<tr><th class="font-bold px-3 py-2 bg-blue-50 border-1 border-gray-400">Total de resultados x campaña</th>';
 
         grouped.forEach(c => {
-            rowCampañas += `<th class="text-center bg-blue-100 font-semibold border border-gray-300" colspan="${c.rows.length}">${c.group}</th>`;
+            rowCampañas += `<th class="text-center bg-blue-100 font-semibold border-1 border-gray-400" colspan="${c.rows.length}">${c.group}</th>`;
 
             c.rows.forEach(r => {
-                rowAnuncios += `<th class="text-center bg-blue-100 border border-gray-300 font-semibold">${r.Anuncio}</th>`;
-                rowClasif += `<td class="text-center bg-blue-50 border border-gray-300 italic">${r.Clasificación}</td>`;
-                rowClics += `<td class="text-right bg-white border border-gray-300 px-1">${r["Resultados (clics)"]}</td>`;
-                rowInversion += `<td class="text-right bg-white border border-gray-300  px-1">${r["Inversión"]}</td>`;
-                rowCPC += `<td class="text-right bg-white border border-gray-300  px-1">${r["CPC"]}</td>`;
+                rowAnuncios += `<th class="text-center bg-blue-100 border-1 border-gray-400 font-semibold">${r.Anuncio}</th>`;
+                rowClasif += `<td class="text-center bg-blue-50 border-1 border-gray-400 italic">${r.Clasificación}</td>`;
+                rowClics += `<td class="text-right bg-white border-1 border-gray-400 px-1">${r["Resultados (clics)"]}</td>`;
+                rowInversion += `<td class="text-right bg-white border-1 border-gray-400  px-1">${r["Inversión"]}</td>`;
+                rowCPC += `<td class="text-right bg-white border-1 border-gray-400  px-1">${r["CPC"]}</td>`;
             });
 
-            rowTotalCampaña += `<td class="text-center font-semibold bg-blue-50 border border-gray-300" colspan="${c.rows.length}">Total ${c.group}: <span class='font-bold'>${c.footer["Resultados (clics)"]}</span></td>`;
+            rowTotalCampaña += `<td class="text-center font-semibold bg-blue-50 border-1 border-gray-400" colspan="${c.rows.length}">Total ${c.group}: <span class='font-bold'>${c.footer["Resultados (clics)"]}</span></td>`;
         });
 
         rowCampañas += `
-                <th class="text-center bg-blue-100 font-semibold border border-gray-300" rowspan="2">Tipo de resultados</th>
-                <th class="text-center bg-blue-100 font-semibold border border-gray-300 rounded-tr-xl" rowspan="2">Resultados</th>
+                <th class="text-center bg-blue-100 font-semibold border-1 border-gray-400" rowspan="2">Tipo de resultados</th>
+                <th class="text-center bg-blue-100 font-semibold border-1 border-gray-400 rounded-tr-xl" rowspan="2">Resultados</th>
                 </tr>`;
 
-        rowClasif += `<td class="text-center bg-blue-50 border border-gray-300"></td>
-              <td class="text-center bg-blue-50 border border-gray-300"></td></tr>`;
+        rowClasif += `<td class="text-center bg-blue-50 border-1 border-gray-400"></td>
+              <td class="text-center bg-blue-50 border-1 border-gray-400"></td></tr>`;
 
         rowClics += `
-             <td class="text-center bg-gray-50 border border-gray-300 font-semibold">Total de resultados (clics)</td>
-             <td class="text-right bg-gray-50 font-bold border border-gray-300 px-1">${totals.total_clics}</td>
+             <td class="text-center bg-gray-50 border-1 border-gray-400 font-semibold">Total de resultados (clics)</td>
+             <td class="text-right bg-gray-50 font-bold border-1 border-gray-400 px-1">${totals.total_clics}</td>
              </tr>`;
 
         rowInversion += `
-                 <td class="text-center bg-gray-50 border border-gray-300 font-semibold">Costo total</td>
-                 <td class="text-right bg-gray-50 font-bold border border-gray-300 px-1">${evaluar(totals.total_monto)}</td></tr>`;
+                 <td class="text-center bg-gray-50 border-1 border-gray-400 font-semibold">Costo total</td>
+                 <td class="text-right bg-gray-50 font-bold border-1 border-gray-400 px-1">${evaluar(totals.total_monto)}</td></tr>`;
 
         rowCPC += `
-           <td class="text-center bg-gray-50 border border-gray-300 font-semibold">CPC promedio</td>
-           <td class="text-right bg-gray-50 font-bold border border-gray-300 px-1">${evaluar(totals.promedio_cpc)}</td>
+           <td class="text-center bg-gray-50 border-1 border-gray-400 font-semibold">CPC promedio</td>
+           <td class="text-right bg-gray-50 font-bold border-1 border-gray-400 px-1">${evaluar(totals.promedio_cpc)}</td>
            </tr>`;
 
-        rowTotalCampaña += `<td class="bg-blue-50 border border-gray-300"></td>
-                    <td class="bg-blue-50 border border-gray-300"></td></tr>`;
+        rowTotalCampaña += `<td class="bg-blue-50 border-1 border-gray-400"></td>
+                    <td class="bg-blue-50 border-1 border-gray-400"></td></tr>`;
 
 
         $('#container-table-summary').html(`
-            <div class="overflow-auto rounded-xl border border-gray-300 shadow-md mt-6">
+            <div class="overflow-auto rounded-xl  mt-6">
                 <table class="min-w-full text-sm text-gray-800 border-collapse rounded-xl overflow-hidden">
                     <thead class="rounded-t-xl">
                         ${rowCampañas}

@@ -1,5 +1,4 @@
 <?php
-session_start();
 if (empty($_POST['opc'])) exit(0);
 
 require_once '../mdl/mdl-summary.php';

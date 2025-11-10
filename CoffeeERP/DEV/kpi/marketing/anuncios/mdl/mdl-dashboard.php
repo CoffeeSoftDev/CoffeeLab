@@ -31,6 +31,7 @@ class mdl extends CRUD {
             AND c.red_social_id = ?
             AND YEAR(a.fecha_inicio) = ?
             AND MONTH(a.fecha_inicio) = ?
+            AND fecha_resultado IS NULL
         ";
         
         return $this->_Read($query, $array)[0];
