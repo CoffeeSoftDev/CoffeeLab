@@ -82,23 +82,23 @@ class mdl extends CRUD {
     function getTopCampaigns($array) {
         $query = "
             SELECT 
-                c.nombre AS campaña,
-                a.nombre AS anuncio,
+                c.nombre as campaña,
                 c.estrategia,
-                a.total_monto AS inversion,
-                a.total_clics AS clics,
+                SUM(a.total_monto) as inversion,
+                SUM(a.total_clics) as clics,
                 CASE 
-                    WHEN a.total_clics > 0 
-                    THEN a.total_monto / a.total_clics
+                    WHEN SUM(a.total_clics) > 0 
+                    THEN SUM(a.total_monto) / SUM(a.total_clics)
                     ELSE 0 
-                END AS cpc
+                END as cpc
             FROM {$this->bd}campaña c
             INNER JOIN {$this->bd}anuncio a ON c.id = a.campaña_id
             WHERE c.udn_id = ?
             AND c.red_social_id = ?
             AND YEAR(a.fecha_inicio) = ?
             AND MONTH(a.fecha_inicio) = ?
-            ORDER BY cpc ASC, a.total_clics DESC
+            GROUP BY c.id, c.nombre, c.estrategia
+            ORDER BY inversion DESC
             LIMIT 5
         ";
         

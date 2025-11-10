@@ -31,11 +31,6 @@
             <script src="js/history.js?t=<?php echo time(); ?>"></script>
             <script src="js/admin.js?t=<?php echo time(); ?>"></script>
         </div>
-
-
-
-
     </main>
 </body>
-
 </html>

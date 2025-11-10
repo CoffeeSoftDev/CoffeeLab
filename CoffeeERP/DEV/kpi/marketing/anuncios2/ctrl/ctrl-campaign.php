@@ -180,30 +180,10 @@ class ctrl extends mdl {
         foreach ($ls as $key) {
             $a = []; // 🔹 Reiniciar acciones por fila
 
-            // 🎨 Color del ícono según red social
-                $colorIcon = '#9CA3AF'; // gris por defecto
-
-                switch ((int)($key['red_social_id'] ?? 0)) {
-                    case 1:
-                        $colorIcon = '#1877F2'; // Facebook
-                        $bgColor   = 'bg-blue-100';
-                        break;
-                    case 2:
-                        $colorIcon = '#F527BE'; // Instagram
-                        $bgColor   = 'bg-pink-100';
-                        break;
-                    case 3:
-                        $colorIcon = '#010101'; // TikTok
-                        $bgColor   = 'bg-gray-300';
-                        break;
-                }
-
-            // 🖼️ Imagen o ícono por defecto
-        $imageHtml = !empty($key['imagen']) 
-            ? '<img src="https://www.erp-varoch.com/DEV/' . ltrim($key['imagen'], '/') . '" class="w-16 h-16 rounded-lg object-cover shadow-md mx-auto my-1" />'
-            : '<div class="w-16 h-16 ' . $bgColor . ' rounded-lg flex items-center justify-center mx-auto my-1">
-                   <i class="icon-heart-1 text-lg" style="color:' . $colorIcon . ';"></i>
-               </div>';
+            // 🖼️ Imagen
+            $imageHtml = !empty($key['imagen']) 
+                ? '<img src="https://www.erp-varoch.com/DEV/' . ltrim($key['imagen'], '/') . '" class="w-16 h-16 rounded-lg object-cover shadow-md mx-auto my-1" />'
+                : '<div class="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center mx-auto my-1"><i class="icon-image text-gray-400"></i></div>';
 
             // 🎨 Badges
             $clasificacionBadge = renderBadge($key['clasificacion_nombre'], 'gray');
@@ -254,6 +234,7 @@ class ctrl extends mdl {
             // 🧱 Construcción de fila
             $__row[] = [
                 'id'             => $key['id'],
+                'index'          => $key['id'],
                 'Imagen'         => ['html' => $imageHtml, 'class' => 'text-center align-middle'],
                 'Campaña'        => $key['campaña_nombre'],
                 'Anuncio'        => $key['anuncio_nombre'],
@@ -271,10 +252,6 @@ class ctrl extends mdl {
             $values
         ];
     }
-
-
-
-
 
     function getAnnouncement() {
         $status = 500;
@@ -352,8 +329,8 @@ class ctrl extends mdl {
 
             // Actualizar el active de campaña a 1
             $dataCampaign = [
-                'active' => 1,
-                'id'     => $_POST['campaña_id']
+                    'id'     => $_POST['campaña_id'],
+                    'active' => 1
             ];
             $this->updateCampaign($this->util->sql($dataCampaign, 1));
         }
@@ -499,6 +476,8 @@ class ctrl extends mdl {
         ];
     }
 
+
+
     function captureResults() {
         $status = 500;
         $message = 'Error al capturar resultados';
@@ -515,20 +494,6 @@ class ctrl extends mdl {
         if ($update) {
             $status = 200;
             $message = 'Resultados capturados correctamente';
-
-            // Desactivar campaña si todos los anuncios tienen resultados
-            $ad = $this->getAnnouncementById([$_POST['id']]);
-            $campaña_id = $ad['campaña_id'] ?? null;
-            if ($campaña_id) {
-                $adsWithoutResults = $this->countAnnouncementsWithoutResults([$campaña_id]);
-                if ($adsWithoutResults == 0) {
-                    $dataCampaign = [
-                        'active' => '0',
-                        'id'     => $campaña_id
-                    ];
-                    $this->updateCampaign($this->util->sql($dataCampaign, 1));
-                }
-            }
         }
 
         return [
@@ -567,10 +532,11 @@ function renderStatus($status) {
 
 function renderBadge($text, $color = 'green') {
     $colors = [
-        'green' => 'bg-gray-200 text-green-800',
-        'blue' => 'bg-gray-200 text-blue-900',
-        // 'purple' => 'bg-gray-200 text-purple-800',
-        // 'gray' => 'bg-gray-200 text-gray-800',
+        'green' => 'bg-green-900 text-green-300',
+        'blue' => 'bg-blue-900 text-blue-300',
+        'purple' => 'bg-purple-900 text-purple-300',
+        'yellow' => 'bg-yellow-900 text-yellow-300',
+        'pink' => 'bg-pink-900 text-pink-300'
     ];
     
     $colorClass = $colors[$color] ?? $colors['green'];

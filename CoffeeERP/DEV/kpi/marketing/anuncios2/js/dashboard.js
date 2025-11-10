@@ -156,7 +156,7 @@ class CampaignDashboard extends Templates {
         const container = $("<div>", { class: opts.class });
         const title = $("<h2>", {
             class: "text-lg font-bold mb-3 text-gray-800",
-            text: `Comparativa Anual: ${opts.año - 1} vs ${opts.año}`
+            text: `Comparativa Anual: ${opts.año} vs ${opts.año - 1}`
         });
         const canvasWrapper = $("<div>", {
             class: "w-full",
@@ -180,15 +180,15 @@ class CampaignDashboard extends Templates {
                 labels: opts.data.labels,
                 datasets: [
                     {
-                        label: `Año ${opts.año - 1}`,
-                        data: opts.data.B,
-                        backgroundColor: "#8CC63F"
-                    },
-                    {
                         label: `Año ${opts.año}`,
                         data: opts.data.A,
                         backgroundColor: "#103B60"
                     },
+                    {
+                        label: `Año ${opts.año - 1}`,
+                        data: opts.data.B,
+                        backgroundColor: "#8CC63F"
+                    }
                 ]
             },
             options: {
@@ -297,8 +297,8 @@ class CampaignDashboard extends Templates {
     topCampaignsRanking(options) {
         const defaults = {
             parent: "containerTopCampaigns",
-            title: "📊 Top 5 Mejores Anuncios",
-            subtitle: "Por menor costo por clic (CPC)",
+            title: "📊 Top 5 Campañas por Inversión",
+            subtitle: "",
             data: []
         };
 
@@ -337,7 +337,7 @@ class CampaignDashboard extends Templates {
             const content = $("<div>", { class: "flex-1" });
             content.append(
                 $("<div>", { class: "flex justify-between" })
-                    .append($("<span>", { class: "font-semibold text-gray-800", text: item.anuncio }))
+                    .append($("<span>", { class: "font-semibold text-gray-800", text: item.campaña }))
                     .append($("<span>", { class: "font-bold text-[#8CC63F]", text: formatPrice(item.inversion) }))
             );
             content.append(
@@ -369,11 +369,11 @@ class CampaignDashboard extends Templates {
 
         const themeClasses = {
             containerBg: isDark ? "bg-[#0f172a]" : "bg-gray-100",
-            headerBg: isDark ? "bg-[#1F2A37]" : "bg-[#FAFCFF]",
+            headerBg: isDark ? "bg-[#1F2A37]" : "bg-white",
             cardBg: isDark ? "bg-[#1F2A37]" : "bg-white",
             text: isDark ? "text-white" : "text-gray-800",
             subtext: isDark ? "text-gray-400" : "text-gray-500",
-            section: isDark ? "bg-transparent" : "bg-[#FAFCFF]"
+            section: isDark ? "bg-transparent" : "bg-gray-50"
         };
 
         const container = $(`

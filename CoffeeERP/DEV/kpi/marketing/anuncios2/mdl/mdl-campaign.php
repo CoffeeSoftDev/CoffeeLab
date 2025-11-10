@@ -79,10 +79,9 @@ class mdl extends CRUD {
         return $result[0]['last_id'] ?? 0;
     }
 
-    // Announcement Methods
-    function listAnnouncements($campaña_id = null, $udn_id = null, $red_social_id = null) {
+    public function listAnnouncements($campaña_id = null, $udn_id = null, $red_social_id = null) {
         $query = "
-            SELECT
+            SELECT 
                 anuncio.id AS id,
                 anuncio.nombre AS anuncio_nombre,
                 DATE_FORMAT(anuncio.fecha_inicio, '%d/%m/%Y') AS fecha_inicio,
@@ -106,6 +105,11 @@ class mdl extends CRUD {
 
         $data = [];
 
+        // if (!empty($campaña_id)) {
+        //     $query .= " AND anuncio.campaña_id = ?";
+        //     $data[] = $campaña_id;
+        // }
+
         if (!empty($udn_id)) {
             $query .= " AND campaña.udn_id = ?";
             $data[] = $udn_id;
@@ -119,7 +123,7 @@ class mdl extends CRUD {
         $query .= " ORDER BY anuncio.campaña_id DESC, anuncio.id ASC";
 
         return $this->_Read($query, $data);
-
+    
     }
 
     function getAnnouncementById($array) {
@@ -200,16 +204,5 @@ class mdl extends CRUD {
             ORDER BY UDN DESC
         ";
         return $this->_Read($query, null);
-    }
-
-    function countAnnouncementsWithoutResults($array) {
-        $query = "
-            SELECT COUNT(id) AS count
-            FROM {$this->bd}anuncio
-            WHERE fecha_resultado IS NULL
-            AND campaña_id = ?
-        ";
-        $result = $this->_Read($query, $array);
-        return $result[0]['count'] ?? 0;
     }
 }

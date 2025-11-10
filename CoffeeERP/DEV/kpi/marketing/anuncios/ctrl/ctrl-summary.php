@@ -1,15 +1,11 @@
 <?php
-
+session_start();
 if (empty($_POST['opc'])) exit(0);
-
-
 
 require_once '../mdl/mdl-summary.php';
 
 class ctrl extends mdl {
-
     function lsSummary() {
-        $__row         = [];
         $udn_id        = $_POST['udn_id'];
         $red_social_id = $_POST['red_social_id'];
         $año           = $_POST['año'];
@@ -19,111 +15,63 @@ class ctrl extends mdl {
         $totals         = $this->getCampaignTotals([$udn_id, $red_social_id, $año, $mes]);
         $monthlySummary = $this->getMonthlySummary([$udn_id, $red_social_id, $año, $mes]);
 
-        $campaignGroups = [];
+        $agrupado = [];
+        $suma_cpc = 0;
+        $conteo_anuncios = 0;
+
         foreach ($data as $item) {
-            $campaña_id = $item['campaña_id'];
-            
-            if (!isset($campaignGroups[$campaña_id])) {
-                $campaignGroups[$campaña_id] = [
-                    'campaña' => $item['campaña'],
-                    'estrategia' => $item['estrategia'],
-                    'anuncios' => []
+            $campaña = $item['campaña'];
+
+            if (!isset($agrupado[$campaña])) {
+                $agrupado[$campaña] = [
+                    'group' => $campaña,
+                    'rows' => [],
+                    'footer' => [
+                        'Resultados (clics)' => 0,
+                        'Inversión'          => 0,
+                    ]
                 ];
             }
-            
-            $campaignGroups[$campaña_id]['anuncios'][] = $item;
+
+            $clics = (int) $item['total_clics'];
+            $monto = (float) $item['total_monto'];
+            $cpc = $clics > 0 ? $monto / $clics : 0;
+
+            // Sumar CPC y contar anuncio
+            $suma_cpc += $cpc;
+            $conteo_anuncios++;
+
+            $agrupado[$campaña]['rows'][] = [
+                'Anuncio'         => $item['anuncio'],
+                'Clasificación'   => $item['clasificacion'],
+                'Resultados (clics)' => $clics,
+                'Inversión'       => evaluar($monto),
+                'CPC'             => evaluar($cpc),
+            ];
+
+            $agrupado[$campaña]['footer']['Resultados (clics)'] += $clics;
+            $agrupado[$campaña]['footer']['Inversión']          += $monto;
         }
 
-    //     foreach ($campaignGroups as $campaña_id => $group) {
-    //         $campaignTotal = null;
-    //         foreach ($totals as $total) {
-    //             if ($total['campaña_id'] == $campaña_id) {
-    //                 $campaignTotal = $total;
-    //                 break;
-    //             }
-    //         }
+        // Evaluar totales por campaña
+        foreach ($agrupado as &$grupo) {
+            $grupo['footer']['Inversión'] = evaluar($grupo['footer']['Inversión']);
+        }
 
-    //         $__row[] = [
-    //             'Campaña' => [
-    //                 'html' => '<strong class="text-[#8CC63F]">' . $group['campaña'] . '</strong>',
-    //             ],
-    //             'Estrategia' => [
-    //                 'html' => $group['estrategia'],
-    //             ],
-    //             'Anuncios' => [
-    //                 'html' => $campaignTotal['total_anuncios'] . ' anuncios',
-    //                 'class' => ' text-center'
-    //             ],
-    //             'Inversión Total' => [
-    //                 'html' => evaluar($campaignTotal['total_inversion']),
-    //                 'class' => ' text-end'
-    //             ],
-    //             'Total Clics' => [
-    //                 'html' => number_format($campaignTotal['total_clics'], 0, '.', ','),
-    //                 'class' => ' text-center'
-    //             ],
-    //             'CPC Promedio' => [
-    //                 'html' => evaluar($campaignTotal['cpc_promedio']),
-    //                 'class' => 'text-end'
-    //             ]
-    //         ];
-
-    //         foreach ($group['anuncios'] as $anuncio) {
-    //             $__row[] = [
-    //                 'Campaña' => '↳ ' . $anuncio['anuncio'],
-    //                 'Estrategia' => $anuncio['fecha_inicio'] . ' - ' . $anuncio['fecha_fin'],
-    //                 'Anuncios' => [
-    //                     'html' => $anuncio['duracion_dias'] . ' días',
-    //                     'class' => 'text-center'
-    //                 ],
-    //                 'Inversión Total' => [
-    //                     'html' => evaluar($anuncio['inversion']),
-    //                     'class' => 'text-end'
-    //                 ],
-    //                 'Total Clics' => [
-    //                     'html' => number_format($anuncio['clics'], 0, '.', ','),
-    //                     'class' => 'text-center'
-    //                 ],
-    //                 'CPC Promedio' => [
-    //                     'html' => evaluar($anuncio['cpc']),
-    //                     'class' => 'text-end'
-    //                 ]
-    //             ];
-    //         }
-    //     }
-
-    //     $__row[] = [
-    //         'Campaña' => [
-    //             'html' => '<strong class="text-white">TOTAL MENSUAL</strong>',
-    //         ],
-    //         'Estrategia' => [
-    //             'html' => '',
-    //             'class' => ''
-    //         ],
-    //         'Anuncios' => [
-    //             'html' => '',
-    //             'class' => 'bg-[#103B60]'
-    //         ],
-    //         'Inversión Total' => [
-    //             'html' => '<strong>' . evaluar($monthlySummary['costo_total']) . '</strong>',
-    //         ],
-    //         'Total Clics' => [
-    //             'html' => '<strong>' . number_format($monthlySummary['total_resultados'], 0, '.', ',') . '</strong>',
-    //         ],
-    //         'CPC Promedio' => [
-    //             'html' => '<strong>' . evaluar($monthlySummary['cpc_promedio_mes']) . '</strong>',
-    //         ]
-    //     ];
+        // Añadir CPC promedio al objeto totals
+        $totals[0]['promedio_cpc'] = $conteo_anuncios > 0 ? $suma_cpc / $conteo_anuncios : 0;
 
         return [
-            'row' => $__row,
-            'data' => $data,
-            'totals' => $totals,
+            'grouped' => array_values($agrupado),
+            'totals'  => $totals,
             'monthlySummary' => $monthlySummary
         ];
     }
+
 }
 
-
+function evaluar($valor) {
+    return '$' . number_format($valor, 2, '.', ',');
+}
 $obj = new ctrl();
 echo json_encode($obj->{$_POST['opc']}());

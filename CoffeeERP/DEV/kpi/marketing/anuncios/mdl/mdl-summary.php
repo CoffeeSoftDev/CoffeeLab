@@ -16,81 +16,46 @@ class mdl extends CRUD {
     function getCampaignSummary($array) {
         $query = "
             SELECT 
-                c.id as campaña_id,
-                c.nombre as campaña,
-                c.estrategia,
-                a.id as anuncio_id,
-                a.nombre as anuncio,
-                DATE_FORMAT(a.fecha_inicio, '%d/%m/%Y') as fecha_inicio,
-                DATE_FORMAT(a.fecha_fin, '%d/%m/%Y') as fecha_fin,
-                DATEDIFF(a.fecha_fin, a.fecha_inicio) as duracion_dias,
-                t.nombre as tipo,
-                cl.nombre as clasificacion,
-                a.total_monto as inversion,
-                a.total_clics as clics,
-                CASE 
-                    WHEN a.total_clics > 0 
-                    THEN a.total_monto / a.total_clics
-                    ELSE 0 
-                END as cpc
-            FROM {$this->bd}campaña c
-            INNER JOIN {$this->bd}anuncio a ON c.id = a.campaña_id
-            INNER JOIN {$this->bd}tipo_anuncio t ON a.tipo_id = t.id
-            INNER JOIN {$this->bd}clasificacion_anuncio cl ON a.clasificacion_id = cl.id
-            WHERE c.udn_id = ?
-            AND c.red_social_id = ?
-            AND YEAR(a.fecha_inicio) = ?
-            AND MONTH(a.fecha_inicio) = ?
-            ORDER BY c.id DESC, a.id ASC
+                ca.id AS campaña_id,
+                ca.nombre AS campaña,
+                ca.estrategia,
+                an.fecha_inicio,
+                an.fecha_fin,
+                an.total_monto,
+                an.total_clics,
+                an.nombre AS anuncio,
+                tipo.nombre AS tipo,
+                clasificacion.nombre AS clasificacion
+            FROM {$this->bd}anuncio an
+            INNER JOIN {$this->bd}campaña ca ON ca.id = an.campaña_id
+            INNER JOIN {$this->bd}tipo_anuncio tipo ON an.tipo_id = tipo.id
+            INNER JOIN {$this->bd}clasificacion_anuncio clasificacion ON an.clasificacion_id = clasificacion.id
+            WHERE ca.udn_id = ? AND ca.red_social_id = ? AND YEAR(an.fecha_inicio) = ? AND MONTH(an.fecha_inicio) = ?
         ";
-        
         return $this->_Read($query, $array);
     }
 
     function getCampaignTotals($array) {
         $query = "
             SELECT 
-                c.id as campaña_id,
-                c.nombre as campaña,
-                SUM(a.total_monto) as total_inversion,
-                SUM(a.total_clics) as total_clics,
-                AVG(CASE 
-                    WHEN a.total_clics > 0 
-                    THEN a.total_monto / a.total_clics
-                    ELSE 0 
-                END) as cpc_promedio,
-                COUNT(a.id) as total_anuncios
-            FROM {$this->bd}campaña c
-            INNER JOIN {$this->bd}anuncio a ON c.id = a.campaña_id
-            WHERE c.udn_id = ?
-            AND c.red_social_id = ?
-            AND YEAR(a.fecha_inicio) = ?
-            AND MONTH(a.fecha_inicio) = ?
-            GROUP BY c.id, c.nombre
-            ORDER BY c.id DESC
+                SUM(an.total_monto) AS total_monto,
+                SUM(an.total_clics) AS total_clics
+            FROM {$this->bd}anuncio an
+            INNER JOIN {$this->bd}campaña ca ON ca.id = an.campaña_id
+            WHERE ca.udn_id = ? AND ca.red_social_id = ? AND YEAR(an.fecha_inicio) = ? AND MONTH(an.fecha_inicio) = ?
         ";
-        
         return $this->_Read($query, $array);
     }
 
     function getMonthlySummary($array) {
         $query = "
-            SELECT 
-                SUM(a.total_monto) as costo_total,
-                SUM(a.total_clics) as total_resultados,
-                AVG(CASE 
-                    WHEN a.total_clics > 0 
-                    THEN a.total_monto / a.total_clics
-                    ELSE 0 
-                END) as cpc_promedio_mes
-            FROM {$this->bd}campaña c
-            INNER JOIN {$this->bd}anuncio a ON c.id = a.campaña_id
-            WHERE c.udn_id = ?
-            AND c.red_social_id = ?
-            AND YEAR(a.fecha_inicio) = ?
-            AND MONTH(a.fecha_inicio) = ?
+            SELECT
+                COUNT(DISTINCT ca.id) AS total_campañas,
+                COUNT(an.id) AS total_anuncios
+            FROM {$this->bd}anuncio an
+            INNER JOIN {$this->bd}campaña ca ON ca.id = an.campaña_id
+            WHERE ca.udn_id = ? AND ca.red_social_id = ? AND YEAR(an.fecha_inicio) = ? AND MONTH(an.fecha_inicio) = ?
         ";
-        
-        return $this->_Read($query, $array)[0];
+        return $this->_Read($query, $array);
     }
 }

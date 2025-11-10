@@ -21,7 +21,7 @@ class mdl extends CRUD {
                 SUM(a.total_clics) as total_clics,
                 CASE 
                     WHEN SUM(a.total_clics) > 0 
-                    THEN (SUM(a.total_monto) / SUM(a.total_clics))
+                    THEN (SUM(a.total_monto) / SUM(a.total_clics)) * 1000
                     ELSE 0 
                 END as cpc_promedio
             FROM {$this->bd}anuncio a
@@ -51,7 +51,7 @@ class mdl extends CRUD {
                 END as cac
             FROM {$this->bd}anuncio a
             INNER JOIN {$this->bd}campaña c ON a.campaña_id = c.id
-            LEFT JOIN {$this->bd}pedido p ON p.anuncio_id = a.id
+            LEFT JOIN {$this->bd}pedidos p ON p.anuncio_id = a.id
             WHERE YEAR(a.fecha_inicio) = ?
             AND c.udn_id = ?
             AND c.red_social_id = ?

@@ -80,12 +80,12 @@ class AnnualHistory extends Templates {
     }
 
     updateReport() {
-        // const activeTab = $(`#tabs${this.PROJECT_NAME} .active`).attr('id');
-        // if (activeTab == 'tab-cpc') {
+        const activeTab = $(`#tabs${this.PROJECT_NAME} .active`).attr('id');
+        if (activeTab === 'tab-cpc') {
             this.lsCPC();
-        // } else {
+        } else {
             this.lsCAC();
-        // }
+        }
     }
 
     lsCPC() {
@@ -115,6 +115,7 @@ class AnnualHistory extends Templates {
             },
             success: () => {
                 this._link = tempLink;
+                console.log('Reporte CPC cargado');
             }
         });
     }
@@ -145,6 +146,7 @@ class AnnualHistory extends Templates {
             },
             success: () => {
                 this._link = tempLink;
+                console.log('Reporte CAC cargado');
             }
         });
     }

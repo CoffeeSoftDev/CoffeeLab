@@ -27,11 +27,12 @@ class ctrl extends mdl {
                     'Mes'              => $months[$mes],
                     'Inversión Total'  => [
                         'html'  => evaluar($item['inversion_total']),
+                        'class' => 'text-end'
                     ],
                     'Total Clics'      => number_format($item['total_clics'], 0, '.', ','),
                     'CPC Promedio'     => [
                         'html'  => evaluar($item['cpc_promedio']),
-                        
+                        'class' => 'text-end'
                     ]
                 ];
             } else {
@@ -39,15 +40,12 @@ class ctrl extends mdl {
                     'Mes'              => $months[$mes],
                     'Inversión Total'  => [
                         'html'  => '$0.00',
-                        'class' => 'text-end text-gray-500 '
+                        'class' => 'text-end text-gray-500'
                     ],
-                    'Total Clics'      => [
-                        'html'  => '0',
-                        'class' => 'text-end text-gray-500 '
-                    ],
+                    'Total Clics'      => '0',
                     'CPC Promedio'     => [
                         'html'  => '$0.00',
-                        'class' => 'text-end text-gray-500 '
+                        'class' => 'text-end text-gray-500'
                     ]
                 ];
             }
@@ -62,7 +60,7 @@ class ctrl extends mdl {
     function lsCAC() {
         $__row = [];
         $año = $_POST['año'];
-        $udn_id = $_POST['udn_id'];
+        $udn_id = $_POST['udn_id'] ?? $_SESSION['SUB'];
         $red_social_id = $_POST['red_social_id'];
 
         $data = $this->getCACHistory([$año, $udn_id, $red_social_id]);
@@ -80,10 +78,12 @@ class ctrl extends mdl {
                     'Mes'              => $months[$mes],
                     'Inversión Total'  => [
                         'html'  => evaluar($item['inversion_total']),
+                        'class' => 'text-end'
                     ],
                     'Número Clientes'  => number_format($item['numero_clientes'], 0, '.', ','),
                     'CAC'              => [
                         'html'  => $item['numero_clientes'] > 0 ? evaluar($item['cac']) : 'N/A',
+                        'class' => 'text-end'
                     ]
                 ];
             } else {
@@ -91,15 +91,12 @@ class ctrl extends mdl {
                     'Mes'              => $months[$mes],
                     'Inversión Total'  => [
                         'html'  => '$0.00',
-                        'class' => 'text-end text-gray-500 '
+                        'class' => 'text-end text-gray-500'
                     ],
-                    'Número Clientes'  => [
-                        'html'  => '0',
-                        'class' => 'text-end text-gray-500 '
-                    ],
+                    'Número Clientes'  => '0',
                     'CAC'              => [
                         'html'  => 'N/A',
-                        'class' => 'text-end text-gray-500 '
+                        'class' => 'text-end text-gray-500'
                     ]
                 ];
             }

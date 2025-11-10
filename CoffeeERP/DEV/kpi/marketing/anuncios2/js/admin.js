@@ -86,6 +86,7 @@ class Admin extends Templates {
     }
 
     lsTypes() {
+       
         this.createTable({
             parent: "table-types",
             idFilterBar: "filterbar-types",

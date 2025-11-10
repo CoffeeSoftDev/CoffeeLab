@@ -1,15 +1,15 @@
 let api = 'ctrl/ctrl-campaign.php';
 let api_admin = 'ctrl/ctrl-admin.php';
-let app, campaign, dashboard, summary, history, admin;
 
+let app, campaign, dashboard, summary, history, admin; // Instancias globales
 let udn, red_social, tipo_anuncio, clasificacion;
 
 $(async () => {
-    let dataInit = await useFetch({ url: api, data: { opc: "init" } });
-    udn = dataInit.udn;
-    red_social = dataInit.red_social;
-    tipo_anuncio = dataInit.tipo_anuncio;
-    clasificacion = dataInit.clasificacion;
+    const data = await useFetch({ url: api, data: { opc: "init" } });
+    udn = data.udn;
+    red_social = data.red_social;
+    tipo_anuncio = data.tipo_anuncio;
+    clasificacion = data.clasificacion;
 
     app = new App(api, "root");
     campaign = new Campaign(api, "root");
@@ -30,6 +30,7 @@ class App extends Templates {
     render() {
         this.layout();
         dashboard.render();
+        admin.render();
     }
 
     layout() {
@@ -61,13 +62,12 @@ class App extends Templates {
                     id: "dashboard",
                     tab: "Dashboard",
                     class: "mb-1",
-                    active: true,
                     onClick: () => dashboard.render()
                 },
                 {
                     id: "campaigns",
                     tab: "Anuncios",
-
+                    active: true,
                     onClick: () => campaign.render()
                 },
                 {
@@ -78,17 +78,16 @@ class App extends Templates {
                 {
                     id: "history",
                     tab: "Historial Anual",
-
                     onClick: () => history.render()
                 },
                 {
                     id: "admin",
                     tab: "Administrador",
-                    onClick: () => admin.render()
+                    onClick: () => admin.lsTypes()
                 },
             ]
         });
-        history.render()
+        campaign.render()
         $('#content-tabsCampaigns').removeClass('h-screen');
     }
 
@@ -142,7 +141,6 @@ class App extends Templates {
         container.append(leftSection, centerSection);
         $(`#${opts.parent}`).html(container);
     }
-
 }
 
 class Campaign extends Templates {
@@ -152,16 +150,10 @@ class Campaign extends Templates {
         this.idCampaign = null;
     }
 
-    async render() {
+    render() {
         this.layout();
         this.filterBar();
         this.lsCampaigns();
-
-        let dataInit = await useFetch({ url: api, data: { opc: "init" } });
-
-        red_social = dataInit.red_social;
-        tipo_anuncio = dataInit.tipo_anuncio;
-        clasificacion = dataInit.clasificacion;
     }
 
     layout() {
@@ -207,28 +199,31 @@ class Campaign extends Templates {
     }
 
     lsCampaigns() {
-        // 🎨 Contenedor principal
         $(`#container${this.PROJECT_NAME}`).html(`
-            <div class="px-2 pt-2 pb-2">
-                <h2 class="text-2xl font-semibold">📢 Anuncios de la Campaña</h2>
-                <p>Gestiona anuncios de las campañas por red social o unidad de negocio</p>
-            </div>
-            <div id="container-table-announcements"></div>
-        `);
+        <div class="px-2 pt-2 pb-2">
+            <h2 class="text-2xl font-semibold">📢 Anuncios de la Campaña</h2>
+            <p>Gestiona anuncios de las campañas por red social o unidad de negocio</p>
+        </div>
+        <div id="container-table-announcements"></div>
+    `);
 
-        // 🔹 Generar tabla filtrada
+        let udn_id = $('#udn_id').val() || null;
+        let red_social_id = $('#red_social_id').val() || null;
+
         this.createTable({
             parent: "container-table-announcements",
             idFilterBar: `filterBarCampaign`,
             data: {
                 opc: 'lsAnnouncements',
+                // udn_id: udn_id,
+                // red_social_id: red_social_id,
             },
             coffeesoft: true,
             conf: { datatable: true, pag: 15 },
             attr: {
                 id: "tbAnnouncements",
                 theme: 'corporativo',
-                center: [0, 3, 4]
+                center: [1, 3, 4,5,6]
             },
         });
     }
@@ -364,7 +359,7 @@ class Campaign extends Templates {
                 Guardar
             </button>
         </div>
-        `;
+    `;
     }
 
     _initImageUpload(selector = "[id^='inputImage_']") {
@@ -429,6 +424,7 @@ class Campaign extends Templates {
 
                 // Backend retorna: { status, message, data }
                 if (response.status == 200) {
+                    console.log(response.message);
                     alert(response.message);
                     self._convertToEditMode(index, response.data.id);
                     self._initUpdateAds();
@@ -438,6 +434,7 @@ class Campaign extends Templates {
                     alert(response.message || "Error al guardar el anuncio.");
                 }
             } catch (error) {
+                console.error("Error en fetch:", error);
                 alert("Error al enviar los datos al servidor.");
             }
         });
@@ -486,6 +483,7 @@ class Campaign extends Templates {
                     alert(response.message || "Error al actualizar el anuncio.");
                 }
             } catch (error) {
+                console.error("Error al actualizar:", error);
                 alert("Error en la comunicación con el servidor.");
             }
         });
@@ -540,6 +538,7 @@ class Campaign extends Templates {
                     });
                 }
             } catch (error) {
+                console.error("Error al eliminar:", error);
                 Swal.fire({
                     icon: "error",
                     title: "Error",
@@ -574,7 +573,7 @@ class Campaign extends Templates {
 
         // 🧠 Helper para enviar cambios
         const updateField = async (field, value) => {
-            if (!self.idCampaign) return alert("ID de campaña no definido.");
+            if (!self.idCampaign) return console.warn("No hay campaña activa para actualizar.");
 
             try {
                 const request = await useFetch({
@@ -586,11 +585,13 @@ class Campaign extends Templates {
                     }
                 });
 
-                if (request.status != 200) {
-                    alert(`❌ Error al actualizar ${field}: ${request.message}`);
+                if (request.status === 200) {
+                    console.log(`✅ ${field} actualizado correctamente`);
+                } else {
+                    console.warn(`⚠️ Error al actualizar ${field}:`, request.message);
                 }
             } catch (err) {
-                alert(`❌ Error en la comunicación al actualizar ${field}.`);
+                console.error("❌ Error de comunicación con el servidor:", err);
             }
         };
 
@@ -728,6 +729,7 @@ class Campaign extends Templates {
             campaign._initAutoEditCampaign();
 
         } catch (error) {
+            console.error("Error al cargar la campaña:", error);
             alert("Error al cargar los datos de la campaña.");
         }
     }
@@ -831,6 +833,7 @@ class Campaign extends Templates {
 
             const hoy = new Date();
             const fechaResultado = new Date(announcementData.fecha_resultado);
+            console.log({ hoy, fechaResultado });
             const diffDays = Math.floor((hoy - fechaResultado) / (1000 * 60 * 60 * 24));
 
             // 🧮 Cálculo de margen
@@ -838,7 +841,7 @@ class Campaign extends Templates {
             const $warning = $('#warning_update');
 
             if (margen >= 0) {
-                if (margen == 0) {
+                if (margen === 0) {
                     // 🟠 Último día
                     $warning.html(`<span class="text-red-500">⚠️ Hoy es el último día para actualizar en caso de error!</span>`);
                 } else {
@@ -852,7 +855,6 @@ class Campaign extends Templates {
             }
         }
     }
-
 
     validationInputForNumber(selector) {
         const value = $(selector).val();
@@ -891,42 +893,43 @@ class Campaign extends Templates {
                 size: "extra-large",
                 closeButton: true,
                 message: `
-                    <div class="p-2">
-                        <h2 class="text-xl font-semibold mb-4">Detalles de la Campaña</h2>
+                <div class="p-2">
+                    <h2 class="text-xl font-semibold mb-4">Detalles de la Campaña</h2>
 
-                        <div class="grid grid-cols-3 gap-3 mb-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-500">Estrategia</label>
-                                <p class="text-base font-semibold text-gray-800 border rounded px-2 py-1 bg-gray-50">
-                                    ${data.campaña.estrategia || "Sin estrategia"}
-                                </p>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-500">Unidad de negocio</label>
-                                <p class="text-base font-semibold text-gray-800 border rounded px-2 py-1 bg-gray-50">
-                                    ${udn.find(u => u.id == data.campaña.udn_id)?.valor || "Sin UDN"}
-                                </p>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-500">Red social</label>
-                                <p class="text-base font-semibold text-gray-800 border rounded px-2 py-1 bg-gray-50">
-                                    ${red_social.find(rs => rs.id == data.campaña.red_social_id)?.valor || "Sin red social"}
-                                </p>
-                            </div>
+                    <div class="grid grid-cols-3 gap-3 mb-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Estrategia</label>
+                            <p class="text-base font-semibold text-gray-800 border rounded px-2 py-1 bg-gray-50">
+                                ${data.campaña.estrategia || "Sin estrategia"}
+                            </p>
                         </div>
 
-                        <h3 class="text-lg font-semibold mb-2 border-b pb-1">Anuncios de la Campaña</h3>
-                        <div class="grid grid-cols-2 gap-6" id="containerAdsView">
-                            ${data.anuncios.length > 0
-                        ? data.anuncios.map((ad, i) => campaign._createAdView(ad, i + 1)).join("")
-                        : `<p class='text-gray-500 italic'>No hay anuncios registrados en esta campaña.</p>`}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Unidad de negocio</label>
+                            <p class="text-base font-semibold text-gray-800 border rounded px-2 py-1 bg-gray-50">
+                                ${udn.find(u => u.id == data.campaña.udn_id)?.valor || "Sin UDN"}
+                            </p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-500">Red social</label>
+                            <p class="text-base font-semibold text-gray-800 border rounded px-2 py-1 bg-gray-50">
+                                ${red_social.find(rs => rs.id == data.campaña.red_social_id)?.valor || "Sin red social"}
+                            </p>
                         </div>
                     </div>
-                `
+
+                    <h3 class="text-lg font-semibold mb-2 border-b pb-1">Anuncios de la Campaña</h3>
+                    <div class="grid grid-cols-2 gap-6" id="containerAdsView">
+                        ${data.anuncios.length > 0
+                        ? data.anuncios.map((ad, i) => campaign._createAdView(ad, i + 1)).join("")
+                        : `<p class='text-gray-500 italic'>No hay anuncios registrados en esta campaña.</p>`}
+                    </div>
+                </div>
+            `
             });
         } catch (error) {
+            console.error("Error al cargar la campaña:", error);
             alert("Error al cargar los datos de la campaña.");
         }
     }
@@ -936,48 +939,48 @@ class Campaign extends Templates {
         const clas = clasificacion.find(c => c.id == ad.clasificacion_id)?.valor || "Sin clasificación";
 
         return `
-            <div class="border rounded-lg p-4 shadow-sm relative bg-gray-50" id="adView_${index}">
-                <h4 class="text-base font-semibold mb-3 flex items-center gap-2">
-                    <i class="icon-bullhorn text-blue-600"></i> 
-                    Anuncio ${index}: ${ad.nombre || "Sin nombre"}
-                </h4>
+        <div class="border rounded-lg p-4 shadow-sm relative bg-gray-50" id="adView_${index}">
+            <h4 class="text-base font-semibold mb-3 flex items-center gap-2">
+                <i class="icon-bullhorn text-blue-600"></i> 
+                Anuncio ${index}: ${ad.nombre || "Sin nombre"}
+            </h4>
 
-                <div class="grid grid-cols-2 gap-3 mb-2">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500">Fecha inicio</label>
-                        <p class="text-sm font-semibold text-gray-800 border rounded px-2 py-1 bg-white">
-                            ${ad.fecha_inicio || "—"}
-                        </p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500">Fecha fin</label>
-                        <p class="text-sm font-semibold text-gray-800 border rounded px-2 py-1 bg-white">
-                            ${ad.fecha_fin || "—"}
-                        </p>
-                    </div>
+            <div class="grid grid-cols-2 gap-3 mb-2">
+                <div>
+                    <label class="block text-xs font-medium text-gray-500">Fecha inicio</label>
+                    <p class="text-sm font-semibold text-gray-800 border rounded px-2 py-1 bg-white">
+                        ${ad.fecha_inicio || "—"}
+                    </p>
                 </div>
-
-                <div class="grid grid-cols-2 gap-3 mb-2">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500">Tipo</label>
-                        <p class="text-sm font-semibold text-gray-800 border rounded px-2 py-1 bg-white">${tipo}</p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-500">Clasificación</label>
-                        <p class="text-sm font-semibold text-gray-800 border rounded px-2 py-1 bg-white">${clas}</p>
-                    </div>
-                </div>
-
-                <label class="block text-xs font-medium text-gray-500 mb-1">Imagen</label>
-                <div class="border rounded-lg overflow-hidden bg-white flex justify-center items-center" style="height:180px;">
-                    ${ad.imagen
-                ? `<img src="${ad.imagen}" class="w-full h-full object-contain p-2 rounded-lg" />`
-                : `<div class="flex items-center justify-center w-full h-full text-gray-400">
-                            <i class="icon-image text-4xl"></i> Sin imagen
-                        </div>`
-            }
+                <div>
+                    <label class="block text-xs font-medium text-gray-500">Fecha fin</label>
+                    <p class="text-sm font-semibold text-gray-800 border rounded px-2 py-1 bg-white">
+                        ${ad.fecha_fin || "—"}
+                    </p>
                 </div>
             </div>
-        `;
+
+            <div class="grid grid-cols-2 gap-3 mb-2">
+                <div>
+                    <label class="block text-xs font-medium text-gray-500">Tipo</label>
+                    <p class="text-sm font-semibold text-gray-800 border rounded px-2 py-1 bg-white">${tipo}</p>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500">Clasificación</label>
+                    <p class="text-sm font-semibold text-gray-800 border rounded px-2 py-1 bg-white">${clas}</p>
+                </div>
+            </div>
+
+            <label class="block text-xs font-medium text-gray-500 mb-1">Imagen</label>
+            <div class="border rounded-lg overflow-hidden bg-white flex justify-center items-center" style="height:180px;">
+                ${ad.imagen
+                ? `<img src="${ad.imagen}" class="w-full h-full object-contain p-2 rounded-lg" />`
+                : `<div class="flex items-center justify-center w-full h-full text-gray-400">
+                         <i class="icon-image text-4xl"></i> Sin imagen
+                       </div>`
+            }
+            </div>
+        </div>
+    `;
     }
 }
