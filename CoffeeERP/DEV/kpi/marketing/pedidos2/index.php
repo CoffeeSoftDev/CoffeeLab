@@ -5,8 +5,7 @@
 
 
 <!-- CoffeeSoft Framework -->
-<!--<script src="../../../src/js/coffeeSoft.js"></script>-->
- <script src="https://plugins.erp-varoch.com/coffee-lib/coffeeSoft.js"></script>
+<script src="../../../src/js/coffeeSoft.js"></script>
 <script src="https://rawcdn.githack.com/SomxS/Grupo-Varoch/refs/heads/main/src/js/plugins.js"></script>
 <script src="https://www.plugins.erp-varoch.com/ERP/JS/complementos.js"></script>
 

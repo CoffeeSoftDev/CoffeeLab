@@ -509,13 +509,13 @@ class Pedidos extends Templates {
             });
 
             // Limpiar campos cuando se borra el nombre
-            // $('#cliente_nombre').on('input', function() {
-            //     if ($(this).val().trim() === '') {
-            //         $('#cliente_telefono').val('');
-            //         $('#cliente_correo').val('');
-            //         $('#cliente_cumpleaños').val('');
-            //     }
-            // });
+            $('#cliente_nombre').on('input', function() {
+                if ($(this).val().trim() === '') {
+                    $('#cliente_telefono').val('');
+                    $('#cliente_correo').val('');
+                    $('#cliente_cumpleaños').val('');
+                }
+            });
 
             // Limpiar campos cuando se borra el teléfono
             $('#cliente_telefono').on('input', function() {
@@ -525,9 +525,6 @@ class Pedidos extends Templates {
                     $('#cliente_cumpleaños').val('');
                 }
             });
-
-
-
 
             // Inicializar Select2 para productos (múltiple)
             $('#producto_id').select2({
