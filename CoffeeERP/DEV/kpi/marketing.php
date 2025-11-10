@@ -60,12 +60,7 @@
                 <script  src='src/js/kpi-redes.js?t=<?php echo time(); ?>'></script>
                 <script  src='src/js/kpi-pedidos.js?t=<?php echo time(); ?>'></script>
                 <script  src='src/js/kpi-campaign.js?t=<?php echo time(); ?>'></script>
-
-
         </div>
-
     </main>
-
-
 </body>
 </html>
