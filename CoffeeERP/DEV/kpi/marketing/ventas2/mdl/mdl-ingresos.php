@@ -105,7 +105,7 @@ class mdl extends CRUD {
                 noHabitaciones,
                 alimentos,
                 bebidas,
-                guarniciones as complementos,
+                guarniciones,
                 sales,
                 domicilio,
                  (alimentos + bebidas) as totalGral,
@@ -217,7 +217,7 @@ class mdl extends CRUD {
 
                 alimentos,
                 bebidas,
-                guarniciones as complementos,
+                guarniciones,
                 domicilio,
 
                 sales,

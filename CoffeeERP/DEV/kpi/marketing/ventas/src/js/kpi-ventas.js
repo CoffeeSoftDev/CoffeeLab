@@ -1,5 +1,5 @@
 let api = 'ctrl/ctrl-ingresos.php';
-let app, sales, salesDashboard, monthlySales, cumulativeAverages, salesCalendar;
+let app, sales, dashboard,calendar, salesDashboard, monthlySales, cumulativeAverages;
 
 let udn, lsudn, clasificacion, clasificacionUdn;
 
@@ -8,17 +8,21 @@ $(async () => {
 
     const data = await useFetch({ url: api, data: { opc: "init" } });
     console.log(data)
-    udn = data.udn;
-    lsudn = data.lsudn;
+    udn           = data.udn;
+    lsudn         = data.lsudn;
     clasificacion = data.clasification;
 
     // ** Instancias **
     app = new App(api, "root");
-    salesDashboard = new SalesDashboard(api, "root");
+
+    // salesDashboard = new SalesDashboard(api, "root");
+    dashboard = new FinanceDashboard(api, "root");
+    calendar  = new SalesCalendar(api, "root");
+
     sales = new Sales(api, "root");
     monthlySales = new MonthlySales(api, "root");
     cumulativeAverages = new CumulativeAverages(api, "root");
-    salesCalendar = new SalesCalendar(api, "root");
+
 
     app.render();
 
@@ -37,11 +41,11 @@ class App extends Templates {
 
         // init instancias.
 
-        salesDashboard.render();
+        dashboard.render();
+        calendar.render();
         sales.render();
         monthlySales.render();
         cumulativeAverages.render();
-        salesCalendar.render();
 
     }
 
@@ -75,8 +79,15 @@ class App extends Templates {
                     tab: "Dashboard",
                     class: "mb-1",
                     active: true,
-                    onClick: () => salesDashboard.renderDashboard()
+                    onClick: () => dashboard.renderDashboard()
                 },
+
+                {
+                    id: "calendar",
+                    tab: "Calendario de ventas",
+                    onClick: () => calendar.renderCalendar()
+                },
+               
                 {
                     id: "sales",
                     tab: "Módulo ventas",
@@ -100,11 +111,6 @@ class App extends Templates {
                     tab: "Promedios acumulados",
                     onClick: () => {
                     }
-                },
-                {
-                    id: "calendarioVentas",
-                    tab: "Calendario de Ventas",
-                    onClick: () => salesCalendar.renderCalendar()
                 },
             ]
         });
@@ -165,811 +171,12 @@ class App extends Templates {
         container.append(leftSection, centerSection);
         $(`#${opts.parent}`).html(container);
     }
+
+
+
 }
 
 class SalesDashboard extends Templates {
-    constructor(link, div_modulo) {
-        super(link, div_modulo);
-        this.PROJECT_NAME = "order";
-    }
-
-    render() {
-        this.layout();
-    }
-
-    layout() {
-
-        this.dashboardComponent({
-
-            parent: "container-dashboard",
-
-            id: "dashboardComponent",
-            title: "📊 Dashboard de Ventas",
-            subtitle: "Análisis comparativo de ventas entre dos períodos",
-
-            json: [
-
-
-                {
-                    type: "grafico", id: "dailyAverageCheck", title: "",
-                    content: [
-                        { class: "border px-3 py-2 rounded", type: "div", id: "filterBarDailyAverageCheck" },
-                        { class: " mt-2", type: "div", id: "containerDailyAverageCheck" },
-                    ]
-                },
-
-                {
-                    type: "grafico", id: "linearChequePromedio", title: "",
-                    content: [
-                        { class: "border px-3 py-2 rounded", type: "div", id: "filterBarChequePromedio" },
-                        { class: " mt-2", type: "div", id: "barChequePromedio" },
-                    ]
-                },
-
-            ]
-        });
-
-
-        this.filterBarDashboard();
-
-
-
-        setTimeout(() => {
-
-            this.renderDashboard();
-        }, 100);
-
-
-
-
-        // this.layoutChequePromedio();
-    }
-
-    filterBarDashboard() {
-        this.createfilterBar({
-            parent: `filterBarDashboard`,
-            data: [
-                {
-                    opc: "select",
-                    id: "udn",
-                    lbl: "UDN",
-                    class: "col-sm-3",
-                    data: udn,
-                    onchange: `salesDashboard.renderDashboard()`,
-                },
-                {
-                    opc: "div",
-                    id: "containerPeriodo1",
-                    lbl: "Consultar con:",
-                    class: "col-lg-3 col-sm-4",
-                    html: `
-                        <input 
-                            type="month" 
-                            id="periodo1" 
-                            class="form-control"
-                            style="width: 100%; min-width: 100%; display: block;"
-                            onchange="salesDashboard.renderDashboard()"
-                        />
-                    `
-                },
-                {
-                    opc: "div",
-                    id: "containerPeriodo2",
-                    lbl: "Comparar con:",
-                    class: "col-lg-3 col-sm-4 ",
-                    html: `
-                        <input 
-                            type="month" 
-                            id="periodo2" 
-                            class="form-control"
-                            onchange="salesDashboard.renderDashboard()"
-                        />
-                    `
-                },
-            ],
-        });
-
-        const currentYear = moment().year();
-        const currentMonth = moment().month() + 1;
-        const lastYear = currentYear - 1;
-
-        const periodo1 = `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
-        const periodo2 = `${lastYear}-${String(currentMonth).padStart(2, '0')}`;
-
-        $('#containerPeriodo1').removeClass('col-lg-3 col-sm-4');
-        $('#containerPeriodo2').removeClass('col-lg-3 col-sm-4');
-
-        setTimeout(() => {
-            $(`#filterBarDashboard #periodo1`).val(periodo1);
-            $(`#filterBarDashboard #periodo2`).val(periodo2);
-        }, 100);
-    }
-
-    async renderDashboard() {
-
-        // filtrar clasificacion x udn 
-        // this.handleCategoryChange($('#idFilterBar #udn').val());
-
-        let udn = $('#filterBarDashboard #udn').val();
-        let periodo1 = $('#filterBarDashboard #periodo1').val();
-
-        let [anio1, mes1] = periodo1.split('-');
-        let periodo2 = $('#filterBarDashboard #periodo2').val();
-        let [anio2, mes2] = periodo2.split('-');
-
-        let mkt = await useFetch({
-            url: api,
-            data: {
-                opc: "apiPromediosDiarios",
-                udn: udn,
-                anio1: anio1,
-                mes1: mes1,
-                anio2: anio2,
-                mes2: mes2,
-            },
-        });
-
-
-
-        this.showCards(mkt.dashboard);
-
-        // Graficos.
-
-        this.layoutDailyAverageCheck();
-        this.layoutChequePromedio();
-
-        //  
-
-
-
-    }
-
-
-    // Cheque Promedio por día de la semana.
-    layoutDailyAverageCheck() {
-
-        $('#filterBarDailyAverageCheck').empty();
-
-        this.createfilterBar({
-            parent: `filterBarDailyAverageCheck`,
-            data: [
-                {
-                    opc: "select",
-                    id: "category",
-                    lbl: "Categorias",
-                    class: "col-sm-4",
-                    onchange: `salesDashboard.renderDailyAverageCheck()`,
-                },
-
-            ],
-        });
-
-        this.renderSelectCategory({
-            parent: 'filterBarDailyAverageCheck #category',
-            udn: $('#idFilterBar #udn').val(),
-            data: clasificacion,
-            includeAll: false
-        });
-
-
-    }
-
-    getFilterDate() {
-        let periodo1 = $('#filterBarDashboard #periodo1').val();
-        let [year1, month1] = periodo1.split('-');
-
-        let periodo2 = $('#filterBarDashboard #periodo2').val();
-        let [year2, month2] = periodo2.split('-');
-
-        return {
-            year1,
-            month1,
-            year2,
-            month2
-        };
-    }
-
-    async renderDailyAverageCheck() {
-        let udn = $('#filterBarDashboard #udn').val();
-        let category = $('#category option:selected').text();
-        let date = this.getFilterDate();
-
-        const meses = moment.months();
-        const nombreMes1 = meses[parseInt(date.month1) - 1];
-        const nombreMes2 = meses[parseInt(date.month2) - 1];
-
-        let mkt = await useFetch({
-            url: api,
-            data: {
-                opc: "getDailyCheck",
-                udn: udn,
-                category: category,
-                anio1: date.year1,
-                mes1: date.month1,
-                anio2: date.year2,
-                mes2: date.month2,
-            },
-        });
-
-        this.barChart({
-            parent: "containerDailyAverageCheck",
-            id: "chartDailyCheck",
-            title: `📊 Cheque Promedio Diario - ${nombreMes1} ${date.year1} vs ${nombreMes2} ${date.year2}`,
-            labels: mkt.labels,
-            dataA: mkt.dataB,
-            dataB: mkt.dataA,
-            yearA: mkt.yearA,
-            yearB: mkt.yearB
-        });
-    }
-
-    // Cheque Promedio.
-    layoutChequePromedio() {
-
-        $('#filterBarChequePromedio').empty();
-
-        this.createfilterBar({
-            parent: `filterBarChequePromedio`,
-            data: [
-                {
-                    opc: "select",
-                    id: "category",
-                    lbl: "Categoria",
-                    class: "col-sm-4",
-                    onchange: `salesDashboard.renderChequePromedioCategory()`,
-                },
-
-            ],
-        });
-
-        this.renderSelectCategory({
-            parent: 'filterBarChequePromedio #category',
-            udn: $('#idFilterBar #udn').val(),
-            data: clasificacion,
-            includeAll: false
-        });
-
-        // this.renderChequePromedioCategory();
-    }
-
-    async renderChequePromedioCategory() {
-
-        let udn = $('#filterBarDashboard #udn').val();
-        let category = $('#filterBarChequePromedio #category option:selected').text();
-        let date = this.getFilterDate();
-
-        const meses = moment.months();
-        const nombreMes1 = meses[parseInt(date.month1) - 1];
-        const nombreMes2 = meses[parseInt(date.month2) - 1];
-
-        let mkt = await useFetch({
-            url: api,
-            data: {
-                opc: "getPromediosDiariosRange",
-                udn: udn,
-                concepto: category,
-                mes: 10,
-                anio: 2025,
-                rango: 3
-
-            },
-        });
-
-
-
-        this.barChart({
-            parent: 'barChequePromedio',
-            id: 'chartAnual',
-            ...mkt.dataset
-        });
-
-
-
-        // let mkt = await useFetch({
-        //     url: api,
-        //     data: {
-        //         opc: "getDailyCheck",
-        //         udn: udn,
-        //         category: category,
-        //         anio1: date.year1,
-        //         mes1: date.month1,
-        //         anio2: date.year2,
-        //         mes2: date.month2,
-        //     },
-        // });
-
-        console.log(mkt)
-
-
-
-
-
-    }
-    // Cheque Promedio cards.
-
-
-
-
-    showCards(data) {
-        this.infoCard({
-            parent: "cardDashboard",
-            theme: "light",
-            json: [
-                {
-                    id: "kpiDia",
-                    title: data.ventaDia.titulo,
-                    data: {
-                        value: data.ventaDia.valor,
-                        description: data.ventaDia.fecha,
-                        color: data.ventaDia.color,
-                    },
-                },
-                {
-                    id: "kpiMes",
-                    title: data.ventaMes.titulo,
-                    data: {
-                        value: data.ventaMes.valor,
-                        description: `${this.getTrendIcon(data.ventaMes.tendencia)} ${data.ventaMes.mensaje}`,
-                        color: data.ventaMes.color,
-                    },
-                },
-                {
-                    title: data.clientes.titulo,
-                    data: {
-                        value: data.clientes.valor,
-                        description: `${this.getTrendIcon(data.clientes.tendencia)} ${data.clientes.mensaje}`,
-                        color: data.clientes.color,
-                    },
-                },
-                {
-                    id: "kpiCheque",
-                    title: data.chequePromedio.titulo,
-                    data: {
-                        value: data.chequePromedio.valor,
-                        description: `${this.getTrendIcon(data.chequePromedio.tendencia)} ${data.chequePromedio.mensaje}`,
-                        color: data.chequePromedio.color,
-                    },
-                },
-            ],
-        });
-    }
-
-
-
-
-    getTrendIcon(tendencia) {
-        switch (tendencia) {
-            case 'up':
-                return '↑';
-            case 'down':
-                return '↓';
-            default:
-                return '→';
-        }
-    }
-
-    infoCard(options) {
-        const defaults = {
-            parent: "root",
-            id: "infoCardKPI",
-            class: "",
-            theme: "light",
-            json: [],
-            data: {
-                value: "0",
-                description: "",
-                color: "text-gray-800"
-            },
-            onClick: () => { }
-        };
-        const opts = Object.assign({}, defaults, options);
-        const isDark = opts.theme === "dark";
-        const cardBase = isDark
-            ? "bg-[#1F2A37] text-white rounded-xl shadow"
-            : "bg-white text-gray-800 rounded-xl shadow";
-        const titleColor = isDark ? "text-gray-300" : "text-gray-600";
-        const descColor = isDark ? "text-gray-400" : "text-gray-500";
-
-        const renderCard = (card, i = "") => {
-            const box = $("<div>", {
-                id: `${opts.id}_${i}`,
-                class: `${cardBase} p-4`
-            });
-            const title = $("<p>", {
-                class: `text-sm ${titleColor}`,
-                text: card.title
-            });
-            const value = $("<p>", {
-                id: card.id || "",
-                class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
-                text: card.data?.value
-            });
-            const description = $("<p>", {
-                class: `text-xs mt-1 ${card.data?.color || descColor}`,
-                text: card.data?.description
-            });
-            box.append(title, value, description);
-            return box;
-        };
-
-        const container = $("<div>", {
-            id: opts.id,
-            class: `grid grid-cols-2 md:grid-cols-4 gap-4 ${opts.class}`
-        });
-
-        if (opts.json.length > 0) {
-            opts.json.forEach((item, i) => {
-                container.append(renderCard(item, i));
-            });
-        } else {
-            container.append(renderCard(opts));
-        }
-
-        $(`#${opts.parent}`).html(container);
-    }
-
-
-
-
-
-
-    // components.
-    dashboardComponent(options) {
-        const defaults = {
-            parent: "root",
-            id: "dashboardComponent",
-            title: "📊 Huubie · Dashboard de Eventos",
-            subtitle: "Resumen mensual · Cotizaciones · Pagados · Cancelados",
-            json: [
-                { type: "grafico", id: "barChartContainer", title: "Eventos por sucursal" },
-                { type: "tabla", id: "tableSucursal", title: "Tabla de sucursales" },
-                { type: "grafico", id: "donutChartContainer", title: "Ventas vs Entrada de dinero" },
-                { type: "grafico", id: "topClientsChartContainer", title: "Top 10 clientes" },
-                { type: "tabla", id: "tableClientes", title: "Tabla de clientes" }
-            ]
-        };
-
-        const opts = Object.assign(defaults, options);
-
-        const container = $(`
-        <div id="${opts.id}" class="w-full ">
-            <!-- Header -->
-            <div class="p-6 border-b border-gray-200 ">
-                <div class=" mx-auto">
-                    <h1 class="text-2xl font-bold text-[#103B60]">${opts.title}</h1>
-                    <p class="text-sm text-gray-600">${opts.subtitle}</p>
-                </div>
-            </div>
-
-            <!-- FilterBar -->
-            <div id="filterBarDashboard" class=" mx-auto px-4 py-4">
-          
-            </div>
-
-             <section id="cardDashboard" class=" mx-auto px-4 py-4">
-              
-            </section>
-
-            <!-- Content -->
-            <section id="content-${opts.id}" class="mx-auto px-4 py-6 grid gap-6 grid-cols-1 md:grid-cols-2"></section>
-        </div>`);
-
-        // Renderizar contenedores desde JSON
-        opts.json.forEach(item => {
-            let block = $("<div>", {
-                id: item.id,
-                class: "bg-white p-2 rounded-xl shadow-md border border-gray-200 min-h-[200px] w-full"
-            });
-
-            if (item.title) {
-                const defaultEmojis = {
-                    'grafico': '📊',
-                    'tabla': '�',
-                    'doc': '�',
-                    'filterBar': '🔍'
-                };
-
-                const emoji = item.emoji || defaultEmojis[item.type] || '';
-                const iconHtml = item.icon ? `<i class="${item.icon}"></i> ` : '';
-                const titleContent = `${emoji} ${iconHtml}${item.title}`;
-
-                block.prepend(`<h3 class="text-sm font-semibold text-gray-800 mb-3">${titleContent}</h3>`);
-            }
-
-            if (item.content && Array.isArray(item.content)) {
-                item.content.forEach(contentItem => {
-                    const element = $(`<${contentItem.type}>`, {
-                        id: contentItem.id || '',
-                        class: contentItem.class || '',
-                        text: contentItem.text || ''
-                    });
-
-                    if (contentItem.attributes) {
-                        Object.keys(contentItem.attributes).forEach(attr => {
-                            element.attr(attr, contentItem.attributes[attr]);
-                        });
-                    }
-
-                    if (contentItem.html) {
-                        element.html(contentItem.html);
-                    }
-
-                    block.append(element);
-                });
-            }
-
-            $(`#content-${opts.id}`, container).append(block);
-        });
-
-        $(`#${opts.parent}`).html(container);
-    }
-
-    infoCard(options) {
-        const defaults = {
-            parent: "root",
-            id: "infoCardKPI",
-            class: "",
-            theme: "light", // light | dark
-            json: [],
-            data: {
-                value: "0",
-                description: "",
-                color: "text-gray-800"
-            },
-            onClick: () => { }
-        };
-        const opts = Object.assign({}, defaults, options);
-        const isDark = opts.theme === "dark";
-        const cardBase = isDark
-            ? "bg-[#1F2A37] text-white rounded-xl shadow"
-            : "bg-white text-gray-800 rounded-xl shadow";
-        const titleColor = isDark ? "text-gray-300" : "text-gray-600";
-        const descColor = isDark ? "text-gray-400" : "text-gray-500";
-        const renderCard = (card, i = "") => {
-            const box = $("<div>", {
-                id: `${opts.id}_${i}`,
-                class: `${cardBase} p-4`
-            });
-            const title = $("<p>", {
-                class: `text-sm ${titleColor}`,
-                text: card.title
-            });
-            const value = $("<p>", {
-                id: card.id || "",
-                class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
-                text: card.data?.value
-            });
-            const description = $("<p>", {
-                class: `text-xs mt-1 ${card.data?.color || descColor}`,
-                text: card.data?.description
-            });
-            box.append(title, value, description);
-            return box;
-        };
-        const container = $("<div>", {
-            id: opts.id,
-            class: `grid grid-cols-2 md:grid-cols-4 gap-4 ${opts.class}`
-        });
-        if (opts.json.length > 0) {
-            opts.json.forEach((item, i) => {
-                container.append(renderCard(item, i));
-            });
-        } else {
-            container.append(renderCard(opts));
-        }
-        $(`#${opts.parent}`).html(container);
-    }
-
-    linearChart(options) {
-        const defaults = {
-            parent: "containerLineChart",
-            id: "linearChart",
-            title: "",
-            class: "border p-4 rounded-xl",
-            data: {},   // <- puede contener { labels: [], datasets: [], tooltip: [] }
-            json: [],
-            onShow: () => { },
-        };
-        const opts = Object.assign({}, defaults, options);
-        const container = $("<div>", { class: opts.class });
-        const title = $("<h2>", {
-            class: "text-lg font-bold mb-2",
-            text: opts.title
-        });
-        const canvasWrapper = $("<div>", {
-            class: "w-full",
-            css: { height: "300px" }
-        });
-        const canvas = $("<canvas>", {
-            id: opts.id,
-            class: "w-full h-full"
-        });
-        canvasWrapper.append(canvas);
-        container.append(title, canvasWrapper);
-        $('#' + opts.parent).html(container);
-
-        const ctx = document.getElementById(opts.id).getContext("2d");
-        if (!window._charts) window._charts = {};
-        if (window._charts[opts.id]) {
-            window._charts[opts.id].destroy();
-        }
-
-        window._charts[opts.id] = new Chart(ctx, {
-            type: "line",
-            data: opts.data,
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: "bottom" },
-                    tooltip: {
-                        callbacks: {
-                            title: (items) => {
-                                const index = items[0].dataIndex;
-                                const tooltips = opts.data.tooltip || opts.data.labels;
-                                return tooltips[index];
-                            },
-                            label: (ctx) => `${ctx.dataset.label}: ${formatPrice(ctx.parsed.y)}`
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: (v) => formatPrice(v)
-                        }
-                    }
-                }
-            }
-        });
-    }
-
-    barChart(options) {
-        const defaults = {
-            parent: "containerBarChart",
-            id: "chartBar",
-            title: "Comparativa por Categorías",
-            class: "border p-4 rounded-xl",
-            labels: [],
-            dataA: [], // Año anterior
-            dataB: [], // Año actual
-            yearA: new Date().getFullYear() - 1, // 2024
-            yearB: new Date().getFullYear(),     // 2025
-        };
-
-        const opts = Object.assign({}, defaults, options);
-
-        // 📦 Crear contenedor
-        const container = $("<div>", { class: opts.class });
-        const title = $("<h2>", {
-            class: "text-lg font-bold mb-2",
-            text: opts.title
-        });
-        const canvasWrapper = $("<div>", {
-            class: "w-full",
-            css: { height: "300px" }
-        });
-        const canvas = $("<canvas>", {
-            id: opts.id,
-            class: "w-full h-full"
-        });
-
-        canvasWrapper.append(canvas);
-        container.append(title, canvasWrapper);
-        $("#" + opts.parent).html(container);
-
-        const ctx = document.getElementById(opts.id).getContext("2d");
-        if (window._barChart) window._barChart.destroy();
-
-        // 🎨 Colores: Azul para período 1 (consulta), Verde para período 2 (comparación)
-        const colorPeriodo1 = "#103B60"; // Azul oscuro - Período de consulta
-        const colorPeriodo2 = "#8CC63F"; // Verde - Período de comparación
-
-        // 📊 Crear gráfico
-        window._barChart = new Chart(ctx, {
-            type: "bar",
-            data: {
-                labels: opts.labels,
-                datasets: [
-                    {
-                        label: `Año ${opts.yearA}`, // Período 2 (comparación) - dataB
-                        data: opts.dataB,
-                        backgroundColor: colorPeriodo2
-                    },
-                    {
-                        label: `Año ${opts.yearB}`, // Período 1 (consulta) - dataA
-                        data: opts.dataA,
-                        backgroundColor: colorPeriodo1
-                    },
-
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: "bottom",
-                        labels: {
-                            usePointStyle: true,
-                            padding: 15,
-                            font: {
-                                size: 13,
-                                weight: "600"
-                            },
-                            color: "#333"
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: (ctx) =>
-                                `${ctx.dataset.label}: ${formatPrice(ctx.parsed.y)}`
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            callback: (v) => formatPrice(v),
-                            color: "#333",
-                            font: { size: 12 }
-                        },
-                        grid: { color: "rgba(0,0,0,0.05)" }
-                    },
-                    x: {
-                        ticks: {
-                            color: "#333",
-                            font: { size: 12 }
-                        },
-                        grid: { display: false }
-                    }
-                }
-            }
-        });
-    }
-
-
-
-    renderSelectCategory(options) {
-        const defaults = {
-            parent: "category",
-            udn: null,
-            data: [],
-            placeholder: "Seleccionar categoría",
-            includeAll: false,
-            onChange: null
-        };
-
-        const opts = Object.assign({}, defaults, options);
-
-        if (!opts.udn) {
-            console.warn('UDN no proporcionado para renderSelectCategory');
-            return;
-        }
-
-        const filteredData = opts.data.filter((item) => item.udn == opts.udn);
-
-        let optionsHtml = '';
-
-        if (opts.includeAll) {
-            optionsHtml += `<option value="0">${opts.placeholder}</option>`;
-        }
-
-        optionsHtml += filteredData.map(item =>
-            `<option value="${item.id}">${item.valor}</option>`
-        ).join('');
-
-        $(`#${opts.parent}`).html(optionsHtml);
-
-        if (opts.onChange && typeof opts.onChange === 'function') {
-            $(`#${opts.parent}`).off('change').on('change', opts.onChange);
-        }
-    }
-}
-
-class ChequePromedioDashboard extends SalesDashboard {
     constructor(link, div_modulo) {
         super(link, div_modulo);
         this.PROJECT_NAME = "order";
@@ -988,30 +195,18 @@ class ChequePromedioDashboard extends SalesDashboard {
             subtitle: "Análisis comparativo de ventas entre dos períodos",
             json: [
                 { type: "grafico", id: "containerChequePro" },
-
                 {
-                    type: "grafico", id: "linearChequePromedio", title: "",
+                    type   : "grafico", id: "barProductMargen1", title: "",
                     content: [
-                        { class: "border px-3 py-2 rounded", type: "div", id: "filterBarChequePromedio" },
-                        { class: " mt-2", type: "div", id: "barChequePromedio" },
+                        { class: "border px-3 py-2 rounded", type: "div", id: "filterBarProductMargen" },
+                        { class: " mt-2", type: "div", id: "barProductMargen" },
                     ]
                 },
-
-                // {
-                //     type   : "grafico", id: "barProductMargen1", title: "",
-                //     content: [
-                //         { class: "border px-3 py-2 rounded", type: "div", id: "filterBarProductMargen" },
-                //         { class: " mt-2", type: "div", id: "barProductMargen" },
-                //     ]
-                // },
-                // { type: "grafico", id: "ventasDiasSemana", title: "Ventas por Día de la Semana" },
-                // { type: "grafico", id: "Tendencia", title: "Tendencia de Ventas" },
+                { type: "grafico", id: "ventasDiasSemana", title: "Ventas por Día de la Semana" },
+                { type: "grafico", id: "Tendencia", title: "Tendencia de Ventas" },
             ]
         });
-
-
-
-
+   
         this.createfilterBar({
             parent: `filterBarProductMargen`,
             data: [
@@ -1029,78 +224,17 @@ class ChequePromedioDashboard extends SalesDashboard {
 
         this.filterBarDashboard();
         this.renderDashboard();
-
-        this.layoutChequePromedio();
     }
-
-    layoutChequePromedio() {
-
-        this.createfilterBar({
-            parent: `filterBarChequePromedio`,
-            data: [
-                {
-                    opc: "select",
-                    id: "category",
-                    lbl: "Categorias",
-                    class: "col-sm-4",
-                    onchange: `salesDashboard.comparativeChequePromedio()`,
-                },
-
-            ],
-        });
-
-        this.renderSelectCategory({
-            parent: 'filterBarChequePromedio #category',
-            udn: $('#idFilterBar #udn').val(),
-            data: clasificacion,
-            includeAll: false
-        });
-
-        // this.renderChequePromedioCategory();
-    }
-
-    async renderChequePromedioCategory() {
-
-        let udn = $('#filterBarDashboard #udn').val();
-        let periodo1 = $('#filterBarDashboard #periodo1').val();
-        let [anio1, mes1] = periodo1.split('-');
-        let periodo2 = $('#filterBarDashboard #periodo2').val();
-        let [anio2, mes2] = periodo2.split('-');
-
-        let mkt = await useFetch({
-            url: api,
-            data: {
-                opc: "comparativaByCategory",
-                udn: udn,
-                category: $('#category option:selected').text(),
-                anio1: anio1,
-                mes1: mes1,
-                anio2: anio2,
-                mes2: mes2,
-            },
-        });
-
-
-        this.linearChart({
-            parent: "barProductMargen",
-            id: "barProductMargewn",
-            title: "📈 Comparativa por Categoría",
-            data: mkt
-        });
-
-    }
-
-
 
     async renderDashboard() {
 
         // filtrar clasificacion x udn 
         this.handleCategoryChange($('#idFilterBar #udn').val());
 
-        let udn = $('#filterBarDashboard #udn').val();
-        let periodo1 = $('#filterBarDashboard #periodo1').val();
+        let udn           = $('#filterBarDashboard #udn').val();
+        let periodo1      = $('#filterBarDashboard #periodo1').val();
         let [anio1, mes1] = periodo1.split('-');
-        let periodo2 = $('#filterBarDashboard #periodo2').val();
+        let periodo2      = $('#filterBarDashboard #periodo2').val();
         let [anio2, mes2] = periodo2.split('-');
 
         let mkt = await useFetch({
@@ -1127,9 +261,6 @@ class ChequePromedioDashboard extends SalesDashboard {
         });
 
 
-
-
-
         this.comparativaIngresosDiarios({ data: mkt.linear });
 
         this.ventasPorDiaSemana(mkt.barDays);
@@ -1154,7 +285,7 @@ class ChequePromedioDashboard extends SalesDashboard {
                     opc: "select",
                     id: "udn",
                     lbl: "UDN",
-                    class: "col-sm-3",
+                    class: "col-sm-4",
                     data: udn,
                     onchange: `salesDashboard.renderDashboard()`,
                 },
@@ -1207,121 +338,48 @@ class ChequePromedioDashboard extends SalesDashboard {
     }
 
     showCards(data) {
+        // KPIs visuales
         this.infoCard({
             parent: "cardDashboard",
             theme: "light",
             json: [
                 {
                     id: "kpiDia",
-                    title: data.ventaDia.titulo,
+                    title: "Venta del día de ayer",
                     data: {
-                        value: data.ventaDia.valor,
-                        description: data.ventaDia.fecha,
-                        color: data.ventaDia.color,
+                        value: data.ventaDia,
+                        // description: "+12% vs ayer",
+                        color: "text-[#8CC63F]",
                     },
                 },
                 {
                     id: "kpiMes",
-                    title: data.ventaMes.titulo,
+                    title: "Venta del Mes",
                     data: {
-                        value: data.ventaMes.valor,
-                        description: `${this.getTrendIcon(data.ventaMes.tendencia)} ${data.ventaMes.mensaje}`,
-                        color: data.ventaMes.color,
+                        value: data.ventaMes,
+                        // description: "+8% vs mes anterior",
+                        color: "text-green-800",
                     },
                 },
                 {
-                    title: data.clientes.titulo,
+                    title: "Clientes",
                     data: {
-                        value: data.clientes.valor,
-                        description: `${this.getTrendIcon(data.clientes.tendencia)} ${data.clientes.mensaje}`,
-                        color: data.clientes.color,
+                        value: data.Clientes,
+                        // description: "+5% vs período anterior",
+                        color: "text-[#103B60]",
                     },
                 },
                 {
                     id: "kpiCheque",
-                    title: data.chequePromedio.titulo,
+                    title: "Cheque Promedio",
                     data: {
-                        value: data.chequePromedio.valor,
-                        description: `${this.getTrendIcon(data.chequePromedio.tendencia)} ${data.chequePromedio.mensaje}`,
-                        color: data.chequePromedio.color,
+                        value: data.ChequePromedio,
+                        // description: "-2% vs período anterior",
+                        color: "text-red-600",
                     },
                 },
             ],
         });
-    }
-
-
-
-
-    getTrendIcon(tendencia) {
-        switch (tendencia) {
-            case 'up':
-                return '↑';
-            case 'down':
-                return '↓';
-            default:
-                return '→';
-        }
-    }
-
-    infoCard(options) {
-        const defaults = {
-            parent: "root",
-            id: "infoCardKPI",
-            class: "",
-            theme: "light",
-            json: [],
-            data: {
-                value: "0",
-                description: "",
-                color: "text-gray-800"
-            },
-            onClick: () => { }
-        };
-        const opts = Object.assign({}, defaults, options);
-        const isDark = opts.theme === "dark";
-        const cardBase = isDark
-            ? "bg-[#1F2A37] text-white rounded-xl shadow"
-            : "bg-white text-gray-800 rounded-xl shadow";
-        const titleColor = isDark ? "text-gray-300" : "text-gray-600";
-        const descColor = isDark ? "text-gray-400" : "text-gray-500";
-
-        const renderCard = (card, i = "") => {
-            const box = $("<div>", {
-                id: `${opts.id}_${i}`,
-                class: `${cardBase} p-4`
-            });
-            const title = $("<p>", {
-                class: `text-sm ${titleColor}`,
-                text: card.title
-            });
-            const value = $("<p>", {
-                id: card.id || "",
-                class: `text-2xl font-bold ${card.data?.color || "text-white"}`,
-                text: card.data?.value
-            });
-            const description = $("<p>", {
-                class: `text-xs mt-1 ${card.data?.color || descColor}`,
-                text: card.data?.description
-            });
-            box.append(title, value, description);
-            return box;
-        };
-
-        const container = $("<div>", {
-            id: opts.id,
-            class: `grid grid-cols-2 md:grid-cols-4 gap-4 ${opts.class}`
-        });
-
-        if (opts.json.length > 0) {
-            opts.json.forEach((item, i) => {
-                container.append(renderCard(item, i));
-            });
-        } else {
-            container.append(renderCard(opts));
-        }
-
-        $(`#${opts.parent}`).html(container);
     }
 
     // graphigs.
@@ -1453,14 +511,14 @@ class ChequePromedioDashboard extends SalesDashboard {
         })
     }
 
-    async comparativaByCategory() {
-        let udn = $('#filterBarDashboard #udn').val();
-        let periodo1 = $('#filterBarDashboard #periodo1').val();
+    async comparativaByCategory(){
+        let udn           = $('#filterBarDashboard #udn').val();
+        let periodo1      = $('#filterBarDashboard #periodo1').val();
         let [anio1, mes1] = periodo1.split('-');
-        let periodo2 = $('#filterBarDashboard #periodo2').val();
+        let periodo2      = $('#filterBarDashboard #periodo2').val();
         let [anio2, mes2] = periodo2.split('-');
 
-        let mkt = await useFetch({
+           let mkt = await useFetch({
             url: api,
             data: {
                 opc: "comparativaByCategory",
@@ -1473,13 +531,13 @@ class ChequePromedioDashboard extends SalesDashboard {
             },
         });
 
-
-        this.linearChart({
-            parent: "barProductMargen",
-            id: "barProductMargewn",
-            title: "📈 Comparativa por Categoría",
-            data: mkt
-        });
+      
+            this.linearChart({
+                parent: "barProductMargen",
+                id: "barProductMargewn",
+                title: "📈 Comparativa por Categoría",
+                data:mkt
+            });
 
     }
 
@@ -1933,53 +991,18 @@ class ChequePromedioDashboard extends SalesDashboard {
     }
 
     handleCategoryChange(idudn) {
-        this.renderSelectCategory({
-            parent: 'category',
-            udn: idudn,
-            data: clasificacion,
-            includeAll: false
-        });
-    }
+        // Filtrar las clasificaciones que coincidan con el idudn
+        let lsclasificacion = clasificacion.filter((item) => item.udn == idudn);
 
-    renderSelectCategory(options) {
-        const defaults = {
-            parent: "category",
-            udn: null,
-            data: [],
-            placeholder: "Seleccionar categoría",
-            includeAll: false,
-            onChange: null
-        };
-
-        const opts = Object.assign({}, defaults, options);
-
-        if (!opts.udn) {
-            console.warn('UDN no proporcionado para renderSelectCategory');
-            return;
-        }
-
-        const filteredData = opts.data.filter((item) => item.udn == opts.udn);
-
-        let optionsHtml = '';
-
-        if (opts.includeAll) {
-            optionsHtml += `<option value="0">${opts.placeholder}</option>`;
-        }
-
-        optionsHtml += filteredData.map(item =>
+        // Generar options HTML para el select
+        const optionsHtml = lsclasificacion.map(item => 
             `<option value="${item.id}">${item.valor}</option>`
         ).join('');
 
-        $(`#${opts.parent}`).html(optionsHtml);
-
-        if (opts.onChange && typeof opts.onChange === 'function') {
-            $(`#${opts.parent}`).off('change').on('change', opts.onChange);
-        }
+        // Actualizar el select con las opciones
+        $('#category').html(optionsHtml);
     }
 }
-
-
-
 
 class Sales extends Templates {
     constructor(link, div_modulo) {
@@ -2273,392 +1296,3 @@ class CumulativeAverages extends Templates {
     }
 }
 
-
-
-class SalesCalendar extends Templates {
-    constructor(link, div_modulo) {
-        super(link, div_modulo);
-        this.PROJECT_NAME = "SalesCalendar";
-        this._ventasData = [];
-    }
-
-    render() {
-        this.layout();
-    }
-
-    layout() {
-        this.primaryLayout({
-            parent: `container-calendarioVentas`,
-            id: this.PROJECT_NAME,
-            card: {
-                filterBar: { class: 'w-full border-b pb-2', id: `filterBar` },
-                container: { class: 'w-full my-2 h-full', id: `container${this.PROJECT_NAME}` }
-            }
-        });
-
-        $(`#container${this.PROJECT_NAME}`).html(`
-        <!-- 🧭 Encabezado flexible -->
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-3 pt-3 pb-2 flex-wrap">
-            
-            <!-- 📅 Título -->
-            <div class="flex flex-col">
-                <h2 class="text-2xl font-semibold text-[#103B60] leading-tight">
-                    📅 Calendario de Ventas
-                </h2>
-                <p class="text-gray-500 text-sm">
-                    Visualiza las ventas de las últimas 5 semanas
-                </p>
-            </div>
-
-                <!-- 🧭 Filtro UDN -->
-                <div id="filterBar${this.PROJECT_NAME}"
-                    class="w-full sm:w-2/3 md:w-1/2 lg:w-2/5 xl:w-1/3 flex justify-start sm:justify-end items-center"></div>
-            </div>
-
-            <!-- 📆 Contenedor del calendario -->
-            <div id="calendario-container" class="px-2"></div>
-        `);
-
-        this.renderCalendar();
-        this.filterBar();
-    }
-
-    filterBar() {
-        this.createfilterBar({
-            parent: `filterBar${this.PROJECT_NAME}`,
-            data: [
-                {
-                    opc: "select",
-                    id: "udn",
-                    lbl: "UDN",
-                    class: "w-full",
-                    data: lsudn,
-                    onchange: `salesCalendar.renderCalendar()`
-                }
-            ]
-        });
-    }
-
-    async renderCalendar() {
-        // 🧠 Obtener datos
-        const udn = $(`#filterBar${this.PROJECT_NAME} #udn`).val();
-        const data = await useFetch({
-            url: this._link,
-            data: { opc: 'getCalendarioVentas', udn: udn }
-        });
-
-        console.log('📅 Datos del backend:', data);
-        console.log('📅 Estructura semanas:', data.semanas);
-
-        // 📆 Renderizar calendario
-        this.calendarioVentas({
-            parent: 'calendario-container',
-            id: 'calendarioVentas',
-            json: data.semanas || [],
-            onDayClick: (dia) => {
-                bootbox.dialog({
-                    title: `<p class="text-2xl">📊 Ventas del ${dia.dia} de ${dia.mesAbreviado}</p>`,
-                    size: 'large',
-                    message: `
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-center mt-3">
-                        <!-- 💰 Total -->
-                        <div class="bg-gradient-to-br from-[#EAF3FA] to-[#C9E3F8] rounded-2xl p-4 shadow-[0_4px_16px_rgba(0,0,0,0.06)] 
-                                    hover:shadow-[0_8px_24px_rgba(16,59,96,0.12)] hover:-translate-y-1 transition-all duration-300">
-                            <div class="flex flex-col items-center">
-                                <div class="text-3xl mb-2 text-[#103B60]">💰</div>
-                                <h3 class="text-xs uppercase tracking-wide font-semibold text-[#335D84] mb-1">Total</h3>
-                                <p class="text-2xl font-bold text-[#103B60] mt-1">${dia.totalFormateado}</p>
-                            </div>
-                        </div>
-
-                        <!-- 👥 Clientes -->
-                        <div class="bg-gradient-to-br from-[#E8F8ED] to-[#C9F3D7] rounded-2xl p-4 shadow-[0_4px_16px_rgba(0,0,0,0.06)] 
-                                    hover:shadow-[0_8px_24px_rgba(140,198,63,0.18)] hover:-translate-y-1 transition-all duration-300">
-                            <div class="flex flex-col items-center">
-                                <div class="text-3xl mb-2 text-[#639C3F]">👥</div>
-                                <h3 class="text-xs uppercase tracking-wide font-semibold text-[#6A9E56] mb-1">Clientes</h3>
-                                <p class="text-2xl font-bold text-[#447733] mt-1">${dia.clientes}</p>
-                            </div>
-                        </div>
-
-                        <!-- 🍽️ Cheque Promedio -->
-                        <div class="bg-gradient-to-br from-[#FFF9E8] to-[#FCEFC2] rounded-2xl p-4 shadow-[0_4px_16px_rgba(0,0,0,0.06)] 
-                                    hover:shadow-[0_8px_24px_rgba(255,200,80,0.18)] hover:-translate-y-1 transition-all duration-300">
-                            <div class="flex flex-col items-center">
-                                <div class="text-3xl mb-2 text-[#C79A00]">🍽️</div>
-                                <h3 class="text-xs uppercase tracking-wide font-semibold text-[#B58900] mb-1">Cheque Promedio</h3>
-                                <p class="text-2xl font-bold text-[#9A7400] mt-1">${dia.chequePromedio}</p>
-                            </div>
-                        </div>
-                    </div>
-                `,
-                    buttons: {
-                        ok: {
-                            label: 'Cerrar',
-                            className: 'btn-primary'
-                        }
-                    }
-                });
-            }
-        });
-    }
-
-    calendarioVentas(options) {
-        const defaults = {
-            parent: "calendario-container",
-            id: "calendarioVentas",
-            class: "w-full",
-            data: {},
-            json: [],
-            onDayClick: () => { },
-            onWeekClick: () => { }
-        };
-
-        const opts = Object.assign({}, defaults, options);
-
-        const container = $("<div>", {
-            id: opts.id,
-            class: opts.class
-        });
-
-        const calendarContainer = $("<div>", {
-            class: "bg-white rounded-lg shadow-md p-4 border border-gray-200"
-        });
-
-        const diasHeader = $("<div>", {
-            class: "grid grid-cols-7 gap-2 mb-4"
-        });
-
-        const diasSemana = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
-        diasSemana.forEach(dia => {
-            diasHeader.append(
-                $("<div>", {
-                    class: "text-center text-sm font-semibold text-gray-600 py-2",
-                    text: dia
-                })
-            );
-        });
-
-        const diasContainer = $("<div>", {
-            class: "grid grid-cols-7 gap-2"
-        });
-
-        if (opts.json && opts.json.length > 0) {
-            const todosDias = [];
-            opts.json.forEach((semana) => {
-                semana.dias.forEach(dia => {
-                    todosDias.push(dia);
-                    this._ventasData.push(dia);
-                });
-            });
-
-            todosDias.sort((a, b) => {
-                return moment(a.fecha, 'YYYY-MM-DD') - moment(b.fecha, 'YYYY-MM-DD');
-            });
-
-            const semanas = this.agruparPorSemanas(todosDias);
-
-            semanas.forEach(semana => {
-                semana.forEach(dia => {
-                    if (dia) {
-                        const diaCard = this.renderDia(dia, opts);
-                        diasContainer.append(diaCard);
-                    } else {
-                        diasContainer.append($("<div>", { class: "p-4" }));
-                    }
-                });
-            });
-        }
-
-        calendarContainer.append(diasHeader, diasContainer);
-        container.append(calendarContainer);
-        $(`#${opts.parent}`).html(container);
-    }
-
-    agruparPorSemanas(dias) {
-        if (!dias || dias.length === 0) return [];
-
-        const semanas = [];
-        let semanaActual = new Array(7).fill(null);
-        let primerDia = moment(dias[0].fecha, 'YYYY-MM-DD');
-        let inicioSemana = primerDia.clone().startOf('isoWeek');
-
-        dias.forEach(dia => {
-            const fecha = moment(dia.fecha, 'YYYY-MM-DD');
-            const diaSemana = fecha.isoWeekday() - 1;
-            const semanaDia = fecha.clone().startOf('isoWeek');
-
-            if (!semanaDia.isSame(inicioSemana, 'day')) {
-                const semanaCompleta = this.completarSemana(semanaActual, inicioSemana);
-                semanas.push(semanaCompleta);
-                semanaActual = new Array(7).fill(null);
-                inicioSemana = semanaDia;
-            }
-
-            semanaActual[diaSemana] = dia;
-        });
-
-        if (semanaActual.some(d => d !== null)) {
-            const semanaCompleta = this.completarSemana(semanaActual, inicioSemana);
-            semanas.push(semanaCompleta);
-        }
-
-        return semanas;
-    }
-
-    completarSemana(semana, inicioSemana) {
-        return semana.map((dia, index) => {
-            if (dia) return dia;
-
-            const fecha = inicioSemana.clone().add(index, 'days');
-            return {
-                dia: fecha.format('DD'),
-                mes: fecha.format('MM'),
-                mesAbreviado: fecha.format('MMM').toLowerCase(),
-                fecha: fecha.format('YYYY-MM-DD'),
-                diaSemana: fecha.format('dddd'),
-                total: 0,
-                totalFormateado: '-',
-                clientes: 0,
-                chequePromedio: '-',
-                isEmpty: true
-            };
-        });
-    }
-
-    // 🌸 Renderiza una card diaria con estilo Rosy Light ✨
-    renderDia(dia, opts) {
-        const isEmpty = dia.isEmpty || dia.total === 0;
-        const total = parseFloat(dia.total) || 0;
-        const colorClass = isEmpty ? 'text-gray-400' : this.highlightExtremes(total);
-        const bestCP = this.getBestChequePromedio();
-        const chequito = (dia.chequePromedio || "")
-            .toString()
-            .replace(/[^\d.,-]/g, " ")
-            .replace(",", ".");
-
-        let cpValue = parseFloat(chequito) || 0;
-
-        const cardClass = isEmpty
-            ? `group relative rounded-2xl p-4 bg-gray-50/50 backdrop-blur-sm
-               shadow-[0_2px_8px_rgba(0,0,0,0.04)]
-               transition-all duration-300 ease-out`
-            : `group relative rounded-2xl p-4 bg-white/80 backdrop-blur-sm
-               shadow-[0_4px_16px_rgba(0,0,0,0.08)]
-               hover:shadow-[0_6px_24px_rgba(16,59,96,0.15)]
-               transition-all duration-300 ease-out cursor-pointer`;
-
-        const diaCard = $("<div>", {
-            id: `card-dia-${dia.dia}-${dia.mes}`,
-            class: cardClass,
-            click: isEmpty ? null : () => opts?.onDayClick?.(dia)
-        });
-
-        const diaNumero = $("<div>", {
-            class: "text-sm font-medium text-gray-500 uppercase tracking-wide mb-1",
-            text: `${dia.dia}/${dia.mes}`
-        });
-
-        const diaTotal = $("<div>", {
-            class: `text-2xl font-bold mt-1 ${colorClass}`,
-            text: dia.totalFormateado
-        });
-
-        const diaClientes = $("<div>", {
-            class: "text-xs text-gray-600",
-            text: `${dia.clientes} clientes`
-        });
-
-        // 🧾 Badge solo si es el mejor CP
-        let diaCheque;
-        if (cpValue == bestCP && cpValue > 0) {
-            diaCheque = $("<div>", {
-                class: "flex items-center justify-center mt-1",
-                html: `
-                <span class="
-                    inline-flex items-center gap-1 px-2 py-1 rounded-full
-                    bg-gradient-to-r from-[#EAF3FA] to-[#C9E3F8]
-                    text-[#103B60] font-semibold text-[11px] tracking-wide
-                    shadow-[0_1px_4px_rgba(16,59,96,0.15)]
-                    border border-white/40 backdrop-blur-sm animate-pulse
-                ">
-                    <i class="icon-trophy text-[#103B60] text-[12px]"></i>
-                    CP: <span class="font-bold">${dia.chequePromedio}</span>
-                </span>
-            `
-            });
-        } else {
-            diaCheque = $("<div>", {
-                class: "text-xs text-gray-500 italic",
-                text: `CP: ${dia.chequePromedio}`
-            });
-        }
-
-        const accentLine = $("<div>", {
-            class: `
-            absolute bottom-0 left-0 w-0 h-1
-            bg-gradient-to-r from-[#8CC63F] to-[#A7E056]
-            rounded-tr-xl rounded-bl-xl
-            group-hover:w-full transition-all duration-300 ease-out
-        `
-        });
-
-        diaCard.append(
-            $("<div>", {
-                class: "flex flex-col items-center text-center select-none",
-                html: `
-                ${diaNumero.prop("outerHTML")}
-                ${diaTotal.prop("outerHTML")}
-                ${diaClientes.prop("outerHTML")}
-                ${diaCheque.prop("outerHTML")}
-            `
-            }),
-            accentLine
-        );
-
-        return diaCard;
-    }
-
-    // 📊 Determina la clase de color para el número según máximo y mínimo con venta
-    highlightExtremes(total) {
-        // Validamos que exista la data en memoria
-        if (!this._ventasData || this._ventasData.length === 0) return "text-gray-700";
-
-        // 🔹 Convertir totales a números válidos
-        const valores = this._ventasData
-            .map(d => parseFloat(d.total) || 0)
-            .filter(v => v > 0); // ✅ solo ventas reales (ignora ceros o nulos)
-
-        if (valores.length === 0) return "text-gray-700";
-
-        // 🔍 Determinar máximos y mínimos con venta
-        const maxVenta = Math.max(...valores);
-        const minVenta = Math.min(...valores);
-
-        // 🎨 Retornar clases de color según el valor actual
-        if (total === maxVenta) {
-            return "text-green-600 font-extrabold";
-        } else if (total === minVenta && total > 0) {
-            return "text-red-500 font-extrabold animate-pulse";
-        } else {
-            return "text-[#103B60]";
-        }
-    }
-
-    // 🏆 Devuelve el cheque promedio más alto con venta (corrigido)
-    getBestChequePromedio() {
-        if (!this._ventasData || this._ventasData.length === 0) return 0;
-
-        const valores = this._ventasData
-            .map(d => {
-                const val = (d.chequePromedio || "")
-                    .toString()
-                    .replace(/[^\d.,-]/g, " ") // quita $ , y espacios
-                    .replace(",", ".");       // normaliza coma decimal
-                return parseFloat(val) || 0;
-            })
-            .filter(v => v > 0);
-        // console.log(valores)
-        return valores.length ? Math.max(...valores) : 0;
-    }
-}

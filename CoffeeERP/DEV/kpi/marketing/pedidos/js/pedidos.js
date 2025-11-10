@@ -95,12 +95,12 @@ class App extends Templates {
                     class:'h-full',
                     active: true,
 
-                    onClick: () => pedidos.render()
+                    // onClick: () => pedidos.render()
                 },
                 {
                     id: "history",
                     tab: "Historial Anual",
-                    onClick: () => report.lsResumenPedidos()
+                    // onClick: () => report.lsResumenPedidos()
                 },
                 {
                     id: "admin",
@@ -803,7 +803,7 @@ class Pedidos extends Templates {
                             udn_id: $('#udn_id_edit').val(),
                             envio_domicilio: $('#envio_domicilio').val(),
                             producto_id: $('#producto_id').val(),
-                            anuncio_id: $('#anuncio_id').val() || null,
+                            anuncio_id: $('#anuncio_id').val() ,
                             red_social_id: $('#red_social_id').val(),
                             cliente_id: $('#cliente_id_edit').val()
                         };

@@ -4,10 +4,9 @@
 ?>
 
 <!-- CoffeeSoft Framework -->
-<script src="../../../../DEV/src/js/coffeeSoft.js"></script>
+<script src="https://erp-varoch.com/ERP24/gestor-de-actividades/src/js/CoffeeSoft.js"></script>
 <script src="https://rawcdn.githack.com/SomxS/Grupo-Varoch/refs/heads/main/src/js/plugins.js"></script>
 <script src="https://www.plugins.erp-varoch.com/ERP/JS/complementos.js"></script>
-
 
 <body>
     <?php require_once('../../../layout/navbar.php'); ?>
@@ -27,7 +26,7 @@
 
             <!-- Module Scripts -->
             <script src="src/js/kpi-ventas.js?t=<?php echo time(); ?>"></script>
-            <script src="src/js/dashboard.js?t=<?php echo time(); ?>"></script>
+            <script src="src/js/kpi-dashboard.js?t=<?php echo time(); ?>"></script>
         
         </div>
     </main>

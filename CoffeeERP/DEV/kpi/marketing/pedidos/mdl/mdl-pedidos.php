@@ -283,13 +283,25 @@ class mdl extends CRUD {
         ]);
     }
 
-    function deleteProductosPedido($array) {
-        return $this->_Delete([
-            'table' => $this->bd . 'producto_pedido',
-            'where' => 'pedido_id = ?',
-            'data' => $array
-        ]);
+    function removeProductsOrder($array){
+        $query = "
+            DELETE FROM {$this->bd}producto_pedido
+            WHERE pedido_id = ?
+        ";
+
+        return $this->_CUD($query, $array);
     }
+
+
+
+
+    // function deleteProductosPedido($array) {
+    //     return $this->_Delete([
+    //         'table' => "{$this->bd}producto_pedido",
+    //         'where' => $array['where'],
+    //         'data'  => $array['data']
+    //     ]);
+    // }
 
     function validatePedidoAge($array) {
         $query = "

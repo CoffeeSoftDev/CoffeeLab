@@ -216,7 +216,8 @@ class ctrl extends mdl {
         return [
             'status' => $pedido ? 200 : 404,
             'message' => $pedido ? 'Pedido obtenido' : 'Pedido no encontrado',
-            'data' => $pedido
+            'data' => $pedido,
+          
         ];
     }
 
@@ -241,9 +242,12 @@ class ctrl extends mdl {
                 'envio_domicilio' => $_POST['envio_domicilio'],
                 'fecha_pedido'    => $_POST['fecha_pedido'],
                 'canal_id'        => $_POST['canal_id'],
-                'red_social_id'   => $_POST['red_social_id'],
-                'anuncio_id'      => $_POST['anuncio_id'] ?? null
+                'red_social_id'   => $_POST['red_social_id']
             ];
+            
+            if (!empty($_POST['anuncio_id'])) {
+                $pedidoData['anuncio_id'] = $_POST['anuncio_id'];
+            }
             
             // Actualizar cliente si viene un nuevo cliente_id
             if (!empty($_POST['cliente_id'])) {
@@ -254,21 +258,37 @@ class ctrl extends mdl {
 
             $update = $this->updatePedido($this->util->sql($pedidoData, 1));
             
+            $array_product = [];
+
             if ($update) {
+                
                 // Actualizar productos si vienen
-                if (isset($_POST['producto_id']) && is_array($_POST['producto_id'])) {
+                if (isset($_POST['producto_id']) ) {
                     // Eliminar productos anteriores
-                    $this->deleteProductosPedido([$_POST['id']]);
+                    $delete = $this->removeProductsOrder( [$_POST['id']] );
+                    
+                    $array_product[] = [
+                        'delete' => $delete,
+                        'productid' =>$_POST['producto_id'],
+                        'id' => $_POST['id']
+                    ];
+
+                    // Asegurar que producto_id sea un array
+                    $productos = is_array($_POST['producto_id']) 
+                        ? $_POST['producto_id'] 
+                        : [$_POST['producto_id']];
                     
                     // Insertar nuevos productos
-                    foreach ($_POST['producto_id'] as $productoId) {
-                        $this->createProductoPedido($this->util->sql([
-                            'producto_id' => $productoId,
-                            'pedido_id' => $_POST['id']
-                        ]));
+                    foreach ($productos as $productoId) {
+                        if (!empty($productoId)) {
+                            $this->createProductoPedido($this->util->sql([
+                                'producto_id' => $productoId,
+                                'pedido_id'   => $_POST['id']
+                            ]));
+                        }
                     }
                 }
-                
+
                 $status = 200;
                 $message = 'Pedido editado correctamente';
             }
@@ -279,7 +299,8 @@ class ctrl extends mdl {
         
         return [
             'status' => $status,
-            'message' => $message
+            'message' => $message,
+            'array'   => $array_product
         ];
     }
 
