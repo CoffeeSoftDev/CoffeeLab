@@ -116,7 +116,7 @@ class App extends Templates {
 
     redirectToHome() {
         const base = window.location.origin + '/DEV';
-        window.location.href = `http://localhost/CoffeeLab/CoffeeERP/DEV/kpi/marketing.php`;
+        window.location.href = `${base}/kpi/marketing.php`;
     }
 
     headerBar(options) {
@@ -525,9 +525,6 @@ class Pedidos extends Templates {
                     $('#cliente_cumpleaños').val('');
                 }
             });
-
-
-
 
             // Inicializar Select2 para productos (múltiple)
             $('#producto_id').select2({

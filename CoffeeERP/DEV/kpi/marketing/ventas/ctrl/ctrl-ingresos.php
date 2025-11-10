@@ -1181,7 +1181,7 @@ class ctrl extends mdl {
     function ComparativaMensual(){
 
         $Mes          = $_POST['mes'];
-        $mesCompleto  = $_POST['mesCompleto'];
+        $mesCompleto  = isset($_POST['mesCompleto']) ? $_POST['mesCompleto'] : '';
         $Anio         = $_POST['anio'];
         $AnioAnterior = $Anio - 1;
         $days         = listDays();
@@ -1235,8 +1235,6 @@ class ctrl extends mdl {
         }
 
         return [
-            'view'  => $data,
-            // 'thead' => [],
             'thead' => ['DIA', $mesCompleto . ' / ' . $Anio, $mesCompleto . ' / ' . $AnioAnterior, 'DIFERENCIA'],
             'row'   => $__row
         ];
@@ -1244,7 +1242,7 @@ class ctrl extends mdl {
 
     function ComparativaMensualPromedios(){
           $Mes          = $_POST['mes'];
-          $mesCompleto  = $_POST['mesCompleto'];
+          $mesCompleto  = isset($_POST['mesCompleto']) ? $_POST['mesCompleto'] : '';
           $Anio         = $_POST['anio'];
           $AnioAnterior = $Anio - 1;
           $days         = listDays();
@@ -1264,6 +1262,7 @@ class ctrl extends mdl {
             foreach ($days as $noDias => $Days){
                 $campos = ['id' => $noDias, 'dayOfWeek' => $Days];
                 $meses = [];
+                $val = 0;
 
                 foreach($month as $titulo => $getFecha){
         //     //         $lsPromedios = $this->lsPromediosAcomulados(['Anio' => $getFecha['year'], 'Mes' => $getFecha['month']]);
@@ -1285,10 +1284,8 @@ class ctrl extends mdl {
         }
 
         return [
-            // 'thead' => ['DIA', $mesCompleto . ' / ' . $Anio, $mesCompleto . ' / ' . $AnioAnterior, 'DIFERENCIA'],
-            'row'   => $__row,
-            // 'data'  => $lsPromedios,
-            'ok'    => $ok
+            'thead' => ['DIA', $mesCompleto . ' / ' . $Anio, $mesCompleto . ' / ' . $AnioAnterior, 'DIFERENCIA'],
+            'row'   => $__row
         ];
     }
 
@@ -1377,6 +1374,16 @@ class ctrl extends mdl {
 
         $hoy->modify('last day of this month');
         $__row = [];
+        
+        // Inicializar variables
+        $idRow = 0;
+        $noHabitaciones = 0;
+        $total = 0;
+        $hospedaje = 0;
+        $AyB = 0;
+        $ingresosDiversos = 0;
+        $ventasAlimentos = 0;
+        $ventasBebidas = 0;
 
 
         while ($fi <= $hoy) {

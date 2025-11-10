@@ -18,7 +18,6 @@ class ctrl extends mdl {
     }
 
     // Clientes.
-
     function listClientes() {
         $__row = [];
         
@@ -397,8 +396,6 @@ class ctrl extends mdl {
                     </span>';
         }
     }
-
-
 }
 
 function renderUserCard($name, $email = '', $color = '#2563EB') {
