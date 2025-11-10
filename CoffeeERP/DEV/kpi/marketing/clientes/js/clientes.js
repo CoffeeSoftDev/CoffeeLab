@@ -56,7 +56,6 @@ class App extends Templates {
 
 
     layout() {
-
         this.primaryLayout({
             parent: 'root',
             id: this.PROJECT_NAME,
@@ -489,7 +488,6 @@ class Clientes extends Templates {
                 text: "valor",
                 value: "id"
             },
-
             {
                 opc: "input",
                 id: "nombre",
@@ -497,7 +495,6 @@ class Clientes extends Templates {
                 class: "col-12 col-md-8 mb-3",
                 placeholder: "Nombre completo"
             },
-
             {
                 opc: "div",
                 class: "col-12 mb-3 mt-1",
@@ -526,10 +523,9 @@ class Clientes extends Templates {
                 id: "fecha_cumpleaños",
                 lbl: "Fecha de Cumpleaños",
                 type: "date",
-                class: "col-12 col-md-4 mb-3"
+                class: "col-12 col-md-4 mb-3",
+                required: false
             },
-
-
             {
                 opc: "div",
                 class: "col-12 mt-2",
