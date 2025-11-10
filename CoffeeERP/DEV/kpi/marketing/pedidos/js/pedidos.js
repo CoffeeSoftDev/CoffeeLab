@@ -272,17 +272,29 @@ class Pedidos extends Templates {
         });
     }
 
-    showModalAddPedido() {
+    async showModalAddPedido() {
         const selectedUdn = $("#filterBarPedido #udn_id").val();
         let selectedClienteId = null;
 
-        // Filtrar productos por unidad de negocio seleccionada
-        pedidos.productosFiltrados = productos.filter(p => p.udn_id == selectedUdn);
+        const formData = await useFetch({
+            url: this._link,
+            data: { opc: 'getFormDataPedido', udn_id: selectedUdn }
+        });
 
-        // Filtrar anuncios por unidad de negocio seleccionada
-        const anunciosFiltrados = anuncios.filter(a => a.udn_id == selectedUdn);
+        if (formData.status !== 200) {
+            alert({
+                icon: "error",
+                text: "Error al cargar datos del formulario",
+                btn1: true,
+                btn1Text: "Ok"
+            });
+            return;
+        }
+
+        const { canales, productos, anuncios, redes_sociales, udn } = formData.data;
+
         let anunciosOptions = '';
-        anunciosFiltrados.forEach(anuncio => {
+        anuncios.forEach(anuncio => {
             const imagenUrl = anuncio.imagen ? `https://www.erp-varoch.com/DEV/${anuncio.imagen}` : 'https://sublimac.com/wp-content/uploads/2017/11/default-placeholder.png';
             anunciosOptions += `
                 <div class="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100" 
@@ -307,7 +319,7 @@ class Pedidos extends Templates {
                     <label class="form-label">Canal</label>
                     <select class="form-control" id="canal_id" required>
                         <option value="">Seleccione...</option>
-                        ${canales.map(c => `<option value="${c.id}">${c.valor}</option>`).join('')}
+                        ${formData.data.canales.map(c => `<option value="${c.id}">${c.valor}</option>`).join('')}
                     </select>
                 </div>
                 
@@ -318,8 +330,8 @@ class Pedidos extends Templates {
                 
                 <div class="col-12 col-lg-4 mb-3">
                     <label class="form-label">Unidad de Negocio</label>
-                    <select class="form-control" id="udn_id" required onchange="updateProductosByUdnAdd(this.value)">
-                        ${udn.map(u => `<option value="${u.id}" ${u.id == selectedUdn ? 'selected' : ''}>${u.valor}</option>`).join('')}
+                    <select class="form-control" id="udn_id" required onchange="pedidos.updateProductosByUdnAdd(this.value)">
+                        ${formData.data.udn.map(u => `<option value="${u.id}" ${u.id == selectedUdn ? 'selected' : ''}>${u.valor}</option>`).join('')}
                     </select>
                 </div>
                 
@@ -334,7 +346,7 @@ class Pedidos extends Templates {
                   <div class="col-12 col-lg-4 mb-3">
                     <label class="form-label">Producto o servicio</label>
                     <select class="form-control" id="producto_id" required multiple>
-                        ${pedidos.productosFiltrados.map(r => `<option value="${r.id}">${r.valor}</option>`).join('')}
+                        ${formData.data.productos.map(r => `<option value="${r.id}">${r.valor}</option>`).join('')}
                     </select>
                 </div>
                 
@@ -363,7 +375,7 @@ class Pedidos extends Templates {
                     <label class="form-label">Red social</label>
                     <select class="form-control" id="red_social_id" required>
                         <option value="">Seleccione...</option>
-                        ${redes_sociales.map(r => `<option value="${r.id}">${r.valor}</option>`).join('')}
+                        ${formData.data.redes_sociales.map(r => `<option value="${r.id}">${r.valor}</option>`).join('')}
                     </select>
                 </div>
                 
@@ -630,33 +642,38 @@ class Pedidos extends Templates {
                 validationInputForNumber('#monto');
             });
 
-            window.updateProductosByUdnAdd = function (udnId) {
-                // Actualizar productos
-                pedidos.productosFiltrados = productos.filter(p => p.udn_id == udnId);
-                const options = pedidos.productosFiltrados.map(r => `<option value="${r.id}">${r.valor}</option>`).join('');
-                $('#producto_id').html(options).trigger('change');
-
-                // Actualizar anuncios
-                const anunciosFiltrados = anuncios.filter(a => a.udn_id == udnId);
-                let anunciosOptions = '<div class="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100" data-value="" data-icon=""><span class="text-gray-400">Sin anuncio</span></div>';
-                anunciosFiltrados.forEach(anuncio => {
-                    const imagenUrl = anuncio.imagen ? `https://www.erp-varoch.com/DEV/${anuncio.imagen}` : 'https://sublimac.com/wp-content/uploads/2017/11/default-placeholder.png';
-                    anunciosOptions += `
-                        <div class="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100" 
-                             data-value="${anuncio.id}" 
-                             data-icon="${imagenUrl}">
-                            <img src="${imagenUrl}" class="w-8 h-8 mr-2 rounded object-cover"> 
-                            ${anuncio.valor}
-                        </div>
-                    `;
-                });
-                $('#dropdownAnuncioMenu').html(anunciosOptions);
-                // Reiniciar selección de anuncio
-                $('#anuncio_id').val('');
-                $('#selectedAnuncio').html('<span class="text-gray-400">Seleccione un anuncio...</span>');
-            };
-
         }, 100);
+    }
+
+    async updateProductosByUdnAdd(udnId) {
+        const formData = await useFetch({
+            url: this._link,
+            data: { opc: 'getFormDataPedido', udn_id: udnId }
+        });
+
+        if (formData.status === 200) {
+            const { productos, anuncios } = formData.data;
+
+            const options = productos.map(r => `<option value="${r.id}">${r.valor}</option>`).join('');
+            $('#producto_id').html(options).trigger('change');
+
+            let anunciosOptions = '<div class="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100" data-value="" data-icon=""><span class="text-gray-400">Sin anuncio</span></div>';
+            anuncios.forEach(anuncio => {
+                const imagenUrl = anuncio.imagen ? `https://www.erp-varoch.com/DEV/${anuncio.imagen}` : 'https://sublimac.com/wp-content/uploads/2017/11/default-placeholder.png';
+                anunciosOptions += `
+                    <div class="flex items-center px-3 py-2 cursor-pointer hover:bg-gray-100" 
+                         data-value="${anuncio.id}" 
+                         data-icon="${imagenUrl}">
+                        <img src="${imagenUrl}" class="w-8 h-8 mr-2 rounded object-cover"> 
+                        ${anuncio.valor}
+                    </div>
+                `;
+            });
+            $('#dropdownAnuncioMenu').html(anunciosOptions);
+
+            $('#anuncio_id').val('');
+            $('#selectedAnuncio').html('<span class="text-gray-400">Seleccione un anuncio...</span>');
+        }
     }
 
     async editPedido(id) {

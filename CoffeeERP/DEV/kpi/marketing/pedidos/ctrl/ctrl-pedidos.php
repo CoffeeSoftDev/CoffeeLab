@@ -22,6 +22,36 @@ class ctrl extends mdl {
         ];
     }
 
+    function getFormDataPedido() {
+        $udn_id = isset($_POST['udn_id']) ? $_POST['udn_id'] : null;
+        
+        $productos = $this->lsProductos([1]);
+        $anuncios = $this->lsAnuncios();
+        
+        if ($udn_id) {
+            $productos = array_filter($productos, function($p) use ($udn_id) {
+                return $p['udn_id'] == $udn_id;
+            });
+            $productos = array_values($productos);
+            
+            $anuncios = array_filter($anuncios, function($a) use ($udn_id) {
+                return $a['udn_id'] == $udn_id;
+            });
+            $anuncios = array_values($anuncios);
+        }
+        
+        return [
+            'status' => 200,
+            'data' => [
+                'canales'        => $this->lsCanales([1]),
+                'productos'      => $productos,
+                'anuncios'       => $anuncios,
+                'redes_sociales' => $this->lsSocialNetworks([]),
+                'udn'            => $this->lsUDN()
+            ]
+        ];
+    }
+
     function apiSearchClientes() {
         $search = '%' . $_POST['search'] . '%';
         
