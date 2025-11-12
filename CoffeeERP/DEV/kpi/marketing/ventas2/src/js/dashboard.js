@@ -229,9 +229,11 @@ class Dashboard extends Templates {
             dataB: [], // Año actual
             yearA: new Date().getFullYear() - 1, // 2024
             yearB: new Date().getFullYear(),     // 2025
+            type: "price"
         };
 
         const opts = Object.assign({}, defaults, options);
+        const isPrice = opts.type === "price";
 
         // 📦 Crear contenedor
         const container = $("<div>", { class: opts.class });
@@ -293,7 +295,7 @@ class Dashboard extends Templates {
                             meta.data.forEach(function (bar, index) {
                                 const value = dataset.data[index];
                                 if (value && value > 0) {
-                                    const label = typeof formatPrice === "function" ? formatPrice(value) : value;
+                                    const label = isPrice ? (typeof formatPrice === "function" ? formatPrice(value) : Number(value).toLocaleString()) : Number(value).toLocaleString();
                                     ctx.fillStyle = "#000";
                                     ctx.fillText(label, bar.x, bar.y - 5);
                                 }
@@ -321,7 +323,7 @@ class Dashboard extends Templates {
                     tooltip: {
                         callbacks: {
                             label: (ctx) =>
-                                `${ctx.dataset.label}: ${formatPrice(ctx.parsed.y)}`
+                                `${ctx.dataset.label}: ${isPrice && typeof formatPrice === "function" ? formatPrice(ctx.parsed.y) : Number(ctx.parsed.y).toLocaleString()}`
                         }
                     }
                 },
@@ -338,7 +340,7 @@ class Dashboard extends Templates {
                         beginAtZero: true,
                         grace: '5%',
                         ticks: {
-                            callback: (v) => formatPrice(v),
+                            callback: (v) => isPrice && typeof formatPrice === "function" ? formatPrice(v) : Number(v).toLocaleString(),
                             color: "#333",
                             font: { size: 12 }
                         },
@@ -488,8 +490,6 @@ class Dashboard extends Templates {
         $("#" + opts.parent).html(container);
     }
 
-  
-
     handleCategoryChange(idudn) {
         // Filtrar las clasificaciones que coincidan con el idudn
         let lsclasificacion = clasificacion.filter((item) => item.udn == idudn);
@@ -580,15 +580,16 @@ class FinanceDashboard extends Dashboard {
                 },
 
                 { type: "grafico", id: "rankingChequePromedio", title: "Ranking Cheque Promedio" },
+                { type: "grafico", id: "containerChequePro" },
 
                 {
-                    type: "grafico", id: "clientesPorSemana", title: "",
+                    type: "grafico", id: "clientesPorSemana", title: "Clientes",
                     content: [
                         { class: " mt-2", type: "div", id: "containerClientesSemana" },
                     ]
                 },
 
-                { type: "grafico", id: "containerChequePro" },
+
                 {
                     type: "grafico", id: "barProductMargen1", title: "",
                     content: [
@@ -759,7 +760,6 @@ class FinanceDashboard extends Dashboard {
 
         this.layoutDailyAverageCheck();
         this.layoutChequePromedio();
-        this.layoutClientesPorSemana();
 
         // Graficos ventas.
 
@@ -790,6 +790,8 @@ class FinanceDashboard extends Dashboard {
             data: mkt.topWeekCheque || []
         });
 
+        this.renderClientesPorSemana();
+
 
     }
 
@@ -800,12 +802,12 @@ class FinanceDashboard extends Dashboard {
             $('#barProductMargen1').show();
             $('#ventasDiasSemana').show();
             $('#Tendencia').show();
-
             // Ocultar gráficos de cheque promedio
+            $('#clientesPorSemana').hide();
             $('#linearChequePromedio').hide();
             $('#dailyAverageCheck').hide();
             $('#rankingChequePromedio').hide();
-            $('#clientesPorSemana').hide();
+          
         } else if (category === 'daily') {
             // Mostrar gráficos de cheque promedio
             $('#linearChequePromedio').show();
@@ -908,10 +910,6 @@ class FinanceDashboard extends Dashboard {
 
     }
 
-    layoutClientesPorSemana() {
-        this.renderClientesPorSemana();
-    }
-
     async renderDailyAverageCheck() {
 
         let udn = $('#filterBar #udn').val();
@@ -946,40 +944,8 @@ class FinanceDashboard extends Dashboard {
             dataA: mkt.dataB,
             dataB: mkt.dataA,
             yearA: mkt.yearA,
-            yearB: mkt.yearB
-        });
-    }
-
-    async renderClientesPorSemana() {
-
-        let udn = $('#filterBar #udn').val();
-        let date = this.getFilterDate();
-
-        const meses = moment.months();
-        const nombreMes1 = meses[parseInt(date.month1) - 1];
-        const nombreMes2 = meses[parseInt(date.month2) - 1];
-
-        let mkt = await useFetch({
-            url: api_dashboard,
-            data: {
-                opc: "getClientesPorSemana",
-                udn: udn,
-                anio1: date.year1,
-                mes1: date.month1,
-                anio2: date.year2,
-                mes2: date.month2,
-            },
-        });
-
-        this.barChart({
-            parent: "containerClientesSemana",
-            id: "chartClientesSemana",
-            title: `👥 Total de Clientes por Día de la Semana - ${nombreMes1} ${date.year1} vs ${nombreMes2} ${date.year2}`,
-            labels: mkt.labels,
-            dataA: mkt.dataB,
-            dataB: mkt.dataA,
-            yearA: mkt.yearA,
-            yearB: mkt.yearB
+            yearB: mkt.yearB,
+            type: "price"
         });
     }
 
@@ -1074,6 +1040,7 @@ class FinanceDashboard extends Dashboard {
             onShow: () => { },
         };
         const opts = Object.assign({}, defaults, options);
+        const isPrice = opts.type === "price";
 
         const periodo1 = $('#filterBar #periodo1').val();
         const [anio1, mesNum1] = periodo1.split('-');
@@ -1235,139 +1202,6 @@ class FinanceDashboard extends Dashboard {
 
     }
 
-    clientsByDayChart(options) {
-        const defaults = {
-            parent: "containerClientsByDay",
-            id: "chartClientsByDay",
-            title: "Clientes por Día de la Semana",
-            class: "border p-4 rounded-xl",
-            labels: [],
-            dataA: [],
-            dataB: [],
-            yearA: new Date().getFullYear() - 1,
-            yearB: new Date().getFullYear(),
-        };
-
-        const opts = Object.assign({}, defaults, options);
-
-        const container = $("<div>", { class: opts.class });
-        const title = $("<h2>", {
-            class: "text-lg font-bold mb-2",
-            text: opts.title
-        });
-        const canvasWrapper = $("<div>", {
-            class: "w-full",
-            css: { height: "400px" }
-        });
-        const canvas = $("<canvas>", {
-            id: opts.id,
-            class: "w-full h-full"
-        });
-
-        canvasWrapper.append(canvas);
-        container.append(title, canvasWrapper);
-        $("#" + opts.parent).html(container);
-
-        const ctx = document.getElementById(opts.id).getContext("2d");
-        if (!window._clientsCharts) window._clientsCharts = {};
-        if (window._clientsCharts[opts.id]) window._clientsCharts[opts.id].destroy();
-
-        const colorPeriodo1 = "#103B60";
-        const colorPeriodo2 = "#8CC63F";
-
-        window._clientsCharts[opts.id] = new Chart(ctx, {
-            type: "bar",
-            data: {
-                labels: opts.labels,
-                datasets: [
-                    {
-                        label: `Año ${opts.yearA}`,
-                        data: opts.dataA,
-                        backgroundColor: colorPeriodo2
-                    },
-                    {
-                        label: `Año ${opts.yearB}`,
-                        data: opts.dataB,
-                        backgroundColor: colorPeriodo1
-                    }
-                ]
-            },
-            plugins: [{
-                id: 'clientsValueLabels',
-                afterDatasetsDraw: function (chart) {
-                    const ctx = chart.ctx;
-                    ctx.font = "bold 11px sans-serif";
-                    ctx.textAlign = "center";
-                    ctx.textBaseline = "bottom";
-
-                    chart.data.datasets.forEach(function (dataset, datasetIndex) {
-                        const meta = chart.getDatasetMeta(datasetIndex);
-                        if (!meta.hidden) {
-                            meta.data.forEach(function (bar, index) {
-                                const value = dataset.data[index];
-                                if (value && value > 0) {
-                                    ctx.fillStyle = "#000";
-                                    ctx.fillText(value, bar.x, bar.y - 5);
-                                }
-                            });
-                        }
-                    });
-                }
-            }],
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: "bottom",
-                        labels: {
-                            usePointStyle: true,
-                            padding: 15,
-                            font: {
-                                size: 13,
-                                weight: "600"
-                            },
-                            color: "#333"
-                        }
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: (ctx) =>
-                                `${ctx.dataset.label}: ${ctx.parsed.y} clientes`
-                        }
-                    }
-                },
-                layout: {
-                    padding: {
-                        top: 30,
-                        bottom: 10,
-                        left: 10,
-                        right: 10
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grace: '5%',
-                        ticks: {
-                            callback: (v) => Math.round(v),
-                            color: "#333",
-                            font: { size: 12 }
-                        },
-                        grid: { color: "rgba(0,0,0,0.05)" }
-                    },
-                    x: {
-                        ticks: {
-                            color: "#333",
-                            font: { size: 12 }
-                        },
-                        grid: { display: false }
-                    }
-                }
-            }
-        });
-    }
-
     // Top cheque promedio.
     topChequePromedioSemanal(options) {
         const defaults = {
@@ -1430,6 +1264,41 @@ class FinanceDashboard extends Dashboard {
         container.append(header, list);
         $("#" + opts.parent).html(container);
     }
+
+    async renderClientesPorSemana() {
+
+        let udn = $('#filterBar #udn').val();
+        let date = this.getFilterDate();
+
+        const meses = moment.months();
+        const nombreMes1 = meses[parseInt(date.month1) - 1];
+        const nombreMes2 = meses[parseInt(date.month2) - 1];
+
+        let mkt = await useFetch({
+            url: api_dashboard,
+            data: {
+                opc: "getClientesPorSemana",
+                udn: udn,
+                anio1: date.year1,
+                mes1: date.month1,
+                anio2: date.year2,
+                mes2: date.month2,
+            },
+        });
+
+        this.barChart({
+            parent: "containerClientesSemana",
+            id: "chartClientesSemana",
+            title: `👥 Total de Clientes por Día de la Semana - ${nombreMes1} ${date.year1} vs ${nombreMes2} ${date.year2}`,
+            labels: mkt.labels,
+            dataA: mkt.dataB,
+            dataB: mkt.dataA,
+            yearA: mkt.yearA,
+            yearB: mkt.yearB,
+            type: "number"
+        });
+    }
+
 
 
     // auxiliar.

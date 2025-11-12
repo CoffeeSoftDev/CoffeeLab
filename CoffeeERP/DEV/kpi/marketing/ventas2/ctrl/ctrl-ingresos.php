@@ -664,64 +664,6 @@ class ctrl extends mdl {
 
 
     // Dashboard -Promedios diarios
-    public function apiClientesPorDiaSemana($anio1 = null, $mes1 = null, $anio2 = null, $mes2 = null, $udn = null) {
-        $anio1 = $anio1 ?? (isset($_POST['anio1']) ? (int) $_POST['anio1'] : date('Y'));
-        $mes1  = $mes1  ?? (isset($_POST['mes1'])  ? (int) $_POST['mes1']  : date('m'));
-        $anio2 = $anio2 ?? (isset($_POST['anio2']) ? (int) $_POST['anio2'] : (date('Y') - 1));
-        $mes2  = $mes2  ?? (isset($_POST['mes2'])  ? (int) $_POST['mes2']  : date('m'));
-        $udn   = $udn   ?? (isset($_POST['udn'])   ? (int) $_POST['udn']   : 1);
-
-        // Período 1 (año actual)
-        $apiA = $this->apiResumenIngresosPorDia($anio1, $mes1, $udn);
-        $clientesA = [];
-        $conteosA = [];
-        foreach ($apiA['data'] as $row) {
-            $dia = $row['dia'];
-            if (!isset($clientesA[$dia])) {
-                $clientesA[$dia] = 0;
-                $conteosA[$dia] = 0;
-            }
-            $clientesA[$dia] += isset($row['clientes']) ? (int)$row['clientes'] : 0;
-            $conteosA[$dia]++;
-        }
-
-        // Período 2 (año anterior)
-        $apiB = $this->apiResumenIngresosPorDia($anio2, $mes2, $udn);
-        $clientesB = [];
-        $conteosB = [];
-        foreach ($apiB['data'] as $row) {
-            $dia = $row['dia'];
-            if (!isset($clientesB[$dia])) {
-                $clientesB[$dia] = 0;
-                $conteosB[$dia] = 0;
-            }
-            $clientesB[$dia] += isset($row['clientes']) ? (int)$row['clientes'] : 0;
-            $conteosB[$dia]++;
-        }
-
-        // Etiquetas en orden fijo
-        $labels = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"];
-        $dataA  = [];
-        $dataB  = [];
-
-        foreach ($labels as $dia) {
-            // Total de clientes (no promedio)
-            $totalA = isset($clientesA[$dia]) ? $clientesA[$dia] : 0;
-            $totalB = isset($clientesB[$dia]) ? $clientesB[$dia] : 0;
-                
-            $dataA[] = $totalA;
-            $dataB[] = $totalB;
-        }
-
-        return [
-            'labels' => $labels,
-            'dataA'  => $dataA,
-            'dataB'  => $dataB,
-            'yearA'  => $anio2,
-            'yearB'  => $anio1
-        ];
-    }
-
     public function apiPromediosDiarios() {
         $response = [];
 
@@ -793,15 +735,14 @@ class ctrl extends mdl {
         }
 
         return [
-            'status'       => 200,
-            'data'         => $response,
-            'dashboard'    => $this->apiDashBoard($response, $udn),
-            'barras'       => $this->comparativaChequePromedio(),
-            'linear'       => $this->apiLinearPromediosDiario($anio, $mes, $udn),
-            'barDays'      => $this->apiIngresosComparativoSemana(),
-            'clientsByDay' => $this->apiClientesPorDiaSemana(),
-            'topDays'      => $this->apiTopDiasMes(),
-            'topWeek'      => $this->apiTopDiasSemanaPromedio($anio, $mes, $udn)
+            'status'    => 200,
+            'data'      => $response,
+            'dashboard' => $this->apiDashBoard($response, $udn),
+            'barras'    => $this->comparativaChequePromedio(),
+            'linear'    => $this->apiLinearPromediosDiario($anio, $mes, $udn),
+            'barDays'   => $this->apiIngresosComparativoSemana(),
+            'topDays'   => $this->apiTopDiasMes(),
+            'topWeek'   => $this->apiTopDiasSemanaPromedio($anio, $mes, $udn)
         ];
     }
 

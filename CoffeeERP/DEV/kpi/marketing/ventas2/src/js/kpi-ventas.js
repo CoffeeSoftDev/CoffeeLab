@@ -1,4 +1,5 @@
 let api = 'ctrl/ctrl-ingresos.php';
+let apiVentas2 = 'ctrl/ctrl-ventas2.php';
 let app, sales, dashboard,calendar, salesDashboard, monthlySales, cumulativeAverages;
 
 let udn, lsudn, clasificacion, clasificacionUdn;
@@ -19,7 +20,7 @@ $(async () => {
     dashboard = new FinanceDashboard(api, "root");
     calendar  = new SalesCalendar(api, "root");
 
-    sales = new Sales(api, "root");
+    sales = new Sales(apiVentas2, "root");
     monthlySales = new MonthlySales(api, "root");
     cumulativeAverages = new CumulativeAverages(api, "root");
 
@@ -121,7 +122,7 @@ class App extends Templates {
 
     // Components.
     redirectToHome() {
-        const base = window.location.origin + '/DEV';
+        const base = window.location.origin + '/ERP24';
         window.location.href = `${base}/kpi/marketing.php`;
     }
 
@@ -203,7 +204,6 @@ class SalesDashboard extends Templates {
                     ]
                 },
                 { type: "grafico", id: "ventasDiasSemana", title: "Ventas por Día de la Semana" },
-                { type: "grafico", id: "clientesPorDia", title: "Clientes por Día de la Semana" },
                 { type: "grafico", id: "Tendencia", title: "Tendencia de Ventas" },
             ]
         });
@@ -266,7 +266,6 @@ class SalesDashboard extends Templates {
 
         this.ventasPorDiaSemana(mkt.barDays);
 
-        this.clientesPorDiaSemana(mkt.clientsByDay);
 
         this.topDiasSemana({
             parent: "Tendencia",
@@ -509,14 +508,7 @@ class SalesDashboard extends Templates {
             parent: 'ventasDiasSemana',
             title: 'Ventas por Día de Semana',
             ...data
-        })
-    }
 
-    clientesPorDiaSemana(data) {
-        this.clientsByDayChart({
-            parent: 'clientesPorDia',
-            title: 'Total de Clientes por Día de Semana',
-            ...data
         })
     }
 
@@ -1045,7 +1037,7 @@ class Sales extends Templates {
                 {
                     opc: "select",
                     id: "udn",
-                    lbl: "Seleccionar udn",
+                    lbl: "Seleccionar UDN",
                     class: "col-sm-3",
                     data: lsudn,
                     onchange: `sales.listSales()`,
@@ -1070,48 +1062,204 @@ class Sales extends Templates {
                     onchange: `sales.listSales()`,
                 },
                 {
-                    opc: "select",
-                    id: "type",
-                    lbl: "Consultar",
+                    opc: "button",
                     class: "col-sm-3",
-                    data: [
-                        { id: "3", valor: "Promedios Diarios" },
-                        { id: "1", valor: " Ingresos por día" },
-                        { id: "2", valor: "Captura de sales" },
-                    ],
-                    onchange: `sales.listSales()`,
+                    id: "btnSubirInfo",
+                    text: "Subir Información",
+                    onClick: () => this.addSale(),
                 },
             ],
         });
-        const currentMonth = moment().month() + 1; // Mes actual (1-12)
+        const currentMonth = moment().month() + 1;
         setTimeout(() => {
             $(`#filterBar${this.PROJECT_NAME} #mes`).val(currentMonth).trigger("change");
         }, 100);
     }
 
     listSales() {
-        const monthText = $("#filterBarsales #mes option:selected").text();
-        $("#containersales").html(`
+        const monthText = $(`#filterBar${this.PROJECT_NAME} #mes option:selected`).text();
+        $(`#container${this.PROJECT_NAME}`).html(`
             <div class="px-2 pt-2 pb-2">
                 <h2 class="text-2xl font-semibold ">📦 VENTAS DIARIAS</h2>
-                <p class="text-gray-400">Consultar y capturar ventas diaria por unidad de negocio (sales)</p>
+                <p class="text-gray-400">Consultar y capturar ventas diaria por unidad de negocio</p>
             </div>
             <div id="container-table-sales"></div>
         `);
+
+        const udn = $(`#filterBar${this.PROJECT_NAME} #udn`).val();
+        const anio = $(`#filterBar${this.PROJECT_NAME} #anio`).val();
+        const mes = $(`#filterBar${this.PROJECT_NAME} #mes`).val();
+
         this.createTable({
             parent: "container-table-sales",
-            idFilterBar: `filterBarsales`,
-            data: { opc: 'list', monthText: monthText },
+            idFilterBar: `filterBar${this.PROJECT_NAME}`,
+            data: { 
+                opc: 'lsSales', 
+                udn: udn,
+                anio: anio,
+                mes: mes
+            },
             coffeesoft: true,
             conf: { datatable: false, pag: 15 },
             attr: {
-                id: "tbIngresos",
+                id: "tbVentas",
                 theme: 'corporativo',
-                color_group: "bg-gray-300",
-                // center: [2],
-                right: [4]
+                title: `Ventas de ${monthText} ${anio}`,
+                subtitle: 'Desglose por categorías',
+                center: [1, 2, 3, 4],
+                right: [5, 6, 7]
             },
         });
+    }
+
+    addSale() {
+        this.createModalForm({
+            id: 'formSaleAdd',
+            data: { opc: 'addSale' },
+            bootbox: {
+                title: 'Agregar Venta',
+                closeButton: true
+            },
+            json: this.jsonSale(),
+            success: (response) => {
+                if (response.status === 200) {
+                    alert({
+                        icon: "success",
+                        text: response.message,
+                        btn1: true,
+                        btn1Text: "Ok"
+                    });
+                    this.listSales();
+                } else {
+                    alert({
+                        icon: "error",
+                        text: response.message,
+                        btn1: true,
+                        btn1Text: "Ok"
+                    });
+                }
+            }
+        });
+    }
+
+    async editSale(id) {
+        const request = await useFetch({
+            url: this._link,
+            data: { opc: "getSale", id: id }
+        });
+
+        if (request.status === 200) {
+            this.createModalForm({
+                id: 'formSaleEdit',
+                data: { opc: 'editSale', id: id },
+                bootbox: {
+                    title: 'Editar Venta',
+                    closeButton: true
+                },
+                autofill: request.data,
+                json: this.jsonSale(),
+                success: (response) => {
+                    if (response.status === 200) {
+                        alert({
+                            icon: "success",
+                            text: response.message,
+                            btn1: true,
+                            btn1Text: "Ok"
+                        });
+                        this.listSales();
+                    } else {
+                        alert({
+                            icon: "error",
+                            text: response.message,
+                            btn1: true,
+                            btn1Text: "Ok"
+                        });
+                    }
+                }
+            });
+        }
+    }
+
+    statusSale(id, active) {
+        const action = active === 1 ? 'desactivar' : 'activar';
+        
+        this.swalQuestion({
+            opts: {
+                title: `¿Desea ${action} esta venta?`,
+                text: "Esta acción cambiará el estado del registro",
+                icon: "warning"
+            },
+            data: {
+                opc: "statusSale",
+                id: id,
+                active: active
+            },
+            methods: {
+                send: (response) => {
+                    if (response.status === 200) {
+                        alert({
+                            icon: "success",
+                            text: response.message,
+                            btn1: true,
+                            btn1Text: "Ok"
+                        });
+                        this.listSales();
+                    } else {
+                        alert({
+                            icon: "error",
+                            text: response.message,
+                            btn1: true,
+                            btn1Text: "Ok"
+                        });
+                    }
+                }
+            }
+        });
+    }
+
+    jsonSale() {
+        return [
+            {
+                opc: "select",
+                id: "udn",
+                lbl: "Unidad de Negocio",
+                class: "col-12 mb-3",
+                data: lsudn,
+                text: "valor",
+                value: "id"
+            },
+            {
+                opc: "input",
+                id: "fecha",
+                lbl: "Fecha",
+                type: "date",
+                class: "col-12 mb-3"
+            },
+            {
+                opc: "input",
+                id: "clientes",
+                lbl: "Clientes",
+                tipo: "numero",
+                class: "col-12 mb-3",
+                onkeyup: "validationInputForNumber('#clientes')"
+            },
+            {
+                opc: "input",
+                id: "alimentos",
+                lbl: "Alimentos",
+                tipo: "cifra",
+                class: "col-12 mb-3",
+                onkeyup: "validationInputForNumber('#alimentos')"
+            },
+            {
+                opc: "input",
+                id: "bebidas",
+                lbl: "Bebidas",
+                tipo: "cifra",
+                class: "col-12 mb-3",
+                onkeyup: "validationInputForNumber('#bebidas')"
+            }
+        ];
     }
 }
 

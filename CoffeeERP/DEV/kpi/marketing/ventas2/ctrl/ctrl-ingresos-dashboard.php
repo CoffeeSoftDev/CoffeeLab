@@ -445,71 +445,6 @@ class ctrl extends mdl {
         ];
     }
 
-    function getClientesPorSemana() {
-        $udn   = $_POST['udn']   ?? null;
-        $anio1 = $_POST['anio1'] ?? date('Y');
-        $mes1  = $_POST['mes1']  ?? date('m');
-        $anio2 = $_POST['anio2'] ?? date('Y') - 1;
-        $mes2  = $_POST['mes2']  ?? date('m');
-
-        $apiActual   = $this->apiIngresosTotales($udn, $anio1, $mes1);
-        $apiAnterior = $this->apiIngresosTotales($udn, $anio2, $mes2);
-
-        $rowsActual   = $apiActual['data'] ?? [];
-        $rowsAnterior = $apiAnterior['data'] ?? [];
-
-        $diasES = [
-            'Monday'    => 'Lunes',
-            'Tuesday'   => 'Martes',
-            'Wednesday' => 'Miércoles',
-            'Thursday'  => 'Jueves',
-            'Friday'    => 'Viernes',
-            'Saturday'  => 'Sábado',
-            'Sunday'    => 'Domingo'
-        ];
-
-        $weeklyActual   = array_fill_keys(array_values($diasES), 0);
-        $weeklyAnterior = array_fill_keys(array_values($diasES), 0);
-
-        $processData = function ($rows, &$weeklyData) use ($diasES) {
-            foreach ($rows as $row) {
-                if (empty($row['fecha'])) continue;
-
-                $dayEnglish = ucfirst(strtolower(date('l', strtotime($row['fecha']))));
-                $dayName    = $diasES[$dayEnglish] ?? $dayEnglish;
-
-                $clientes = isset($row['clientes']) ? intval($row['clientes']) : 0;
-
-                if (isset($weeklyData[$dayName])) {
-                    $weeklyData[$dayName] += $clientes;
-                }
-            }
-        };
-
-        $processData($rowsActual, $weeklyActual);
-        $processData($rowsAnterior, $weeklyAnterior);
-
-        $labels = [];
-        $dataA  = [];
-        $dataB  = [];
-
-        foreach ($diasES as $en => $es) {
-            $labels[] = $es;
-            $dataA[]  = $weeklyAnterior[$es];
-            $dataB[]  = $weeklyActual[$es];
-        }
-
-        return [
-            'status'  => 200,
-            'message' => 'Total de clientes por día de la semana generado correctamente',
-            'labels'  => $labels,
-            'dataA'   => $dataA,
-            'dataB'   => $dataB,
-            'yearA'   => intval($anio2),
-            'yearB'   => intval($anio1)
-        ];
-    }
-
     // Graficos cheque Prom.
     function apiPromediosDiariosRange() {
         $__row        = [];
@@ -1010,6 +945,71 @@ class ctrl extends mdl {
         });
 
         return $ranking;
+    }
+
+    function getClientesPorSemana() {
+        $udn   = $_POST['udn']   ?? null;
+        $anio1 = $_POST['anio1'] ?? date('Y');
+        $mes1  = $_POST['mes1']  ?? date('m');
+        $anio2 = $_POST['anio2'] ?? date('Y') - 1;
+        $mes2  = $_POST['mes2']  ?? date('m');
+
+        $apiActual   = $this->apiIngresosTotales($udn, $anio1, $mes1);
+        $apiAnterior = $this->apiIngresosTotales($udn, $anio2, $mes2);
+
+        $rowsActual   = $apiActual['data'] ?? [];
+        $rowsAnterior = $apiAnterior['data'] ?? [];
+
+        $diasES = [
+            'Monday'    => 'Lunes',
+            'Tuesday'   => 'Martes',
+            'Wednesday' => 'Miércoles',
+            'Thursday'  => 'Jueves',
+            'Friday'    => 'Viernes',
+            'Saturday'  => 'Sábado',
+            'Sunday'    => 'Domingo'
+        ];
+
+        $weeklyActual   = array_fill_keys(array_values($diasES), 0);
+        $weeklyAnterior = array_fill_keys(array_values($diasES), 0);
+
+        $processData = function ($rows, &$weeklyData) use ($diasES) {
+            foreach ($rows as $row) {
+                if (empty($row['fecha'])) continue;
+
+                $dayEnglish = ucfirst(strtolower(date('l', strtotime($row['fecha']))));
+                $dayName    = $diasES[$dayEnglish] ?? $dayEnglish;
+
+                $clientes = isset($row['clientes']) ? intval($row['clientes']) : 0;
+
+                if (isset($weeklyData[$dayName])) {
+                    $weeklyData[$dayName] += $clientes;
+                }
+            }
+        };
+
+        $processData($rowsActual, $weeklyActual);
+        $processData($rowsAnterior, $weeklyAnterior);
+
+        $labels = [];
+        $dataA  = [];
+        $dataB  = [];
+
+        foreach ($diasES as $en => $es) {
+            $labels[] = $es;
+            $dataA[]  = $weeklyAnterior[$es];
+            $dataB[]  = $weeklyActual[$es];
+        }
+
+        return [
+            'status'  => 200,
+            'message' => 'Total de clientes por día de la semana generado correctamente',
+            'labels'  => $labels,
+            'dataA'   => $dataA,
+            'dataB'   => $dataB,
+            'yearA'   => intval($anio2),
+            'yearB'   => intval($anio1)
+        ];
     }
 
     
