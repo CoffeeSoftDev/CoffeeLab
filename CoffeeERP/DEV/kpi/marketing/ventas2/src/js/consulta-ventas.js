@@ -1,9 +1,10 @@
 let apiVentas = 'ctrl/ctrl-ventas2.php';
-let app, lsudn;
+let app, lsudn, categorias;
 
 $(async () => {
     const data = await useFetch({ url: apiVentas, data: { opc: "init" } });
     lsudn = data.udn;
+    categorias = data.categorias;
 
     app = new ConsultaVentas(apiVentas, "root");
     app.render();
@@ -118,8 +119,10 @@ class ConsultaVentas extends Templates {
             parent: "container-table-ventas",
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
             data: { 
-                opc: 'lsSales', 
-               
+                opc: 'lsSales',
+                udn: udn,
+                anio: anio,
+                mes: mes
             },
             coffeesoft: true,
             conf: { datatable: true, pag: 15 },
@@ -127,9 +130,9 @@ class ConsultaVentas extends Templates {
                 id: "tbVentasDiarias",
                 theme: 'corporativo',
                 title: `Ventas de ${monthText} ${anio}`,
-                subtitle: 'Desglose detallado por categorías',
-                center: [1, 2, 3, 4],
-                right: [5, 6, 7]
+                subtitle: 'Desglose por categorías - Columnas dinámicas según tipos de venta',
+                center: [1, 2],
+                right: []
             },
         });
     }
@@ -290,27 +293,20 @@ class ConsultaVentas extends Templates {
             },
             {
                 opc: "input",
-                id: "clientes",
-                lbl: "Número de Clientes",
-                tipo: "numero",
+                id: "cantidad",
+                lbl: "Cantidad de Ventas",
+                tipo: "cifra",
                 class: "col-12 mb-3",
-                onkeyup: "validationInputForNumber('#clientes')"
+                onkeyup: "validationInputForNumber('#cantidad')"
             },
             {
-                opc: "input",
-                id: "alimentos",
-                lbl: "Ventas en Alimentos ($)",
-                tipo: "cifra",
-                class: "col-12 col-md-6 mb-3",
-                onkeyup: "validationInputForNumber('#alimentos')"
-            },
-            {
-                opc: "input",
-                id: "bebidas",
-                lbl: "Ventas en Bebidas ($)",
-                tipo: "cifra",
-                class: "col-12 col-md-6 mb-3",
-                onkeyup: "validationInputForNumber('#bebidas')"
+                opc: "select",
+                id: "categoria",
+                lbl: "Categoría de Venta",
+                class: "col-12 mb-3",
+                data: categorias,
+                text: "valor",
+                value: "id"
             }
         ];
     }

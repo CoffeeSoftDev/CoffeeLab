@@ -6,10 +6,14 @@
 		public function connect() {
             if (!$this->connected) {
                 // $conf = require_once('_conf.php'); 
-                $host = "localhost";
+                // $host = "www.erp-varoch.com";
+                $host = 'localhost';
                 $user = "root";
                 $pass = "";
                 $db   = "rfwsmqex_erp";
+                //    $user = "rfwsmqex_sl";
+                // $pass = "@GVsl_1234";
+                // $db   = "rfwsmqex_erp";
                 
                 //  La opción especifica que se debe ejecutar el comando "SET NAMES utf8" para asegurarse de que la conexión use la codificación de caracteres UTF-8.
                 $opc = array(
@@ -17,7 +21,7 @@
                     );
 
                 try {
-                    $this->mysql = new PDO('mysql:host=localhost;dbname='.$db,$user,$pass,$opc);
+                    $this->mysql = new PDO('mysql:host='.$host.';dbname='.$db,$user,$pass,$opc);
                     $this->mysql->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
                     $this->connected = true;
                 } catch (PDOException $e) {

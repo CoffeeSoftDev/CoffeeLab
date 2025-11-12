@@ -7,13 +7,15 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
 
 require_once '../mdl/mdl-ventas2.php';
+require_once '../../../../conf/coffeSoft.php';
+
 
 class ctrl extends mdl {
 
     function init() {
         return [
             'udn' => $this->lsUDN(),
-            'ventas' => $this->lsVentas()
+            'categorias' => $this->lsVentas()
         ];
     }
 
@@ -25,49 +27,66 @@ class ctrl extends mdl {
 
         $ls = $this->listSales([$udn, $anio, $mes]);
 
+        $categorias = [];
         $ventasPorFecha = [];
+
         foreach ($ls as $key) {
             $fecha = $key['fecha'];
+            $categoria = $key['categoria'];
+
+            if (!in_array($categoria, $categorias)) {
+                $categorias[] = $categoria;
+            }
+
             if (!isset($ventasPorFecha[$fecha])) {
                 $ventasPorFecha[$fecha] = [
-                    'id'        => $key['id'],
-                    'fecha'     => $fecha,
-                    'dia'       => traducirDia($key['dia']),
-                    'clientes'  => $key['clientes'],
-                    'estado'    => $key['estado'],
-                    'alimentos' => 0,
-                    'bebidas'   => 0
+                    'id'       => $key['id'],
+                    'fecha'    => $fecha,
+                    'dia'      => traducirDia($key['dia']),
+                    'estado'   => $key['estado'],
+                    'categorias' => []
                 ];
             }
 
-            if (strtolower($key['categoria']) == 'alimentos') {
-                $ventasPorFecha[$fecha]['alimentos'] += floatval($key['clientes']);
-            } elseif (strtolower($key['categoria']) == 'bebidas') {
-                $ventasPorFecha[$fecha]['bebidas'] += floatval($key['clientes']);
-            }
+            $ventasPorFecha[$fecha]['categorias'][$categoria] = floatval($key['cantidad']);
         }
 
-        foreach ($ventasPorFecha as $venta) {
-            $total = $venta['alimentos'] + $venta['bebidas'];
+        $thead = ['Fecha', 'Día', 'Estado'];
+        foreach ($categorias as $cat) {
+            $thead[] = $cat;
+        }
+        $thead[] = 'Total Ventas';
 
-            $__row[] = [
-                'id' => $venta['id'],
-                'Fecha'     => formatSpanishDate($venta['fecha']),
-                'Día'       => $venta['dia'],
-                'Estado'    => renderStatus($venta['estado']),
-                'Clientes'  => $venta['clientes'],
-                'Alimentos' => evaluar($venta['alimentos']),
-                'Bebidas'   => evaluar($venta['bebidas']),
-                'Total' => [
-                    'html'  => evaluar($total),
-                    'class' => 'text-end bg-[#283341]'
-                ],
-                'dropdown' => dropdown($venta['id'], $venta['estado'])
+        foreach ($ventasPorFecha as $venta) {
+            $total = 0;
+            $row = [
+                'id'     => $venta['id'],
+             
+                'Fecha'  => formatSpanishDate($venta['fecha']),
+                // 'Día'    => $venta['dia'],
+                'Estado' => renderStatus($venta['estado'])
             ];
+
+            foreach ($categorias as $cat) {
+                $cantidad = isset($venta['categorias'][$cat]) ? $venta['categorias'][$cat] : 0;
+                $total += $cantidad;
+                $row[$cat] = evaluar($cantidad);
+            }
+
+            $row['Total Ventas'] = [
+                'html'  => evaluar($total),
+                'class' => 'text-end bg-[#283341] font-bold'
+            ];
+
+            $row['dropdown'] = dropdown($venta['id'], $venta['estado']);
+
+            $__row[] = $row;
         }
 
         return [
             'row' => $__row,
+            'thead' => $thead,
+            'categorias' => $categorias,
             'ls' => $ls
         ];
     }
@@ -99,30 +118,23 @@ class ctrl extends mdl {
         $message = 'No se pudo agregar la venta';
         
         $_POST['Fecha_Venta'] = $_POST['fecha'];
-        $_POST['Cantidad'] = $_POST['clientes'];
+        $_POST['Cantidad'] = $_POST['cantidad'];
 
-        $exists = $this->existsSaleByDate([$_POST['udn'], $_POST['fecha']]);
+        $idFolio = $this->createVentaUDN($this->util->sql([
+            'id_UDN' => $_POST['udn'],
+            'id_Venta' => $_POST['categoria'],
+            'Stado' => 1,
+            'creacion' => date('Y-m-d H:i:s')
+        ]));
 
-        if ($exists == 0) {
-            $idFolio = $this->createVentaUDN($this->util->sql([
-                'id_UDN' => $_POST['udn'],
-                'id_Venta' => 1,
-                'Stado' => 1,
-                'creacion' => date('Y-m-d H:i:s')
-            ]));
+        if ($idFolio) {
+            $_POST['id_UV'] = $idFolio;
+            $create = $this->createSale($this->util->sql($_POST));
 
-            if ($idFolio) {
-                $_POST['id_Folio'] = $idFolio;
-                $create = $this->createSale($this->util->sql($_POST));
-
-                if ($create) {
-                    $status = 200;
-                    $message = 'Venta agregada correctamente';
-                }
+            if ($create) {
+                $status = 200;
+                $message = 'Venta agregada correctamente';
             }
-        } else {
-            $status = 409;
-            $message = 'Ya existe un registro para esta fecha y UDN';
         }
 
         return [
@@ -137,7 +149,7 @@ class ctrl extends mdl {
         $message = 'Error al editar la venta';
 
         $_POST['Fecha_Venta'] = $_POST['fecha'];
-        $_POST['Cantidad'] = $_POST['clientes'];
+        $_POST['Cantidad'] = $_POST['cantidad'];
 
         $edit = $this->updateSale($this->util->sql($_POST, 1));
 
