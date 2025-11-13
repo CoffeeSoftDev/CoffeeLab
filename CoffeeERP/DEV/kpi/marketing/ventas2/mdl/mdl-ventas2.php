@@ -33,7 +33,7 @@ class mdl extends CRUD {
                 u.idUDN = ?
                 AND YEAR(vb.Fecha_Venta)  = ?
                 AND MONTH(vb.Fecha_Venta) = ?
-            ORDER BY vb.Fecha_Venta DESC, v.Name_Venta ASC
+            ORDER BY vb.Fecha_Venta ASC, v.Name_Venta ASC
         ";
 
         return $this->_Read($query, $array);
@@ -120,5 +120,59 @@ class mdl extends CRUD {
             'where' => 'idUV = ?',
             'data' => [$id_folio]
         ])[0];
+    }
+
+    function getFolioByFechaUdn($array) {
+        return $this->_Select([
+            'table'  => "{$this->bd}soft_folio",
+            'values' => "*",
+            'where'  => 'fecha_folio = ? AND id_udn = ?',
+            'data'   => $array
+        ])[0] ?? null;
+    }
+
+    function getVentaByFolioId($folioId) {
+        return $this->_Select([
+            'table'  => "{$this->bd}soft_restaurant_ventas",
+            'values' => "*",
+            'where'  => 'soft_folio = ?',
+            'data'   => [$folioId]
+        ])[0] ?? null;
+    }
+
+    function createVenta($array) {
+        return $this->_Insert([
+            'table'  => "{$this->bd}soft_restaurant_ventas",
+            'values' => $array['values'],
+            'data'   => $array['data']
+        ]);
+    }
+
+    function updateVenta($array) {
+        return $this->_Update([
+            'table'  => "{$this->bd}soft_restaurant_ventas",
+            'values' => $array['values'],
+            'where'  => 'id_venta = ?',
+            'data'   => $array['data']
+        ]);
+    }
+
+    function createFolio($array) {
+        return $this->_Insert([
+            'table'  => "{$this->bd}soft_folio",
+            'values' => $array['values'],
+            'data'   => $array['data']
+        ]);
+    }
+
+    function getSuitesOcupadasByFecha($fecha) {
+        $query = "
+            SELECT SUM(t.suite) AS total_suites_unicas
+            FROM {$this->bd}turno t
+            WHERE t.fecha_turno = ?
+        ";
+
+        $result = $this->_Read($query, [$fecha]);
+        return $result[0]['total_suites_unicas'] ?? 0;
     }
 }
