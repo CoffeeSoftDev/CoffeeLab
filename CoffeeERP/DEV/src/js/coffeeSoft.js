@@ -1633,7 +1633,7 @@ class Components extends Complements {
             center: [],
             right: [],
             color_th: "bg-[#003360] text-gray-100",
-            color_row: "bg-white hover:bg-gray-50",
+            color_row: " hover:bg-gray-50",
             color_group: "bg-gray-200",
             class: "w-full table-auto text-sm text-gray-800",
             onEdit: () => { },
@@ -1658,7 +1658,7 @@ class Components extends Complements {
             defaults.color_row_alt = "bg-[#111827]";
         } else if (options.theme === 'corporativo') {
             defaults.color_th = "bg-[#003360] text-white";
-            defaults.color_row = "bg-white ";
+            defaults.color_row = " ";
             defaults.color_group = "bg-gray-100 ";
             defaults.class = "w-full text-sm ";
             defaults.border_table = "border rounded-lg  border-gray-300";
