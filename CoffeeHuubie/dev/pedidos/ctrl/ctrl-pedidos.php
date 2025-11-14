@@ -1054,7 +1054,7 @@ class Pedidos extends MPedidos{
         $status = 500;
         $message = 'Error al actualizar el estado de entrega';
         
-        $id = $_POST['id'] ?? null;
+        $id           = $_POST['id'] ?? null;
         $is_delivered = $_POST['is_delivered'] ?? null;
         
         if (!$id || !isset($is_delivered)) {
@@ -1066,34 +1066,22 @@ class Pedidos extends MPedidos{
         
         $order = $this->getOrderID([$id]);
         
-        if (empty($order)) {
-            return [
-                'status' => 404,
-                'message' => 'Pedido no encontrado'
-            ];
-        }
-        
-        if ($order[0]['status'] == 1) {
-            return [
-                'status' => 403,
-                'message' => 'No se puede actualizar el estado de entrega de una cotización'
-            ];
-        }
-        
+            
         $update = $this->updateOrderDeliveryStatus([
             'id' => $id,
             'is_delivered' => $is_delivered
         ]);
         
         if ($update) {
-            $status = 200;
+            $status     = 200;
             $statusText = $is_delivered == 1 ? 'entregado' : 'no entregado';
-            $message = "El pedido fue marcado como {$statusText}";
+            $message    = "El pedido fue marcado como {$statusText}";
         }
         
         return [
             'status' => $status,
             'message' => $message,
+            'order'   => $order,
             'data' => [
                 'id' => $id,
                 'is_delivered' => $is_delivered
