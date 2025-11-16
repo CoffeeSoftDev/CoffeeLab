@@ -998,7 +998,7 @@ class CatalogProduct extends Pos {
 
         const isEditMode = this.layoutEdit;
 
-        console.log('editMode', isEditMode)
+ 
 
         this.tabLayout({
             parent: "container" + this.PROJECT_NAME,
@@ -1405,10 +1405,8 @@ class CatalogProduct extends Pos {
     async printOrder() {
 
         const pos = await useFetch({
-            url: this._link,
-            // data: { opc: "getOrder", id: idFolio }
+            url: api,
             data: { opc: "getOrderDetails", id: idFolio }
-
         });
 
         const modal = bootbox.dialog({
@@ -1417,57 +1415,20 @@ class CatalogProduct extends Pos {
                         <i class="icon-print text-blue-400 text-xl"></i>
                         Imprimir
                     </div>`,
-            message: `
-                <div class="p-4">
-                    <div class="flex justify-start mb-4">
-                        <button id="btnPrintTicketModal" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-md flex items-center justify-center gap-2" style="width: 25%;">
-                            <i class="icon-print"></i> Imprimir Ticket
-                        </button>
-                    </div>
-                    <div id="containerPrintOrder"></div>
-                </div>
-            `
+            message: ` <div id="containerPrintOrder"></div>`
         });
-
 
         this.ticketPasteleria({
             parent: 'containerPrintOrder',
             data: {
-                head: pos.order[0],
-                products: pos.data.products,
-                paymentMethods: pos.paymentMethods
+                head          : pos.order[0],
+                products      : pos.data.products,
+                paymentMethods: pos.data.paymentMethods || []
             }
-        });
+        })
 
-        // Evento para imprimir solo el ticket
-        $(document).off('click', '#btnPrintTicketModal').on('click', '#btnPrintTicketModal', function () {
-            const ticketContent = document.getElementById('ticketPasteleria');
-            if (ticketContent) {
-                const printWindow = window.open('', '_blank');
-                printWindow.document.write(`
-                    <!DOCTYPE html>
-                    <html>
-                    <head>
-                        <title>Ticket - Pedido</title>
-                        <script src="https://cdn.tailwindcss.com"></script>
-                        <style>
-                            @media print {
-                                body { margin: 0; padding: 20px; }
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        ${ticketContent.outerHTML}
-                    </body>
-                    </html>
-                `);
-                printWindow.document.close();
-                setTimeout(() => {
-                    printWindow.print();
-                    printWindow.close();
-                }, 250);
-            }
-        });
+        
+
 
     }
 

@@ -433,6 +433,7 @@ class App extends Templates {
 
         const modal = bootbox.dialog({
             closeButton: true,
+            size: 'large',
             title: ` <div class="flex items-center gap-2 text-white text-lg font-semibold">
                         <i class="icon-print text-blue-400 text-xl"></i>
                         Imprimir
@@ -477,22 +478,23 @@ class App extends Templates {
             },
             methods: {
                 send: (response) => {
+                 
                     if (response.status === 200) {
                         // this.updateBadgeUI(orderId, newStatus);
                         this.ls()
                         alert({
-                            icon: 'success',
-                            title: 'Estado actualizado',
-                            text: response.message,
-                            timer: 2000,
+                            icon             : 'success',
+                            title            : 'Estado actualizado',
+                            text             : response.message,
+                            timer            : 2000,
                             showConfirmButton: false
                         });
                     } else {
                         alert({
-                            icon: 'error',
-                            title: 'Error',
-                            text: response.message,
-                            btn1: true,
+                            icon    : 'error',
+                            title   : 'Error',
+                            text    : response.message,
+                            btn1    : true,
                             btn1Text: 'Ok'
                         });
                     }

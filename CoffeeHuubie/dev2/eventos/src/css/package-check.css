@@ -1,0 +1,92 @@
+/* ============================================================================
+   Estilos para el componente de checkboxes de productos en paquetes
+   ============================================================================ */
+
+/* Animación de feedback al actualizar */
+@keyframes flash {
+    0%, 100% {
+        background-color: transparent;
+    }
+    50% {
+        background-color: rgba(139, 198, 63, 0.2);
+    }
+}
+
+.updated-flash {
+    animation: flash 0.3s ease-in-out;
+}
+
+/* Estilos para checkboxes */
+.product-checkbox {
+    cursor: pointer;
+    accent-color: #8CC63F;
+}
+
+.product-checkbox:hover {
+    transform: scale(1.1);
+    transition: transform 0.2s ease;
+}
+
+/* Estilos para labels de checkboxes */
+.product-checkbox-list label {
+    transition: all 0.2s ease;
+}
+
+.product-checkbox-list label:hover {
+    background-color: #283341;
+}
+
+/* Estado deshabilitado durante actualización */
+.opacity-50 {
+    opacity: 0.5;
+}
+
+.pointer-events-none {
+    pointer-events: none;
+}
+
+/* Estilos para el contenedor de checkboxes */
+.product-checkbox-list {
+    margin-top: 1rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .product-checkbox-list .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Tema oscuro - asegurar visibilidad */
+.product-checkbox-list .bg-\[#1F2A37\] {
+    background-color: #1F2A37;
+}
+
+.product-checkbox-list .text-gray-300 {
+    color: #D1D5DB;
+}
+
+.product-checkbox-list .text-white {
+    color: #FFFFFF;
+}
+
+/* Hover states */
+.product-checkbox-list label:hover .text-gray-300 {
+    color: #FFFFFF;
+}
+
+/* Focus states para accesibilidad */
+.product-checkbox:focus {
+    outline: 2px solid #8CC63F;
+    outline-offset: 2px;
+}
+
+/* Estilos para checkboxes deshabilitados */
+.product-checkbox:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.product-checkbox:disabled + span {
+    opacity: 0.5;
+}
