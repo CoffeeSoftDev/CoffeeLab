@@ -438,7 +438,7 @@ class App extends Templates {
                         Imprimir
                     </div>`,
             message: `
-                <div class="p-3">
+                <div class="p-2">
                     <div id="containerPrintOrder"></div>
                 </div>
             `
