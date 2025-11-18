@@ -361,11 +361,28 @@ function evaluar($val) {
     return $val ? '$ ' . number_format($val, 2, '.', ',') : '-';
 }
 
-function dropdown($id) {
-    return [
-        ['icon' => 'icon-pencil', 'text' => 'Editar', 'onclick' => "app.editProducto($id)"],
-        ['icon' => 'icon-trash', 'text' => 'Eliminar', 'onclick' => "app.deleteProducto($id)"]
-    ];
+function renderStatus($status) {
+    switch ($status) {
+        case 1:
+            return '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-[#014737] text-[#3FC189]">Activo</span>';
+        case 0:
+            return '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-[#721c24] text-[#ba464d]">Inactivo</span>';
+        default:
+            return '<span class="px-2 py-1 rounded-md text-sm font-semibold bg-gray-500 text-white">Desconocido</span>';
+    }
+}
+
+function dropdown($id, $active = 1) {
+    $options = [];
+    
+    if ($active == 1) {
+        $options[] = ['icon' => 'icon-pencil', 'text' => 'Editar', 'onclick' => "app.editProducto($id)"];
+        $options[] = ['icon' => 'icon-toggle-on', 'text' => 'Desactivar', 'onclick' => "app.statusProducto($id, 1)"];
+    } else {
+        $options[] = ['icon' => 'icon-toggle-off', 'text' => 'Activar', 'onclick' => "app.statusProducto($id, 0)"];
+    }
+    
+    return $options;
 }
 
 $obj = new ctrl();

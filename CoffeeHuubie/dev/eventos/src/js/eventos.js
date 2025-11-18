@@ -475,7 +475,7 @@ class Eventos extends App {
                 {
                     tab: "Crear Menú",
                     id: "containerAddMenu",
-                    fn: this.newMenuLayout()
+                    // fn: this.newMenuLayout()
                 },
             ],
         });
@@ -966,7 +966,9 @@ class Eventos extends App {
     // MENU -------------------------------------
 
     async newMenuLayout(id = null) {
-        if (!id_event || id_event === 0) {
+        console.log('menu',id_event,id)
+
+        if (!id_event || id_event == 0) {
             $("#containerAddMenu").html(`
                 <div class="flex flex-col items-center justify-center py-16 px-4">
                     <div class="w-24 h-24 bg-[#8B5CF6] rounded-full flex items-center justify-center mb-6">
@@ -982,6 +984,7 @@ class Eventos extends App {
             return;
         }
 
+        $("#containerAddMenu").empty();
 
         let menusPrecargadosData = await useFetch({ url: link, data: { opc: "getPackages" } });
         let extrasDisponiblesData = await useFetch({ url: link, data: { opc: "getProducts" } });
@@ -993,9 +996,14 @@ class Eventos extends App {
 
 
         $("#containerAddMenu").append(`
-            <div class="flex justify-end mb-2">
+            <div class="flex justify-end gap-2 mb-2">
+                <button id="btnPrintMenu" onclick="eventos.printEvent()"
+                    class="hidden  flex items-center justify-center gap-2 bg-[#1A56DB] hover:bg-[#274DCD] text-white font-medium py-2 px-6 rounded-md shadow-md">
+                    <i class="icon-print"></i>
+                    Imprimir
+                </button>
                 <button id="" onclick="window.location.href='https://huubie.com.mx/dev/catalogos/'"
-                    class="flex items-center justify-center gap-2 bg-[#1A56DB] hover:bg-[#274DCD] text-white font-medium py-2 px-6 rounded-md shadow-md">
+                    class="flex items-center justify-center gap-2 bg-gray-500 hover:bg-gray-800 text-white font-medium py-2 px-6 rounded-md shadow-md">
                     Panel de administración
                 </button>
             </div>
@@ -1171,6 +1179,7 @@ class Eventos extends App {
             const cantidad = parseInt($("#cantidadPersonas").val()) || 1;
             const menu = menusPrecargados.find(m => m.id == idSeleccionado);
 
+            console.log('add-menu',menu)
 
             if (!idSeleccionado || cantidad <= 0) {
                 alert({ icon: "warning", text: "Debe seleccionar un paquete y una cantidad válida." });
@@ -1188,11 +1197,30 @@ class Eventos extends App {
                 this.menusSeleccionados.push({ menu, cantidadPersonas: cantidad });
             }
 
+
+            const response = await useFetch({
+                url: this._link,
+                data: {
+                    opc: "addMenuPackage",
+                    package_id: idSeleccionado,
+                    quantity: cantidad,
+                    price: menu.precioPorPersona,
+                    id_event: id_event,
+
+               
+                },
+            });
+
+
+
+
             $("#selectMenu").val(null).trigger('change');
             $("#cantidadPersonas").val(1);
 
             eventos.renderPaquetes();
             eventos.renderResumen();
+
+
 
 
 
@@ -1782,6 +1810,41 @@ class Eventos extends App {
     }
 
 
+    printEvent(){
+        // 🔎 Detectar si es edición o creación
+        const isEdit = !!id_event;
+        const action = isEdit ? "editEventMenus" : "addEventMenus";
+
+        const data = {
+            opc: action,
+            id_event: id_event,
+            menus: JSON.stringify(eventos.menusSeleccionados),
+            extras: JSON.stringify(eventos.extrasSeleccionados),
+            total: $(`#pagoTotal`).text().replace("$", "").replace(",", "")
+        };
+
+
+        // Agregar a menu. 
+
+        fn_ajax(data, link).then((response) => {
+            if (response.status == 200) {
+               
+
+                // Solo cerrar si es nuevo (no edición)
+                if (!isEdit) {
+                    eventos.closeEvent();
+                }
+            } else {
+                
+            }
+        });
+
+
+
+        payment.onShowDocument(id_event);
+    }
+
+
 
     async editMenuLayout(id) {
         // 📦 Obtener los menús y extras del evento desde el backend
@@ -1880,6 +1943,8 @@ class Eventos extends App {
         return status;
 
     }
+
+
 
 }
 

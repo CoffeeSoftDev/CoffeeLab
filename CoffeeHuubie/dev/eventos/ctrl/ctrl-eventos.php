@@ -1079,25 +1079,25 @@ class ctrl extends MEvent{
             } else {
                 $addEventPackage = $this->createEventPackage($this->util->sql([
                     'package_id'    => $_POST['package_id'],
-                    'quantity'      => $_POST['cantidad'],
+                    'quantity'      => $_POST['quantity'],
                     'price'         => $_POST['price'],
                     'date_creation' => date('Y-m-d H:i:s'),
                     'event_id'      => $_POST['id_event'],
                 ]));
 
-            //     if ($addEventPackage) {
+                if ($addEventPackage) {
                     $events_package_id = $this->maxEventPackageId();
                     $result            = $this->addPackageProducts($events_package_id, $_POST['package_id']);
                     
                     $status  = 200;
                     $message = 'Paquete agregado correctamente';
-            //     }
+                }
             }
                         
             return [
                 'status'  => $status,
                 'message' => $message,
-           
+                'endpoint' => $existingPackage
             ];
     }
 

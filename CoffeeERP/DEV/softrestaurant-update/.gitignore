@@ -1,0 +1,61 @@
+# SoftRestaurant - Git Ignore
+
+# Configuración sensible
+conf/database.php
+conf/_CRUD.php
+conf/_Utileria.php
+
+# Logs
+logs/
+*.log
+
+# Archivos temporales
+temp/
+tmp/
+*.tmp
+
+# Uploads
+uploads/
+archivos/
+
+# Cache
+cache/
+*.cache
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDEs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Backups
+*.bak
+*.backup
+*.old
+*~
+
+# Composer
+vendor/
+composer.lock
+
+# NPM
+node_modules/
+package-lock.json
+
+# Archivos de prueba
+test/
+tests/
+phpunit.xml
+
+# Documentación generada
+docs/build/
+
+# Archivos de desarrollo
+.env
+.env.local
+.env.*.local

@@ -20,7 +20,8 @@ Este plan de implementación convierte el diseño de modernización de SoftResta
 
 
 
-- [ ] 1.1 Create layout files
+- [x] 1.1 Create layout files
+
   - Create `layout/head.php` with TailwindCSS CDN, jQuery, and required libraries
   - Create `layout/navbar.php` with navigation structure
   - Create `layout/footer.php` with scripts includes
@@ -28,6 +29,8 @@ Este plan de implementación convierte el diseño de modernización de SoftResta
 
 
   - _Requirements: 1.1, 10.1_
+
+
 
 - [ ] 1.2 Configure database connection
   - Review existing database configuration in `conf/_CRUD.php`
@@ -131,7 +134,9 @@ Este plan de implementación convierte el diseño de modernización de SoftResta
 
 
 
-- [ ] 3.1 Implement Administracion CRUD methods
+- [x] 3.1 Implement Administracion CRUD methods
+
+
   - Implement `getProducto()` with status 200/404 responses
   - Implement `addProducto()` with validation and status codes
   - Implement `editProducto()` with update logic
@@ -140,18 +145,29 @@ Este plan de implementación convierte el diseño de modernización de SoftResta
   - Add helper functions: `dropdown()`, `evaluar()`, `renderStatus()`
   - _Requirements: 3.3, 3.8, 5.4-5.7_
 
-- [ ] 3.2 Create ProductosVendidos controller
+
+
+- [x] 3.2 Create ProductosVendidos controller
+
+
+
   - Create `ctrl/ctrl-productos-vendidos.php` extending mdl
   - Implement `init()` method
   - Implement `ls()` method for Soft Restaurant data
   - Implement `lsCostsys()` method for Costsys data
   - Implement `lsFogaza()` method with category filter
+
+
+
   - _Requirements: 3.1, 3.2, 3.3, 6.1-6.4_
 
 - [ ] 3.3 Implement ProductosVendidos advanced methods
   - Implement `subirCostoPotencial()` with compare/upload logic
   - Implement `lsDiasPendientes()` for pending days
+
+
   - Implement `lsRegistros()` for date range queries
+
   - Add helper functions for data formatting
   - _Requirements: 3.3, 3.8, 6.5-6.9_
 
@@ -161,13 +177,17 @@ Este plan de implementación convierte el diseño de modernización de SoftResta
   - Implement `ls()` method with filters
   - Implement `getSalida()` method
   - Implement `addSalida()` method
+
   - Implement `editSalida()` method
   - Implement `statusSalida()` method
   - _Requirements: 3.1, 3.2, 3.3, 7.1-7.5_
 
 - [ ] 3.5 Create file upload controllers
   - Create `ctrl/ctrl-subir-productos.php` for Excel upload
+
+
   - Implement PHPSpreadsheet integration
+
   - Implement compare logic for existing products
   - Implement bulk insert/update logic
   - Return detailed results (added, updated, errors)
@@ -175,6 +195,9 @@ Este plan de implementación convierte el diseño de modernización de SoftResta
 
 - [ ] 3.6 Create ArchivoDiarios controller
   - Create `ctrl/ctrl-soft-archivos-diarios.php`
+
+
+
   - Implement `ls()` for file listing
   - Implement `lsDiasPendientes()` for tracking
   - Implement file validation logic
@@ -184,12 +207,16 @@ Este plan de implementación convierte el diseño de modernización de SoftResta
 
 ## Phase 4: Frontend - Base Classes and Layouts
 
-- [ ] 4. Create Administracion frontend class
+
+- [x] 4. Create Administracion frontend class
+
   - Create `js/administracion.js` extending Templates
   - Implement constructor with PROJECT_NAME = "administracion"
   - Implement `render()` method calling layout and filterBar
+
   - Implement `layout()` using `primaryLayout()` component
   - _Requirements: 2.1, 2.2, 2.3, 2.6_
+
 
 - [ ] 4.1 Implement Administracion filterBar and listing
   - Implement `filterBar()` using `createfilterBar()` component
@@ -198,14 +225,21 @@ Este plan de implementación convierte el diseño de modernización de SoftResta
   - Configure table with theme 'corporativo', pagination, and DataTables
   - _Requirements: 2.5, 2.6, 5.1-5.3_
 
+
+
 - [ ] 4.2 Implement Administracion CRUD operations
+
+
   - Implement `lsGrupo()` for category grid view
   - Implement `rptDetallado()` for detailed table view
+
+
   - Implement `addProducto()` using `createModalForm()`
   - Implement `editProducto(id)` with async data fetch
   - Implement `statusProducto(id)` using `swalQuestion()`
   - Replace all `$.ajax` calls with `useFetch()`
   - _Requirements: 2.4, 2.5, 2.8, 5.4-5.7_
+
 
 - [ ] 4.3 Implement Excel upload functionality
   - Implement `uploadExcel()` method with file input handling
@@ -213,6 +247,7 @@ Este plan de implementación convierte el diseño de modernización de SoftResta
   - Handle file upload with FormData
   - Display results in table format
   - Update product count display
+
   - _Requirements: 2.4, 2.5, 4.7, 5.3_
 
 - [ ] 4.4 Create ProductosVendidos frontend class
@@ -220,6 +255,8 @@ Este plan de implementación convierte el diseño de modernización de SoftResta
   - Implement constructor with PROJECT_NAME = "productosVendidos"
   - Implement `render()` method
   - Implement `layout()` using `primaryLayout()`
+
+
   - _Requirements: 2.1, 2.2, 2.3, 2.6_
 
 - [ ] 4.5 Implement ProductosVendidos filterBar and views
@@ -230,6 +267,9 @@ Este plan de implementación convierte el diseño de modernización de SoftResta
   - Implement `lsFogaza()` with category selector
   - _Requirements: 2.5, 2.6, 6.1-6.4_
 
+
+
+
 - [ ] 4.6 Implement ProductosVendidos advanced features
   - Implement `subirCostoPotencial()` with confirmation dialog
   - Implement `tabLayout()` for results (added/not found)
@@ -238,12 +278,16 @@ Este plan de implementación convierte el diseño de modernización de SoftResta
   - Add counter display for pending days
   - _Requirements: 2.5, 2.6, 6.5-6.9_
 
+
+
 - [ ] 4.7 Create Salidas frontend class
   - Create `js/salidas.js` extending Templates
   - Implement constructor with PROJECT_NAME = "salidas"
   - Implement `render()`, `layout()`, `filterBar()` methods
   - Implement `ls()` method using `createTable()`
   - Implement `addSalida()` using `createModalForm()`
+
+
   - Implement `editSalida(id)` with async fetch
   - Implement `statusSalida(id)` using `swalQuestion()`
   - _Requirements: 2.1-2.6, 7.1-7.5_

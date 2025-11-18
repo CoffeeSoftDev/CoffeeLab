@@ -27,6 +27,11 @@
 <script src="src/js/coffeSoft.js?t=<?php echo time(); ?>"></script>
 <script src="src/js/plugins.js?t=<?php echo time(); ?>"></script>
 
+<!-- Custom Components -->
+<script src="src/components/product-card.js?t=<?php echo time(); ?>"></script>
+<script src="src/components/excel-uploader.js?t=<?php echo time(); ?>"></script>
+<script src="src/components/category-selector.js?t=<?php echo time(); ?>"></script>
+
 <!-- Complementos externos -->
 <script src="https://15-92.com/ERP3/src/js/complementos.js?t=<?php echo time(); ?>"></script>
 <script src="https://15-92.com/ERP3/src/js/plugin-table.js?t=<?php echo time(); ?>"></script>
