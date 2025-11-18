@@ -1561,30 +1561,149 @@ class CatalogProduct extends Pos {
 
         const layout = $("<div>", {
             id: 'layoutPrintTicket',
-            class: 'p-2'
+            class: ''
+        });
+
+        const btnContainer = $("<div>", {
+            class: 'flex justify-end mb-3 no-print'
         });
 
         const btnPrint = $("<button>", {
             id: "btnPrintTicket",
-            class: "bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-md mb-3 flex items-center justify-center gap-2 no-print ml-auto",
-            html: '<i class="icon-print"></i> Imprimir',
+            class: "bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded-md flex items-center justify-center gap-2",
+            html: '<i class="icon-print"></i> Imprimir ',
             click: () => {
-                const printContent = document.getElementById(opts.id);
-                const originalContents = document.body.innerHTML;
-                document.body.innerHTML = printContent.outerHTML;
-                window.print();
-                document.body.innerHTML = originalContents;
-                location.reload();
+                const ticketContent = document.getElementById('ticketPasteleria');
+                if (ticketContent) {
+                    const printWindow = window.open('', '_blank');
+                    printWindow.document.write(`
+                        <html>
+                            <head>
+                                <title>Ticket de Pedido</title>
+                                <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+                                <style>
+                                    body { 
+                                        margin: 0; 
+                                        padding: 20px; 
+                                        font-family: 'Courier New', monospace;
+                                        background: white;
+                                    }
+                                    @media print {
+                                        body { 
+                                            margin: 0; 
+                                            padding: 10px; 
+                                        }
+                                    }
+                                    img {
+                                        max-width: 100%;
+                                        height: auto;
+                                    }
+                                    .capitalize {
+                                        text-transform: capitalize;
+                                    }
+                                    .uppercase {
+                                        text-transform: uppercase;
+                                    }
+                                    .italic {
+                                        font-style: italic;
+                                    }
+                                    .font-bold {
+                                        font-weight: bold;
+                                    }
+                                    .font-semibold {
+                                        font-weight: 600;
+                                    }
+                                    .text-center {
+                                        text-align: center;
+                                    }
+                                    .text-right {
+                                        text-align: right;
+                                    }
+                                    .flex {
+                                        display: flex;
+                                    }
+                                    .flex-col {
+                                        flex-direction: column;
+                                    }
+                                    .items-center {
+                                        align-items: center;
+                                    }
+                                    .justify-between {
+                                        justify-content: space-between;
+                                    }
+                                    .space-y-1 > * + * {
+                                        margin-top: 0.25rem;
+                                    }
+                                    .space-y-2 > * + * {
+                                        margin-top: 0.5rem;
+                                    }
+                                    .mb-1 { margin-bottom: 0.25rem; }
+                                    .mb-2 { margin-bottom: 0.5rem; }
+                                    .mb-4 { margin-bottom: 1rem; }
+                                    .mt-1 { margin-top: 0.25rem; }
+                                    .mt-2 { margin-top: 0.5rem; }
+                                    .mt-3 { margin-top: 0.75rem; }
+                                    .mt-4 { margin-top: 1rem; }
+                                    .mt-6 { margin-top: 1.5rem; }
+                                    .my-2 { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+                                    .ml-1 { margin-left: 0.25rem; }
+                                    .pb-2 { padding-bottom: 0.5rem; }
+                                    .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
+                                    .p-4 { padding: 1rem; }
+                                    .text-xs { font-size: 0.75rem; line-height: 1rem; }
+                                    .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+                                    .text-base { font-size: 1rem; line-height: 1.5rem; }
+                                    .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+                                    .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+                                    .text-gray-700 { color: #374151; }
+                                    .text-gray-900 { color: #111827; }
+                                    .text-red-600 { color: #dc2626; }
+                                    .text-purple-800 { color: #6b21a8; }
+                                    .bg-white { background-color: white; }
+                                    .rounded-lg { border-radius: 0.5rem; }
+                                    .shadow { box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1); }
+                                    .border-dashed { border-style: dashed; }
+                                    .border-t { border-top-width: 1px; }
+                                    .border-gray-300 { border-color: #d1d5db; }
+                                    .w-20 { width: 5rem; }
+                                    .w-1\\/6 { width: 16.666667%; }
+                                    .w-2\\/6 { width: 33.333333%; }
+                                    .w-3\\/6 { width: 50%; }
+                                    hr {
+                                        border: 0;
+                                        border-top: 1px dashed #d1d5db;
+                                        margin: 0.5rem 0;
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                ${ticketContent.outerHTML}
+                            </body>
+                        </html>
+                    `);
+                    printWindow.document.close();
+                    printWindow.focus();
+                    setTimeout(() => {
+                        printWindow.print();
+                        printWindow.close();
+                    }, 250);
+                }
             }
         });
 
-        layout.append(btnPrint)
+        btnContainer.append(btnPrint);
+        layout.append(btnContainer)
 
 
 
         const container = $("<div>", {
             id: opts.id,
-            class: opts.class
+            class: "bg-white p-4 rounded-lg shadow font-mono text-gray-900",
+            css: {
+                // maxWidth: "350px",
+                minHeight: "600px",
+                margin: "0 auto"
+            }
         });
 
 
@@ -1592,7 +1711,7 @@ class CatalogProduct extends Pos {
 
 
         const header = `
-            <div class="flex flex-col items-center mb-4">
+            <div class="flex flex-col items-center mb-4 mt-3">
                 ${data.logo ? `<img src="https://huubie.com.mx/alpha${data.logo}" alt="Logo" class="w-20 mb-1" />` : ""}
                 ${data.company ? `<div class="text-xs font-semibold uppercase mb-1">${data.company}</div>` : ""}
                 <h1 class="text-lg font-bold">PEDIDOS DE PASTELERÍA</h1>
@@ -1714,10 +1833,9 @@ class CatalogProduct extends Pos {
 
         const footer = `
         <div class="text-center mt-6 text-xs font-bold text-gray-900 space-y-1">
-            <p class="mt-2">GRACIAS POR SU PREFERENCIA</p>
             <p>ESTE NO ES UN COMPROBANTE FISCAL</p>
-
             <p class="text-purple-800 text-sm">Huubie</p>
+            <p class="mt-2">GRACIAS POR SU PREFERENCIA</p>
         </div>
     `;
 

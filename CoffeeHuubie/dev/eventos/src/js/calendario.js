@@ -20,7 +20,7 @@ class Calendar extends Eventos {
         const name = "Calendario";
 
         this.primaryLayout({
-            parent: "root2",
+            parent: "root",
             id: name,
             class: 'd-flex mx-2 my-2 h-100 mt-5 p-2 ',
             card: {
