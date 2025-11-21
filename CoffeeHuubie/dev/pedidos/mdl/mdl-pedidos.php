@@ -38,19 +38,14 @@ class MPedidos extends CRUD {
 
     function getSubsidiariesByCompany($array){
         $query = "SELECT
-            u.id as id,
-            u.fullname as valor,
-            u.user,
-            s.name as sucursal,
-            c.social_name as company
+            id,
+            name as valor
+            
         FROM
-            usr_users u
-        INNER JOIN fayxzvov_alpha.subsidiaries s ON u.subsidiaries_id = s.id
-        INNER JOIN fayxzvov_admin.companies c ON s.companies_id = c.id
+            fayxzvov_alpha.subsidiaries
         WHERE 
-            u.enabled = 1 
-            AND c.id = ?
-        ORDER BY u.fullname";
+            companies_id = ?
+        ORDER BY name";
         return $this->_Read($query, $array);
     }
 
@@ -135,8 +130,7 @@ class MPedidos extends CRUD {
 
         $params    = [
             $startDate,
-            $endDate,
-            // $data['subsidiaries_id']
+            $endDate
         ];
 
         $query = "
@@ -167,20 +161,23 @@ class MPedidos extends CRUD {
         INNER JOIN {$this->bd}status_process ON order.STATUS = status_process.id
         WHERE
         order.date_creation BETWEEN ? AND ?
-
-
         ";
 
-        if (!empty($data['status']) && $data['status'] !== '0') {
+        // Filtrar por subsidiaries_id si se proporciona
+        if (!empty($data['subsidiaries_id'])) {
+            $query .= " AND order.subsidiaries_id = ?";
+            $params[] = $data['subsidiaries_id'];
+        }
 
-            $query .= " AND order.status = ? " ;
+        // Filtrar por status si se proporciona
+        if (!empty($data['status']) && $data['status'] !== '0') {
+            $query .= " AND order.status = ?";
             $params[] = $data['status'];
         }
 
-        $query .= "   ORDER BY
+        $query .= " ORDER BY
             status_process.id ASC,
             order.date_creation DESC";
-
 
         return $this->_Read($query, $params);
     }
@@ -1099,6 +1096,9 @@ class MPedidos extends CRUD {
     }
 
     function getDailySalesMetrics($array) {
+        $date = $array[0];
+        $subsidiaries_id = $array[1] ?? null;
+        
         // 1. Obtener total de ventas y número de pedidos
         $queryOrders = "
             SELECT 
@@ -1106,11 +1106,19 @@ class MPedidos extends CRUD {
                 SUM(total_pay) as total_sales
             FROM {$this->bd}`order`
             WHERE DATE_FORMAT(date_order, '%Y-%m-%d') = ?
-            AND subsidiaries_id = ?
-            AND status != 4
         ";
         
-        $orders = $this->_Read($queryOrders, $array);
+        $paramsOrders = [$date];
+        
+        // Si subsidiaries_id no es null, agregar filtro
+        if ($subsidiaries_id !== null) {
+            $queryOrders .= " AND subsidiaries_id = ?";
+            $paramsOrders[] = $subsidiaries_id;
+        }
+        
+        $queryOrders .= " AND status != 4";
+        
+        $orders = $this->_Read($queryOrders, $paramsOrders);
         
         $ordersData = is_array($orders) && !empty($orders) ? $orders[0] : [
             'total_orders' => 0,
@@ -1125,12 +1133,19 @@ class MPedidos extends CRUD {
             FROM {$this->bd}order_payments pp
             INNER JOIN {$this->bd}`order` po ON pp.order_id = po.id
             WHERE DATE_FORMAT(date_order, '%Y-%m-%d') = ?
-            AND po.subsidiaries_id = ?
-            AND po.status != 4
-            GROUP BY pp.method_pay_id
         ";
         
-        $payments = $this->_Read($queryPayments,$array);
+        $paramsPayments = [$date];
+        
+        // Si subsidiaries_id no es null, agregar filtro
+        if ($subsidiaries_id !== null) {
+            $queryPayments .= " AND po.subsidiaries_id = ?";
+            $paramsPayments[] = $subsidiaries_id;
+        }
+        
+        $queryPayments .= " AND po.status != 4 GROUP BY pp.method_pay_id";
+        
+        $payments = $this->_Read($queryPayments, $paramsPayments);
         
         // 3. Mapear pagos por método (1=Efectivo, 2=Tarjeta, 3=Transferencia)
         $card_sales = 0;

@@ -7,7 +7,7 @@ let normal, app, custom; //Clases.
 let idFolio;
 let categories, estado, clients;
 
-let rol ,subsidiaries;
+let rol ,subsidiaries, udn;
 
 $(async () => {
     let dataModifiers = await useFetch({ url: api, data: { opc: "getModifiers" } });
@@ -69,10 +69,10 @@ class App extends Templates {
         // Agregar select de admin solo si rol == 1
         if (rol == 1) {
             filterBar.push({
-                opc: "select",
-                id: "adminFilter",
-                lbl: "Filtrar por usuario:",
-                class: "col-sm-2",
+                opc     : "select",
+                id      : "subsidiaries_id",
+                lbl     : "Filtrar por sucursal:",
+                class   : "col-sm-2",
                 onchange: "app.ls()",
                 data: [
                     { id: "", valor: "Todas las sucursales" },
@@ -200,7 +200,7 @@ class App extends Templates {
         this.createTable({
             parent: `container${this.PROJECT_NAME}`,
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
-            data: { opc: "listOrders", fi: rangePicker.fi, ff: rangePicker.ff },
+            data: { opc: "listOrders", subsidiaries_id: $('#subsidiaries_id').val(), fi: rangePicker.fi, ff: rangePicker.ff },
             conf: {
                 datatable: true, pag: 10, fn_datatable: 'simple_data_table_filter',
             },
@@ -1717,7 +1717,7 @@ class App extends Templates {
 
         const request = await useFetch({
             url: this._link,
-            data: { opc: "getDailyClose", date: date }
+            data: { opc: "getDailyClose", date: date, subsidiaries_id: $('#subsidiaries_id').val() }
         });
 
         if (request.status === 200) {

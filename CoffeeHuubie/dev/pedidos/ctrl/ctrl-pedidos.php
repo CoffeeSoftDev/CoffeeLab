@@ -9,13 +9,15 @@ header("Access-Control-Allow-Headers: Content-Type"); // Encabezados permitidos
 require_once '../mdl/mdl-pedidos.php';
 
 class Pedidos extends MPedidos{
+
     function init(){
+        $subsidiaries = $this->lsSubsidiaries();
         return [
             'modifier'   => $this->getAllModifiers([1]),
             'products'   => $this->lsProductos([1,$_SESSION['SUB']]),
             'clients'    => $this->getAllClients([$_SESSION['SUB']]),
             'status'     => $this->lsStatus(),
-            'sucursales' => $this->lsSucursales(),
+            'sucursales' => $subsidiaries['data'],
             'access'        => $_SESSION['ROLID'],
           
         ];
@@ -29,16 +31,22 @@ class Pedidos extends MPedidos{
 
         // Solo permitir si el rol es 1 (admin)
         if ($_SESSION['ROLID'] == 1) {
+
             $subsidiaries = $this->getSubsidiariesByCompany([$_SESSION['COMPANY_ID']]);
             
             if ($subsidiaries) {
+
                 $status  = 200;
                 $message = 'Sucursales obtenidas correctamente';
                 $data    = $subsidiaries;
+
             }
+
         } else {
+
             $status  = 403;
             $message = 'No tienes permisos para acceder a esta información';
+
         }
 
         return [
@@ -72,13 +80,22 @@ class Pedidos extends MPedidos{
     // Order.
     public function listOrders() {
         $rows = [];
-        $Sucursal = $this->getSucursalByID([$_SESSION['SUB']]);
+        
+        // Si el rol es 1 (admin) y se envió adminFilter, usar ese filtro
+        // Si no, usar la sucursal del usuario en sesión
+        if ($_SESSION['ROLID'] == 1 && !empty($_POST['subsidiaries_id'])) {
+            $subsidiaries_id = $_POST['subsidiaries_id'];
+        } else {
+            $subsidiaries_id = $_SESSION['SUB'];
+        }
+
+        $Sucursal = $this->getSucursalByID([$subsidiaries_id]);
 
         $orders   = $this->getOrders([
             'fi'              => $_POST['fi'] ?? '',
             'ff'              => $_POST['ff'] ?? '',
-            'status'          => $_POST['status'] ,
-            // 'subsidiaries_id' => $_SESSION['SUB'] ?? 1
+            'status'          => $_POST['status'],
+            'subsidiaries_id' => $subsidiaries_id
         ]);
 
         foreach ($orders as $order) {
@@ -1128,12 +1145,17 @@ class Pedidos extends MPedidos{
         $message = 'Error al obtener resumen del día';
         $data    = null;
      
-        
-        $subsidiaries_id = $_SESSION['SUB'] ?? 4;
+        // Si adminFilter está vacío o es "all", obtener todas las sucursales
+        // Si no, usar el valor específico o la sucursal del usuario
+        if (isset($_POST['subsidiaries_id']) && ($_POST['subsidiaries_id'] === '' || $_POST['subsidiaries_id'] === 'all')) {
+            $subsidiaries_id = null; // null indica todas las sucursales
+        } else {
+            $subsidiaries_id = $_POST['subsidiaries_id'] ?? $_SESSION['SUB'];
+        }
         
         $summary = $this->getDailySalesMetrics([
             $_POST['date'],
-           $subsidiaries_id
+            $subsidiaries_id
         ]);
         
         // Verificar que los datos de pagos se obtengan correctamente
