@@ -36,6 +36,24 @@ class MPedidos extends CRUD {
         return $this->_Read($query, null);
     }
 
+    function getSubsidiariesByCompany($array){
+        $query = "SELECT
+            u.id as id,
+            u.fullname as valor,
+            u.user,
+            s.name as sucursal,
+            c.social_name as company
+        FROM
+            usr_users u
+        INNER JOIN fayxzvov_alpha.subsidiaries s ON u.subsidiaries_id = s.id
+        INNER JOIN fayxzvov_admin.companies c ON s.companies_id = c.id
+        WHERE 
+            u.enabled = 1 
+            AND c.id = ?
+        ORDER BY u.fullname";
+        return $this->_Read($query, $array);
+    }
+
 
     public function getAdvancedPay($array) {
         return $this->_Select([

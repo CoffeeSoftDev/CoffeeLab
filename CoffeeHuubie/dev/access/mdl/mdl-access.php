@@ -14,6 +14,7 @@
                     	usr_users.`user` AS user,
                     	usr_users.enabled AS active,
                     	usr_rols.rols AS rol,
+                    	usr_rols.id AS rol_id,
                     	fayxzvov_admin.companies.social_name AS company,
                         usr_users.key, 
                         fayxzvov_admin.companies.name_bd as DB, 

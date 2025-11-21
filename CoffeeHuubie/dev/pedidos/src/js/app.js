@@ -7,16 +7,20 @@ let normal, app, custom; //Clases.
 let idFolio;
 let categories, estado, clients;
 
+let rol ,subsidiaries;
+
 $(async () => {
     let dataModifiers = await useFetch({ url: api, data: { opc: "getModifiers" } });
     categories = dataModifiers.data || [];
 
-    const req = await useFetch({ url: api, data: { opc: "init" } });
-    estado = req.status;
-    clients = req.clients || [];
-    app = new App(api, 'root');
-    custom = new CustomOrder(api_custom, 'root');
-    normal = new CatalogProduct(api_catalogo, 'root');
+    const req     = await useFetch({ url: api, data: { opc: "init" } });
+          estado  = req.status;
+          clients = req.clients || [];
+          rol     = req.access;
+          subsidiaries = req.sucursales;
+          app     = new App(api, 'root');
+          custom  = new CustomOrder(api_custom, 'root');
+          normal  = new CatalogProduct(api_catalogo, 'root');
 
     app.render();
     app.actualizarFechaHora();
@@ -59,64 +63,80 @@ class App extends Templates {
     }
 
     createFilterBar() {
+
+        let filterBar = [];
+
+        // Agregar select de admin solo si rol == 1
+        if (rol == 1) {
+            filterBar.push({
+                opc: "select",
+                id: "adminFilter",
+                lbl: "Filtrar por usuario:",
+                class: "col-sm-2",
+                onchange: "app.ls()",
+                data: [
+                    { id: "", valor: "Todas las sucursales" },
+                    ...subsidiaries
+                ]
+            });
+        }
+
+        filterBar.push(
+            {
+                opc: "input-calendar",
+                class: "col-sm-2",
+                id: "calendar",
+                lbl: "Consultar fecha: ",
+            },
+            {
+                opc: "select",
+                id: "status",
+                lbl: "Seleccionar estados:",
+                class: "col-sm-2",
+                onchange: "app.ls()",
+                data: [
+                    { id: "", valor: "Todos los estados" },
+                    ...estado
+                ]
+            }
+        );
+
+        filterBar.push(
+        {
+                opc      : 'button',
+                id       : 'btnNuevoPedido',
+                class    : 'col-sm-2',
+                text     : 'Nuevo Pedido',
+                className: 'btn-primary w-100',
+                onClick  : () => this.showTypePedido()
+            },
+            {
+                opc      : "button",
+                id       : "btnDailyClose",
+                text     : "Cierre del día",
+                class    : "col-sm-2",
+                className: 'w-100',
+                color_btn: 'success',
+                icono    : "icon-receipt",
+                onClick  : () => this.printDailyClose()
+            },
+        {
+                opc: "button",
+                className: "w-100",
+                class: "col-sm-2",
+                color_btn: "secondary",
+                id: "btnCalendario",
+                text: "Calendario",
+                onClick: () => {
+                    window.location.href = '../pedidos/calendario/index.php'
+                }
+            }
+        );
+      
+        
         this.createfilterBar({
             parent: `filterBar${this.PROJECT_NAME}`,
-            data: [
-                {
-                    opc: "input-calendar",
-                    class: "col-sm-3",
-                    id: "calendar",
-                    lbl: "Consultar fecha: ",
-                },
-
-                {
-                    opc: "select",
-                    id: "status",
-                    lbl: "Seleccionar estados:",
-                    class: "col-sm-3",
-                    onchange: "app.ls()",
-                    data: [
-                        { id: "", valor: "Todos los estados" },
-                        ...estado
-
-                    ]
-                },
-
-                {
-                    opc: 'button',
-                    id: 'btnNuevoPedido',
-                    class: 'col-sm-2',
-                    text: 'Nuevo Pedido',
-                    className: 'btn-primary w-100',
-                    onClick: () => this.showTypePedido()
-                },
-
-                {
-                    opc: "button",
-                    id: "btnDailyClose",
-                    text: "Cierre del día",
-                    class: "col-sm-2",
-                    className: 'w-100',
-                    color_btn: 'success',
-                    icono: "icon-receipt",
-                    onClick: () => this.printDailyClose()
-                },
-
-                {
-                    opc: "button",
-                    className: "w-100",
-                    class: "col-sm-2",
-                    color_btn: "secondary",
-                    id: "btnCalendario",
-                    text: "Calendario",
-                    onClick: () => {
-                        window.location.href = '../pedidos/calendario/index.php'
-                    }
-                },
-
-
-
-            ]
+            data: filterBar
         });
 
         dataPicker({
@@ -433,7 +453,7 @@ class App extends Templates {
 
         const modal = bootbox.dialog({
             closeButton: true,
-            size: 'large',
+            // size: 'large',
             title: ` <div class="flex items-center gap-2 text-white text-lg font-semibold">
                         <i class="icon-print text-blue-400 text-xl"></i>
                         Imprimir

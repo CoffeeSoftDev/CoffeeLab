@@ -1,3 +1,5 @@
+let level = 0;
+
 class Navbar {
     init(options) {
         this.render(options);
@@ -127,6 +129,8 @@ $(async () => {
     } else {
         user = 'Usuario';
     }
+
+    level = data.level;
 
     navbar.init({
         logo: "/dev/src/img/logo/logo.svg",

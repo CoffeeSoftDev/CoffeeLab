@@ -30,6 +30,7 @@ class Access extends MAccess {
             $_SESSION['ID']            = $idUser;
             $_SESSION['USR']           = $idUser;
             $_SESSION['ROL']           = $idRol;
+            $_SESSION['ROLID']         = $sql['rol_id'];
             $_SESSION['SUB']           = $idSub;
             $_SESSION['COMPANY']       = $social_name;
             $_SESSION['last_activity'] = time();
@@ -37,6 +38,7 @@ class Access extends MAccess {
             $_SESSION['DB']            = $sql['DB'];
             $_SESSION['UBICATION']     = $sql['ubication'];
             $_SESSION['LOGO']          = $sql['logo'];
+            $_SESSION['COMPANY_ID']    = $sql['company_id'];
 
             $rute = ($idRol === 1 && $sql['active'] == 0) ? "/dev/empresas/" : "/dev/menu/";
 
@@ -62,6 +64,7 @@ class Access extends MAccess {
             "company" => $_SESSION['COMPANY'],
             "photo"   => $photo,
             "user"    => $sql['fullname'],
+            'level'   => $_SESSION['ROLID'],
             $_SESSION['USR']
         ];
     }

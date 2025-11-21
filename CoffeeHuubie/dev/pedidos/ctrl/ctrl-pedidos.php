@@ -16,6 +16,35 @@ class Pedidos extends MPedidos{
             'clients'    => $this->getAllClients([$_SESSION['SUB']]),
             'status'     => $this->lsStatus(),
             'sucursales' => $this->lsSucursales(),
+            'access'        => $_SESSION['ROLID'],
+          
+        ];
+    }
+
+
+    function lsSubsidiaries(){
+        $status  = 500;
+        $message = 'Error al obtener las sucursales';
+        $data    = [];
+
+        // Solo permitir si el rol es 1 (admin)
+        if ($_SESSION['ROLID'] == 1) {
+            $subsidiaries = $this->getSubsidiariesByCompany([$_SESSION['COMPANY_ID']]);
+            
+            if ($subsidiaries) {
+                $status  = 200;
+                $message = 'Sucursales obtenidas correctamente';
+                $data    = $subsidiaries;
+            }
+        } else {
+            $status  = 403;
+            $message = 'No tienes permisos para acceder a esta información';
+        }
+
+        return [
+            'status'  => $status,
+            'message' => $message,
+            'data'    => $data
         ];
     }
 
@@ -273,6 +302,7 @@ class Pedidos extends MPedidos{
         $order = $this->getOrderID([$orderId]);
         
         if ($order) {
+            $order[0]['logo'] = $_SESSION['LOGO'];
             $orderData = $order[0];
             
             // Obtener sucursal para el folio
@@ -284,6 +314,9 @@ class Pedidos extends MPedidos{
             $discount    = $orderData['discount'] ?? 0;
             $total       = $orderData['total_pay'] ?? 0;
             $saldo       = $total - $discount - $totalPagado;
+
+
+
             $products =[];
             
             // Obtener productos del pedido (si existen tablas relacionadas)
@@ -327,7 +360,8 @@ class Pedidos extends MPedidos{
             'status' => $status,
             'message' =>  $message ,
             'data' => $data,
-            'order'=> $order 
+            'order'=> $order ,
+            '$sesion' => $_SESSION
         ];
     }
 
