@@ -11,14 +11,14 @@ class App extends Templates {
         super(link, div_modulo);
         this.PROJECT_NAME = "Calendario";
         this.calendar = null;
-        this.filters = {
-            fi: '',
-            ff: '',
-            status: ''
-        };
+        this.subsidiaries = [];
+        this.isAdmin = false;
     }
 
-    init() {
+    async init() {
+        const data = await useFetch({ url: this._link, data: { opc: 'init' } });
+        this.subsidiaries = data.subsidiaries;
+        this.isAdmin = data.isAdmin;
         this.render();
     }
 
@@ -48,36 +48,251 @@ class App extends Templates {
                     <small><i class="icon-reply"></i> Volver a Lista</small>
                 </button>
 
-              <div class="flex flex-wrap items-center gap-2 ml-auto text-xs sm:text-sm">
-                <p class="flex items-center">
-                    <i class="icon-blank text-lg" style="color: #6E95C0"></i> Cotización
-                </p>
-                <p class="flex items-center">
-                    <i class="icon-blank text-lg" style="color: #0E9E6E"></i> Pagado
-                </p>
-                <p class="flex items-center">
-                    <i class="icon-blank text-lg" style="color: #FE6F00"></i> Pendiente
-                </p>
-                <p class="flex items-center">
-                    <i class="icon-blank text-lg" style="color: #E60001"></i> Cancelado
-                </p>
-            </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <div class="relative">
+                        <button id="statusFilterBtn" type="button" 
+                            class="flex items-center gap-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-300 text-blue-700 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="icon-filter"></i>
+                            <span>Filtrar Estados</span>
+                            <span id="statusCount" class="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">4</span>
+                            <i class="icon-down-open text-xs"></i>
+                        </button>
+                        
+                        <div id="statusDropdown" class="hidden absolute top-full left-0 mt-2 bg-[#2B3D4F] border border-gray-300 rounded-lg shadow-lg z-50 min-w-[240px]">
+                            <div class="p-3 border-b border-gray-200">
+                                <p class="text-xs font-semibold text-white uppercase">Seleccionar Estados</p>
+                            </div>
+                            <div class="p-2 space-y-1">
+                                <label class="flex items-center gap-3 px-3 py-2 hover:bg-gray-800 rounded cursor-pointer transition-colors">
+                                    <input type="checkbox" value="1" class="status-checkbox w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" checked>
+                                    <i class="icon-blank text-lg" style="color: #6E95C0"></i>
+                                    <span class="text-sm text-white">Cotización</span>
+                                </label>
+                                <label class="flex items-center gap-3 px-3 py-2 hover:bg-gray-800 rounded cursor-pointer transition-colors">
+                                    <input type="checkbox" value="2" class="status-checkbox w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" checked>
+                                    <i class="icon-blank text-lg" style="color: #FE6F00"></i>
+                                    <span class="text-sm text-white">Pendiente</span>
+                                </label>
+                                <label class="flex items-center gap-3 px-3 py-2 hover:bg-gray-800 rounded cursor-pointer transition-colors">
+                                    <input type="checkbox" value="3" class="status-checkbox w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" checked>
+                                    <i class="icon-blank text-lg" style="color: #0E9E6E"></i>
+                                    <span class="text-sm text-white">Pagado</span>
+                                </label>
+                                <label class="flex items-center gap-3 px-3 py-2 hover:bg-gray-800 rounded cursor-pointer transition-colors">
+                                    <input type="checkbox" value="4" class="status-checkbox w-4 h-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" checked>
+                                    <i class="icon-blank text-lg" style="color: #E60001"></i>
+                                    <span class="text-sm text-white">Cancelado</span>
+                                </label>
+                            </div>
+                            <div class="p-2 border-t border-gray-200 flex gap-2">
+                                <button id="selectAllBtn" class="flex-1 text-xs px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded transition-colors">
+                                    Todos
+                                </button>
+                                <button id="clearAllBtn" class="flex-1 text-xs px-3 py-1.5 bg-red-100 hover:bg-red-200 text-gray-700 rounded transition-colors">
+                                    Ninguno
+                                </button>
+                            </div>
+                        </div>
+                    </div>
 
+                    <div class="relative">
+                        <button id="deliveryFilterBtn" type="button" 
+                            class="flex items-center gap-2 bg-green-500/10 hover:bg-green-500/20 border border-green-300 text-green-700 px-4 py-2 rounded-md text-sm font-medium transition-colors">
+                            <i class="icon-truck"></i>
+                            <span>Estado Entrega</span>
+                            <span id="deliveryCount" class="bg-green-600 text-white text-xs px-2 py-0.5 rounded-full">2</span>
+                            <i class="icon-down-open text-xs"></i>
+                        </button>
+                        
+                        <div id="deliveryDropdown" class="hidden absolute top-full left-0 mt-2 bg-[#2B3D4F] border border-gray-300 rounded-lg shadow-lg z-50 min-w-[240px]">
+                            <div class="p-3 border-b border-gray-200">
+                                <p class="text-xs font-semibold text-white uppercase">Estado de Entrega</p>
+                            </div>
+                            <div class="p-2 space-y-1">
+                                <label class="flex items-center gap-3 px-3 py-2 hover:bg-gray-800 rounded cursor-pointer transition-colors">
+                                    <input type="checkbox" value="1" class="delivery-checkbox w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500" checked>
+                                    <i class="icon-ok text-lg text-green-400"></i>
+                                    <span class="text-sm text-white">Entregado</span>
+                                </label>
+                                <label class="flex items-center gap-3 px-3 py-2 hover:bg-gray-800 rounded cursor-pointer transition-colors">
+                                    <input type="checkbox" value="0" class="delivery-checkbox w-4 h-4 text-green-600 rounded focus:ring-2 focus:ring-green-500" checked>
+                                    <i class="icon-cancel text-lg text-orange-400"></i>
+                                    <span class="text-sm text-white">No Entregado</span>
+                                </label>
+                            </div>
+                            <div class="p-2 border-t border-gray-200 flex gap-2">
+                                <button id="selectAllDeliveryBtn" class="flex-1 text-xs px-3 py-1.5 bg-green-100 hover:bg-green-200 text-green-700 rounded transition-colors">
+                                    Todos
+                                </button>
+                                <button id="clearAllDeliveryBtn" class="flex-1 text-xs px-3 py-1.5 bg-red-100 hover:bg-red-200 text-gray-700 rounded transition-colors">
+                                    Ninguno
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${this.isAdmin ? `
+                    <div class="flex flex-col gap-1 bg-purple-500/10 px-3 py-2 rounded-md shadow-sm w-fit">
+                        <label for="subsidiaryFilter" class="text-xs font-medium text-purple-700">Sucursal:</label>
+                        <select id="subsidiaryFilter" class="text-xs border border-purple-300 rounded-md px-2 py-1 focus:ring-1 focus:ring-purple-400 focus:border-purple-400" style="min-width: 180px;">
+                            <option value="0">Todas las sucursales</option>
+                        </select>
+                    </div>
+                    ` : ''}
+
+                    <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm">
+                        <p class="flex items-center">
+                            <i class="icon-blank text-lg" style="color: #6E95C0"></i> Cotización
+                        </p>
+                        <p class="flex items-center">
+                            <i class="icon-blank text-lg" style="color: #0E9E6E"></i> Pagado
+                        </p>
+                        <p class="flex items-center">
+                            <i class="icon-blank text-lg" style="color: #FE6F00"></i> Pendiente
+                        </p>
+                        <p class="flex items-center">
+                            <i class="icon-blank text-lg" style="color: #E60001"></i> Cancelado
+                        </p>
+                    </div>
+                </div>
             </div>
 
             <div class="row h-full mt-4">
                 <div class="bg-[#111928] rounded-lg p-4 h-100 w-full" id="calendarFull"></div>
             </div>
         `);
+
+        this.initSubsidiaryFilter();
+        this.initStatusFilter();
+    }
+
+    initSubsidiaryFilter() {
+        if (!this.isAdmin) return;
+
+        const $select = $('#subsidiaryFilter');
+        
+        this.subsidiaries.forEach(sub => {
+            $select.append(`<option value="${sub.id}">${sub.valor}</option>`);
+        });
+
+        $select.on('change', () => {
+            this.createCalendar();
+        });
+    }
+
+    initStatusFilter() {
+        const $statusBtn = $('#statusFilterBtn');
+        const $statusDropdown = $('#statusDropdown');
+        const $statusCheckboxes = $('.status-checkbox');
+        const $statusCount = $('#statusCount');
+
+        const $deliveryBtn = $('#deliveryFilterBtn');
+        const $deliveryDropdown = $('#deliveryDropdown');
+        const $deliveryCheckboxes = $('.delivery-checkbox');
+        const $deliveryCount = $('#deliveryCount');
+
+        $statusBtn.on('click', (e) => {
+            e.stopPropagation();
+            $statusDropdown.toggleClass('hidden');
+            $deliveryDropdown.addClass('hidden');
+        });
+
+        $deliveryBtn.on('click', (e) => {
+            e.stopPropagation();
+            $deliveryDropdown.toggleClass('hidden');
+            $statusDropdown.addClass('hidden');
+        });
+
+        $(document).on('click', (e) => {
+            if (!$(e.target).closest('#statusFilterBtn, #statusDropdown, #deliveryFilterBtn, #deliveryDropdown').length) {
+                $statusDropdown.addClass('hidden');
+                $deliveryDropdown.addClass('hidden');
+            }
+        });
+
+        const updateStatusCount = () => {
+            const count = $statusCheckboxes.filter(':checked').length;
+            $statusCount.text(count);
+        };
+
+        const updateDeliveryCount = () => {
+            const count = $deliveryCheckboxes.filter(':checked').length;
+            $deliveryCount.text(count);
+        };
+
+        $statusCheckboxes.on('change', () => {
+            updateStatusCount();
+            this.createCalendar();
+        });
+
+        $deliveryCheckboxes.on('change', () => {
+            updateDeliveryCount();
+            this.createCalendar();
+        });
+
+        $('#selectAllBtn').on('click', () => {
+            $statusCheckboxes.prop('checked', true);
+            updateStatusCount();
+            this.createCalendar();
+        });
+
+        $('#clearAllBtn').on('click', () => {
+            $statusCheckboxes.prop('checked', false);
+            updateStatusCount();
+            this.createCalendar();
+        });
+
+        $('#selectAllDeliveryBtn').on('click', () => {
+            $deliveryCheckboxes.prop('checked', true);
+            updateDeliveryCount();
+            this.createCalendar();
+        });
+
+        $('#clearAllDeliveryBtn').on('click', () => {
+            $deliveryCheckboxes.prop('checked', false);
+            updateDeliveryCount();
+            this.createCalendar();
+        });
     }
 
     async createCalendar() {
-        let data = await useFetch({ url: this._link, data: { opc: 'getCalendar' } });
+        const selectedStatuses = $('.status-checkbox:checked').map(function () {
+            return $(this).val();
+        }).get();
+
+        const selectedDelivery = $('.delivery-checkbox:checked').map(function () {
+            return $(this).val();
+        }).get();
+
+        if (selectedStatuses.length === 0 || selectedDelivery.length === 0) {
+            if (this.calendar) {
+                this.calendar.destroy();
+            }
+            $('#calendarFull').html('<div class="flex items-center justify-center h-full text-gray-400"><p>Selecciona al menos un estado y un tipo de entrega para ver los pedidos</p></div>');
+            return;
+        }
+
+        const subsidiaryId = this.isAdmin ? ($('#subsidiaryFilter').val() || 0) : 0;
+
+        let data = await useFetch({
+            url: this._link,
+            data: {
+                opc: 'getCalendar',
+                statuses: selectedStatuses.join(','),
+                delivery: selectedDelivery.join(','),
+                subsidiaries_id: subsidiaryId
+            }
+        });
+
         const calendarEl = document.getElementById('calendarFull');
 
         if (!calendarEl) {
             console.error('Elemento del calendario no encontrado');
             return;
+        }
+
+        if (this.calendar) {
+            this.calendar.destroy();
         }
 
         this.calendar = new FullCalendar.Calendar(calendarEl, {
@@ -88,6 +303,11 @@ class App extends Templates {
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
+            height: 'auto',
+            contentHeight: 'auto',
+            dayMaxEvents: 3,
+            moreLinkClick: 'popover',
+            eventMaxStack: 3,
             events: data,
             eventContent: (arg) => this.renderEventContent(arg),
             eventClick: (info) => this.showOrder(info.event.id),
@@ -95,25 +315,60 @@ class App extends Templates {
         });
 
         this.calendar.render();
+        this.applyCalendarStyles();
     }
 
     renderEventContent(arg) {
-        let envio_domicilio = arg.event.extendedProps.type  == 'Envío a Domicilio' ? true : false;
+        let envio_domicilio = arg.event.extendedProps.type == 'Envío a Domicilio' ? true : false;
         let entregado = arg.event.extendedProps.delivery == 'Entregado' ? true : false;
+        let emoji = envio_domicilio ? "🚚" : "🏠";
 
+        // Contenedor principal
+        let containerEl = document.createElement("div");
+        containerEl.classList.add("p-2", "w-full");
+
+        // Nombre del cliente
         let titleEl = document.createElement("div");
-        let deliveryEl = document.createElement("div");
-        let timeEl = document.createElement("div");
-
-        titleEl.classList.add("font-12", "font-bold");
-        deliveryEl.classList.add("font-10", "text-gray-200");
-        timeEl.classList.add("font-10", "text-gray-200");
-
+        titleEl.classList.add("font-semibold", "text-sm", "mb-1", "truncate");
         titleEl.innerHTML = arg.event.title;
-        deliveryEl.innerHTML =  (envio_domicilio ? "<i class='icon-motorcycle'></i> " : "<i class='icon-shop'></i> ") + arg.event.extendedProps.delivery;
-        timeEl.innerHTML = "<i class='icon-clock'></i> " + arg.event.extendedProps.hour;
 
-        return { domNodes: [titleEl, deliveryEl, timeEl] };
+        // Tipo de entrega
+        let deliveryEl = document.createElement("div");
+        deliveryEl.classList.add("flex", "items-center", "gap-1", "text-xs", "mb-1", "opacity-80");
+        deliveryEl.innerHTML = `
+        <span>${emoji}</span>
+        <span>${arg.event.extendedProps.type}</span>
+    `;
+
+        // Hora
+        let timeEl = document.createElement("div");
+        timeEl.classList.add("flex", "items-center", "gap-1", "text-xs", "opacity-80");
+        timeEl.innerHTML = `
+        <i class='icon-clock'></i>
+        <span>${arg.event.extendedProps.hour}</span>
+    `;
+
+        // Badge de estado
+        let badgeEl = document.createElement("div");
+        badgeEl.classList.add("mt-1.5");
+
+        const badgeClass = entregado
+            ? "bg-green-100 text-green-700 border-1 border-green-300"
+            : "bg-orange-100 text-orange-700 border-1 border-orange-300";
+
+        badgeEl.innerHTML = `
+        <span class="${badgeClass} px-2 py-0.5 rounded-full text-xs font-medium inline-block">
+            ${arg.event.extendedProps.delivery}
+        </span>
+    `;
+
+        // Ensamblar elementos
+        containerEl.appendChild(titleEl);
+        containerEl.appendChild(deliveryEl);
+        containerEl.appendChild(timeEl);
+        containerEl.appendChild(badgeEl);
+
+        return { domNodes: [containerEl] };
     }
 
     customizeCalendarAppearance() {
@@ -125,6 +380,90 @@ class App extends Templates {
             el.style.border = '1px solid #1F2A37';
         });
     }
+
+    applyCalendarStyles() {
+        const styleId = 'calendar-custom-styles';
+        if ($('#' + styleId).length === 0) {
+            $('<style>', {
+                id: styleId,
+                text: `
+                    thead {
+                        background: #2B3D4F;
+                    }
+
+                    .fc-daygrid-day-frame {
+                        min-height: 120px !important;
+                        max-height: 600px !important;
+                    }
+                    
+                    .fc-daygrid-day-events {
+                        max-height: 600px !important;
+                        overflow-y: auto !important;
+                        margin-bottom: 2px !important;
+                    }
+                    
+                    .fc-daygrid-day-events::-webkit-scrollbar {
+                        width: 4px;
+                    }
+                    
+                    .fc-daygrid-day-events::-webkit-scrollbar-track {
+                        background: #1F2A37;
+                        border-radius: 2px;
+                    }
+                    
+                    .fc-daygrid-day-events::-webkit-scrollbar-thumb {
+                        background: #4B5563;
+                        border-radius: 2px;
+                    }
+                    
+                    .fc-daygrid-day-events::-webkit-scrollbar-thumb:hover {
+                        background: #6B7280;
+                    }
+                    
+                    .fc-daygrid-event {
+                        margin-bottom: 2px !important;
+                        font-size: 0.75rem !important;
+                    }
+                    
+                    .fc-daygrid-event-harness {
+                        margin-bottom: 2px !important;
+                    }
+                    
+                    .fc-more-link {
+                        font-size: 0.7rem !important;
+                        padding: 2px 4px !important;
+                        background: #374151 !important;
+                        color: #9CA3AF !important;
+                        border-radius: 4px !important;
+                        margin-top: 2px !important;
+                    }
+                    
+                    .fc-more-link:hover {
+                        background: #4B5563 !important;
+                        color: #D1D5DB !important;
+                    }
+                    
+                    .fc-popover {
+                        background: #1F2A37 !important;
+                        border: 1px solid #374151 !important;
+                        max-height: 600px !important;
+                        overflow-y: auto !important;         
+                    }
+                    
+                    .fc-popover-header {
+                        background: #111928 !important;
+                        color: #fff !important;
+                        padding: 8px 12px !important;
+                    }
+                    
+                    .fc-popover-body {
+                        padding: 8px !important;
+                    }
+                `
+            }).appendTo('head');
+        }
+    }
+
     async showOrder(orderId) {
         const response = await useFetch({
             url: '../ctrl/ctrl-pedidos.php',

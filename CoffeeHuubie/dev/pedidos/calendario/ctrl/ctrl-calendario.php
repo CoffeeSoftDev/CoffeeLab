@@ -13,10 +13,35 @@ require_once '../mdl/mdl-calendario.php';
 $encode = [];
 
 class ctrlCalendario extends MCalendarioPedidos{
-
+    
+    function init() {
+        $rolId = $_SESSION['ROLID'];
+        $company = $_SESSION['COMPANY_ID'];
+        
+        return [
+            'subsidiaries' => $this->getSubsidiariesByCompany([$company]),
+            'isAdmin' => $rolId == 1
+        ];
+    }
+    
     function getCalendar()  {
+        // Validar variables de sesión con valores por defecto
+        $rolId      = $_SESSION['ROLID'];
+        $sessionSub = $_SESSION['SUB'];
+
+        // Si es admin (rol 1), usar la sucursal del POST, sino usar la de sesión
+        if ($rolId == 1) {
+            // Validar que subsidiaries_id exista y no sea vacío
+            $subsidiaries_id = isset($_POST['subsidiaries_id']) ? $_POST['subsidiaries_id'] : 0;
+        } else {
+            $subsidiaries_id = $sessionSub;
+        }
+
         $event = [];
-        $getCalendar = $this->getOrders();
+        $statuses = isset($_POST['statuses']) ? explode(',', $_POST['statuses']) : ['1', '2', '3', '4'];
+        $delivery = isset($_POST['delivery']) ? explode(',', $_POST['delivery']) : ['0', '1'];
+        
+        $getCalendar = $this->getOrders($statuses, $delivery, $subsidiaries_id);
 
         foreach ($getCalendar as $key) {
             $color = '';
@@ -29,12 +54,12 @@ class ctrlCalendario extends MCalendarioPedidos{
             if ($key['is_delivered'] == 1) {
                 $delivered = 'Entregado';
             }
-            $type = 'Envío a Domicilio';
+
+            $type = 'Recogida en Tienda';
             if ($key['delivery_type'] == 1) {
-                $type = 'Recogida en Tienda';
+                $type = 'Envío a Domicilio';                
             }
-            // Agregar un dia a la fecha de fin
-            // $key['end'] = date('Y-m-d', strtotime($key['end'] . ' +1 day'));
+            
             $event[] = [
                 'id'       => $key['id'],
                 'title'    => $key['name_client'],
