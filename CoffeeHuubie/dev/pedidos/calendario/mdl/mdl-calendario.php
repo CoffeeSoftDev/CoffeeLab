@@ -11,7 +11,30 @@ class MCalendarioPedidos extends CRUD {
         $this->bd   = 'fayxzvov_coffee.';
     }
     
-    function getOrders() {
+    function getOrders($statuses = [], $delivery = [], $subsidiaries_id = 0) {
+        $filters = [];
+        $params = [];
+        
+        if (!empty($statuses) && is_array($statuses)) {
+            $placeholders = implode(',', array_fill(0, count($statuses), '?'));
+            $filters[] = "order.STATUS IN ($placeholders)";
+            $params = array_merge($params, $statuses);
+        }
+        
+        if (!empty($delivery) && is_array($delivery)) {
+            $placeholders = implode(',', array_fill(0, count($delivery), '?'));
+            $filters[] = "order.is_delivered IN ($placeholders)";
+            $params = array_merge($params, $delivery);
+        }
+        
+        // Filtrar por subsidiaries_id si se proporciona y es diferente de 0
+        if (!empty($subsidiaries_id) && $subsidiaries_id != 0) {
+            $filters[] = "order.subsidiaries_id = ?";
+            $params[] = $subsidiaries_id;
+        }
+        
+        $whereClause = !empty($filters) ? ' WHERE ' . implode(' AND ', $filters) : '';
+        
         $query = "
         SELECT
             order.id AS id,
@@ -25,6 +48,7 @@ class MCalendarioPedidos extends CRUD {
             order.info_discount,
             order.is_delivered,
             order.delivery_type,
+            order.subsidiaries_id,
             order_clients. NAME AS name_client,
             order_clients.phone AS phone,
             order_clients.email AS email,
@@ -36,9 +60,24 @@ class MCalendarioPedidos extends CRUD {
             {$this->bd}order
         INNER JOIN {$this->bd}order_clients ON client_id = order_clients.id
         INNER JOIN {$this->bd}status_process ON order.STATUS = status_process.id
+        {$whereClause}
+        ORDER BY status_process.id ASC, order.date_order ASC
         ";
 
-        return $this->_Read($query, null);
+        return $this->_Read($query, $params);
+    }
+    
+    function getSubsidiariesByCompany($array){
+        $query = "SELECT
+            id,
+            name as valor
+
+        FROM
+            fayxzvov_alpha.subsidiaries
+        WHERE 
+            companies_id = ?
+        ORDER BY name";
+        return $this->_Read($query, $array);
     }
 }
 ?>
