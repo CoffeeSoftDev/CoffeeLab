@@ -143,6 +143,7 @@ class MPedidos extends CRUD {
             order.location,
             order.total_pay,
             order.discount,
+            order.subsidiaries_id,
             order.info_discount,
             order.is_delivered,
             order.delivery_type,
@@ -1099,7 +1100,8 @@ class MPedidos extends CRUD {
         $date = $array[0];
         $subsidiaries_id = $array[1] ?? null;
         
-        // 1. Obtener total de ventas y número de pedidos
+       // 1. Obtener total de ventas y número de pedidos  --
+              
         $queryOrders = "
             SELECT 
                 COUNT(*) as total_orders,
@@ -1109,16 +1111,43 @@ class MPedidos extends CRUD {
         ";
         
         $paramsOrders = [$date];
-        
-        // Si subsidiaries_id no es null, agregar filtro
-        if ($subsidiaries_id !== null) {
-            $queryOrders .= " AND subsidiaries_id = ?";
+ 
+        // Si subsidiaries_id no es 0, agregar filtro
+        if ($subsidiaries_id != 0) {
+            $queryOrders .= " AND subsidiaries_id = ? ";
             $paramsOrders[] = $subsidiaries_id;
         }
         
-        $queryOrders .= " AND status != 4";
+        $queryOrders .= " AND status != 4 ";
         
         $orders = $this->_Read($queryOrders, $paramsOrders);
+
+
+        // ---
+        /* cuantos pasteles se vendieron 
+        en cotizaciones
+        cuantos pagados
+        cuantos pendientes
+        cuantos cancelados
+
+
+        venta total neta del mes ()
+        ingreso del mes(dinero real ingresado)
+        pendiente de cobrar del mes(pendientes)
+        por sucursal.
+        cuantos pedidos gnrl
+        cheque promedio.
+        tendencia del año (histograma)
+        cuál es pastel que mas vende
+        top 10 mas vendidos
+        top 10 clientes frecuentes
+        cliente top
+        que usuario de cada sucursal es el que mas ha vendido
+        
+        */
+
+
+
         
         $ordersData = is_array($orders) && !empty($orders) ? $orders[0] : [
             'total_orders' => 0,
@@ -1168,6 +1197,68 @@ class MPedidos extends CRUD {
             }
         }
         
+        // 4. Contar órdenes por estado
+        $quotation_count = 0;
+        $cancelled_count = 0;
+        $pending_count = 0;
+        
+        // Consulta para cotizaciones (status = 1)
+        $queryQuotations = "
+            SELECT COUNT(*) as count
+            FROM {$this->bd}`order`
+            WHERE DATE_FORMAT(date_order, '%Y-%m-%d') = ?
+              AND status = 1
+        ";
+        $paramsQuotations = [$date];
+        
+        if ($subsidiaries_id != 0) {
+            $queryQuotations .= " AND subsidiaries_id = ?";
+            $paramsQuotations[] = $subsidiaries_id;
+        }
+        
+        $quotations = $this->_Read($queryQuotations, $paramsQuotations);
+        if (is_array($quotations) && !empty($quotations)) {
+            $quotation_count = $quotations[0]['count'];
+        }
+        
+        // Consulta para cancelados (status = 4)
+        $queryCancelled = "
+            SELECT COUNT(*) as count
+            FROM {$this->bd}`order`
+            WHERE DATE_FORMAT(date_order, '%Y-%m-%d') = ?
+              AND status = 4
+        ";
+        $paramsCancelled = [$date];
+        
+        if ($subsidiaries_id != 0) {
+            $queryCancelled .= " AND subsidiaries_id = ?";
+            $paramsCancelled[] = $subsidiaries_id;
+        }
+        
+        $cancelled = $this->_Read($queryCancelled, $paramsCancelled);
+        if (is_array($cancelled) && !empty($cancelled)) {
+            $cancelled_count = $cancelled[0]['count'];
+        }
+        
+        // Consulta para pendientes (status = 2)
+        $queryPending = "
+            SELECT COUNT(*) as count
+            FROM {$this->bd}`order`
+            WHERE DATE_FORMAT(date_order, '%Y-%m-%d') = ?
+              AND status = 2
+        ";
+        $paramsPending = [$date];
+        
+        if ($subsidiaries_id != 0) {
+            $queryPending .= " AND subsidiaries_id = ?";
+            $paramsPending[] = $subsidiaries_id;
+        }
+        
+        $pending = $this->_Read($queryPending, $paramsPending);
+        if (is_array($pending) && !empty($pending)) {
+            $pending_count = $pending[0]['count'];
+        }
+        
         return [
             'order'          => $orders,
             'payments'       => $payments,
@@ -1175,7 +1266,10 @@ class MPedidos extends CRUD {
             'total_sales'    => $ordersData['total_sales'],
             'card_sales'     => $card_sales,
             'cash_sales'     => $cash_sales,
-            'transfer_sales' => $transfer_sales
+            'transfer_sales' => $transfer_sales,
+            'quotation_count' => $quotation_count,
+            'cancelled_count' => $cancelled_count,
+            'pending_count'   => $pending_count
         ];
     }
 

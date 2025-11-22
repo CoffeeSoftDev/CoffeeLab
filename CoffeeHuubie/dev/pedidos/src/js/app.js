@@ -1784,12 +1784,18 @@ class App extends Templates {
             class: opts.class
         });
 
+        // Información de la sucursal
+        const subsidiaryInfo = d.subsidiary_name 
+            ? `<div class="text-sm font-semibold text-gray-600 mt-1">${d.is_all_subsidiaries ? d.subsidiary_name : 'Sucursal: ' + d.subsidiary_name}</div>` 
+            : '';
+
         const header = `
         <div class="flex flex-col items-center mb-4">
             <img src="../src/img/logo/logo.png" alt="CoffeeSoft Logo" class="w-20 mb-1" />
             <h1 class="text-lg font-bold">PEDIDOS DE PASTELERÍA</h1>
             <div class="text-sm text-gray-600">Cierre del Día</div>
             <div class="text-sm text-gray-600">${formattedDate}</div>
+             ${subsidiaryInfo}
         </div>
     `;
 
@@ -1825,10 +1831,24 @@ class App extends Templates {
                 <div class="text-lg font-bold">${d.total_orders}</div>
             </div>
 
+            <hr class="border-dashed border-t my-2" />
+
             <div class="flex justify-between items-center">
-                <div class="font-semibold">VENTA TOTAL DEL DÍA:</div>
-                <div class="text-lg font-bold">${formatPrice(d.total_sales)}</div>
+                <div class="font-semibold">COTIZACIONES:</div>
+                <div>${d.quotation_count || 0}</div>
             </div>
+
+            <div class="flex justify-between items-center">
+                <div class="font-semibold">PENDIENTES:</div>
+                <div>${d.pending_count || 0}</div>
+            </div>
+
+            <div class="flex justify-between items-center">
+                <div class="font-semibold">CANCELADOS:</div>
+                <div>${d.cancelled_count || 0}</div>
+            </div>
+
+           
         </div>
     `;
 

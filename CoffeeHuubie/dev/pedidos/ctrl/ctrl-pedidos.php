@@ -81,26 +81,29 @@ class Pedidos extends MPedidos{
     public function listOrders() {
         $rows = [];
         
-       
-        // Si no, usar la sucursal del usuario en sesión
-        if ($_SESSION['ROLID'] == 1 ) {
-
-            $subsidiaries_id = $_POST['subsidiaries_id'];
+        // Validar variables de sesión con valores por defecto
+        $rolId      = $_SESSION['ROLID'] ;
+        $sessionSub = $_SESSION['SUB'];
         
+        // Si es admin (rol 1), usar la sucursal del POST, sino usar la de sesión
+        if ($rolId == 1) {
+            // Validar que subsidiaries_id exista y no sea vacío
+            $subsidiaries_id = $_POST['subsidiaries_id'];
         } else {
-            $subsidiaries_id = $_SESSION['SUB'];
+            $subsidiaries_id = $sessionSub;
         }
-
-        $Sucursal = $this->getSucursalByID([$subsidiaries_id]);
-
+      
         $orders   = $this->getOrders([
+
             'fi'              => $_POST['fi'] ?? '',
             'ff'              => $_POST['ff'] ?? '',
             'status'          => $_POST['status'],
             'subsidiaries_id' => $subsidiaries_id
+
         ]);
 
         foreach ($orders as $order) {
+
             $advanceExtra = 0;
             $discount     = $order['discount'] ?? 0;
             $total        = $order['total_pay'] ?? 0;
@@ -110,16 +113,18 @@ class Pedidos extends MPedidos{
             $saldo         = $total - $discount - $totalPagado;
             $hasDiscount   = $discount > 0;
 
+            $Sucursal = $this->getSucursalByID([$order['subsidiaries_id']]);
+
             $htmlTotal = $hasDiscount
                 ? "<div class='text-end'>
                         <p title='Con descuento aplicado' class='text-green-400 cursor-pointer font-semibold'>" . evaluar($totalGral) . "</p>
-                        <p class='line-through text-gray-500 text-[10px]'>" . evaluar($total) . "</p>
+                        <p class='line-through text-gray-500 text-[10px]'>".evaluar($total) ."</p>
                         <p class='text-gray-500 text-[10px]'><i class='icon-tag'></i> Descuento: " . evaluar($discount) . "</p>
                     </div>"
                 : number_format($total, 2);
 
 
-            $Folio         = formatSucursal($Sucursal['name'], $Sucursal['sucursal'], $order['id']);
+            $Folio   = formatSucursal($Sucursal['name'], $Sucursal['sucursal'], $order['id']);
 
 
             // list.
@@ -605,8 +610,6 @@ class Pedidos extends MPedidos{
     }
 
 
-   
-   
     // Estos son los modificadores
     function getModifiers() {
         $status  = 404;
@@ -1157,6 +1160,23 @@ class Pedidos extends MPedidos{
             $subsidiaries_id = $_SESSION['SUB'];
         }
 
+        // Obtener información de la sucursal
+        $subsidiary_name = '';
+        $is_all_subsidiaries = false;
+
+        if ($subsidiaries_id == 0 || $subsidiaries_id == '0') {
+            // Modo "todas las sucursales"
+            $subsidiary_name = 'TODAS LAS SUCURSALES';
+            $is_all_subsidiaries = true;
+        } else {
+            // Obtener nombre de sucursal específica
+            $subsidiary = $this->getSucursalByID([$subsidiaries_id]);
+            if ($subsidiary && isset($subsidiary['name'])) {
+                $subsidiary_name = $subsidiary['name'];
+            } else {
+                $subsidiary_name = 'Sucursal Desconocida';
+            }
+        }
 
         $summary = $this->getDailySalesMetrics([
             $_POST['date'],
@@ -1168,23 +1188,33 @@ class Pedidos extends MPedidos{
             $status  = 200;
             $message = 'Resumen obtenido correctamente';
             $data    = [
-                'total_sales'     => $summary['total_sales'],
-                'card_sales'      => $summary['card_sales'],
-                'cash_sales'      => $summary['cash_sales'],
-                'transfer_sales'  => $summary['transfer_sales'],
-                'total_orders'    => $summary['total_orders']
+                'total_sales'          => $summary['total_sales'],
+                'card_sales'           => $summary['card_sales'],
+                'cash_sales'           => $summary['cash_sales'],
+                'transfer_sales'       => $summary['transfer_sales'],
+                'total_orders'         => $summary['total_orders'],
+                'quotation_count'      => $summary['quotation_count'],
+                'cancelled_count'      => $summary['cancelled_count'],
+                'pending_count'        => $summary['pending_count'],
+                'subsidiary_name'      => $subsidiary_name,
+                'is_all_subsidiaries'  => $is_all_subsidiaries
             ];
         } else {
             $status  = 404;
             $message = 'No hay pedidos registrados para esta fecha';
+            $data    = [
+                'quotation_count'      => $summary['quotation_count'] ?? 0,
+                'cancelled_count'      => $summary['cancelled_count'] ?? 0,
+                'pending_count'        => $summary['pending_count'] ?? 0,
+                'subsidiary_name'      => $subsidiary_name,
+                'is_all_subsidiaries'  => $is_all_subsidiaries
+            ];
         }
         
         return [
             'status'  => $status,
             'message' => $message,
-            'data'    => $summary,
-
-         
+            'data'    => $data
         ];
     }
 
