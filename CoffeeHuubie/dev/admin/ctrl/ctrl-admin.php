@@ -2,10 +2,6 @@
 session_start();
 if (empty($_POST['opc'])) exit(0);
 
-header("Access-Control-Allow-Origin: *"); // Permite solicitudes de cualquier origen
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS"); // Métodos permitidos
-header("Access-Control-Allow-Headers: Content-Type"); // Encabezados permitidos
-
 require_once '../mdl/mdl-admin.php';
 class User extends MUser{
 
@@ -330,11 +326,11 @@ class User extends MUser{
         $status                 = 500;
         $message                = 'No se pudo agregar la sucursal';
         $_POST['date_creation'] = date('Y-m-d H:i:s');
-        $_POST['companies_id']  = $_SESSION['COM'];
+        $_POST['companies_id']  = $_SESSION['COMPANY_ID'];
         $_POST['active']        = 1; // Por defecto, la sucursal se crea activa
 
         // Validar que el nombre de la sucursal no exista
-        $exists = $this->existsSucursalByName([$_POST['name'], $_SESSION['COM']]);
+        $exists = $this->existsSucursalByName([$_POST['name'], $_SESSION['COMPANY_ID']]);
         if ($exists) {
             return [
                 'status'  => 400,
@@ -361,7 +357,7 @@ class User extends MUser{
         $message = 'Error al editar';
 
         // Validar que el nombre de la sucursal no exista
-        $exists = $this->existsOtherSucursalByName([$_POST['name'], $_POST['id'], $_SESSION['COM']]);
+        $exists = $this->existsOtherSucursalByName([$_POST['name'], $_POST['id'], $_SESSION['COMPANY_ID']]);
         if ($exists) {
             return [
                 'status'  => 400,
@@ -467,7 +463,7 @@ class User extends MUser{
         $status  = 500;
         $message = 'No se pudo agregar la cláusula';
         $_POST['date_creation'] = date('Y-m-d H:i:s');
-        $_POST['companies_id']  = $_SESSION['COM'];
+        $_POST['companies_id']  = $_SESSION['COMPANY_ID'];
 
         // Validar que el nombre de la cláusula no exista
         $exists = $this->existsClausulaByName([$_POST['name'], $_POST['companies_id']]);
@@ -489,7 +485,7 @@ class User extends MUser{
         return [
             'status'  => $status,
             'message' => $message,
-             $_SESSION['COM']   
+             $_SESSION['COMPANY_ID']   
         ];
     }
 
@@ -498,7 +494,7 @@ class User extends MUser{
         $message = 'Error al editar';
 
         // Validar que el nombre de la cláusula no exista
-        $exists = $this->existsOtherClausulaByName([$_POST['name'], $_POST['id'], $_SESSION['COM']]);
+        $exists = $this->existsOtherClausulaByName([$_POST['name'], $_POST['id'], $_SESSION['COMPANY_ID']]);
         if ($exists) {
             return [
                 'status'  => 400,

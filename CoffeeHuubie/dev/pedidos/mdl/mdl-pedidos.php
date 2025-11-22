@@ -163,13 +163,13 @@ class MPedidos extends CRUD {
         order.date_creation BETWEEN ? AND ?
         ";
 
-        // Filtrar por subsidiaries_id si se proporciona
-        if (!empty($data['subsidiaries_id'])) {
+        // Filtrar por subsidiaries_id si se proporciona y es diferente de 0
+        if (!empty($data['subsidiaries_id']) && $data['subsidiaries_id'] != 0) {
             $query .= " AND order.subsidiaries_id = ?";
             $params[] = $data['subsidiaries_id'];
         }
 
-        // Filtrar por status si se proporciona
+        // Filtrar por status si se proporciona y es diferente de 0
         if (!empty($data['status']) && $data['status'] !== '0') {
             $query .= " AND order.status = ?";
             $params[] = $data['status'];

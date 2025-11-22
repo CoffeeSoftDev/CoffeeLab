@@ -1,4 +1,4 @@
-let api = "/alpha/admin/ctrl/ctrl-admin.php";
+let api = "/dev/admin/ctrl/ctrl-admin.php";
 let app, usuarios, sucursales, company, clausulas;
 let rol, sucursal, nameCompany, idCompany;
 
@@ -110,7 +110,7 @@ class Company extends Templates {
         `);
 
         if (companie.id) {
-            let fotito = 'https://huubie.com.mx/alpha' + companie.logo;
+            let fotito = 'https://huubie.com.mx/dev' + companie.logo;
             $('#logo').attr('src', fotito);
         }
 
@@ -293,7 +293,7 @@ class Usuarios extends Templates {
                 opc: "input-group",
                 lbl: "Contraseña",
                 id: "key",
-                icon: "icon-key",
+                icon: "icon-eye",
                 type: "password",
                 onkeyup: "validarPassword(this)",
                 class: "col-12",
@@ -333,6 +333,25 @@ class Usuarios extends Templates {
                 }
             },
         });
+
+        setTimeout(() => {
+            const $inputKey = $('#key');
+            const $iconEye = $inputKey.siblings('.input-group-text').find('.icon-eye');
+            
+            $iconEye.css('cursor', 'pointer');
+            
+            $iconEye.on('click', function() {
+                const currentType = $inputKey.attr('type');
+                
+                if (currentType === 'password') {
+                    $inputKey.attr('type', 'text');
+                    $(this).removeClass('icon-eye').addClass('icon-eye-off');
+                } else {
+                    $inputKey.attr('type', 'password');
+                    $(this).removeClass('icon-eye-off').addClass('icon-eye');
+                }
+            });
+        }, 100);
     }
 
     async editar(id) {
@@ -356,6 +375,25 @@ class Usuarios extends Templates {
                 }
             },
         });
+
+        setTimeout(() => {
+            const $inputKey = $('#key');
+            const $iconEye = $inputKey.siblings('.input-group-text').find('.icon-eye');
+            
+            $iconEye.css('cursor', 'pointer');
+            
+            $iconEye.on('click', function() {
+                const currentType = $inputKey.attr('type');
+                
+                if (currentType === 'password') {
+                    $inputKey.attr('type', 'text');
+                    $(this).removeClass('icon-eye').addClass('icon-eye-off');
+                } else {
+                    $inputKey.attr('type', 'password');
+                    $(this).removeClass('icon-eye-off').addClass('icon-eye');
+                }
+            });
+        }, 100);
     }
 
     toggleStatus(id, active) {

@@ -75,7 +75,7 @@ class App extends Templates {
                 class   : "col-sm-2",
                 onchange: "app.ls()",
                 data: [
-                    { id: "", valor: "Todas las sucursales" },
+                    { id: "0", valor: "Todas las sucursales" },
                     ...subsidiaries
                 ]
             });
@@ -200,7 +200,7 @@ class App extends Templates {
         this.createTable({
             parent: `container${this.PROJECT_NAME}`,
             idFilterBar: `filterBar${this.PROJECT_NAME}`,
-            data: { opc: "listOrders", subsidiaries_id: $('#subsidiaries_id').val(), fi: rangePicker.fi, ff: rangePicker.ff },
+            data: { opc: "listOrders", fi: rangePicker.fi, ff: rangePicker.ff },
             conf: {
                 datatable: true, pag: 10, fn_datatable: 'simple_data_table_filter',
             },
@@ -400,10 +400,12 @@ class App extends Templates {
                 phone: client.phone,  // extra
                 email: client.email   // extra
             })),
+            
             select: function (event, ui) {
                 $('#formPedido #phone').val(ui.item.phone);
                 $('#formPedido #email').val(ui.item.email);
             }
+
         });
 
         // ✅ Asignar radio seleccionado
@@ -1765,9 +1767,9 @@ class App extends Templates {
         const d = opts.data;
         const fecha = opts.date;
 
-        function formatPrice(value) {
-            return `$${parseFloat(value || 0).toFixed(2)}`;
-        }
+        // function formatPrice(value) {
+        //     return `$${parseFloat(value || 0).toFixed(2)}`;
+        // }
 
         const formattedDate = moment(fecha).format('DD [de] MMMM [de] YYYY');
 
@@ -1786,8 +1788,8 @@ class App extends Templates {
         <div class="flex flex-col items-center mb-4">
             <img src="../src/img/logo/logo.png" alt="CoffeeSoft Logo" class="w-20 mb-1" />
             <h1 class="text-lg font-bold">PEDIDOS DE PASTELERÍA</h1>
-            <div class="text-xs text-gray-600">Cierre del Día</div>
-            <div class="text-xs text-gray-600">${formattedDate}</div>
+            <div class="text-sm text-gray-600">Cierre del Día</div>
+            <div class="text-sm text-gray-600">${formattedDate}</div>
         </div>
     `;
 

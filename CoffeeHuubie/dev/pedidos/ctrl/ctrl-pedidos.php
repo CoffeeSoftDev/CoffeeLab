@@ -81,10 +81,12 @@ class Pedidos extends MPedidos{
     public function listOrders() {
         $rows = [];
         
-        // Si el rol es 1 (admin) y se envió adminFilter, usar ese filtro
+       
         // Si no, usar la sucursal del usuario en sesión
-        if ($_SESSION['ROLID'] == 1 && !empty($_POST['subsidiaries_id'])) {
+        if ($_SESSION['ROLID'] == 1 ) {
+
             $subsidiaries_id = $_POST['subsidiaries_id'];
+        
         } else {
             $subsidiaries_id = $_SESSION['SUB'];
         }
@@ -170,7 +172,8 @@ class Pedidos extends MPedidos{
 
         return [
             'row'    => $rows,
-            'orders' => $orders
+            'orders' => $orders,
+         $subsidiaries_id
         ];
 
     }
@@ -1144,15 +1147,17 @@ class Pedidos extends MPedidos{
         $status  = 500;
         $message = 'Error al obtener resumen del día';
         $data    = null;
-     
-        // Si adminFilter está vacío o es "all", obtener todas las sucursales
-        // Si no, usar el valor específico o la sucursal del usuario
-        if (isset($_POST['subsidiaries_id']) && ($_POST['subsidiaries_id'] === '' || $_POST['subsidiaries_id'] === 'all')) {
-            $subsidiaries_id = null; // null indica todas las sucursales
-        } else {
-            $subsidiaries_id = $_POST['subsidiaries_id'] ?? $_SESSION['SUB'];
-        }
+
+
+        if ($_SESSION['ROLID'] == 1 ) {
+
+            $subsidiaries_id = $_POST['subsidiaries_id'];
         
+        } else {
+            $subsidiaries_id = $_SESSION['SUB'];
+        }
+
+
         $summary = $this->getDailySalesMetrics([
             $_POST['date'],
             $subsidiaries_id
