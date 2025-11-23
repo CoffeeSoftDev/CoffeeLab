@@ -268,6 +268,39 @@ Ejemplos:
         }
    ```
 
+7. **delete[Entidad]()**
+
+   - Elimina un registro de forma permanente.
+   - **IMPORTANTE:** Validar permisos de usuario antes de eliminar (ej: solo administradores).
+
+   ```php
+   function deleteOrder() {
+        $status  = 500;
+        $message = 'Error al eliminar el pedido';
+
+        if ($_SESSION['ROLID'] != 1) {
+            return [
+                'status'  => 403,
+                'message' => 'No tienes permisos para eliminar pedidos'
+            ];
+        }
+
+        $id = $_POST['id'];
+        
+        $delete = $this->deleteOrderById([$id]);
+
+        if ($delete) {
+            $status  = 200;
+            $message = 'Pedido eliminado correctamente';
+        }
+
+        return [
+            'status'  => $status,
+            'message' => $message
+        ];
+    }
+   ```
+
    Funciones extra:
 
    - **dropdown($id)**: Construye opciones de acciones disponibles según el estado del registro.

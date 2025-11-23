@@ -446,6 +446,33 @@ class App extends Templates {
         });
     }
 
+    deleteOrder(id) {
+        const row = event.target.closest('tr');
+        const folio = row.querySelectorAll('td')[0]?.innerText || '';
+
+        this.swalQuestion({
+            opts: {
+                title: `¿Eliminar pedido?`,
+                html: `¿Estás seguro de eliminar el pedido con folio <strong>${folio}</strong>?
+                <br><br>
+                <span class="text-red-500">⚠️ Esta acción es permanente y no se puede deshacer.</span>`,
+                icon: "warning",
+            },
+            data: { opc: "deleteOrder", id: id },
+            methods: {
+                request: (data) => {
+                    alert({
+                        icon: "success",
+                        title: "Eliminado",
+                        text: "El pedido fue eliminado correctamente.",
+                        btn1: true
+                    });
+                    this.ls();
+                },
+            },
+        });
+    }
+
     async printOrder(id) {
 
         const pos = await useFetch({
@@ -1942,117 +1969,5 @@ class App extends Templates {
 
 }
 
-// class Order extends Templates {
-//     constructor(link, divModule) {
-//         super(link, divModule);
-//         this.PROJECT_NAME = "Pedidos";
-//     }
-
-
-
-//     // Payments.
-
-//     addPayment(id) {
-
-//         let tr = $(event.target).closest("tr");
-
-//         // Obtiene la celda de la cantidad (columna 5)
-//         let saldo = tr.find("td").eq(5).text();
-//         let saldoOriginal = tr.find("td").eq(5).text().replace(/[^0-9.-]+/g, "");
-//         let total = parseFloat(saldoOriginal);
-
-//         this.createModalForm({
-//             id: "modalRegisterPayment",
-//             bootbox: { title: "Registrar Pago", id: "registerPaymentModal", size: "medium" },
-//             data: { opc: 'addPayment', total: total, evt_events_id: id },
-//             json: [
-//                 {
-//                     opc: "input",
-//                     type: "number",
-//                     id: "pay",
-//                     lbl: "Pago",
-//                     class: "col-12 mb-3",
-//                     placeholder: "$ 0",
-//                     required: true,
-//                     min: 0, // 📛 Evita valores negativos desde el input
-//                     onkeyup: 'payment.updateSaldoEvent(' + saldoOriginal + ')'
-//                 },
-//                 {
-//                     opc: "select",
-//                     id: "type",
-//                     lbl: "Tipo de pago",
-//                     class: "col-12 mb-3",
-//                     data: [
-//                         { id: "2", valor: "Anticipo" },
-//                         { id: "1", valor: "Abono" },
-
-//                     ],
-//                     required: true
-//                 },
-
-
-//                 {
-//                     opc: "select",
-//                     id: "method_pay_id",
-//                     lbl: "Método de pago",
-//                     class: "col-12 mb-3",
-//                     data: [
-//                         { id: "1", valor: "Efectivo" },
-//                         { id: "2", valor: "Tarjeta" },
-//                         { id: "3", valor: "Transferencia" }
-//                     ],
-//                     required: true
-//                 },
-//                 {
-//                     opc: "div",
-//                     id: "dueAmount",
-//                     class: "col-12 text-center bg-gray-800 text-white p-2 rounded",
-//                     html: `<strong>Adeudado</strong><br> <span id="SaldoEvent">${saldo}</span>`
-//                 }
-//             ],
-//             success: (response) => {
-//                 if (response.status == 200) {
-//                     alert({ icon: "success", text: response.message, btn1: true, btn1Text: "Ok" });
-//                     app.ls();
-//                 } else {
-//                     alert({ icon: "error", text: response.message, btn1: true, btn1Text: "Ok" });
-//                 }
-//             }
-//         });
-
-//         $("#btnSuccess").addClass("text-white");
-//         $("#btnExit").addClass("text-white");
-//     }
-
-//     updateSaldoEvent(saldo) {
-//         let payInput = document.getElementById("pay");
-//         let saldoElement = document.getElementById("SaldoEvent");
-//         let pagarBtn = document.querySelector(".bootbox .btn-primary");
-
-//         if (payInput && saldoElement && pagarBtn) {
-//             let saldoOriginal = parseFloat(saldo) || 0;
-//             let pago = parseFloat(payInput.value) || 0;
-
-//             // ⛔ Bloquear si el valor es negativo
-//             if (pago < 0) {
-//                 payInput.value = 0;
-//                 pago = 0;
-//             }
-
-//             let nuevoSaldo = saldoOriginal - pago;
-
-//             saldoElement.textContent = formatPrice(nuevoSaldo);
-
-//             if (nuevoSaldo < 0) {
-//                 saldoElement.classList.add("text-danger");
-//             } else {
-//                 saldoElement.classList.remove("text-danger");
-//             }
-
-//             pagarBtn.disabled = nuevoSaldo < 0 || pago <= 0;
-//         }
-//     }
-
-// }
 
 

@@ -1146,6 +1146,33 @@ class Pedidos extends MPedidos{
         ];
     }
 
+    function deleteOrder() {
+        $status  = 500;
+        $message = 'Error al eliminar el pedido';
+
+        if ($_SESSION['ROLID'] != 1) {
+            return [
+                'status'  => 403,
+                'message' => 'No tienes permisos para eliminar pedidos'
+            ];
+        }
+
+       
+        
+        $delete = $this->deleteOrderById([$_POST['id']]);
+
+        if ($delete) {
+            $status  = 200;
+            $message = 'Pedido eliminado correctamente';
+        }
+
+        return [
+            'status'  => $status,
+            'message' => $message,
+            $delete
+        ];
+    }
+
     function getDailyClose() {
         $status  = 500;
         $message = 'Error al obtener resumen del día';
@@ -1214,7 +1241,9 @@ class Pedidos extends MPedidos{
         return [
             'status'  => $status,
             'message' => $message,
-            'data'    => $data
+            'data'    => $data,
+            'sumary'  => $summary,
+            $subsidiaries_id
         ];
     }
 
@@ -1227,6 +1256,7 @@ class Pedidos extends MPedidos{
 function dropdownOrder($id, $status) {
     $instancia = 'app';
     $impresion = 'payment';
+    $rolId     = $_SESSION['ROLID'] ?? 0;
 
     $options = [
         ['Ver', 'icon-eye', "{$instancia}.showOrder({$id})"],
@@ -1234,7 +1264,6 @@ function dropdownOrder($id, $status) {
         ['Cancelar', 'icon-block-1', "{$instancia}.cancelOrder({$id})"],
         ['Pagar', 'icon-money', "{$instancia}.historyPay({$id})"],
         ['Historial', 'icon-history', "{$instancia}.showHistory({$id})"],
-
         ['Imprimir', 'icon-print', "{$instancia}.printOrder({$id})"],
     ];
 
@@ -1245,16 +1274,38 @@ function dropdownOrder($id, $status) {
             ['Pagar', 'icon-money', "{$instancia}.historyPay({$id})"],
             ['Imprimir', 'icon-print', "{$instancia}.printOrder({$id})"],
             ['Historial', 'icon-history', "{$instancia}.showHistory({$id})"],
-
         ];
+        if ($rolId == 1) {
+            $options[] = ['Eliminar', 'icon-trash', "{$instancia}.deleteOrder({$id})"];
+        }
     } elseif ($status == 3) { // Pagado
         $options = [
             ['Ver', 'icon-eye', "{$instancia}.showOrder({$id})"],
             ['Historial', 'icon-history', "{$instancia}.showHistory({$id})"],
             ['Imprimir', 'icon-print', "{$instancia}.printOrder({$id})"],
-
+        ];
+    } elseif ($status == 1) { // Cotización
+        $options = [
+            ['Ver', 'icon-eye', "{$instancia}.showOrder({$id})"],
+            ['Imprimir', 'icon-print', "{$instancia}.printOrder({$id})"],
+            ['Editar', 'icon-pencil', "{$instancia}.editOrder({$id})"],
+            ['Pagar', 'icon-money', "{$instancia}.historyPay({$id})"],
 
         ];
+
+        if ($rolId == 1) {
+            $options[] = ['Eliminar', 'icon-trash', "{$instancia}.deleteOrder({$id})"];
+        }
+    }elseif ($status == 4) { // Cotización
+        $options = [
+            ['Ver', 'icon-eye', "{$instancia}.showOrder({$id})"],
+             ['Eliminar', 'icon-trash', "{$instancia}.deleteOrder({$id})"]
+        ];
+
+    }
+
+    if ($rolId == 1) {
+        $options[] = ['Eliminar', 'icon-trash', "{$instancia}.deleteOrder({$id})"];
     }
 
     return array_map(fn($opt) => [

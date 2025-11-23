@@ -84,16 +84,29 @@ Debe respetarse el formato de CoffeeSoft
 
 <_Delete>
 
+**Opción 1: Usando _Delete (Método estructurado)**
 ```php
-  function update($array){
-
+  function deleteById($array){
     return $this->_Delete([
       'table' => "{$this->bd}table_name",
-      'where' => $array['where'],
-      'data'  => $array['data'],
+      'where' => 'id = ?',
+      'data'  => $array
     ]);
   }
 ```
+
+**Opción 2: Usando _CUD (Método con query directa - Recomendado)**
+```php
+  function deleteById($array){
+    $query = "
+      DELETE FROM {$this->bd}table_name
+      WHERE id = ?
+    ";
+    return $this->_CUD($query, $array);
+  }
+```
+
+**Nota:** El método `_CUD` (Create, Update, Delete) es preferido para operaciones DELETE ya que permite mayor control sobre la query SQL y es más explícito. Ambos métodos son válidos en CoffeeSoft.
 
 ### 4. Estructura para Consultas tipo `<select>`
 

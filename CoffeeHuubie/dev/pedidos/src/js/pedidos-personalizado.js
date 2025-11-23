@@ -27,15 +27,27 @@ class CustomOrder extends Templates {
                     </section>
 
                     <!-- Progreso -->
-                    <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow space-y-4" id="progressSection">
+                    <section class="bg-gray-800 border border-gray-700 rounded-xl px-6 py-4 shadow space-y-3" id="progressSection">
                     </section>
 
                     <!-- Contenido principal -->
                     <section class="grid lg:grid-cols-3 gap-8">
-                        <div class="lg:col-span-2 space-y-6" id="optionsSection"></div>
-                        <div class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow space-y-2" id="previewSection"></div>
-                    </section>
+                        <!-- Columna izquierda -->
+                        <div class="lg:col-span-2 space-y-6">
+                            
+                            <!-- Sección de opciones -->
+                            <div id="optionsSection" class="space-y-6"></div>
 
+                            <!-- 🧱 Sección de observaciones y fotos -->
+                            <div id="extraContainer" class="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-4"></div>
+                        </div>
+
+                        <!-- Sección de vista previa -->
+                        <div id="previewSection" 
+                            class="bg-gray-800 border border-gray-700 rounded-xl p-6 shadow space-y-2">
+                        </div>
+                    </section>
+                    
                     <!-- Botones -->
                     <div class="flex justify-end mt-3 px-6 pb-6">
                         <button id="btnCancelar" class="border border-gray-700 px-4 py-1 rounded-full text-sm text-gray-400 hover:bg-gray-700 me-2" onclick="bootbox.hideAll()">Cancelar</button>
@@ -59,6 +71,7 @@ class CustomOrder extends Templates {
             custom.renderPreview();
             custom.renderNavigation();
             custom.actualizarEstilosPasos();
+            custom.renderExtraSection();
             $("#btnGuardar").on("click", function () {
                 const canClose = custom.handleFinished();
             });
@@ -178,7 +191,7 @@ class CustomOrder extends Templates {
                         </div>
                     </div>
                     <div>
-                        <button id="btnAgregarOpcion" class="border border-gray-500 px-4 py-1 rounded-full text-sm text-gray-300 hover:bg-violet-700/30">+ Opción</button>
+                        <button id="btnAgregarOpcion" class="border border-gray-500 px-4 py-1 rounded-full text-sm text-gray-300 hover:bg-violet-700/30" onclick="custom.handleAddOption()">+ Opción</button>
                     </div>
                 </div>
                 <div id="opcionesPaso" class="grid md:grid-cols-2 gap-4 pt-3">
@@ -309,10 +322,13 @@ class CustomOrder extends Templates {
 
             $row.find(".btn-minus").on("click", () => {
                 items[i].qty = Math.max(1, (items[i].qty || 1) - 1);
+                // Cambiar la cantidad en el input
+                $row.find(".qty-input").val(items[i].qty);
                 custom.renderPreview();
             });
             $row.find(".btn-plus").on("click", () => {
                 items[i].qty = (items[i].qty || 1) + 1;
+                $row.find(".qty-input").val(items[i].qty);
                 custom.renderPreview();
             });
             $row.find(".qty-input").on("input", function () {
@@ -405,6 +421,7 @@ class CustomOrder extends Templates {
         if (!categories || !Array.isArray(categories) || categories.length == 0) return;
 
         let total = 0;
+
         categories.forEach(cat => {
             const sel = custom.selectedOptions[cat.id];
             if (!sel) return;
@@ -437,17 +454,23 @@ class CustomOrder extends Templates {
             }
         });
 
+
         if (total > 0) {
-            $("#porciones").val(custom.numeroPorciones || "1");
-            let numeroPorciones = parseFloat($("#porciones").val()) || 1;
-            let totalSugerido = total * numeroPorciones;
             detalles.append(`
                 <div class="flex justify-between items-center border-t border-violet-700 mt-2 pt-2 font-bold text-violet-300">
                     <span>Total:</span>
                     <span>${custom.formatPrice(total)}</span>
                 </div>
             `);
-            $("#precioSugerido").text(custom.formatPrice(totalSugerido));
+
+
+            // 🧮 Si hay selección, inicializa el campo porciones y calcula automáticamente
+            const $porciones = $("#porciones");
+            const porciones = custom.numeroPorciones || 1;
+            $porciones.val(porciones);
+
+            // Llama directamente a tu función de cálculo con el input actual
+            custom.calculateSuggestedPrice($porciones[0]);
         } else {
             $("#porciones").val("1");
             $("#precioSugerido").text("$0.00");
@@ -525,32 +548,57 @@ class CustomOrder extends Templates {
         });
     }
 
+    // Renderiza fotos, dedicatoria y observaciones
+    renderExtraSection() {
+        const parent = $("#extraContainer").empty();
+        parent.append(`
+            <form id="formEditProducto" novalidate="true">
+                <div class="col-12 mb-3">
+                    <label class="">Dedicatoria</label>
+                        <input id="dedication" name="dedication" required="required" class="form-control input-sm bg-[#1F2A37]" onkeyup="">
+                </div>
+                <div>    
+                    <label class="">Observaciones</label>
+                    <textarea class="form-control bg-[#1F2A37] resize" id="order_details" name="order_details"></textarea>
+                </div>
+                    
+                <div class="col-12 mt-2 mb-2">
+                    <div class="w-full p-2 border-2 border-dashed border-gray-500 rounded-xl text-center">
+                        <input
+                            type="file"
+                            id="archivos"
+                            name="archivos"
+                            class="hidden"
+                            multiple
+                            accept="image/*"
+                            onchange="normal.previewImages(this, 'previewImagenes')"
+                        >
+                        <div class="flex flex-col items-center justify-center py-2 cursor-pointer" onclick="document.getElementById('archivos').click()">
+                            <div class="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center mb-2">
+                                <i class="icon-upload text-white"></i>
+                            </div>
+                            <p class="text-xs">Drag & Drop or <span class="text-purple-400 underline">choose file</span></p>
+                            <p class="text-[10px] text-gray-400 mt-1">JPEG, PNG</p>
+                        </div>
+                        <div id="previewImagenes" class="flex gap-2 flex-wrap mt-1"></div>
+                    </div>
+                </div>
+            </form>
+        `);
 
+        $("#formEditProducto").on("submit", function (e) {
+            e.preventDefault(); // 🛑 Evita el envío automático
+        });
+    }
 
 
     handleFinished() {
         const $root = $("#modalArmarPastel");
-        const missingCats = [];
-        const payload = [];  // lo que enviarías al backend
+        const payload = [];
         let total = 0;
 
-        // Helper para detectar categoría multi (Decoraciones)
         const isMultiCategory = (cat) => {
             return !!(cat && (cat.isExtra == 1 || /decoraci/i.test(cat.name || "")));
-        };
-
-        // Función para marcar pasos incompletos
-        const markIncompleteSteps = (missingIds = []) => {
-            const set = new Set(missingIds);
-            $root.find(".step-button").each(function (index) {
-                const cat = categories[index];
-                const $btn = $(this);
-                if (cat && set.has(cat.id)) {
-                    $btn.addClass("ring-2 ring-red-500");
-                } else {
-                    $btn.removeClass("ring-2 ring-red-500");
-                }
-            });
         };
 
         categories.forEach(cat => {
@@ -558,65 +606,55 @@ class CustomOrder extends Templates {
             const multi = isMultiCategory(cat);
 
             if (multi) {
-                const items = Array.isArray(sel) ? sel.filter(it => it && (parseInt(it.qty, 10) >= 1)) : [];
-                if (items.length === 0) {
-                    missingCats.push({ id: cat.id, name: cat.name });
-                } else {
-                    // Totaliza y arma payload
-                    const mapItems = items.map(it => {
-                        const qty = parseInt(it.qty, 10) || 1;
+                (Array.isArray(sel) ? sel.filter(it => it && it.qty >= 1) : [])
+                    .forEach(it => {
+                        const qty = parseInt(it.qty) || 1;
                         const price = parseFloat(it.price || 0);
-                        total += (price * qty);
-                        return { id: it.id, name: it.name, price, qty };
+                        total += price * qty;
+                        payload.push({ modifier_id: it.id, quantity: qty, price });
                     });
-                    payload.push({ categoryId: cat.id, category: cat.name, items: mapItems });
-                }
-            } else {
-                if (!sel || sel.id == null) {
-                    missingCats.push({ id: cat.id, name: cat.name });
-                } else {
-                    const price = parseFloat(sel.price || 0);
-                    total += price;
-                    payload.push({ categoryId: cat.id, category: cat.name, item: { id: sel.id, name: sel.name, price } });
-                }
+            } else if (sel?.id != null) {
+                const price = parseFloat(sel.price || 0);
+                total += price;
+                cat.options.forEach(opt => {
+                    if (opt.id === sel.id) payload.push({ modifier_id: opt.id, quantity: 1, price });
+                });
             }
         });
 
-        if (missingCats.length > 0) {
-            // Marca pasos incompletos y alerta
-            markIncompleteSteps(missingCats.map(m => m.id));
 
-            const lista = missingCats.map(m => `• ${m.name}`).join("<br>");
+        // 🔸 Nueva validación: debe haber al menos una selección
+        if (payload.length == 0) {
             bootbox.alert({
-                title: "Faltan campos por completar",
-                message: `Por favor completa las siguientes categorías antes de guardar:<br><br>${lista}`
+                title: "Selecciona al menos una opción",
+                message: `Por favor selecciona al menos una categoría o elemento antes de continuar.`
             });
-            return false; // evita que se cierre el modal
+            return false;
         }
 
-        // Limpia marcas de error si todo OK
-        markIncompleteSteps([]);
+        // Limpieza visual (si existía algún resaltado anterior)
+        $root.find(".step-button").removeClass("ring-2 ring-red-500");
 
-        // Si quieres ver el payload y total:
+        // 🧾 Mostrar resultados en consola (para depurar)
         console.log("Payload listo para backend:", payload);
+
         const totalSugerido = $root.find("#precioSugerido").text().replace(/[^0-9.-]+/g, "");
-        console.log("Total sugerido (limpio):", totalSugerido);
         const priceRealStr = $root.find("#precioReal").val().replace(/,/g, "");
         const priceReal = parseFloat(priceRealStr) || total;
-        console.log("Precio real ingresado:", priceReal);
+        const dedication = $root.find("#dedication").val().trim();
+        const orderDetails = $root.find("#order_details").val().trim();
 
-        // Abrir modal para insertar el nombre del pedido y confirmar
+
+
+
+        // 📝 Pedir nombre del pedido personalizado
         bootbox.prompt({
             title: "Nombre del pedido personalizado",
             inputType: 'text',
             placeholder: "Ejemplo: Pastel de cumpleaños para Ana",
             callback: function (result) {
                 if (result) {
-                    // Aquí puedes enviar 'result' como el nombre del pedido junto con 'payload' y 'total'
-                    console.log("Nombre del pedido:", result);
-                    // Ejemplo de envío al backend:
-                    custom.saveCustomOrder(result, payload, totalSugerido, priceReal);
-                    
+                    custom.saveCustomOrder(result, payload, totalSugerido, priceReal, orderDetails, dedication);
                 }
             }
         });
@@ -624,198 +662,193 @@ class CustomOrder extends Templates {
         return true;
     }
 
+
     // Guarda el pedido personalizado
-    async saveCustomOrder(orderName, payload, totalSuggested, priceReal) {
-        // Preparar datos para enviar
+    async saveCustomOrder(orderName, payload, totalSuggested, priceReal, orderDetails, dedication) {
+
+        // GUARDAR PEDIDO PERSONALIZADO
         const orderData = {
             name: orderName,
             price: totalSuggested,
             price_real: priceReal,
             portion_qty: custom.numeroPorciones || 1,
             date_created: new Date().toISOString(),
-            orderId: idFolio || null, // idFolio viene de la app.js
+            orderId: idFolio || null,               // idFolio viene de la app.js
+            items: JSON.stringify(payload)
         };
+        const response = await useFetch({ url: this._link, data: { opc: "addCustomOrder", ...orderData } });
 
-        const response = await useFetch({
-            url: this._link, data: {
-                opc: "addCustomOrder",
-                ...orderData
-            }
-        });
 
         if (response.status == 200) {
-            bootbox.alert("¡Tu pedido personalizado ha sido guardado con éxito! 🎉");
+            // GUARDAR DEDICATORIA Y OBSERVACIONES
+            const responseOrder = await useFetch({
+                url: custom._link,
+                data:
+                {
+                    opc: "editOrderPackage",
+                    order_details: orderDetails,
+                    dedication: dedication,
+                    id: response.data.orderId,
+                }
+            });
+
+            // GUARDAR IMÁGENES
+
+            const form = document.getElementById('formEditProducto');
+            const formData = new FormData(form);
+
+            formData.append('opc', 'addOrderImages');
+            formData.append('id', response.data.orderId);
+            formData.append('idFolio', idFolio);
+
+            const files = document.getElementById('archivos').files;
+
+            for (let i = 0; i < files.length; i++) {
+                formData.append('archivos[]', files[i]);
+            }
+
+            console.log('form-data', formData);
+
+            fetch(custom._link, {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(response => {
+
+
+                });
+
+
+            if (responseOrder.status == 200) {
+                bootbox.alert("¡Tu pedido personalizado ha sido guardado con éxito! 🎉");
+            }
+
+
+            // Guardar fotos si hay
+            // const $root = $("#modalArmarPastel");
+            // const form = document.getElementById('formEditProducto');
+            // const formData = new FormData(form);
+
+            // formData.append('opc', 'editProduct');
+
+            // const files = document.getElementById('archivos').files;
+            // for (let i = 0; i < files.length; i++) {
+            //     formData.append('archivos[]', files[i]);
+            // }
+
+            // const uploadResponse = await fetch(custom._link, {
+            //     method: 'POST',
+            //     body: formData
+            // });
+            // if (uploadResponse.ok) {
+            //     console.log("Archivos y detalles subidos con éxito.");
+            // } else {
+            //     console.error("Error al subir archivos y detalles:", uploadResponse.statusText);
+            // }
+
+
+
+            const listaProductosDeLaOrden = await useFetch({
+                url: 'ctrl/ctrl-pedidos.php',
+                data: {
+                    opc: "getProductsOrder",
+                    order_id: idFolio
+                }
+            });
+
+            // Recargar la lista de pedidos
+            normal.showOrder(listaProductosDeLaOrden.data || []);
+
+            // temporal
+            // bootbox.hideAll();
         } else {
             bootbox.alert("Error al guardar el pedido personalizado.");
             throw new Error(`Error del servidor: ${response.status}`);
         }
 
-        const listaProductosDeLaOrden = await useFetch({
-            url: 'ctrl/ctrl-pedidos.php', 
-            data: {
-                opc: "getProductsOrder",
-                order_id: idFolio
-            }
-        });
 
-        // Recargar la lista de pedidos
-        normal.showOrder(listaProductosDeLaOrden.data || []);
-
-        bootbox.hideAll();
     }
 
-    // NO SE --------------------------------------------------------
-    // Agrega un item al panel de pedidos (#orderItems)
-    appendToOrderItems(item) {
-        const orderItems = $("#orderItems");
 
-        if (orderItems.length === 0) {
-            console.warn('No se encontró el elemento #orderItems');
-            return;
-        }
+    handleAddOption() {
+        // Abrir modal para agregar nueva opción
+        const cat = categories[custom.currentStep];
+        if (!cat) return;
 
-        // Crear la tarjeta del pedido personalizado
-        const card = $("<div>", {
-            class: "flex justify-between items-center bg-gray-800 border border-gray-700 rounded-xl p-3 shadow-sm"
-        });
+        // bootbox.prompt({
+        //     title: "Agregar nueva opción",
+        //     inputType: 'text',
+        //     placeholder: "Ejemplo: Sabor de pastel",
+        //     callback: async function (result) {
+        //         if (result) {
+        //             const response = await useFetch({ url: this._link, data: { opc: "addModifierProduct", categoryId: cat.id, name: result }});
+        //             // console.log("Nueva opción agregada:", result);
+        //             custom.addOptionToCategory(cat.id, result);
+        //         }
+        //     }
+        // });
 
-        const info = $("<div>", { class: "flex-1" }).append(
-            $("<p>", {
-                class: "text-gray-200 font-medium text-sm",
-                text: item.name
-            }),
-            $("<p>", {
-                class: "text-violet-400 font-semibold text-sm",
-                text: this.formatPrice(item.price)
-            }),
-            $("<p>", {
-                class: "text-gray-400 text-xs",
-                text: "Pedido personalizado"
-            })
-        );
-
-        const actions = $("<div>", { class: "flex flex-col items-end gap-2" });
-        const quantityRow = $("<div>", { class: "flex items-center gap-2" });
-
-        quantityRow.append(
-            $("<button>", {
-                class: "bg-gray-700 text-white rounded px-2",
-                html: "−",
-                click: () => {
-                    if (item.quantity > 1) {
-                        item.quantity--;
-                        this.updateOrderItemQuantity(item);
+        const modalAddOption = bootbox.dialog({
+            title: `Crea nueva opción a ${cat.name}`,
+            size: "small",
+            id: "modalAddOption",
+            closeButton: true,
+            message: `
+                <div class="w-full">
+                    <main class="max-w-md mx-auto p-2" id="modalContentOption">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="newOptionName" class="block text-sm font-medium text-gray-300 mb-1">Nombre de la opción</label>
+                                <input type="text" id="newOptionName" class="w-full border border-gray-700 bg-gray-800 text-gray-200 rounded px-3 py-2" placeholder="" />
+                            </div>
+                            <div>
+                                <label for="newOptionPrice" class="block text-sm font-medium text-gray-300 mb-1">Precio x unidad (opcional)</label>
+                                <input type="text" id="newOptionPrice" class="w-full border border-gray-700 bg-gray-800 text-gray-200 rounded px-3 py-2 text-right" placeholder="0.00" oninput="custom.formatCifra(this)" />
+                            </div>  
+                        </div>
+                    </main>
+                </div>
+            `,
+            buttons: {
+                cancel: {
+                    label: "Cancelar",
+                    className: "border border-gray-700 px-4 py-1 rounded-full text-sm text-gray-400 hover:bg-gray-700",
+                    callback: function () {
+                        // No hacer nada, solo cerrar   
+                    }
+                },
+                confirm: {
+                    label: "Agregar",
+                    className: "border border-violet-500 px-4 py-1 rounded-full text-sm text-violet-300 hover:bg-violet-700/30",
+                    callback: async function () {
+                        const optionName = $("#newOptionName").val().trim();
+                        const optionPriceStr = $("#newOptionPrice").val().replace(/,/g, "");
+                        const optionPrice = parseFloat(optionPriceStr) || 0;
+                        if (optionName) {
+                            const response = await useFetch({ url: custom._link, data: { opc: "addModifierProduct", modifier_id: cat.id, name: optionName, price: optionPrice } });
+                            if (response.status == 200) {
+                                custom.addOptionToCategory(cat.id, optionName, optionPrice, response.data.id);
+                            }
+                        }
                     }
                 }
-            }),
-            $("<span>", {
-                class: "text-gray-200 px-2",
-                text: item.quantity
-            }),
-            $("<button>", {
-                class: "bg-gray-700 text-white rounded px-2",
-                html: "+",
-                click: () => {
-                    item.quantity++;
-                    this.updateOrderItemQuantity(item);
-                }
-            }),
-            $("<button>", {
-                class: "text-blue-400 hover:text-blue-600 ml-2",
-                html: `<i class="icon-eye"></i>`,
-                title: "Ver detalles",
-                click: () => this.showCustomOrderDetails(item)
-            }),
-            $("<button>", {
-                class: "text-gray-400 hover:text-red-400 ml-1",
-                html: `<i class="icon-trash"></i>`,
-                title: "Eliminar",
-                click: () => {
-                    card.remove();
-                    this.updateOrderTotal();
-                }
-            })
-        );
-
-        const lineTotal = (item.price || 0) * (item.quantity || 1);
-        const totalEl = $("<p>", {
-            class: "text-gray-400 text-sm",
-            text: `Total: ${this.formatPrice(lineTotal)}`
-        });
-
-        actions.append(quantityRow, totalEl);
-        card.append(info, actions);
-        orderItems.append(card);
-
-        // Actualizar total general si existe
-        this.updateOrderTotal();
-    }
-
-    // Actualiza la cantidad de un item en el pedido
-    updateOrderItemQuantity(item) {
-        // Aquí podrías agregar lógica adicional para actualizar el total
-        // Por ahora solo actualizamos el display
-        this.updateOrderTotal();
-    }
-
-    // Actualiza el total del pedido
-    updateOrderTotal() {
-        let total = 0;
-        $("#orderItems").find(".text-sm:contains('Total:')").each(function () {
-            const text = $(this).text().replace(/[^0-9.-]+/g, "");
-            const num = parseFloat(text);
-            if (!isNaN(num)) {
-                total += num;
             }
         });
 
-        // Buscar selector de total y actualizarlo
-        const totalSelector = $("[id*='total'], .total-amount, #orderTotal");
-        if (totalSelector.length > 0) {
-            totalSelector.text(this.formatPrice(total));
-        }
     }
 
-    // Muestra los detalles del pedido personalizado
-    showCustomOrderDetails(item) {
-        let detailsHtml = `<div class="space-y-3">`;
-
-        if (item.details && Array.isArray(item.details)) {
-            item.details.forEach(detail => {
-                detailsHtml += `<div class="border-b border-gray-600 pb-2">`;
-                detailsHtml += `<h4 class="font-semibold text-violet-300">${detail.category}</h4>`;
-
-                if (detail.items) {
-                    // Categoría múltiple (decoraciones)
-                    detail.items.forEach(subItem => {
-                        detailsHtml += `<p class="text-sm text-gray-300">• ${subItem.name} (x${subItem.qty}) - ${this.formatPrice(subItem.price * subItem.qty)}</p>`;
-                    });
-                } else if (detail.item) {
-                    // Categoría simple
-                    detailsHtml += `<p class="text-sm text-gray-300">${detail.item.name} - ${this.formatPrice(detail.item.price)}</p>`;
-                }
-                detailsHtml += `</div>`;
-            });
-        }
-
-        detailsHtml += `</div>`;
-
-        bootbox.dialog({
-            title: `Detalles: ${item.name}`,
-            message: detailsHtml,
-            size: 'large',
-            buttons: {
-                ok: {
-                    label: 'Cerrar',
-                    className: 'btn-primary'
-                }
-            }
-        });
+    addOptionToCategory(categoryId, optionName, optionPrice = 0, optionId = null) {
+        const cat = categories.find(c => c.id == categoryId);
+        if (!cat) return;
+        if (!Array.isArray(cat.options)) cat.options = [];
+        const newId = cat.options.length > 0 ? Math.max(...cat.options.map(o => o.id)) + 1 : 1;
+        cat.options.push({ id: optionId || newId, name: optionName, price: optionPrice });
+        custom.renderOptions();
     }
-    // ---------------------------------------------------------------
 
 
-    
+
     formatPrice(price) {
         const num = parseFloat(price) || 0;
         return new Intl.NumberFormat('es-MX', {
@@ -859,25 +892,47 @@ class CustomOrder extends Templates {
 
         // Primero normaliza/limpia el input con la función formatCifra
         custom.formatCifra(inputPorciones);
+        // 📜 Regla:
+        // PrecioSugerido = (SubtotalNoMultiples * Porciones) + SubtotalMultiples
 
-        let total = 0;
+        // 🔵 Identifica categorías múltiples (extras/decoración)
+        const isMultiCategory = (cat) => !!(cat && (cat.isExtra == 1 || /decoraci/i.test(cat.name || "")));
 
-        // Sumar todos los subtotales
-        $root.find("#previewDetails .text-violet-400").each(function () {
-            const text = $(this).text().replace(/[^0-9.-]+/g, "");
-            const num = parseFloat(text);
-            if (!isNaN(num)) {
-                total += num;
-            }
+        // 📌 Acumuladores separados
+        let baseTotal = 0; // NO-múltiples (sabores, rellenos, etc.) → se multiplican por porciones
+        let multiTotal = 0; // Múltiples (extras, decoración)       → NO se multiplican por porciones
+
+        categories.forEach(cat => {
+            const sel = custom.selectedOptions[cat.id];
+            const multi = isMultiCategory(cat);
+
+            // Normaliza a lista para manejar single/multiple de forma uniforme
+            const items = Array.isArray(sel)
+                ? sel.filter(it => it && (parseInt(it.qty, 10) || 1) >= 1)
+                : (sel && sel.id != null ? [sel] : []);
+
+            items.forEach(it => {
+                const qty = parseInt(it.qty, 10) || 1;
+                const price = parseFloat(it.price || 0);
+
+                if (multi) {
+                    // Extras/decoración → NO se multiplican por porciones
+                    multiTotal += price * qty;
+                } else {
+                    // Sabores/rellenos → SÍ se multiplican por porciones (más adelante)
+                    baseTotal += price * qty;
+                }
+            });
         });
 
-        // Ahora obtener porciones (ya limpias por formatCifra)
-        let porcionesVal = $(inputPorciones).val().replace(/,/g, "");
-        custom.numeroPorciones = parseFloat(porcionesVal) || 1;
+        // 🧮 Porciones y precio sugerido final
+        const numeroPorciones = parseFloat(inputPorciones.value) || 1;
+        custom.numeroPorciones = numeroPorciones;
 
-        // Calcular sugerido
-        let totalSugerido = total * custom.numeroPorciones;
-        $root.find("#precioSugerido").text(this.formatPrice(totalSugerido));
+        const totalSugerido = (baseTotal * numeroPorciones) + multiTotal;
+
+        // 📝 Salida UI
+        $root.find("#precioSugerido").text(custom.formatPrice(totalSugerido));
     }
 
 }

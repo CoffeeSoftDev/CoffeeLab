@@ -200,7 +200,14 @@ class MPedidos extends CRUD {
         ]);
     }
 
+    function deleteOrderById($array){
+        $query = "
+            DELETE FROM {$this->bd}order
+            WHERE id = ?
+        ";
 
+        return $this->_CUD($query, $array);
+    }
 
     // add Cliente.
     function createClient($array){
@@ -1098,7 +1105,7 @@ class MPedidos extends CRUD {
 
     function getDailySalesMetrics($array) {
         $date = $array[0];
-        $subsidiaries_id = $array[1] ?? null;
+        $subsidiaries_id = $array[1] ;
         
        // 1. Obtener total de ventas y número de pedidos  --
               
@@ -1107,67 +1114,38 @@ class MPedidos extends CRUD {
                 COUNT(*) as total_orders,
                 SUM(total_pay) as total_sales
             FROM {$this->bd}`order`
-            WHERE DATE_FORMAT(date_order, '%Y-%m-%d') = ?
+            WHERE DATE_FORMAT(date_creation, '%Y-%m-%d') = ?
         ";
-        
         $paramsOrders = [$date];
- 
-        // Si subsidiaries_id no es 0, agregar filtro
-        if ($subsidiaries_id != 0) {
+        if ($subsidiaries_id != 0 || $subsidiaries_id != "0") { // agregar filtro
             $queryOrders .= " AND subsidiaries_id = ? ";
             $paramsOrders[] = $subsidiaries_id;
         }
-        
+
         $queryOrders .= " AND status != 4 ";
-        
-        $orders = $this->_Read($queryOrders, $paramsOrders);
-
-
-        // ---
-        /* cuantos pasteles se vendieron 
-        en cotizaciones
-        cuantos pagados
-        cuantos pendientes
-        cuantos cancelados
-
-
-        venta total neta del mes ()
-        ingreso del mes(dinero real ingresado)
-        pendiente de cobrar del mes(pendientes)
-        por sucursal.
-        cuantos pedidos gnrl
-        cheque promedio.
-        tendencia del año (histograma)
-        cuál es pastel que mas vende
-        top 10 mas vendidos
-        top 10 clientes frecuentes
-        cliente top
-        que usuario de cada sucursal es el que mas ha vendido
-        
-        */
-
-
-
+        $orders       = $this->_Read($queryOrders, $paramsOrders);
         
         $ordersData = is_array($orders) && !empty($orders) ? $orders[0] : [
-            'total_orders' => 0,
-            'total_sales' => 0
+             'total_orders' => 0,
+             'total_sales'  => 0
         ];
+
+
+        // 2. Obtener pagos reales agrupados por método de pago --
         
-        // 2. Obtener pagos reales agrupados por método de pago
         $queryPayments = "
             SELECT 
                 pp.method_pay_id,
                 SUM(pp.pay) as total_paid
             FROM {$this->bd}order_payments pp
             INNER JOIN {$this->bd}`order` po ON pp.order_id = po.id
-            WHERE DATE_FORMAT(date_order, '%Y-%m-%d') = ?
+            WHERE DATE_FORMAT(date_creation, '%Y-%m-%d') = ?
         ";
         
         $paramsPayments = [$date];
         
-        // Si subsidiaries_id no es null, agregar filtro
-        if ($subsidiaries_id !== null) {
+        
+        if ($subsidiaries_id != 0 || $subsidiaries_id != "0" ) {
             $queryPayments .= " AND po.subsidiaries_id = ?";
             $paramsPayments[] = $subsidiaries_id;
         }
@@ -1175,101 +1153,105 @@ class MPedidos extends CRUD {
         $queryPayments .= " AND po.status != 4 GROUP BY pp.method_pay_id";
         
         $payments = $this->_Read($queryPayments, $paramsPayments);
+      
         
-        // 3. Mapear pagos por método (1=Efectivo, 2=Tarjeta, 3=Transferencia)
-        $card_sales = 0;
-        $cash_sales = 0;
-        $transfer_sales = 0;
+
+        // 3. Mapear pagos por método (1=Efectivo, 2=Tarjeta, 3=Transferencia) --
         
-        if (is_array($payments)) {
-            foreach ($payments as $payment) {
-                switch ($payment['method_pay_id']) {
-                    case 1:
-                        $cash_sales = $payment['total_paid'];
-                        break;
-                    case 2:
-                        $card_sales = $payment['total_paid'];
-                        break;
-                    case 3:
-                        $transfer_sales = $payment['total_paid'];
-                        break;
-                }
-            }
-        }
         
-        // 4. Contar órdenes por estado
-        $quotation_count = 0;
-        $cancelled_count = 0;
-        $pending_count = 0;
+        // $card_sales = 0;
+        // $cash_sales = 0;
+        // $transfer_sales = 0;
         
-        // Consulta para cotizaciones (status = 1)
-        $queryQuotations = "
-            SELECT COUNT(*) as count
-            FROM {$this->bd}`order`
-            WHERE DATE_FORMAT(date_order, '%Y-%m-%d') = ?
-              AND status = 1
-        ";
-        $paramsQuotations = [$date];
+        // if (is_array($payments)) {
+        //     foreach ($payments as $payment) {
+        //         switch ($payment['method_pay_id']) {
+        //             case 1:
+        //                 $cash_sales = $payment['total_paid'];
+        //                 break;
+        //             case 2:
+        //                 $card_sales = $payment['total_paid'];
+        //                 break;
+        //             case 3:
+        //                 $transfer_sales = $payment['total_paid'];
+        //                 break;
+        //         }
+        //     }
+        // }
         
-        if ($subsidiaries_id != 0) {
-            $queryQuotations .= " AND subsidiaries_id = ?";
-            $paramsQuotations[] = $subsidiaries_id;
-        }
+        // // 4. Contar órdenes por estado
+        // $quotation_count = 0;
+        // $cancelled_count = 0;
+        // $pending_count = 0;
         
-        $quotations = $this->_Read($queryQuotations, $paramsQuotations);
-        if (is_array($quotations) && !empty($quotations)) {
-            $quotation_count = $quotations[0]['count'];
-        }
+        // // Consulta para cotizaciones (status = 1)
+        // $queryQuotations = "
+        //     SELECT COUNT(*) as count
+        //     FROM {$this->bd}`order`
+        //     WHERE DATE_FORMAT(date_order, '%Y-%m-%d') = ?
+        //       AND status = 1
+        // ";
+        // $paramsQuotations = [$date];
         
-        // Consulta para cancelados (status = 4)
-        $queryCancelled = "
-            SELECT COUNT(*) as count
-            FROM {$this->bd}`order`
-            WHERE DATE_FORMAT(date_order, '%Y-%m-%d') = ?
-              AND status = 4
-        ";
-        $paramsCancelled = [$date];
+        // if ($subsidiaries_id != 0) {
+        //     $queryQuotations .= " AND subsidiaries_id = ?";
+        //     $paramsQuotations[] = $subsidiaries_id;
+        // }
         
-        if ($subsidiaries_id != 0) {
-            $queryCancelled .= " AND subsidiaries_id = ?";
-            $paramsCancelled[] = $subsidiaries_id;
-        }
+        // $quotations = $this->_Read($queryQuotations, $paramsQuotations);
+        // if (is_array($quotations) && !empty($quotations)) {
+        //     $quotation_count = $quotations[0]['count'];
+        // }
         
-        $cancelled = $this->_Read($queryCancelled, $paramsCancelled);
-        if (is_array($cancelled) && !empty($cancelled)) {
-            $cancelled_count = $cancelled[0]['count'];
-        }
+        // // Consulta para cancelados (status = 4)
+        // $queryCancelled = "
+        //     SELECT COUNT(*) as count
+        //     FROM {$this->bd}`order`
+        //     WHERE DATE_FORMAT(date_order, '%Y-%m-%d') = ?
+        //       AND status = 4
+        // ";
+        // $paramsCancelled = [$date];
         
-        // Consulta para pendientes (status = 2)
-        $queryPending = "
-            SELECT COUNT(*) as count
-            FROM {$this->bd}`order`
-            WHERE DATE_FORMAT(date_order, '%Y-%m-%d') = ?
-              AND status = 2
-        ";
-        $paramsPending = [$date];
+        // if ($subsidiaries_id != 0) {
+        //     $queryCancelled .= " AND subsidiaries_id = ?";
+        //     $paramsCancelled[] = $subsidiaries_id;
+        // }
         
-        if ($subsidiaries_id != 0) {
-            $queryPending .= " AND subsidiaries_id = ?";
-            $paramsPending[] = $subsidiaries_id;
-        }
+        // $cancelled = $this->_Read($queryCancelled, $paramsCancelled);
+        // if (is_array($cancelled) && !empty($cancelled)) {
+        //     $cancelled_count = $cancelled[0]['count'];
+        // }
         
-        $pending = $this->_Read($queryPending, $paramsPending);
-        if (is_array($pending) && !empty($pending)) {
-            $pending_count = $pending[0]['count'];
-        }
+        // // Consulta para pendientes (status = 2)
+        // $queryPending = "
+        //     SELECT COUNT(*) as count
+        //     FROM {$this->bd}`order`
+        //     WHERE DATE_FORMAT(date_order, '%Y-%m-%d') = ?
+        //       AND status = 2
+        // ";
+        // $paramsPending = [$date];
+        
+        // if ($subsidiaries_id != 0) {
+        //     $queryPending .= " AND subsidiaries_id = ?";
+        //     $paramsPending[] = $subsidiaries_id;
+        // }
+        
+        // $pending = $this->_Read($queryPending, $paramsPending);
+        // if (is_array($pending) && !empty($pending)) {
+        //     $pending_count = $pending[0]['count'];
+        // }
         
         return [
             'order'          => $orders,
             'payments'       => $payments,
-            'total_orders'   => $ordersData['total_orders'],
-            'total_sales'    => $ordersData['total_sales'],
-            'card_sales'     => $card_sales,
-            'cash_sales'     => $cash_sales,
-            'transfer_sales' => $transfer_sales,
-            'quotation_count' => $quotation_count,
-            'cancelled_count' => $cancelled_count,
-            'pending_count'   => $pending_count
+            // 'total_orders'   => $ordersData['total_orders'],
+            // 'total_sales'    => $ordersData['total_sales'],
+            // 'card_sales'     => $card_sales,
+            // 'cash_sales'     => $cash_sales,
+            // 'transfer_sales' => $transfer_sales,
+            // 'quotation_count' => $quotation_count,
+            // 'cancelled_count' => $cancelled_count,
+            // 'pending_count'   => $pending_count
         ];
     }
 
